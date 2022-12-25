@@ -1,7 +1,6 @@
 ﻿using Carbunql.Analysis.Parser;
-using Carbunql.Core;
-using Carbunql.Core.Clauses;
-using Carbunql.Core.Tables;
+using Carbunql.Clauses;
+using Carbunql.Tables;
 using Xunit.Abstractions;
 
 namespace Carbunql.Analysis.Test;

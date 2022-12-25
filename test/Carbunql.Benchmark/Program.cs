@@ -1,8 +1,8 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
+using Carbunql;
 using Carbunql.Analysis;
-using Carbunql.Core;
-using Carbunql.Core.Extensions;
+using Carbunql.Extensions;
 
 class Program
 {
