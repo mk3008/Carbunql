@@ -21,7 +21,7 @@ values
 order by 1 desc 
 limit 1";
 
-        var item = ValuesQueryParser.Parse(text);
+        var item = QueryParser.Parse(text);
         Monitor.Log(item);
     }
 

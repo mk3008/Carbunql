@@ -24,7 +24,9 @@ order by
     a.val desc,
     a.table_a_id";
 
-        var item = SelectQueryParser.Parse(text);
+        var item = QueryParser.Parse(text) as SelectQuery;
+        if (item == null) throw new Exception();
+
         Monitor.Log(item);
 
         Assert.NotNull(item.SelectClause);
@@ -48,7 +50,8 @@ from
     inner join table_b b on a.table_a_id = b.table_a_id and b.visible = true
     left join table_c c on a.table_a_id = c.table_a_id";
 
-        var item = SelectQueryParser.Parse(text);
+        var item = QueryParser.Parse(text) as SelectQuery;
+        if (item == null) throw new Exception();
         Monitor.Log(item);
 
         Assert.NotNull(item.SelectClause);
@@ -72,7 +75,8 @@ group by
 having
     sum(a.val) > 0";
 
-        var item = SelectQueryParser.Parse(text);
+        var item = QueryParser.Parse(text) as SelectQuery;
+        if (item == null) throw new Exception();
         Monitor.Log(item);
 
         Assert.NotNull(item.SelectClause);
@@ -101,7 +105,8 @@ select
 from
     table_c as c";
 
-        var item = SelectQueryParser.Parse(text);
+        var item = QueryParser.Parse(text) as SelectQuery;
+        if (item == null) throw new Exception();
         Monitor.Log(item);
     }
 
@@ -127,7 +132,8 @@ select
 from
     b";
 
-        var item = SelectQueryParser.Parse(text);
+        var item = QueryParser.Parse(text) as SelectQuery;
+        if (item == null) throw new Exception();
         Monitor.Log(item);
     }
 
@@ -141,7 +147,8 @@ from
     table_a as a
 limit 10";
 
-        var item = SelectQueryParser.Parse(text);
+        var item = QueryParser.Parse(text) as SelectQuery;
+        if (item == null) throw new Exception();
         Monitor.Log(item);
     }
 
@@ -155,7 +162,8 @@ from
     table_a as a
 limit 10 offset 3";
 
-        var item = SelectQueryParser.Parse(text);
+        var item = QueryParser.Parse(text) as SelectQuery;
+        if (item == null) throw new Exception();
         Monitor.Log(item);
     }
 
@@ -169,7 +177,8 @@ from
     table_a as a
 limit 3, 10";
 
-        var item = SelectQueryParser.Parse(text);
+        var item = QueryParser.Parse(text) as SelectQuery;
+        if (item == null) throw new Exception();
         Monitor.Log(item);
     }
 
@@ -250,7 +259,8 @@ from
 order by 
     line_id";
 
-        var item = SelectQueryParser.Parse(text);
+        var item = QueryParser.Parse(text) as SelectQuery;
+        if (item == null) throw new Exception();
         Monitor.Log(item);
     }
 }
