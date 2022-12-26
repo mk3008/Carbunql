@@ -1,0 +1,17 @@
+﻿<RadzenHeader>
+	<div class="d-flex align-items-center">
+		<RadzenSidebarToggle Click="@(() => isExpanded = !isExpanded)" />
+		<RadzenLabel Text="SQL Editor" />
+	</div>
+</RadzenHeader>
+<RadzenSidebar @bind-Expanded="@isExpanded">
+	<RadzenPanelMenu>
+		<RadzenPanelMenuItem Text="Home" Icon="home" Path="/" />
+		<RadzenPanelMenuItem Text="Counter" Path="counter" />
+		<RadzenPanelMenuItem Text="FetchData" Path="fetchdata" />
+	</RadzenPanelMenu>
+</RadzenSidebar>
+
+@code {
+	bool isExpanded = true;
+}

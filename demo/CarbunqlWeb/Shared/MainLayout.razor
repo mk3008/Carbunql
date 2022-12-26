@@ -1,29 +1,17 @@
 ﻿@inherits LayoutComponentBase
 
-<RadzenDialog/>
-<RadzenNotification/>
-<RadzenContextMenu/>
-<RadzenTooltip/>
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
 
-<RadzenLayout class="rz-shadow-3" >
-    <NavMenu />
-    <RadzenBody>
+    <main>
+        <div class="top-row px-4">
+            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+        </div>
+
         <article class="content px-4">
-            <ErrorBoundary @ref="_errorBoundary">
-                <ChildContent>
-                    @Body
-                </ChildContent>
-                <ErrorContent>
-                    <p>Error : @context.Message</p>
-                </ErrorContent>
-            </ErrorBoundary>
+            @Body
         </article>
-    </RadzenBody>
-@*    <RadzenFooter>
-        Footer
-    </RadzenFooter>*@
-</RadzenLayout>
-
-@code {
-    private ErrorBoundary? _errorBoundary;
-}
+    </main>
+</div>
