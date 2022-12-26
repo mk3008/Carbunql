@@ -9,10 +9,21 @@
     <NavMenu />
     <RadzenBody>
         <article class="content px-4">
-            @Body
+            <ErrorBoundary @ref="_errorBoundary">
+                <ChildContent>
+                    @Body
+                </ChildContent>
+                <ErrorContent>
+                    <p>Error : @context.Message</p>
+                </ErrorContent>
+            </ErrorBoundary>
         </article>
     </RadzenBody>
-    <RadzenFooter>
+@*    <RadzenFooter>
         Footer
-    </RadzenFooter>
+    </RadzenFooter>*@
 </RadzenLayout>
+
+@code {
+    private ErrorBoundary? _errorBoundary;
+}
