@@ -22,4 +22,12 @@ and t1.c1 between 1 and 10";
         var item = WhereClauseParser.Parse(text);
         Monitor.Log(item);
     }
+
+    [Fact]
+    public void ParseNull()
+    {
+        var text = @"tbl.col1 is null and tbl.col2 is not null";
+        var item = WhereClauseParser.Parse(text);
+        Monitor.Log(item);
+    }
 }
