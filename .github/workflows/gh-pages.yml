@@ -27,10 +27,10 @@ jobs:
         run: dotnet publish $PROJECT_FOLDER/$PROJECT_FILE --configuration Release
 
       - name: Change base-tag in index.html to repo name
-        run: sed -i 's/<base href="\/" \/>/<base href="\/${{ env.REPO_NAME }}\/" \/>/g' $GITHUB_WORKSPACE/$PUBLISH_FOLDER/index.html
+        run: sed -i 's/<base href="\/" \/>/<base href="\/${{ env.REPO_NAME }}\/" \/>/g' $GITHUB_WORKSPACE/$PROJECT_FOLDER/$PUBLISH_FOLDER/index.html
   
       - name: copy index.html to 404.html
-        run: cp $GITHUB_WORKSPACE/$PROJECT_FOLDER/$PUBLISH_FOLDER/index.html $GITHUB_WORKSPACE/$PUBLISH_FOLDER/404.html
+        run: cp $GITHUB_WORKSPACE/$PROJECT_FOLDER/$PUBLISH_FOLDER/index.html $GITHUB_WORKSPACE/$PROJECT_FOLDER/$PUBLISH_FOLDER/404.html
       
       - name: Add .nojekyll file
         run: touch $PUBLISH_FOLDER/.nojekyll
