@@ -19,7 +19,17 @@ public class RelationParserTest
         var item = RelationParser.Parse(text);
         Monitor.Log(item);
 
-        //Assert.Equal("inner join public.table as b on a.id = b.id", item.GetCommandText());
+        Assert.Equal("b", item.Table.Alias);
+    }
+
+    [Fact]
+    public void NoALias()
+    {
+        var text = "inner join public.table_b on a.id = table_b.id";
+        var item = RelationParser.Parse(text);
+        Monitor.Log(item);
+
+        Assert.Equal("table_b", item.Table.Alias);
     }
 
     [Fact]
@@ -69,6 +79,16 @@ public class RelationParserTest
         var item = RelationParser.Parse(text);
         Monitor.Log(item);
 
-        //Assert.Equal("cross join public.table as b", item.GetCommandText());
+        Assert.Equal("b", item.Table.Alias);
+    }
+
+    [Fact]
+    public void NoAliasCrossJoin()
+    {
+        var text = "cross join public.table_b";
+        var item = RelationParser.Parse(text);
+        Monitor.Log(item);
+
+        Assert.Equal("table_b", item.Table.Alias);
     }
 }
