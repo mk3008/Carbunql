@@ -1,31 +1,47 @@
-name: github pages
-
-on:
-  push:
-    branches:
-      - main
+name: 'Publish application'
+on: push
 
 jobs:
-  deploy:
+  build:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
+    
+    env:
+     PROJECT_FOLDER: demo/CarbunqlWeb
+     PROJECT_FILE: CarbunqlWeb.csproj
+     PUBLISH_FOLDER: bin/Release/net7.0/publish/wwwroot
+
+    name: Build and Deploy Job
     steps:
-      # Checkout the code
+      - name: Set the name of the repo in env variable 
+        run: 
+            echo "REPO_NAME=${{ github.event.repository.name }}" >> $GITHUB_ENV
+        
       - uses: actions/checkout@v2
-
-      # Install .NET Core SDK
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v2
+      
+      - uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 7.0.x
+          dotnet-version: '7.0.x'
+   
+      - name: Dotnet Publish
+        run: dotnet publish $PROJECT_FOLDER/$PROJECT_FILE --configuration Release
 
-      # Publish the site
-      - name: Publish
-        run: dotnet publish ./demo/CarbunqlWeb/CarbunqlWeb.csproj -p:GHPages=true -c:Release -o:public
-
-      # Deploy the site
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Change base-tag in index.html to repo name
+        run: sed -i 's/<base href="\/" \/>/<base href="\/${{ env.REPO_NAME }}\/" \/>/g' $GITHUB_WORKSPACE/$PUBLISH_FOLDER/index.html
+  
+      - name: copy index.html to 404.html
+        run: cp $GITHUB_WORKSPACE/$PROJECT_FOLDER/$PUBLISH_FOLDER/index.html $GITHUB_WORKSPACE/$PUBLISH_FOLDER/404.html
+      
+      - name: Add .nojekyll file
+        run: touch $PUBLISH_FOLDER/.nojekyll
+        
+      - name: Deploy GitHub Pages action
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: peaceiris/actions-gh-pages@v3.6.1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: public/wwwroot
-          force_orphan: true
+            github_token: ${{ secrets.PUBLISH_TOKEN }}
+            publish_branch: gh-pages
+            publish_dir: /${{ env.PUBLISH_FOLDER }}
+            allow_empty_commit: false
+            keep_files: false
+            force_orphan: true
