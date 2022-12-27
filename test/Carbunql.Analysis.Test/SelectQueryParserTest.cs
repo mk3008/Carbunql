@@ -36,6 +36,33 @@ order by
     }
 
     [Fact]
+    public void CaseSample()
+    {
+        var text = @"
+select
+    1 as v0
+    , case a.id when 1 then 'a' when 2 then 'b' end as v1
+    , case a.id when 1 then 'a' when 2 then 'b' else null end as v2
+    , case when a.id = 1 then 'a' when a.id = 2 then 'b' end as v3
+    , case when a.id = 1 then 'a' when a.id = 2 then 'b' else null end as v4
+    , concat( 
+        case a.id when 1 then 'a' when 2 then 'b' end,
+        'test', 
+        '123', 
+        case when a.id = 1 then 'a' when a.id = 2 then 'b' end
+      ) as text
+    , 9 as v9
+from 
+    table_a a";
+
+        var item = QueryParser.Parse(text) as SelectQuery;
+        if (item == null) throw new Exception();
+
+        Monitor.Log(item);
+    }
+
+
+    [Fact]
     public void RelationSample()
     {
         var text = @"
