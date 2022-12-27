@@ -20,11 +20,14 @@ public class CommandTextBuilder
 
     private Token? PrevToken { get; set; }
 
+    private List<(Token Token, int Level)> IndentLevels { get; set; } = new();
+
     private int Level { get; set; }
 
     public void Init()
     {
         Level = 0;
+        IndentLevels.Clear();
         PrevToken = null;
     }
 
@@ -36,7 +39,6 @@ public class CommandTextBuilder
     public string Execute(IEnumerable<Token> tokens)
     {
         Init();
-        var IndentLevels = new List<(Token Token, int Level)>();
 
         using var sb = ZString.CreateStringBuilder();
 
@@ -67,10 +69,6 @@ public class CommandTextBuilder
                 {
                     Level = q.First();
                 }
-                //else if (t.Sender is CaseExpression)
-                //{
-                //    Level--;
-                //}
                 else
                 {
                     Level = 0;
@@ -101,6 +99,13 @@ public class CommandTextBuilder
     private string GetTokenTextCore(Token token)
     {
         using var sb = ZString.CreateStringBuilder();
+
+        //save indent level
+        if (token.Parent != null)
+        {
+            var q = IndentLevels.Where(x => x.Token != null && x.Token.Equals(token.Parent)).Select(x => x.Level);
+            if (!q.Any()) IndentLevels.Add((token.Parent, Level));
+        }
 
         if (token.NeedsSpace(PrevToken)) sb.Append(' ');
         PrevToken = token;
