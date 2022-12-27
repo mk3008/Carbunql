@@ -199,7 +199,7 @@ public class ValueParserTest
     [Fact]
     public void InExpression()
     {
-        var text = "in (select a.id from table_a)";
+        var text = "'a' in (select a.id from table_a)";
         var v = ValueParser.Parse(text);
         Monitor.Log(v);
 
