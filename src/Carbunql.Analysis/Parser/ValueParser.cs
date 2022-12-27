@@ -39,6 +39,10 @@ public static class ValueParser
         {
             return LikeExpressionParser.Parse(v, r);
         }
+        if (r.TryReadToken("in") != null)
+        {
+            return InExpressionParser.Parse(v, r);
+        }
         return v;
     }
 
@@ -79,17 +83,6 @@ public static class ValueParser
             r.ReadToken("(");
             var (first, inner) = r.ReadUntilCloseBracket();
             return new ExistsExpression(SelectQueryParser.Parse(inner));
-        }
-
-        if (item == "in")
-        {
-            r.ReadToken("(");
-            var (first, inner) = r.ReadUntilCloseBracket();
-            if (first.AreEqual("select"))
-            {
-                return new InExpression(SelectQueryParser.Parse(inner));
-            }
-            return FunctionValueParser.Parse("(" + inner + ")", item);
         }
 
         if (r.PeekRawToken().AreEqual("("))
