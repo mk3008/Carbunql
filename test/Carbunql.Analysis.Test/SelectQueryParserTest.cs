@@ -180,6 +180,28 @@ limit 10";
     }
 
     [Fact]
+    public void LimitSample_NoAlias()
+    {
+        var text = @"
+select
+    a.id
+from
+    table_a
+limit 10";
+
+        var item = QueryParser.Parse(text) as SelectQuery;
+        if (item == null) throw new Exception();
+        Monitor.Log(item);
+
+        var lst = item.GetTokens().ToList();
+        Assert.Equal(8, lst.Count());
+        Assert.Equal("from", lst[4].Text);
+        Assert.Equal("table_a", lst[5].Text);
+        Assert.Equal("limit", lst[6].Text);
+        Assert.Equal("10", lst[7].Text);
+    }
+
+    [Fact]
     public void LimitSample_Postgres()
     {
         var text = @"
