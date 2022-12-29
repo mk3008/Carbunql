@@ -2,5 +2,5 @@
 
 public interface ISelectable
 {
-	string Alias { get; init; }
+    string Alias { get; }
 }
