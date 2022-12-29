@@ -93,31 +93,4 @@ public class SelectQueryTest
         Assert.Equal("'2022/01/01 0:00:00'", lst[15].Text);
         Assert.Equal("::timestamp", lst[16].Text);
     }
-
-    [Fact]
-    public void JoinTest()
-    {
-        var sq = new SelectQuery();
-        var f = sq.From("table_a").As("a");
-        var b = f.InnerJoin("table_b").As("b").On(f.Root, "a_id");
-        var c = f.InnerJoin("table_c").As("c").On(b, new[] { "b_id", "b_sub_id" });
-        var d = f.LeftJoin("table_d").As("d").On(f.Root, "a_id");
-        var e = f.RightJoin("table_e").As("e").On(f.Root, "a_id");
-        var x = f.CrossJoin("table_x").As("x");
-
-        sq.Select(f.Root, "a_id");
-
-        Monitor.Log(sq);
-
-        var lst = sq.GetTokens().ToList();
-
-        Assert.Equal(68, lst.Count());
-
-        Assert.Equal("from", lst[4].Text);
-        Assert.Equal("inner join", lst[8].Text);
-        Assert.Equal("inner join", lst[20].Text);
-        Assert.Equal("left join", lst[40].Text);
-        Assert.Equal("right join", lst[52].Text);
-        Assert.Equal("cross join", lst[64].Text);
-    }
 }
