@@ -82,18 +82,25 @@ order by
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-5">
             <RadzenText TextStyle="TextStyle.H5">Input SQL</RadzenText>
             <RadzenTextArea @bind-Value=@sql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: nowrap;" />
         </div>
-        <div class="col-md-6">
-            <RadzenText TextStyle="TextStyle.H5">Analysis result</RadzenText>
+        <div class="col-md-2">
+            <RadzenText TextStyle="TextStyle.H5">Tokens</RadzenText>
+            <RadzenListBox @bind-Value=@selectToken Data=@tokens TextProperty="Text" ValueProperty="Text" Style="width: 100%; height: 600px; margin : 0px"/>
+        </div>
+        <div class="col-md-5">
+            <RadzenText TextStyle="TextStyle.H5">Format SQL</RadzenText>
             <RadzenTextArea @bind-Value=@fsql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px;" ReadOnly="true" />
         </div>
     </div>
 </div>
 
 @code {
+    IEnumerable<Token>? tokens = null;
+    object? selectToken = null;
+
     protected override void OnInitialized()
     {
         OnChange(sql);
@@ -107,11 +114,11 @@ order by
         {
             var bld = new CommandTextBuilder();
             var sq = QueryParser.Parse(sql);
-            fsql = bld.Execute(sq);
+            tokens = sq.GetTokens(null).ToList();
+            fsql = bld.Execute(tokens);
         }
         catch (Exception ex)
-        {
-            
+        {            
             fsql = ex.ToString();
         }
 
