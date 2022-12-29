@@ -17,9 +17,25 @@ public static class QueryBaseExtension
         return new SelectableItem(source, source.GetDefaultName());
     }
 
-    public static SelectableItem ToSelectable(this LiteralValue source)
+    public static SelectableItem ToSelectable(this LiteralValue source, string name = "column")
     {
-        return new SelectableItem(source, "column");
+        return new SelectableItem(source, name);
+    }
+
+    public static SelectableItem SelectAll(this SelectQuery source)
+    {
+        var item = new ColumnValue("*").ToSelectable();
+        source.SelectClause ??= new();
+        source.SelectClause.Add(item);
+        return item;
+    }
+
+    public static SelectableItem SelectAll(this SelectQuery source, SelectableTable table)
+    {
+        var item = new ColumnValue(table.Alias, "*").ToSelectable();
+        source.SelectClause ??= new();
+        source.SelectClause.Add(item);
+        return item;
     }
 
     public static SelectableItem Select(this SelectQuery source, SelectableTable table, string column)

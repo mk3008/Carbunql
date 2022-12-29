@@ -13,6 +13,48 @@ public class SelectQueryTest
     }
 
     [Fact]
+    public void SelectAllTest_AllTable()
+    {
+        var sq = new SelectQuery();
+        var f = sq.From("table_a");
+        sq.SelectAll();
+
+        Monitor.Log(sq);
+
+        var lst = sq.GetTokens().ToList();
+
+        Assert.Equal(4, lst.Count());
+
+        Assert.Equal("select", lst[0].Text);
+        Assert.Equal("*", lst[1].Text);
+        Assert.Equal("from", lst[2].Text);
+        Assert.Equal("table_a", lst[3].Text);
+    }
+
+    [Fact]
+    public void SelectAllTest_OneTable()
+    {
+        var sq = new SelectQuery();
+        var f = sq.From("table_a").As("a");
+        sq.SelectAll(f.Root);
+
+        Monitor.Log(sq);
+
+        var lst = sq.GetTokens().ToList();
+
+        Assert.Equal(8, lst.Count());
+
+        Assert.Equal("select", lst[0].Text);
+        Assert.Equal("a", lst[1].Text);
+        Assert.Equal(".", lst[2].Text);
+        Assert.Equal("*", lst[3].Text);
+        Assert.Equal("from", lst[4].Text);
+        Assert.Equal("table_a", lst[5].Text);
+        Assert.Equal("as", lst[6].Text);
+        Assert.Equal("a", lst[7].Text);
+    }
+
+    [Fact]
     public void ColumnTest()
     {
         var sq = new SelectQuery();
