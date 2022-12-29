@@ -81,9 +81,9 @@ public class JoinTest
         var f = sq.From("table_a").As("a");
         var b = f.InnerJoin("table_b").As("b").On(r =>
         {
-            ValueBase v = new ColumnValue(f.Root.Alias, "id");
-            v = v.Equal(new ColumnValue(r.Table.Alias, "a_id"));
-            v = v.And(new ColumnValue(r.Table.Alias, "value"));
+            ValueBase v = new ColumnValue(f.Root, "id");
+            v = v.Equal(new ColumnValue(r.Table, "a_id"));
+            v = v.And(new ColumnValue(r.Table, "value"));
             v = v.Expression(">=", new LiteralValue("10"));
             return v;
         });

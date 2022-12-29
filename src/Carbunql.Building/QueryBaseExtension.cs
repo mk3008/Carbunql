@@ -17,7 +17,7 @@ public static class QueryBaseExtension
         return new SelectableItem(source, source.GetDefaultName());
     }
 
-    public static SelectableItem ToSelectable(this LiteralValue source, string name = "column")
+    public static SelectableItem ToSelectable(this ValueBase source, string name = "column")
     {
         return new SelectableItem(source, name);
     }
@@ -88,6 +88,14 @@ public static class QueryBaseExtension
         //parse
         var value = ValueParser.Parse(text);
         var item = new SelectableItem(value, "column");
+        source.SelectClause ??= new();
+        source.SelectClause.Add(item);
+        return item;
+    }
+
+    public static SelectableItem Select(this SelectQuery source, Func<ValueBase> builder)
+    {
+        var item = builder().ToSelectable();
         source.SelectClause ??= new();
         source.SelectClause.Add(item);
         return item;

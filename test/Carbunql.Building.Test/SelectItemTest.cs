@@ -1,3 +1,5 @@
+using Carbunql.Clauses;
+using Carbunql.Values;
 using Xunit.Abstractions;
 
 
@@ -92,5 +94,81 @@ public class SelectItemTest
 
         Assert.Equal("'2022/01/01 0:00:00'", lst[15].Text);
         Assert.Equal("::timestamp", lst[16].Text);
+    }
+
+    [Fact]
+    public void CaseTest()
+    {
+        var sq = new SelectQuery();
+        var f = sq.From("table_a").As("a");
+
+        sq.Select(() =>
+        {
+            var exp = new CaseExpression(new ColumnValue(f.Root, "id"));
+            exp.When(new LiteralValue("1")).Then(new LiteralValue("10"));
+            exp.When(new LiteralValue("2")).Then(new LiteralValue("20"));
+            exp.Else(new LiteralValue("30"));
+            return exp;
+        }).As("val");
+
+        Monitor.Log(sq);
+
+        var lst = sq.GetTokens().ToList();
+
+        Assert.Equal(22, lst.Count());
+
+        Assert.Equal("case", lst[1].Text);
+        Assert.Equal("a", lst[2].Text);
+        Assert.Equal(".", lst[3].Text);
+        Assert.Equal("id", lst[4].Text);
+        Assert.Equal("when", lst[5].Text);
+        Assert.Equal("1", lst[6].Text);
+        Assert.Equal("then", lst[7].Text);
+        Assert.Equal("10", lst[8].Text);
+
+        Assert.Equal("end", lst[15].Text);
+    }
+
+    [Fact]
+    public void CaseWhenTest()
+    {
+        var sq = new SelectQuery();
+        var f = sq.From("table_a").As("a");
+
+        sq.Select(() =>
+        {
+            var exp = new CaseExpression();
+            exp.When(() =>
+            {
+                ValueBase v = new ColumnValue(f.Root, "id");
+                v.Equal(new LiteralValue("1"));
+                return v;
+            }).Then(new LiteralValue("10"));
+            exp.When(() =>
+            {
+                ValueBase v = new ColumnValue(f.Root, "id");
+                v.Equal(new LiteralValue("2"));
+                return v;
+            }).Then(new LiteralValue("20"));
+            exp.Else(new LiteralValue("30"));
+            return exp;
+        }).As("val");
+
+        Monitor.Log(sq);
+
+        var lst = sq.GetTokens().ToList();
+
+        Assert.Equal(27, lst.Count());
+
+        Assert.Equal("case", lst[1].Text);
+        Assert.Equal("when", lst[2].Text);
+        Assert.Equal("a", lst[3].Text);
+        Assert.Equal(".", lst[4].Text);
+        Assert.Equal("id", lst[5].Text);
+        Assert.Equal("=", lst[6].Text);
+        Assert.Equal("1", lst[7].Text);
+        Assert.Equal("then", lst[8].Text);
+
+        Assert.Equal("end", lst[20].Text);
     }
 }

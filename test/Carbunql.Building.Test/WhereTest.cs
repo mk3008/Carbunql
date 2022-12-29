@@ -23,7 +23,7 @@ public class WhereTest
 
         sq.Where(() =>
         {
-            ValueBase v = new ColumnValue(f.Root.Alias, "a_id");
+            ValueBase v = new ColumnValue(f.Root, "a_id");
             v = v.Equal(new LiteralValue("1"));
             return v;
         });
@@ -51,11 +51,11 @@ public class WhereTest
 
         sq.Where(() =>
         {
-            ValueBase v1 = new ColumnValue(f.Root.Alias, "a_id");
+            ValueBase v1 = new ColumnValue(f.Root, "a_id");
             v1 = v1.Equal(new LiteralValue("1"));
             v1 = v1.ToGroup();
 
-            ValueBase v2 = new ColumnValue(f.Root.Alias, "a_id");
+            ValueBase v2 = new ColumnValue(f.Root, "a_id");
             v2 = v2.Equal(new LiteralValue("2"));
             v2 = v2.ToGroup();
 
