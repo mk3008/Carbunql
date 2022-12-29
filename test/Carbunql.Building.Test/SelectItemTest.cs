@@ -3,11 +3,11 @@ using Xunit.Abstractions;
 
 namespace Carbunql.Building.Test;
 
-public class SelectQueryTest
+public class SelectItemTest
 {
     private readonly QueryCommandMonitor Monitor;
 
-    public SelectQueryTest(ITestOutputHelper output)
+    public SelectItemTest(ITestOutputHelper output)
     {
         Monitor = new QueryCommandMonitor(output);
     }

@@ -1,3 +1,5 @@
+using Carbunql.Clauses;
+using Carbunql.Values;
 using Xunit.Abstractions;
 
 
@@ -70,5 +72,46 @@ public class JoinTest
         Assert.Equal("left join", lst[40].Text);
         Assert.Equal("right join", lst[52].Text);
         Assert.Equal("cross join", lst[64].Text);
+    }
+
+    [Fact]
+    public void Custom()
+    {
+        var sq = new SelectQuery();
+        var f = sq.From("table_a").As("a");
+        var b = f.InnerJoin("table_b").As("b").On(r =>
+        {
+            ValueBase v = new ColumnValue(f.Root.Alias, "id");
+            v = v.Equal(new ColumnValue(r.Table.Alias, "a_id"));
+            v = v.And(new ColumnValue(r.Table.Alias, "value"));
+            v = v.Expression(">=", new LiteralValue("10"));
+            return v;
+        });
+
+        sq.Select(f.Root, "a_id");
+
+        Monitor.Log(sq);
+
+        var lst = sq.GetTokens().ToList();
+
+        Assert.Equal(26, lst.Count());
+
+        Assert.Equal("on", lst[12].Text);
+
+        Assert.Equal("a", lst[13].Text);
+        Assert.Equal(".", lst[14].Text);
+        Assert.Equal("id", lst[15].Text);
+        Assert.Equal("=", lst[16].Text);
+        Assert.Equal("b", lst[17].Text);
+        Assert.Equal(".", lst[18].Text);
+        Assert.Equal("a_id", lst[19].Text);
+
+        Assert.Equal("and", lst[20].Text);
+
+        Assert.Equal("b", lst[21].Text);
+        Assert.Equal(".", lst[22].Text);
+        Assert.Equal("value", lst[23].Text);
+        Assert.Equal(">=", lst[24].Text);
+        Assert.Equal("10", lst[25].Text);
     }
 }
