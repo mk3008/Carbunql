@@ -1,10 +1,13 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Extensions;
+using System.Reflection;
 
 namespace Carbunql.Analysis.Parser;
 
 public static class SelectableTableParser
 {
+    private static string[] SelectTableBreakTokens = new[] { "on" };
+
     public static SelectableTable Parse(string text)
     {
         using var r = new TokenReader(text);
@@ -13,7 +16,8 @@ public static class SelectableTableParser
 
     public static SelectableTable Parse(TokenReader r)
     {
-        var breaktokens = TokenReader.BreakTokens.Union(new[] { "on" });
+        var relationtokens = TableJoinEnumReader.GetCommandAttributes().Select(x => x.Value.Text);
+        var breaktokens = TokenReader.BreakTokens.Union(relationtokens).Union(SelectTableBreakTokens);
 
         var v = TableParser.Parse(r);
 

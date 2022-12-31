@@ -6,7 +6,7 @@
 
 @code {
 
-    string sql = @"with
+	string sql = @"with
 dat(line_id, name, unit_price, amount, tax_rate) as ( 
     values
     (1, 'apple' , 105, 5, 0.07),
@@ -81,15 +81,17 @@ order by
 }
 
 <div class="container-fluid">
+    <div class="row" Style="margin: 0px 0px 16px 0px;">
+        <RadzenMenu>
+            <RadzenMenuItem Text="Clear SQL" Icon="clear_all" Click=@OnClear>
+            </RadzenMenuItem>
+        </RadzenMenu>
+    </div>
     <div class="row">
         <div class="col-md-6">
-            <RadzenText TextStyle="TextStyle.H5">Input SQL</RadzenText>
-            <RadzenTextArea @bind-Value=@sql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" />
+            <RadzenText TextStyle="TextStyle.H5">Input</RadzenText>
+            <RadzenTextArea @bind-Value=@sql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" Placeholder="Enter select query(ex. select * from table)" />
         </div>
-@*        <div class="col-md-2">
-            <RadzenText TextStyle="TextStyle.H5">Tokens</RadzenText>
-            <RadzenListBox @bind-Value=@selectToken Data=@tokens TextProperty="Text" ValueProperty="Text" Style="width: 100%; height: 600px; margin : 0px"/>
-        </div>*@
         <div class="col-md-6">
             <RadzenText TextStyle="TextStyle.H5">Format SQL</RadzenText>
             <RadzenTextArea @bind-Value=@fsql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" />
@@ -98,29 +100,39 @@ order by
 </div>
 
 @code {
-    IEnumerable<Token>? tokens = null;
-    //object? selectToken = null;
+	IEnumerable<Token>? tokens = null;
+	object? selectToken = null;
 
-    protected override void OnInitialized()
-    {
-        OnChange(sql);
-    }
+	protected override void OnInitialized()
+	{
+		OnChange(sql);
+	}
 
-    string fsql = string.Empty;
+	string fsql = string.Empty;
 
-    void OnChange(string value)
-    {
-        try
-        {
-            var bld = new CommandTextBuilder();
-            var sq = QueryParser.Parse(sql);
-            tokens = sq.GetTokens(null).ToList();
-            fsql = bld.Execute(tokens);
-        }
-        catch (Exception ex)
-        {            
-            fsql = ex.ToString();
-        }
+	void OnClear()
+	{
+		sql = string.Empty;
+		OnChange(sql);
+	}
 
-    }
+	void OnChange(string value)
+	{
+		if (string.IsNullOrEmpty(value))
+		{
+			fsql = string.Empty;
+			return;
+		}
+		try
+		{
+			var bld = new CommandTextBuilder();
+			var sq = QueryParser.Parse(sql);
+			tokens = sq.GetTokens(null).ToList();
+			fsql = bld.Execute(tokens);
+		}
+		catch (Exception ex)
+		{
+			fsql = ex.ToString();
+		}
+	}
 }
