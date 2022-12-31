@@ -87,6 +87,23 @@ from
     }
 
     [Fact]
+    public void RelationSample_NoAlias()
+    {
+        var text = @"
+select * from a inner join b on a.id = b.id";
+
+        var item = QueryParser.Parse(text) as SelectQuery;
+        if (item == null) throw new Exception();
+        Monitor.Log(item);
+
+        var lst = item.GetTokens().ToList();
+        Assert.Equal(14, lst.Count);
+        Assert.Equal("a", lst[3].Text);
+        Assert.Equal("inner join", lst[4].Text);
+        Assert.Equal("b", lst[5].Text);
+    }
+
+    [Fact]
     public void GroupSample()
     {
         var text = @"
