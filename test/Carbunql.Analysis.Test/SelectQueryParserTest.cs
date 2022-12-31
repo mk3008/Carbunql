@@ -75,7 +75,8 @@ select
 from 
     table_a a
     inner join table_b b on a.table_a_id = b.table_a_id and b.visible = true
-    left join table_c c on a.table_a_id = c.table_a_id";
+    left join table_c c on a.table_a_id = c.table_a_id
+    right outer join table_d d on a.table_a_id = d.table_a_id";
 
         var item = QueryParser.Parse(text) as SelectQuery;
         if (item == null) throw new Exception();
@@ -83,7 +84,7 @@ from
 
         Assert.NotNull(item.SelectClause);
         Assert.Equal(5, item.SelectClause!.Count);
-        Assert.Equal(2, item.FromClause!.Relations!.Count());
+        Assert.Equal(3, item.FromClause!.Relations!.Count());
     }
 
     [Fact]
@@ -101,6 +102,23 @@ select * from a inner join b on a.id = b.id";
         Assert.Equal("a", lst[3].Text);
         Assert.Equal("inner join", lst[4].Text);
         Assert.Equal("b", lst[5].Text);
+    }
+
+    [Fact]
+    public void RelationSample_Comma()
+    {
+        var text = @"select * from a, b where a.id = b.id";
+
+        var item = QueryParser.Parse(text) as SelectQuery;
+        if (item == null) throw new Exception();
+        Monitor.Log(item);
+
+        var lst = item.GetTokens().ToList();
+        Assert.Equal(14, lst.Count);
+        Assert.Equal("a", lst[3].Text);
+        Assert.Equal(",", lst[4].Text);
+        Assert.Equal("b", lst[5].Text);
+        Assert.Equal("where", lst[6].Text);
     }
 
     [Fact]
