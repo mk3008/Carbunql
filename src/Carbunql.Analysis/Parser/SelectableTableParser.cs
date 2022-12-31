@@ -13,7 +13,7 @@ public static class SelectableTableParser
 
     public static SelectableTable Parse(TokenReader r)
     {
-        var breaktokens = TokenReader.BreakTokens.Union(new[] { "on" });
+        var breaktokens = TokenReader.BreakTokens.Union(new[] { "inner", "left", "right", "cross", "on" });
 
         var v = TableParser.Parse(r);
 
