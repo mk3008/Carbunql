@@ -19,7 +19,7 @@ public class Demo
     {
         var sql = @"
 with
-dat(line_id, name, unit_price, amount, tax_rate) as ( 
+dat(line_id, name, unit_price, quantity, tax_rate) as ( 
     values
     (1, 'apple' , 105, 5, 0.07),
     (2, 'orange', 203, 3, 0.07),
@@ -28,9 +28,9 @@ dat(line_id, name, unit_price, amount, tax_rate) as (
     (5, 'coffee', 555, 9, 0.08),
     (6, 'cola'  , 456, 2, 0.08)
 )
-select line_id, name, unit_price, amount, tax_rate from dat";
+select line_id, name, unit_price, quantity, tax_rate from dat";
 
-        var builder = new FractionAdjustmentQueryBuilder("line_id", "unit_price", "amount", "tax_rate");
+        var builder = new FractionAdjustmentQueryBuilder("line_id", "unit_price", "quantity", "tax_rate");
         var sq = builder.Execute(sql, "price", "tax");
 
         Monitor.Log(sq);
@@ -41,22 +41,46 @@ select line_id, name, unit_price, amount, tax_rate from dat";
     }
 }
 
+/// <summary>
+/// Calculate tax rate.
+/// The tax amount is calculated for each tax rate, and any fractions are rounded down.
+/// Also find the tax amount for each line item.
+/// The line item tax amount is also rounded down, but adjusted to match the total tax amount.
+/// The order of priority for adjustment is "in descending order of fractions".
+/// </summary>
 public class FractionAdjustmentQueryBuilder
 {
-    public FractionAdjustmentQueryBuilder(string sortColumn, string unitPriceColumn, string amountColumn, string taxRateColumn)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="sortColumn">
+    /// A column that is unique when sorted.
+    /// It is necessary to specify so that the fractional apportionment does not fluctuate.
+    /// </param>
+    /// <param name="unitPriceColumn">
+    /// unit price column
+    /// </param>
+    /// <param name="quantityColumn">
+    /// quantity column
+    /// </param>
+    /// <param name="taxRateColumn">
+    /// Tax rate column (e.g. 0.05)
+    /// </param>
+    public FractionAdjustmentQueryBuilder(string sortColumn, string unitPriceColumn, string quantityColumn, string taxRateColumn)
     {
         SortColumn = sortColumn;
         UnitPriceColumn = unitPriceColumn;
-        AmountColumn = amountColumn;
+        QuantitytColumn = quantityColumn;
         TaxRateColumn = taxRateColumn;
     }
 
     public string SortColumn { get; init; }
     public string UnitPriceColumn { get; init; }
-    public string AmountColumn { get; init; }
+    public string QuantitytColumn { get; init; }
     public string TaxRateColumn { get; init; }
     private string DatasourceTable { get; set; } = "_datasource";
     private string SummaryTable { get; set; } = "_summary";
+    private string NonTaxPriceColumn { get; set; } = "_non_tax_price";
     private string RawTaxColumn { get; set; } = "_raw_tax";
     private string TotalTaxColumn { get; set; } = "_total_tax";
     private string CumulativeColumn { get; set; } = "_cumulative";
@@ -68,8 +92,8 @@ public class FractionAdjustmentQueryBuilder
         var sq = QueryParser.Parse(sql) as SelectQuery;
         var columns = sq!.SelectClause!.Select(x => x.Alias).ToList();
 
-        sq = GenerateCalcPriceQuery(sq, priceColumn);
-        sq = AddDatasourceCTE(sq, priceColumn, taxColumn);
+        sq = GenerateCalcPriceQuery(sq);
+        sq = AddDatasourceCTE(sq, taxColumn);
         sq = AddSummaryCTE(sq);
         sq = GenerateDetailQuery(sq, taxColumn);
         sq = GenerateCalcAdjustTaxQuery(sq);
@@ -78,12 +102,12 @@ public class FractionAdjustmentQueryBuilder
         return sq;
     }
 
-    private SelectQuery GenerateCalcPriceQuery(SelectQuery query, string priceColumn)
+    private SelectQuery GenerateCalcPriceQuery(SelectQuery query)
     {
         /*
         select
             d.*,
-            d.unit_price * d.amount as price
+            d.unit_price * d.amount as non_tax_price
         from
             (...) as d
         */
@@ -93,14 +117,14 @@ public class FractionAdjustmentQueryBuilder
         sq.Select(() =>
         {
             ValueBase v = new ColumnValue(d, UnitPriceColumn);
-            v = v.Expression("*", new ColumnValue(d, AmountColumn));
+            v = v.Expression("*", new ColumnValue(d, QuantitytColumn));
             return v;
-        }).As(priceColumn);
+        }).As(NonTaxPriceColumn);
 
         return sq;
     }
 
-    private SelectQuery AddDatasourceCTE(SelectQuery query, string priceColumn, string taxColumn)
+    private SelectQuery AddDatasourceCTE(SelectQuery query, string taxColumn)
     {
 
         /*
@@ -108,8 +132,8 @@ public class FractionAdjustmentQueryBuilder
         datasource as (
             select  
                 d.*,
-                trunc(d.price * (1 + d.tax_rate)) - d.price as tax,
-                     (d.price * (1 + d.tax_rate)) - d.price as raw_tax
+                trunc(d.non_tax_price * (1 + d.tax_rate)) - d.non_tax_price as tax,
+                     (d.non_tax_price * (1 + d.tax_rate)) - d.non_tax_price as raw_tax
             from
                 (...) d
         )
@@ -118,7 +142,7 @@ public class FractionAdjustmentQueryBuilder
         var (sq, d) = query.ToSubQuery("d");
         sq.SelectAll(d);
 
-        ValueBase exp = new ColumnValue(d, priceColumn);
+        ValueBase exp = new ColumnValue(d, NonTaxPriceColumn);
         exp = exp.Expression("*", () =>
         {
             ValueBase y = new LiteralValue("1");
@@ -130,7 +154,7 @@ public class FractionAdjustmentQueryBuilder
         sq.Select(() =>
         {
             ValueBase v = new FunctionValue("trunc", exp);
-            v = v.Expression("-", new ColumnValue(d, priceColumn));
+            v = v.Expression("-", new ColumnValue(d, NonTaxPriceColumn));
             return v;
         }).As(taxColumn);
 
@@ -138,7 +162,7 @@ public class FractionAdjustmentQueryBuilder
         sq.Select(() =>
         {
             ValueBase v = exp.ToGroup();
-            v = v.Expression("-", new ColumnValue(d, priceColumn));
+            v = v.Expression("-", new ColumnValue(d, NonTaxPriceColumn));
             return v;
         }).As(RawTaxColumn);
 
@@ -270,7 +294,7 @@ public class FractionAdjustmentQueryBuilder
             unit_price,
             amount,
             tax_rate,
-            price + tax + adjust_tax as price,
+            non_tax_price + tax + adjust_tax as price,
             tax + adjust_tax as tax
         from
             (...) as d
@@ -283,10 +307,10 @@ public class FractionAdjustmentQueryBuilder
         ValueBase tax = new ColumnValue(d, taxColumn);
         tax = tax.Expression("+", new ColumnValue(d, AdjustTaxColumn));
 
-        // price + tax + adjust_tax as price
+        // non_tax_price + tax + adjust_tax as price
         sq.Select(() =>
         {
-            ValueBase v = new ColumnValue(d, priceColumn);
+            ValueBase v = new ColumnValue(d, NonTaxPriceColumn);
             v = v.Expression("+", tax);
             return v;
         }).As(priceColumn);
