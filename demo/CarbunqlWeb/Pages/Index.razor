@@ -6,8 +6,8 @@
 
 @code {
 
-	string sql = @"with
-dat(line_id, name, unit_price, amount, tax_rate) as ( 
+    string sql = @"with
+dat(line_id, name, unit_price, quantity, tax_rate) as ( 
     values
     (1, 'apple' , 105, 5, 0.07),
     (2, 'orange', 203, 3, 0.07),
@@ -25,7 +25,7 @@ detail as (
         (
             select
                 dat.*,
-                (dat.unit_price * dat.amount) as price
+                (dat.unit_price * dat.quantity) as price
             from
                 dat
         ) q
@@ -43,7 +43,7 @@ select
    line_id,
     name,
     unit_price,
-    amount,
+    quantity,
     tax_rate,
     price,
     price + tax as tax_included_price,
@@ -54,7 +54,7 @@ from
             line_id,
             name,
             unit_price,
-            amount,
+            quantity,
             tax_rate,
             price,
             tax + adjust_tax as tax
@@ -83,7 +83,7 @@ order by
 <div class="container-fluid">
     <div class="row" Style="margin: 0px 0px 16px 0px;">
         <RadzenMenu>
-            <RadzenMenuItem Text="Clear SQL" Icon="clear_all" Click=@OnClear>
+            <RadzenMenuItem Text="Clear SQL" Icon="clear" Click=@OnClear>
             </RadzenMenuItem>
         </RadzenMenu>
     </div>
