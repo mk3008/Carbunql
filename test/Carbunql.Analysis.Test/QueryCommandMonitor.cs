@@ -1,7 +1,8 @@
 ﻿using Xunit.Abstractions;
 
 namespace Carbunql.Analysis.Test;
-internal class QueryCommandMonitor
+
+public class QueryCommandMonitor
 {
     private readonly ITestOutputHelper Output;
 

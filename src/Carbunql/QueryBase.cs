@@ -41,9 +41,13 @@ public abstract class QueryBase : IQueryCommandable
         if (LimitClause != null) foreach (var item in LimitClause.GetTokens(parent)) yield return item;
     }
 
+    public String ToText()
+    {
+        return GetTokens(null).ToText();
+    }
+
     public QueryCommand ToCommand()
     {
-        var sql = GetTokens(null).ToText();
-        return new QueryCommand(sql, GetParameters());
+        return new QueryCommand(ToText(), GetParameters());
     }
 }
