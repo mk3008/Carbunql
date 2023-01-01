@@ -1,5 +1,6 @@
 ﻿using Carbunql.Analysis.Parser;
 using Carbunql.Clauses;
+using Carbunql.Tables;
 using Carbunql.Values;
 using System;
 using System.Collections.Generic;
@@ -12,97 +13,40 @@ namespace Carbunql.Building;
 
 public static class QueryBaseExtension
 {
-    public static SelectableItem ToSelectable(this ColumnValue source)
+    public static SelectQuery ToCTE(this QueryBase source, string alias)
     {
-        return new SelectableItem(source, source.GetDefaultName());
+        var sq = new SelectQuery();
+        if (source.WithClause == null)
+        {
+            sq.WithClause = new();
+        }
+        else
+        {
+            sq.WithClause = new WithClause(source.WithClause);
+            source.WithClause = null;
+        }
+
+        var ct = new CommonTable(new VirtualTable(source), alias);
+        sq.WithClause.Add(ct);
+
+        return sq;
     }
 
-    public static SelectableItem ToSelectable(this ValueBase source, string name = "column")
+    public static (SelectQuery, FromClause) ToSubQuery(this QueryBase source, string alias)
     {
-        return new SelectableItem(source, name);
-    }
+        var sq = new SelectQuery();
+        if (source.WithClause == null)
+        {
+            sq.WithClause = new();
+        }
+        else
+        {
+            sq.WithClause = new WithClause(source.WithClause);
+            source.WithClause = null;
+        }
 
-    public static SelectableItem SelectAll(this SelectQuery source)
-    {
-        var item = new ColumnValue("*").ToSelectable();
-        source.SelectClause ??= new();
-        source.SelectClause.Add(item);
-        return item;
-    }
+        var f = sq.From(source, alias);
 
-    public static SelectableItem SelectAll(this SelectQuery source, SelectableTable table)
-    {
-        var item = new ColumnValue(table.Alias, "*").ToSelectable();
-        source.SelectClause ??= new();
-        source.SelectClause.Add(item);
-        return item;
-    }
-
-    public static SelectableItem Select(this SelectQuery source, SelectableTable table, string column)
-    {
-        var item = new ColumnValue(table.Alias, column).ToSelectable();
-        source.SelectClause ??= new();
-        source.SelectClause.Add(item);
-        return item;
-    }
-
-    public static SelectableItem Select(this SelectQuery source, int value)
-    {
-        var item = new LiteralValue(value.ToString()).ToSelectable();
-        source.SelectClause ??= new();
-        source.SelectClause.Add(item);
-        return item;
-    }
-
-    public static SelectableItem Select(this SelectQuery source, long value)
-    {
-        var item = new LiteralValue(value.ToString()).ToSelectable();
-        source.SelectClause ??= new();
-        source.SelectClause.Add(item);
-        return item;
-    }
-
-    public static SelectableItem Select(this SelectQuery source, decimal value)
-    {
-        var item = new LiteralValue(value.ToString()).ToSelectable();
-        source.SelectClause ??= new();
-        source.SelectClause.Add(item);
-        return item;
-    }
-
-    public static SelectableItem Select(this SelectQuery source, double value)
-    {
-        var item = new LiteralValue(value.ToString()).ToSelectable();
-        source.SelectClause ??= new();
-        source.SelectClause.Add(item);
-        return item;
-    }
-
-    public static SelectableItem Select(this SelectQuery source, DateTime value, string sufix = "::timestamp")
-    {
-        return source.Select("'" + value.ToString() + "'" + sufix);
-    }
-
-    public static SelectableItem Select(this SelectQuery source, string text)
-    {
-        //parse
-        var value = ValueParser.Parse(text);
-        var item = new SelectableItem(value, "column");
-        source.SelectClause ??= new();
-        source.SelectClause.Add(item);
-        return item;
-    }
-
-    public static SelectableItem Select(this SelectQuery source, Func<ValueBase> builder)
-    {
-        var item = builder().ToSelectable();
-        source.SelectClause ??= new();
-        source.SelectClause.Add(item);
-        return item;
-    }
-
-    public static void As(this SelectableItem source, string alias)
-    {
-        source.SetAlias(alias);
+        return (sq, f);
     }
 }

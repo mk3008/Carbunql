@@ -60,6 +60,12 @@ public static class ValueBaseExtension
         return source;
     }
 
+    public static ValueBase Expression(this ValueBase source, string @operator, Func<ValueBase> builder)
+    {
+        source.GetLast().AddOperatableValue(@operator, builder());
+        return source;
+    }
+
     public static ValueBase And(this ValueBase source, ValueBase operand)
     {
         source.GetLast().AddOperatableValue("and", operand);
@@ -75,5 +81,10 @@ public static class ValueBaseExtension
     public static ValueBase ToGroup(this ValueBase source)
     {
         return new BracketValue(source);
+    }
+
+    public static SortableItem ToSortable(this ValueBase source, bool isAscending = true)
+    {
+        return new SortableItem(source) { IsAscending = isAscending };
     }
 }

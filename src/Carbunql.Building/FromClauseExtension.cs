@@ -11,6 +11,11 @@ public static class FromClauseExtension
         return new SelectableTable(source, source.GetDefaultName());
     }
 
+    public static SelectableTable ToSelectable(this VirtualTable source, string alias)
+    {
+        return new SelectableTable(source, alias);
+    }
+
     public static FromClause From(this SelectQuery source, string table)
     {
         return source.From(string.Empty, table);
@@ -19,6 +24,15 @@ public static class FromClauseExtension
     public static FromClause From(this SelectQuery source, string schema, string table)
     {
         var st = new PhysicalTable(schema, table).ToSelectable();
+        var f = new FromClause(st);
+        source.FromClause = f;
+        return f;
+    }
+
+    public static FromClause From(this SelectQuery source, QueryBase subQuery, string alias)
+    {
+        var vt = new VirtualTable(subQuery);
+        var st = vt.ToSelectable(alias);
         var f = new FromClause(st);
         source.FromClause = f;
         return f;
@@ -104,6 +118,11 @@ public static class FromClauseExtension
     {
         source.Table.SetAlias(Alias);
         return source;
+    }
+
+    public static SelectableTable On(this Relation source, FromClause from, string column)
+    {
+        return source.On(from.Root, new[] { column });
     }
 
     public static SelectableTable On(this Relation source, SelectableTable sourceTable, string column)

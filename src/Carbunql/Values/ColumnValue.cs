@@ -15,6 +15,12 @@ public class ColumnValue : ValueBase
         Column = column;
     }
 
+    public ColumnValue(FromClause from, string column)
+    {
+        TableAlias = from.Root.Alias;
+        Column = column;
+    }
+
     public ColumnValue(SelectableTable table, string column)
     {
         TableAlias = table.Alias;

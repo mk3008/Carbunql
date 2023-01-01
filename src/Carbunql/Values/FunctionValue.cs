@@ -23,17 +23,65 @@ public class FunctionValue : ValueBase
         Argument = new ValueCollection(arg);
     }
 
-    public FunctionValue(string name, ValueCollection args)
+    public FunctionValue(string name, ValueBase args)
     {
         Name = name;
-        Argument = args;
+        Argument = new ValueCollection
+        {
+            args
+        };
     }
 
-    public FunctionValue(string name, ValueCollection args, WindowFunction winfn)
+    //public FunctionValue(string name, ValueCollection args)
+    //{
+    //    Name = name;
+    //    Argument = args;
+    //}
+
+    public FunctionValue(string name, Func<ValueBase> builder)
     {
         Name = name;
-        Argument = args;
+        Argument = new ValueCollection
+        {
+            builder()
+        };
+    }
+
+    public FunctionValue(string name, Func<WindowFunction> wfbuiilder)
+    {
+        Name = name;
+        Argument = new ValueCollection();
+        WindowFunction = wfbuiilder();
+    }
+
+    public FunctionValue(string name, ValueBase args, WindowFunction winfn)
+    {
+        Name = name;
+        Argument = new ValueCollection
+        {
+            args
+        };
         WindowFunction = winfn;
+    }
+
+    public FunctionValue(string name, ValueBase args, Func<WindowFunction> wfbuiilder)
+    {
+        Name = name;
+        Argument = new ValueCollection
+        {
+            args
+        };
+        WindowFunction = wfbuiilder();
+    }
+
+    public FunctionValue(string name, Func<ValueBase> builder, Func<WindowFunction> wfbuiilder)
+    {
+        Name = name;
+        Argument = new ValueCollection
+        {
+            builder()
+        };
+        WindowFunction = wfbuiilder();
     }
 
     public string Name { get; init; }

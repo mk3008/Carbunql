@@ -53,7 +53,7 @@ public class FunctionTest
         {
             var wf = new WindowFunction();
             wf.AddPartition(new ColumnValue(f.Root, "parent_id"));
-            wf.AddOrder(new ColumnValue(f.Root, "id"));
+            wf.AddOrder(new ColumnValue(f.Root, "id").ToSortable());
             return new FunctionValue("row_number", wf);
         }).As("val");
 
