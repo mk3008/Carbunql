@@ -1,5 +1,4 @@
 ﻿using Carbunql.Extensions;
-using Carbunql.Values;
 using Cysharp.Text;
 
 namespace Carbunql;
@@ -15,6 +14,8 @@ public class CommandTextBuilder
     {
         Formatter = new CommandFormatter();
     }
+
+    public Action<string>? Logger { get; set; }
 
     public CommandFormatter Formatter { get; init; }
 
@@ -54,6 +55,7 @@ public class CommandTextBuilder
             {
                 if (t.Parent != null && Formatter.IsIncrementIndentOnBeforeWriteToken(t.Parent))
                 {
+                    Logger?.Invoke($"increment indent and line break on before : {t.Text}");
                     Level++;
                     IndentLevels.Add((t.Parent, Level));
                     sb.Append(GetLineBreakText());
@@ -64,16 +66,21 @@ public class CommandTextBuilder
 
             if (Formatter.IsDecrementIndentOnBeforeWriteToken(t))
             {
+
+
                 var q = IndentLevels.Where(x => x.Token != null && x.Token.Equals(t.Parent)).Select(x => x.Level);
-                if (q.Any())
+                var lv = 0;
+                if (q.Any()) lv = q.First();
+                if (lv != Level)
                 {
-                    Level = q.First();
+                    Logger?.Invoke($"decrement indent and line break on before : {t.Text}");
+                    Level = lv;
+                    sb.Append(GetLineBreakText());
                 }
                 else
                 {
-                    Level = 0;
+                    Logger?.Invoke($"*Indentation is invalid because the levels are the same : {t.Text}");
                 }
-                sb.Append(GetLineBreakText());
             }
             foreach (var item in GetTokenTexts(t)) sb.Append(item);
         }

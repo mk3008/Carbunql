@@ -22,11 +22,11 @@ public static class WindowFunctionParser
             var token = r.ReadToken();
             if (token.AreEqual("partition by"))
             {
-                winfn.PartitionBy = ValueCollectionParser.Parse(r);
+                winfn.PartitionBy = PartitionClauseParser.Parse(r);
             }
             else if (token.AreEqual("order by"))
             {
-                winfn.OrderBy = SortableCollectionParser.Parse(r);
+                winfn.OrderBy = OrderClauseParser.Parse(r);
             }
         } while (r.PeekOrDefault() != null);
 

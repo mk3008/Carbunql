@@ -88,4 +88,15 @@ public class SelectableItemParserTest
         //Assert.Equal("t.col", item.GetCommandText());
         //Assert.Equal("col", item.Alias);
     }
+
+    [Fact]
+    public void RowNumberTest()
+    {
+        var text = "row_number() over (partition by d.tax_rate order by d.raw_tax % 1 desc, d.line_id) as val";
+        var item = SelectableItemParser.Parse(text);
+        Monitor.Log(item);
+
+        //Assert.Equal("t.col", item.GetCommandText());
+        //Assert.Equal("col", item.Alias);
+    }
 }
