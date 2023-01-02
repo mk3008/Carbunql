@@ -29,10 +29,22 @@ order by
 
         Monitor.Log(item);
 
+        var lst = item.GetTokens().ToList();
+
+        Assert.Equal(20, lst.Count);
+
         Assert.NotNull(item.SelectClause);
         Assert.Single(item.SelectClause);
         Assert.NotNull(item.OrderClause);
         Assert.Equal(3, item.OrderClause!.Count());
+
+        Assert.Equal("table_a", lst[3].Text);
+        Assert.Equal("as", lst[4].Text);
+        Assert.Equal("a", lst[5].Text);
+        Assert.Equal("order by", lst[6].Text);
+        Assert.Equal("a", lst[7].Text);
+        Assert.Equal(".", lst[8].Text);
+        Assert.Equal("name", lst[9].Text);
     }
 
     [Fact]
