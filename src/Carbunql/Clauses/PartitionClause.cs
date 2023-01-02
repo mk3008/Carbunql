@@ -1,12 +1,12 @@
 ﻿namespace Carbunql.Clauses;
 
-public class OrderClause : QueryCommandCollection<SortableItem>, IQueryCommand
+public class PartitionClause : QueryCommandCollection<ValueBase>, IQueryCommand
 {
-    public OrderClause() : base()
+    public PartitionClause() : base()
     {
     }
 
-    public OrderClause(List<SortableItem> collection) : base(collection)
+    public PartitionClause(List<ValueBase> collection) : base(collection)
     {
     }
 
@@ -14,7 +14,7 @@ public class OrderClause : QueryCommandCollection<SortableItem>, IQueryCommand
     {
         if (!Items.Any()) yield break;
 
-        var clause = Token.Reserved(this, parent, "order by");
+        var clause = Token.Reserved(this, parent, "partition by");
         yield return clause;
 
         foreach (var item in base.GetTokens(clause)) yield return item;

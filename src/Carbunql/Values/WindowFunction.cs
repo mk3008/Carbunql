@@ -1,27 +1,30 @@
-﻿namespace Carbunql.Values;
+﻿using Carbunql.Clauses;
+
+namespace Carbunql.Values;
 
 public class WindowFunction : IQueryCommand
 {
-    public ValueCollection? PartitionBy { get; set; }
+    public PartitionClause? PartitionBy { get; set; }
 
-    public SortableValueCollection? OrderBy { get; set; }
+    public OrderClause? OrderBy { get; set; }
 
     public IEnumerable<Token> GetTokens(Token? parent)
     {
-        yield return Token.Reserved(this, parent, "over");
+        if (PartitionBy == null && OrderBy == null) yield break;
 
-        var bracket = Token.ReservedBracketStart(this, parent);
+        var overToken = Token.Reserved(this, parent, "over");
+        yield return overToken;
+
+        var bracket = Token.ReservedBracketStart(this, overToken);
         yield return bracket;
         if (PartitionBy != null)
         {
-            yield return Token.Reserved(this, parent, "partition by");
             foreach (var item in PartitionBy.GetTokens(bracket)) yield return item;
         }
         if (OrderBy != null)
         {
-            yield return Token.Reserved(this, parent, "order by");
             foreach (var item in OrderBy.GetTokens(bracket)) yield return item;
         }
-        yield return Token.ReservedBracketEnd(this, parent);
+        yield return Token.ReservedBracketEnd(this, overToken);
     }
 }

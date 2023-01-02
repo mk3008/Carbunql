@@ -1,6 +1,6 @@
+using CarbunqlWeb;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using CarbunqlWeb;
 using Radzen;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);

@@ -1,5 +1,4 @@
-﻿using Carbunql.Tables;
-using Carbunql.Values;
+﻿using Carbunql.Values;
 
 namespace Carbunql.Clauses;
 

@@ -1,12 +1,13 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Values;
-using System.Data;
 
 namespace Carbunql;
 
 public class CommandFormatter
 {
+    public Action<string>? Logger { get; set; }
+
     public virtual bool IsLineBreakOnBeforeWriteToken(Token token)
     {
         if (token.Text.Equals(",") && token.Sender is Relation) return false;
@@ -48,7 +49,7 @@ public class CommandFormatter
 
         if (token.Parent != null && token.Parent.Sender is ValuesClause) return false;
         if (token.Sender is FunctionValue) return false;
-        if (token.Sender is WindowFunction) return false;
+        if (token.Text.Equals("over")) return false;
 
         return true;
     }
@@ -59,9 +60,9 @@ public class CommandFormatter
 
         if (token.Text.Equals(")") && token.IsReserved == false) return false;
 
-        if (token.Parent != null && token.Parent.Sender is ValuesClause) return false;
+        if (token.Parent.Sender is ValuesClause) return false;
         if (token.Sender is FunctionValue) return false;
-        if (token.Sender is WindowFunction) return false;
+        if (token.Text.Equals(")") && token.Parent.Text.AreEqual("over")) return true;
 
         return true;
     }

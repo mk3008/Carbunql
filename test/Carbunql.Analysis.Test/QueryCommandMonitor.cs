@@ -15,6 +15,8 @@ public class QueryCommandMonitor
     {
         var frm = new CommandFormatter();
         var bld = new CommandTextBuilder(frm);
+        bld.Logger = (x) => Output.WriteLine(x);
+
         var sql = bld.Execute(arg.GetTokens(null));
         Output.WriteLine(sql);
         Output.WriteLine("--------------------");
