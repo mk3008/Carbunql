@@ -19,7 +19,7 @@ public class SortableValueCollection : IList<SortableItem>
         Collection.AddRange(collection);
     }
 
-    public IEnumerable<Token> GetTokens(Token? parent)
+    public virtual IEnumerable<Token> GetTokens(Token? parent)
     {
         var isFirst = true;
         foreach (var item in Collection)
