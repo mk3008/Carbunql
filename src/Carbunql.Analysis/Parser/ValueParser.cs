@@ -62,6 +62,14 @@ public static class ValueParser
             return new LiteralValue(item);
         }
 
+        if (item == "+" || item == "-")
+        {
+            var sign = item;
+            var v = (LiteralValue)Parse(r);
+            v.CommandText = sign + v.CommandText;
+            return v;
+        }
+
         if (item == "(")
         {
             var (first, inner) = r.ReadUntilCloseBracket();

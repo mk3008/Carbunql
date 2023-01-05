@@ -48,6 +48,49 @@ order by
     }
 
     [Fact]
+    public void NumericSample()
+    {
+        var text = @"
+select
+    1 as v1,
+    -1 as v2,
+    1-1 as v3,
+    -1 * 1 as v4,
+    +1 * 1 as v5
+";
+
+        var item = QueryParser.Parse(text) as SelectQuery;
+        if (item == null) throw new Exception();
+
+        Monitor.Log(item);
+
+        var lst = item.GetTokens().ToList();
+
+        Assert.Equal(26, lst.Count);
+
+        Assert.Equal(",", lst[8].Text);
+        Assert.Equal("1", lst[9].Text);
+        Assert.Equal("-", lst[10].Text);
+        Assert.Equal("1", lst[11].Text);
+        Assert.Equal("as", lst[12].Text);
+        Assert.Equal("v3", lst[13].Text);
+
+        Assert.Equal(",", lst[14].Text);
+        Assert.Equal("-1", lst[15].Text);
+        Assert.Equal("*", lst[16].Text);
+        Assert.Equal("1", lst[17].Text);
+        Assert.Equal("as", lst[18].Text);
+        Assert.Equal("v4", lst[19].Text);
+
+        Assert.Equal(",", lst[20].Text);
+        Assert.Equal("+1", lst[21].Text);
+        Assert.Equal("*", lst[22].Text);
+        Assert.Equal("1", lst[23].Text);
+        Assert.Equal("as", lst[24].Text);
+        Assert.Equal("v5", lst[25].Text);
+    }
+
+    [Fact]
     public void CaseSample()
     {
         var text = @"

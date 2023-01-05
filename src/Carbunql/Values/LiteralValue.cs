@@ -4,15 +4,15 @@ namespace Carbunql.Values;
 
 public class LiteralValue : ValueBase
 {
-	public LiteralValue(string commandText)
-	{
-		CommandText = commandText;
-	}
+    public LiteralValue(string commandText)
+    {
+        CommandText = commandText;
+    }
 
-	public string CommandText { get; init; }
+    public string CommandText { get; set; }
 
-	public override IEnumerable<Token> GetCurrentTokens(Token? parent)
-	{
-		yield return new Token(this, parent, CommandText);
-	}
+    public override IEnumerable<Token> GetCurrentTokens(Token? parent)
+    {
+        yield return new Token(this, parent, CommandText);
+    }
 }
