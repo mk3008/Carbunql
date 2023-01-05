@@ -147,7 +147,8 @@ group by
     a.name,
     a.sub_name
 having
-    sum(a.val) > 0";
+    sum(a.val) > 0
+    and sum(a.val) < 10";
 
         var item = QueryParser.Parse(text) as SelectQuery;
         if (item == null) throw new Exception();
