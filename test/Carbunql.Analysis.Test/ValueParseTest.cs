@@ -46,6 +46,18 @@ public class ValueParserTest
     }
 
     [Fact]
+    public void Numeric_Negative()
+    {
+        var text = "-1";
+        var v = ValueParser.Parse(text);
+        Monitor.Log(v);
+
+        Assert.IsType<LiteralValue>(v);
+
+        //Assert.Equal("3.14", v.GetCommandText());
+    }
+
+    [Fact]
     public void Text()
     {
         var text = "'abc''s'";
@@ -82,7 +94,31 @@ public class ValueParserTest
         var v = ValueParser.Parse(text);
         Monitor.Log(v);
 
-        //Assert.Equal("1 * 3.14", v.GetCommandText());
+        Assert.IsType<LiteralValue>(v);
+        var lv = (LiteralValue)v;
+        Assert.Equal("1", lv.CommandText);
+        Assert.NotNull(v.OperatableValue);
+        Assert.Equal("*", v.OperatableValue!.Operator);
+        Assert.IsType<LiteralValue>(v.OperatableValue!.Value);
+        lv = (LiteralValue)v.OperatableValue!.Value;
+        Assert.Equal("3.14", lv.CommandText);
+    }
+
+    [Fact]
+    public void Expression_Negative()
+    {
+        var text = "-1*3.14";
+        var v = ValueParser.Parse(text);
+        Monitor.Log(v);
+
+        Assert.IsType<LiteralValue>(v);
+        var lv = (LiteralValue)v;
+        Assert.Equal("-1", lv.CommandText);
+        Assert.NotNull(v.OperatableValue);
+        Assert.Equal("*", v.OperatableValue!.Operator);
+        Assert.IsType<LiteralValue>(v.OperatableValue!.Value);
+        lv = (LiteralValue)v.OperatableValue!.Value;
+        Assert.Equal("3.14", lv.CommandText);
     }
 
     [Fact]
