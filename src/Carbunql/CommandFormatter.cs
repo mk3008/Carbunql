@@ -18,6 +18,7 @@ public class CommandFormatter
         {
             if (token.Sender is BetweenExpression) return false;
             if (token.Parent != null && token.Parent.Sender is WhereClause) return true;
+            if (token.Parent != null && token.Parent.Sender is HavingClause) return true;
             return false;
         }
 
