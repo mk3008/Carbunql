@@ -173,6 +173,32 @@ public class ValueParserTest
     }
 
     [Fact]
+    public void Function_2()
+    {
+        var text = "concat('a', 'b')";
+        var v = ValueParser.Parse(text);
+        Monitor.Log(v);
+
+        Assert.IsType<FunctionValue>(v);
+        var lv = (FunctionValue)v;
+        Assert.Equal("concat", lv.Name);
+        Assert.NotNull(lv.Argument);
+    }
+
+    [Fact]
+    public void Function_3()
+    {
+        var text = "concat('a',     '/')";
+        var v = ValueParser.Parse(text);
+        Monitor.Log(v);
+
+        Assert.IsType<FunctionValue>(v);
+        var lv = (FunctionValue)v;
+        Assert.Equal("concat", lv.Name);
+        Assert.NotNull(lv.Argument);
+    }
+
+    [Fact]
     public void WindowFunction()
     {
         var text = "row_number() over(partition by tbl.col, tbl.col2 order by tbl.col3, tbl.col4)";
