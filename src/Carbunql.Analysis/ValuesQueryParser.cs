@@ -6,19 +6,10 @@ namespace Carbunql.Analysis;
 
 public static class ValuesQueryParser
 {
-    internal static ValuesQuery Parse(string text, WithClause? w = null)
+    internal static ValuesQuery Parse(string text)
     {
         using var r = new TokenReader(text);
-        var sq = Parse(r);
-        if (w != null) sq.WithClause = w;
-        return sq;
-    }
-
-    internal static ValuesQuery Parse(TokenReader r, WithClause? w)
-    {
-        var sq = Parse(r);
-        if (w != null) sq.WithClause = w;
-        return sq;
+        return Parse(r);
     }
 
     internal static ValuesQuery Parse(TokenReader r)

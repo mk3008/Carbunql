@@ -15,7 +15,7 @@ public class WithClauseParserTest
     [Fact]
     public void Default()
     {
-        var text = "cte1 as (select id from table_a), cte2 as (select id from table_b)";
+        var text = "with cte1 as (select id from table_a), cte2 as (select id from table_b)";
         var item = WithClauseParser.Parse(text);
         Monitor.Log(item);
     }
@@ -23,7 +23,7 @@ public class WithClauseParserTest
     [Fact]
     public void Recursive()
     {
-        var text = "recursive cte1 as (select id from table_a), cte2 as (select id from table_b)";
+        var text = "with recursive cte1 as (select id from table_a), cte2 as (select id from table_b)";
         var item = WithClauseParser.Parse(text);
         Monitor.Log(item);
     }
@@ -31,7 +31,7 @@ public class WithClauseParserTest
     [Fact]
     public void Materialized()
     {
-        var text = "cte1 as materialized (select id from table_a), cte2 as not materialized (select id from table_b)";
+        var text = "with cte1 as materialized (select id from table_a), cte2 as not materialized (select id from table_b)";
         var item = WithClauseParser.Parse(text);
         Monitor.Log(item);
     }

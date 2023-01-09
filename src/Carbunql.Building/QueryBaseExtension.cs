@@ -5,40 +5,52 @@ namespace Carbunql.Building;
 
 public static class QueryBaseExtension
 {
-    public static SelectQuery ToCTE(this QueryBase source, string alias)
+    public static SelectQuery GetSelectQuery(this QueryBase source)
     {
-        var sq = new SelectQuery();
-        if (source.WithClause == null)
+        return (SelectQuery)source.QueryWithoutCTE;
+    }
+
+    public static ValuesQuery GetValuesQuery(this QueryBase source)
+    {
+        return (ValuesQuery)source.QueryWithoutCTE;
+
+    }
+
+    public static CTEQuery ToCTE(this QueryBase source, string alias)
+    {
+        var sq = new CTEQuery();
+
+        if (source.WithClause != null)
         {
-            sq.WithClause = new();
-        }
-        else
-        {
-            sq.WithClause = new WithClause(source.WithClause);
-            source.WithClause = null;
+            foreach (var item in source.WithClause.CommonTables)
+            {
+                sq.WithClause.Add(item);
+            }
         }
 
-        var ct = new CommonTable(new VirtualTable(source), alias);
-        sq.WithClause.Add(ct);
+        sq.WithClause.Add(source.ToCommonTable(alias));
 
         return sq;
     }
 
-    public static (SelectQuery, FromClause) ToSubQuery(this QueryBase source, string alias)
+    public static CommonTable ToCommonTable(this QueryBase source, string alias)
+    {
+        return new CommonTable(new VirtualTable(source.QueryWithoutCTE), alias);
+    }
+
+    public static (QueryBase, FromClause) ToSubQuery(this QueryBase source, string alias)
     {
         var sq = new SelectQuery();
-        if (source.WithClause == null)
-        {
-            sq.WithClause = new();
-        }
-        else
-        {
-            sq.WithClause = new WithClause(source.WithClause);
-            source.WithClause = null;
-        }
+        var f = sq.From(source.QueryWithoutCTE, alias);
 
-        var f = sq.From(source, alias);
+        if (source.WithClause == null) return (sq, f);
 
-        return (sq, f);
+        var cteq = new CTEQuery();
+        foreach (var item in source.WithClause.CommonTables)
+        {
+            cteq.WithClause.Add(item);
+        }
+        cteq.Query = sq;
+        return (cteq, f);
     }
 }

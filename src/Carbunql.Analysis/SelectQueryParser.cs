@@ -6,19 +6,10 @@ namespace Carbunql.Analysis;
 
 public static class SelectQueryParser
 {
-    internal static SelectQuery Parse(string text, WithClause? w = null)
+    internal static SelectQuery Parse(string text)
     {
         using var r = new TokenReader(text);
-        var sq = Parse(r);
-        if (w != null) sq.WithClause = w;
-        return sq;
-    }
-
-    internal static SelectQuery Parse(TokenReader r, WithClause? w)
-    {
-        var sq = Parse(r);
-        if (w != null) sq.WithClause = w;
-        return sq;
+        return Parse(r);
     }
 
     internal static SelectQuery Parse(TokenReader r)

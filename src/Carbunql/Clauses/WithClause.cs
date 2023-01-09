@@ -13,7 +13,7 @@ public class WithClause : IList<CommonTable>, IQueryCommand
         CommonTables.AddRange(commons);
     }
 
-    private List<CommonTable> CommonTables { get; set; } = new();
+    public List<CommonTable> CommonTables { get; private set; } = new();
 
     public bool HasRecursiveKeyword { get; set; } = false;
 
