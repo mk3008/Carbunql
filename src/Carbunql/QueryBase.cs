@@ -5,7 +5,9 @@ namespace Carbunql;
 
 public abstract class QueryBase : IQueryCommandable
 {
-    public WithClause? WithClause { get; set; }
+    public virtual WithClause? WithClause => null;
+
+    public virtual QueryBase QueryWithoutCTE => this;
 
     public OperatableQuery? OperatableQuery { get; private set; }
 

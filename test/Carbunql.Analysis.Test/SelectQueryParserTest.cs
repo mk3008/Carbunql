@@ -250,9 +250,14 @@ select
 from
     b";
 
-        var item = QueryParser.Parse(text) as SelectQuery;
-        if (item == null) throw new Exception();
+        var item = QueryParser.Parse(text);
         Monitor.Log(item);
+
+        Assert.IsType<CTEQuery>(item);
+        var cte = (CTEQuery)item;
+        Assert.NotNull(cte.Query);
+        Assert.NotNull(cte.QueryWithoutCTE);
+        Assert.Equal(cte.Query, cte.QueryWithoutCTE);
     }
 
     [Fact]
@@ -399,8 +404,15 @@ from
 order by 
     line_id";
 
-        var item = QueryParser.Parse(text) as SelectQuery;
-        if (item == null) throw new Exception();
+        var item = QueryParser.Parse(text);
         Monitor.Log(item);
+
+        Assert.Equal(324, item.GetTokens().ToList().Count);
+
+        Assert.IsType<CTEQuery>(item);
+        var cte = (CTEQuery)item;
+        Assert.NotNull(cte.Query);
+        Assert.NotNull(cte.QueryWithoutCTE);
+        Assert.Equal(cte.Query, cte.QueryWithoutCTE);
     }
 }

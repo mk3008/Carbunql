@@ -79,7 +79,7 @@ public class FractionAdjustmentQueryBuilder
     public string QuantitytColumn { get; init; }
     public string TaxRateColumn { get; init; }
     private string DatasourceTable { get; set; } = "_datasource";
-    private string SummaryTable { get; set; } = "_summary";
+    private string TaxSummaryTable { get; set; } = "_summary";
     private string NonTaxPriceColumn { get; set; } = "_non_tax_price";
     private string RawTaxColumn { get; set; } = "_raw_tax";
     private string TotalTaxColumn { get; set; } = "_total_tax";
@@ -87,22 +87,36 @@ public class FractionAdjustmentQueryBuilder
     private string PriorityColumn { get; set; } = "_priority";
     private string AdjustTaxColumn { get; set; } = "_adjust_tax";
 
-    public SelectQuery Execute(string sql, string priceColumn, string taxColumn)
+    public CTEQuery Execute(string sql, string priceColumn, string taxColumn)
     {
-        var sq = QueryParser.Parse(sql) as SelectQuery;
-        var columns = sq!.SelectClause!.Select(x => x.Alias).ToList();
+        var columns = new List<string>();
+        var createCTE = () =>
+        {
+            var q = QueryParser.Parse(sql);
+            var sq = q.GetSelectQuery();
+            columns = sq!.SelectClause!.Select(x => x.Alias).ToList();
 
-        sq = GenerateCalcPriceQuery(sq);
-        sq = AddDatasourceCTE(sq, taxColumn);
-        sq = AddSummaryCTE(sq);
-        sq = GenerateDetailQuery(sq, taxColumn);
-        sq = GenerateCalcAdjustTaxQuery(sq);
-        sq = GenerateCalcTaxQuery(sq, columns, priceColumn, taxColumn);
+            q = GenerateCalcPriceQuery(q);
+            q = GenerateCalcTaxQuery(q, taxColumn);
+            return q.ToCTE(DatasourceTable);
+        };
 
-        return sq;
+        var createQuery = () =>
+        {
+            var q = GenerateDetailQuery(taxColumn);
+            q = GenerateCalcAdjustTaxQuery(q);
+            q = GenerateCalcTaxQuery(q, columns, priceColumn, taxColumn);
+            return q;
+        };
+
+        var cte = createCTE();
+        cte.WithClause.Add(GenerateTaxSummaryQuery().ToCommonTable(TaxSummaryTable));
+        cte.Query = createQuery();
+
+        return cte;
     }
 
-    private SelectQuery GenerateCalcPriceQuery(SelectQuery query)
+    private QueryBase GenerateCalcPriceQuery(QueryBase query)
     {
         /*
         select
@@ -111,7 +125,8 @@ public class FractionAdjustmentQueryBuilder
         from
             (...) as d
         */
-        var (sq, d) = query.ToSubQuery("d");
+        var (q, d) = query.ToSubQuery("d");
+        var sq = q.GetSelectQuery();
         sq.SelectAll(d);
         // dat.unit_price * dat.amount as price
         sq.Select(() =>
@@ -121,25 +136,23 @@ public class FractionAdjustmentQueryBuilder
             return v;
         }).As(NonTaxPriceColumn);
 
-        return sq;
+        return q;
     }
 
-    private SelectQuery AddDatasourceCTE(SelectQuery query, string taxColumn)
+    private QueryBase GenerateCalcTaxQuery(QueryBase query, string taxColumn)
     {
 
         /*
-        with
-        datasource as (
-            select  
-                d.*,
-                trunc(d.non_tax_price * (1 + d.tax_rate)) - d.non_tax_price as tax,
-                     (d.non_tax_price * (1 + d.tax_rate)) - d.non_tax_price as raw_tax
-            from
-                (...) d
-        )
+        select  
+            d.*,
+            trunc(d.non_tax_price * (1 + d.tax_rate)) - d.non_tax_price as tax,
+                    (d.non_tax_price * (1 + d.tax_rate)) - d.non_tax_price as raw_tax
+        from
+            (...) d
         */
 
-        var (sq, d) = query.ToSubQuery("d");
+        var (q, d) = query.ToSubQuery("d");
+        var sq = q.GetSelectQuery();
         sq.SelectAll(d);
 
         ValueBase exp = new ColumnValue(d, NonTaxPriceColumn);
@@ -166,31 +179,28 @@ public class FractionAdjustmentQueryBuilder
             return v;
         }).As(RawTaxColumn);
 
-        return sq.ToCTE(DatasourceTable);
+        return q;
     }
 
-    private SelectQuery AddSummaryCTE(SelectQuery query)
+    private QueryBase GenerateTaxSummaryQuery()
     {
         /*
-        with
-        datasource as (...),
-        summary as (
-            select
-                d.tax_rate,
-                trunc(sum(raw_tax)) as total_tax
-            from
-                dataource d
-            group by
-                d.tax_rate
-        )
+        select
+            d.tax_rate,
+            trunc(sum(raw_tax)) as total_tax
+        from
+            dataource d
+        group by
+            d.tax_rate
         */
-        var d = query.From(DatasourceTable).As("d");
+        var sq = new SelectQuery();
+        var d = sq.From(DatasourceTable).As("d");
 
         // d.tax_rate,
-        var groupkey = query.Select(d, TaxRateColumn);
+        var groupkey = sq.Select(d, TaxRateColumn);
 
         // trunc(sum(raw_tax)) as total_tax
-        query.Select(() =>
+        sq.Select(() =>
         {
             return new FunctionValue("trunc", () =>
             {
@@ -199,12 +209,12 @@ public class FractionAdjustmentQueryBuilder
         }).As(TotalTaxColumn);
 
         // group by d.tax_rate
-        query.Group(groupkey);
+        sq.Group(groupkey);
 
-        return query.ToCTE(SummaryTable);
+        return sq;
     }
 
-    private SelectQuery GenerateDetailQuery(SelectQuery sq, string taxColumn)
+    private QueryBase GenerateDetailQuery(string taxColumn)
     {
         /*
         select  
@@ -216,8 +226,9 @@ public class FractionAdjustmentQueryBuilder
             detail d
             inner join tax_summary s on d.tax_rate = s.tax_rate
         */
+        var sq = new SelectQuery();
         var d = sq.From(DatasourceTable).As("d");
-        var s = d.InnerJoin(SummaryTable).As("s").On(d, TaxRateColumn);
+        var s = d.InnerJoin(TaxSummaryTable).As("s").On(d, TaxRateColumn);
 
         sq.SelectAll(d);
         sq.Select(s, TotalTaxColumn);
@@ -249,7 +260,7 @@ public class FractionAdjustmentQueryBuilder
         return sq;
     }
 
-    private SelectQuery GenerateCalcAdjustTaxQuery(SelectQuery query)
+    private QueryBase GenerateCalcAdjustTaxQuery(QueryBase detailQuery)
     {
         /*
         select
@@ -259,7 +270,8 @@ public class FractionAdjustmentQueryBuilder
             (...) as d
         */
 
-        var (sq, d) = query.ToSubQuery("d");
+        var (q, d) = detailQuery.ToSubQuery("d");
+        var sq = q.GetSelectQuery();
 
         // d.*,
         sq.SelectAll(d);
@@ -282,10 +294,10 @@ public class FractionAdjustmentQueryBuilder
             return exp;
         }).As(AdjustTaxColumn);
 
-        return sq;
+        return q;
     }
 
-    private SelectQuery GenerateCalcTaxQuery(SelectQuery query, List<string> columns, string priceColumn, string taxColumn)
+    private QueryBase GenerateCalcTaxQuery(QueryBase query, List<string> columns, string priceColumn, string taxColumn)
     {
         /*
         select
@@ -299,7 +311,8 @@ public class FractionAdjustmentQueryBuilder
         from
             (...) as d
         */
-        var (sq, d) = query.ToSubQuery("d");
+        var (q, d) = query.ToSubQuery("d");
+        var sq = q.GetSelectQuery();
 
         // line_id, ..., price,
         columns.ForEach(x => sq.Select(d, x));
@@ -318,6 +331,6 @@ public class FractionAdjustmentQueryBuilder
         // tax + adjust_tax as tax
         sq.Select(tax).As(taxColumn);
 
-        return sq;
+        return q;
     }
 }
