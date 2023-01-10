@@ -328,6 +328,18 @@ limit 3, 10";
     }
 
     [Fact]
+    public void FunctionTableSample()
+    {
+        var text = @"SELECT current_date + s.a AS dates FROM generate_series(0,14,7) AS s(a)";
+
+        var item = QueryParser.Parse(text) as SelectQuery;
+        if (item == null) throw new Exception();
+        Monitor.Log(item);
+
+        Assert.Equal(22, item.GetTokens().ToList().Count);
+    }
+
+    [Fact]
     public void Sample()
     {
         var text = @"

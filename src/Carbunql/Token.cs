@@ -69,6 +69,7 @@ public class Token
         if (Text.Equals("("))
         {
             if (Sender is VirtualTable) return true;
+            if (Sender is FunctionTable) return false;
             if (Sender is FunctionValue) return false;
             if (Sender is WindowFunction) return false;
             return true;
