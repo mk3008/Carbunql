@@ -100,7 +100,7 @@ order by
         return sqmodel.ToQuery().CommandText;
     }
 
-    private QueryBase carbunql = QueryParser.Parse(Sql);
+    private ReadQuery carbunql = ReadQueryParser.Parse(Sql);
 
     [Benchmark]
     public string CarbunqlParse()

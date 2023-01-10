@@ -2,7 +2,7 @@
 
 namespace Carbunql.Clauses;
 
-public class ValuesClause : QueryBase
+public class ValuesClause : ReadQuery
 {
 	public ValuesClause(List<ValueCollection> rows)
 	{

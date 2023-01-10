@@ -93,7 +93,7 @@ public class FractionAdjustmentQueryBuilder
         var createCTE = () =>
         {
             var q = QueryParser.Parse(sql);
-            var sq = q.GetSelectQuery();
+            var sq = (SelectQuery)q.GetQuery();
             columns = sq!.SelectClause!.Select(x => x.Alias).ToList();
 
             q = GenerateCalcPriceQuery(q);
@@ -116,7 +116,7 @@ public class FractionAdjustmentQueryBuilder
         return cte;
     }
 
-    private QueryBase GenerateCalcPriceQuery(QueryBase query)
+    private ReadQuery GenerateCalcPriceQuery(IReadQuery query)
     {
         /*
         select
@@ -126,7 +126,7 @@ public class FractionAdjustmentQueryBuilder
             (...) as d
         */
         var (q, d) = query.ToSubQuery("d");
-        var sq = q.GetSelectQuery();
+        var sq = (SelectQuery)q.GetQuery();
         sq.SelectAll(d);
         // dat.unit_price * dat.amount as price
         sq.Select(() =>
@@ -139,7 +139,7 @@ public class FractionAdjustmentQueryBuilder
         return q;
     }
 
-    private QueryBase GenerateCalcTaxQuery(QueryBase query, string taxColumn)
+    private ReadQuery GenerateCalcTaxQuery(IReadQuery query, string taxColumn)
     {
 
         /*
@@ -152,7 +152,7 @@ public class FractionAdjustmentQueryBuilder
         */
 
         var (q, d) = query.ToSubQuery("d");
-        var sq = q.GetSelectQuery();
+        var sq = (SelectQuery)q.GetQuery();
         sq.SelectAll(d);
 
         ValueBase exp = new ColumnValue(d, NonTaxPriceColumn);
@@ -182,7 +182,7 @@ public class FractionAdjustmentQueryBuilder
         return q;
     }
 
-    private QueryBase GenerateTaxSummaryQuery()
+    private ReadQuery GenerateTaxSummaryQuery()
     {
         /*
         select
@@ -214,7 +214,7 @@ public class FractionAdjustmentQueryBuilder
         return sq;
     }
 
-    private QueryBase GenerateDetailQuery(string taxColumn)
+    private ReadQuery GenerateDetailQuery(string taxColumn)
     {
         /*
         select  
@@ -260,7 +260,7 @@ public class FractionAdjustmentQueryBuilder
         return sq;
     }
 
-    private QueryBase GenerateCalcAdjustTaxQuery(QueryBase detailQuery)
+    private ReadQuery GenerateCalcAdjustTaxQuery(IReadQuery detailQuery)
     {
         /*
         select
@@ -271,7 +271,7 @@ public class FractionAdjustmentQueryBuilder
         */
 
         var (q, d) = detailQuery.ToSubQuery("d");
-        var sq = q.GetSelectQuery();
+        var sq = (SelectQuery)q.GetQuery();
 
         // d.*,
         sq.SelectAll(d);
@@ -297,7 +297,7 @@ public class FractionAdjustmentQueryBuilder
         return q;
     }
 
-    private QueryBase GenerateCalcTaxQuery(QueryBase query, List<string> columns, string priceColumn, string taxColumn)
+    private ReadQuery GenerateCalcTaxQuery(IReadQuery query, List<string> columns, string priceColumn, string taxColumn)
     {
         /*
         select
@@ -312,7 +312,7 @@ public class FractionAdjustmentQueryBuilder
             (...) as d
         */
         var (q, d) = query.ToSubQuery("d");
-        var sq = q.GetSelectQuery();
+        var sq = (SelectQuery)q.GetQuery();
 
         // line_id, ..., price,
         columns.ForEach(x => sq.Select(d, x));

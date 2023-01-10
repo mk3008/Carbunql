@@ -2,7 +2,7 @@
 
 namespace Carbunql;
 
-public class SelectQuery : QueryBase, IQueryCommandable
+public class SelectQuery : ReadQuery, IQueryCommandable
 {
     public SelectClause? SelectClause { get; set; }
 

@@ -3,19 +3,15 @@ using Carbunql.Extensions;
 
 namespace Carbunql;
 
-public abstract class QueryBase : IQueryCommandable
+public abstract class ReadQuery : IReadQuery
 {
-    public virtual WithClause? WithClause => null;
-
-    public virtual QueryBase QueryWithoutCTE => this;
-
     public OperatableQuery? OperatableQuery { get; private set; }
 
     public OrderClause? OrderClause { get; set; }
 
     public LimitClause? LimitClause { get; set; }
 
-    public QueryBase AddOperatableValue(string @operator, QueryBase query)
+    public ReadQuery AddOperatableValue(string @operator, ReadQuery query)
     {
         if (OperatableQuery != null) throw new InvalidOperationException();
         OperatableQuery = new OperatableQuery(@operator, query);
@@ -34,9 +30,8 @@ public abstract class QueryBase : IQueryCommandable
 
     public abstract IEnumerable<Token> GetCurrentTokens(Token? parent);
 
-    public IEnumerable<Token> GetTokens(Token? parent = null)
+    public IEnumerable<Token> GetTokens(Token? parent)
     {
-        if (WithClause != null) foreach (var item in WithClause.GetTokens(parent)) yield return item;
         foreach (var item in GetCurrentTokens(parent)) yield return item;
         if (OperatableQuery != null) foreach (var item in OperatableQuery.GetTokens(parent)) yield return item;
         if (OrderClause != null) foreach (var item in OrderClause.GetTokens(parent)) yield return item;
@@ -51,5 +46,10 @@ public abstract class QueryBase : IQueryCommandable
     public QueryCommand ToCommand()
     {
         return new QueryCommand(ToText(), GetParameters());
+    }
+
+    public ReadQuery GetQuery()
+    {
+        return this;
     }
 }
