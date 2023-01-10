@@ -5,7 +5,7 @@
 /// </summary>
 public class OperatableQuery : IQueryCommandable
 {
-    public OperatableQuery(string @operator, QueryBase query)
+    public OperatableQuery(string @operator, ReadQuery query)
     {
         Operator = @operator;
         Query = query;
@@ -16,7 +16,7 @@ public class OperatableQuery : IQueryCommandable
     /// </summary>
     public string Operator { get; init; }
 
-    public QueryBase Query { get; init; }
+    public ReadQuery Query { get; init; }
 
     public IDictionary<string, object?> GetParameters()
     {

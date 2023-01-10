@@ -29,7 +29,7 @@ public static class FromClauseExtension
         return f;
     }
 
-    public static FromClause From(this SelectQuery source, QueryBase subQuery, string alias)
+    public static FromClause From(this SelectQuery source, IReadQuery subQuery, string alias)
     {
         var vt = new VirtualTable(subQuery);
         var st = vt.ToSelectable(alias);

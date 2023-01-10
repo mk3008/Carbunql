@@ -2,7 +2,7 @@
 
 namespace Carbunql;
 
-public class ValuesQuery : QueryBase, IQueryCommandable
+public class ValuesQuery : ReadQuery, IQueryCommandable
 {
     public ValuesClause? ValuesClause { get; set; }
 

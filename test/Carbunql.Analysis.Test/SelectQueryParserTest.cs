@@ -256,8 +256,6 @@ from
         Assert.IsType<CTEQuery>(item);
         var cte = (CTEQuery)item;
         Assert.NotNull(cte.Query);
-        Assert.NotNull(cte.QueryWithoutCTE);
-        Assert.Equal(cte.Query, cte.QueryWithoutCTE);
     }
 
     [Fact]
@@ -424,7 +422,5 @@ order by
         Assert.IsType<CTEQuery>(item);
         var cte = (CTEQuery)item;
         Assert.NotNull(cte.Query);
-        Assert.NotNull(cte.QueryWithoutCTE);
-        Assert.Equal(cte.Query, cte.QueryWithoutCTE);
     }
 }

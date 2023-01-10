@@ -1,8 +1,9 @@
 ﻿using Carbunql.Clauses;
+using Carbunql.Extensions;
 
 namespace Carbunql;
 
-public class CTEQuery : QueryBase
+public class CTEQuery : IReadQuery
 {
     public CTEQuery()
     {
@@ -13,21 +14,43 @@ public class CTEQuery : QueryBase
         WithClause = with;
     }
 
-    public override WithClause WithClause { get; } = new();
+    public WithClause WithClause { get; } = new();
 
-    public QueryBase? Query { get; set; }
+    public ReadQuery? Query { get; set; }
 
-    public override QueryBase QueryWithoutCTE => GetQueryBase();
+    public IEnumerable<Token> GetTokens(Token? parent)
+    {
+        if (Query == null) throw new NullReferenceException(nameof(Query));
 
-    private QueryBase GetQueryBase()
+        foreach (var item in WithClause.GetTokens(parent)) yield return item;
+        foreach (var item in Query.GetTokens(parent)) yield return item;
+    }
+
+    public IDictionary<string, object?>? Parameters { get; set; }
+
+    public virtual IDictionary<string, object?> GetParameters()
+    {
+        if (Query == null) throw new NullReferenceException(nameof(Query));
+
+        var prm = EmptyParameters.Get();
+        prm = prm.Merge(Parameters);
+        prm = prm.Merge(Query.GetParameters());
+        return prm;
+    }
+
+    public String ToText()
+    {
+        return GetTokens(null).ToText();
+    }
+
+    public QueryCommand ToCommand()
+    {
+        return new QueryCommand(ToText(), GetParameters());
+    }
+
+    public ReadQuery GetQuery()
     {
         if (Query == null) throw new NullReferenceException(nameof(Query));
         return Query;
-    }
-
-    public override IEnumerable<Token> GetCurrentTokens(Token? parent)
-    {
-        if (Query == null) throw new NullReferenceException(nameof(Query));
-        foreach (var item in Query.GetTokens(parent)) yield return item;
     }
 }
