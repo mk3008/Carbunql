@@ -32,12 +32,6 @@ public class FunctionValue : ValueBase
         };
     }
 
-    //public FunctionValue(string name, ValueCollection args)
-    //{
-    //    Name = name;
-    //    Argument = args;
-    //}
-
     public FunctionValue(string name, Func<ValueBase> builder)
     {
         Name = name;
@@ -96,10 +90,7 @@ public class FunctionValue : ValueBase
 
         var bracket = Token.ReservedBracketStart(this, parent);
         yield return bracket;
-        if (Argument != null)
-        {
-            foreach (var item in Argument.GetTokens(bracket)) yield return item;
-        }
+        foreach (var item in Argument.GetTokens(bracket)) yield return item;
         yield return Token.ReservedBracketEnd(this, parent);
 
         if (WindowFunction != null)

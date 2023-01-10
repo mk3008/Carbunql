@@ -1,5 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Extensions;
+using Carbunql.Tables;
 using Carbunql.Values;
 
 namespace Carbunql;
@@ -47,9 +48,9 @@ public class CommandFormatter
         if (token.Sender is OperatableQuery) return false;
 
         if (token.Text.Equals("(") && token.IsReserved == false) return false;
-
         if (token.Parent != null && token.Parent.Sender is ValuesClause) return false;
         if (token.Sender is FunctionValue) return false;
+        if (token.Sender is FunctionTable) return false;
         if (token.Text.Equals("over")) return false;
 
         return true;
@@ -63,6 +64,7 @@ public class CommandFormatter
 
         if (token.Parent.Sender is ValuesClause) return false;
         if (token.Sender is FunctionValue) return false;
+        if (token.Sender is FunctionTable) return false;
         if (token.Text.Equals(")") && token.Parent.Text.AreEqual("over")) return true;
 
         return true;

@@ -45,4 +45,25 @@ public class FromClauseParserTest
         Assert.IsType<VirtualTable>(item.Root.Table);
         Assert.IsType<ValuesClause>(((VirtualTable)item.Root.Table).Query);
     }
+
+    [Fact]
+    public void FunctionQuery()
+    {
+        var text = "generate_series(2,4)";
+        var item = FromClauseParser.Parse(text);
+        Monitor.Log(item);
+
+        Assert.IsType<FunctionTable>(item.Root.Table);
+        var t = (FunctionTable)item.Root.Table;
+        Assert.Equal("generate_series", t.Name);
+
+        var lst = t.GetTokens(null).ToList();
+        Assert.Equal(6, lst.Count);
+        Assert.Equal("generate_series", lst[0].Text);
+        Assert.Equal("(", lst[1].Text);
+        Assert.Equal("2", lst[2].Text);
+        Assert.Equal(",", lst[3].Text);
+        Assert.Equal("4", lst[4].Text);
+        Assert.Equal(")", lst[5].Text);
+    }
 }
