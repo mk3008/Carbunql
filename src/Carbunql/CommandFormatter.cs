@@ -37,7 +37,7 @@ public class CommandFormatter
             if (token.Sender is Relation) return true;
             if (token.Sender is GroupClause) return true;
             if (token.Sender is OrderClause) return true;
-            if (token.Sender is ValuesClause) return true;
+            if (token.Sender is ValuesQuery) return true;
         }
 
         return false;
@@ -48,7 +48,7 @@ public class CommandFormatter
         if (token.Sender is OperatableQuery) return false;
 
         if (token.Text.Equals("(") && token.IsReserved == false) return false;
-        if (token.Parent != null && token.Parent.Sender is ValuesClause) return false;
+        if (token.Parent != null && token.Parent.Sender is ValuesQuery) return false;
         if (token.Sender is FunctionValue) return false;
         if (token.Sender is FunctionTable) return false;
         if (token.Text.Equals("over")) return false;
@@ -62,7 +62,7 @@ public class CommandFormatter
 
         if (token.Text.Equals(")") && token.IsReserved == false) return false;
 
-        if (token.Parent.Sender is ValuesClause) return false;
+        if (token.Parent.Sender is ValuesQuery) return false;
         if (token.Sender is FunctionValue) return false;
         if (token.Sender is FunctionTable) return false;
         if (token.Text.Equals(")") && token.Parent.Text.AreEqual("over")) return true;

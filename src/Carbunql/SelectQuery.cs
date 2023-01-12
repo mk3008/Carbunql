@@ -6,6 +6,8 @@ public class SelectQuery : ReadQuery, IQueryCommandable
 {
     public SelectClause? SelectClause { get; set; }
 
+    public override SelectClause? GetSelectClause() => SelectClause;
+
     public FromClause? FromClause { get; set; }
 
     public WhereClause? WhereClause { get; set; }

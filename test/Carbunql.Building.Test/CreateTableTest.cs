@@ -17,25 +17,25 @@ public class CreateTableTest
     public void CreateTable()
     {
         var sql = "select a.id, a.value from table as a";
-        var q = SelectQueryParser.Parse(sql);
+        var q = QueryParser.Parse(sql);
 
         var cmd = q.ToCreateTableCommand("new_table");
 
-        var ddl = "CREATE TABLE new_table\r\nAS\r\nSELECT\r\n    a.id,\r\n    a.value\r\nFROM\r\n    table AS a";
+        var text = "CREATE TABLE new_table\r\nAS\r\nSELECT\r\n    a.id,\r\n    a.value\r\nFROM\r\n    table AS a";
 
-        Assert.Equal(ddl, cmd.CommandText);
+        Assert.Equal(text, cmd.CommandText);
     }
 
     [Fact]
     public void CreateTemporaryTable()
     {
         var sql = "select a.id, a.value from table as a";
-        var q = SelectQueryParser.Parse(sql);
+        var q = QueryParser.Parse(sql);
 
         var cmd = q.ToCreateTableCommand("new_table", isTemporary: true);
 
-        var ddl = "CREATE TEMPORARY TABLE new_table\r\nAS\r\nSELECT\r\n    a.id,\r\n    a.value\r\nFROM\r\n    table AS a";
+        var text = "CREATE TEMPORARY TABLE new_table\r\nAS\r\nSELECT\r\n    a.id,\r\n    a.value\r\nFROM\r\n    table AS a";
 
-        Assert.Equal(ddl, cmd.CommandText);
+        Assert.Equal(text, cmd.CommandText);
     }
 }

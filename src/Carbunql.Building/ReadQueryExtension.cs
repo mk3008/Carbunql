@@ -1,5 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
+using Cysharp.Text;
 
 namespace Carbunql.Building;
 
@@ -31,6 +32,38 @@ public static class ReadQueryExtension
         builder ??= new CommandTextBuilder();
         var cmd = source.ToCommand(builder);
         cmd.CommandText = "CREATE " + (isTemporary ? "TEMPORARY TABLE " : "TABLE ") + table + "\r\nAS\r\n" + cmd.CommandText;
+        return cmd;
+    }
+
+    public static QueryCommand ToInsertCommand(this IReadQuery source, string table, CommandTextBuilder? builder = null)
+    {
+        var sb = ZString.CreateStringBuilder();
+        sb.Append("INSERT INTO " + table);
+
+        var s = source.GetSelectClause();
+        if (s != null)
+        {
+            var isFirst = true;
+
+            foreach (var item in s.Items)
+            {
+                if (isFirst)
+                {
+                    sb.Append("(");
+                    isFirst = false;
+                }
+                else
+                {
+                    sb.Append(", ");
+                }
+                sb.Append(item.Alias);
+            }
+            sb.Append(')');
+        }
+
+        builder ??= new CommandTextBuilder();
+        var cmd = source.ToCommand(builder);
+        cmd.CommandText = sb.ToString() + "\r\n" + cmd.CommandText;
         return cmd;
     }
 }

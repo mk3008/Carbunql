@@ -38,6 +38,8 @@ public class CTEQuery : IReadQuery
         return prm;
     }
 
+    public SelectClause? GetSelectClause() => GetQuery().GetSelectClause();
+
     public ReadQuery GetQuery()
     {
         if (Query == null) throw new NullReferenceException(nameof(Query));
