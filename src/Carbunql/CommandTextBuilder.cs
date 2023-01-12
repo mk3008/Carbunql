@@ -34,7 +34,7 @@ public class CommandTextBuilder
 
     public string Execute(IQueryCommand cmd)
     {
-        return Execute(cmd.GetTokens(null));
+        return Execute(cmd.GetTokens());
     }
 
     public string Execute(IEnumerable<Token> tokens)

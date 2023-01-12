@@ -38,16 +38,6 @@ public class CTEQuery : IReadQuery
         return prm;
     }
 
-    public String ToText()
-    {
-        return GetTokens(null).ToText();
-    }
-
-    public QueryCommand ToCommand()
-    {
-        return new QueryCommand(ToText(), GetParameters());
-    }
-
     public ReadQuery GetQuery()
     {
         if (Query == null) throw new NullReferenceException(nameof(Query));

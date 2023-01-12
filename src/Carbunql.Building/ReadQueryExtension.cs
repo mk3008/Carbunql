@@ -25,4 +25,12 @@ public static class ReadQueryExtension
         var f = sq.From(source, alias);
         return (sq, f);
     }
+
+    public static QueryCommand ToCreateTableCommand(this IReadQuery source, string table, bool isTemporary = false, CommandTextBuilder? builder = null)
+    {
+        builder ??= new CommandTextBuilder();
+        var cmd = source.ToCommand(builder);
+        cmd.CommandText = "CREATE " + (isTemporary ? "TEMPORARY TABLE " : "TABLE ") + table + "\r\nAS\r\n" + cmd.CommandText;
+        return cmd;
+    }
 }
