@@ -20,7 +20,7 @@ public static class ReadQueryExtension
         return new CommonTable(new VirtualTable(source), alias);
     }
 
-    public static (ReadQuery, FromClause) ToSubQuery(this IReadQuery source, string alias)
+    public static (SelectQuery, FromClause) ToSubQuery(this IReadQuery source, string alias)
     {
         var sq = new SelectQuery();
         var f = sq.From(source, alias);
@@ -65,5 +65,22 @@ public static class ReadQueryExtension
         var cmd = source.ToCommand(builder);
         cmd.CommandText = sb.ToString() + "\r\n" + cmd.CommandText;
         return cmd;
+    }
+
+    public static QueryCommand ToInsertCommand(this IReadQuery source, string table, IEnumerable<string> columns, CommandTextBuilder? builder = null)
+    {
+        var s = source.GetSelectClause();
+        if (s == null) throw new NotSupportedException();
+
+        var cols = s.Items.Where(x => columns.Contains(x.Alias)).Select(x => x.Alias).ToList();
+        if (!cols.Any()) throw new Exception();
+
+        var (q, f) = source.ToSubQuery("q");
+        foreach (var item in cols)
+        {
+            q.Select(f, item);
+        }
+
+        return q.ToInsertCommand(table, builder);
     }
 }

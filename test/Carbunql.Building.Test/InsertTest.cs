@@ -38,4 +38,17 @@ public class InsertTest
 
         Assert.Equal(text, cmd.CommandText);
     }
+
+    [Fact]
+    public void InsertQuery_ColumnFilter()
+    {
+        var sql = "select a.id, a.value as v from table as a";
+        var q = QueryParser.Parse(sql);
+
+        var cmd = q.ToInsertCommand("new_table", new string[] { "v" });
+
+        var text = "INSERT INTO new_table(v)\r\nSELECT\r\n    q.v\r\nFROM\r\n    (\r\n        SELECT\r\n            a.id,\r\n            a.value AS v\r\n        FROM\r\n            table AS a\r\n    ) AS q";
+
+        Assert.Equal(text, cmd.CommandText);
+    }
 }
