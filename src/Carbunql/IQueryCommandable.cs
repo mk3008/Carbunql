@@ -2,8 +2,9 @@
 
 namespace Carbunql;
 
-public interface IQueryCommandable : IQueryCommand, IQueryParameter
+public interface IQueryCommandable : IQueryCommand
 {
+    IDictionary<string, object?> GetParameters();
 }
 
 public static class IQueryCommandableExtension

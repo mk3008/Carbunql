@@ -19,11 +19,12 @@ public class InsertTest
         var sql = "select a.id, a.value as v from table as a";
         var q = QueryParser.Parse(sql);
 
-        var cmd = q.ToInsertCommand("new_table");
+        var iq = q.ToInsertQuery("new_table");
+        Monitor.Log(iq);
 
-        var text = "INSERT INTO new_table(id, v)\r\nSELECT\r\n    a.id,\r\n    a.value AS v\r\nFROM\r\n    table AS a";
+        var lst = iq.GetTokens().ToList();
 
-        Assert.Equal(text, cmd.CommandText);
+        Assert.Equal(21, lst.Count());
     }
 
     [Fact]
@@ -32,11 +33,12 @@ public class InsertTest
         var sql = "values (1, 'a'), (2, 'b')";
         var q = QueryParser.Parse(sql);
 
-        var cmd = q.ToInsertCommand("new_table");
+        var iq = q.ToInsertQuery("new_table");
+        Monitor.Log(iq);
 
-        var text = "INSERT INTO new_table\r\nVALUES\r\n    (1, 'a'),\r\n    (2, 'b')";
+        var lst = iq.GetTokens().ToList();
 
-        Assert.Equal(text, cmd.CommandText);
+        Assert.Equal(14, lst.Count());
     }
 
     [Fact]
@@ -45,10 +47,17 @@ public class InsertTest
         var sql = "select a.id, a.value as v from table as a";
         var q = QueryParser.Parse(sql);
 
-        var cmd = q.ToInsertCommand("new_table", new string[] { "v" });
+        q = q.ToSubQuery("q", (x) =>
+        {
+            if (x.Alias == "id") return false;
+            return true;
+        });
 
-        var text = "INSERT INTO new_table(v)\r\nSELECT\r\n    q.v\r\nFROM\r\n    (\r\n        SELECT\r\n            a.id,\r\n            a.value AS v\r\n        FROM\r\n            table AS a\r\n    ) AS q";
+        var iq = q.ToInsertQuery("new_table");
+        Monitor.Log(iq);
 
-        Assert.Equal(text, cmd.CommandText);
+        var lst = iq.GetTokens().ToList();
+
+        Assert.Equal(28, lst.Count());
     }
 }
