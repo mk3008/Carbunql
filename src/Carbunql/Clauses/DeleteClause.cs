@@ -1,8 +1,8 @@
 ﻿namespace Carbunql.Clauses;
 
-public class UpdateClause : IQueryCommand
+public class DeleteClause : IQueryCommand
 {
-    public UpdateClause(SelectableTable table)
+    public DeleteClause(SelectableTable table)
     {
         Table = new SelectableTable(table.Table, table.Alias);
     }
@@ -11,7 +11,7 @@ public class UpdateClause : IQueryCommand
 
     public IEnumerable<Token> GetTokens(Token? parent)
     {
-        var t = Token.Reserved(this, parent, "update");
+        var t = Token.Reserved(this, parent, "delete from");
         yield return t;
         foreach (var item in Table.GetTokens(t)) yield return item;
     }

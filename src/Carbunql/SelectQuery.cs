@@ -1,4 +1,5 @@
 ﻿using Carbunql.Clauses;
+using Carbunql.Values;
 
 namespace Carbunql;
 
@@ -25,5 +26,10 @@ public class SelectQuery : ReadQuery, IQueryCommandable
         if (WhereClause != null) foreach (var item in WhereClause.GetTokens(parent)) yield return item;
         if (GroupClause != null) foreach (var item in GroupClause.GetTokens(parent)) yield return item;
         if (HavingClause != null) foreach (var item in HavingClause.GetTokens(parent)) yield return item;
+    }
+
+    public ValueBase ToValue()
+    {
+        return new QueryContainer(this);
     }
 }

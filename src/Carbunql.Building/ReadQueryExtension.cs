@@ -2,8 +2,6 @@
 using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
-using Cysharp.Text;
-using System.Reflection.Metadata.Ecma335;
 
 namespace Carbunql.Building;
 
@@ -115,21 +113,6 @@ public static class ReadQueryExtension
     }
 
     /// <summary>
-    /// update table as alias
-    /// </summary>
-    /// <param name="source"></param>
-    /// <param name="table"></param>
-    /// <param name="alias"></param>
-    /// <returns></returns>
-    /// <exception cref="NotSupportedException"></exception>
-    private static UpdateClause ToUpdateClause(this IReadQuery source, SelectableTable table)
-    {
-        var t = new SelectableTable(table.Table, table.Alias);
-        var clause = new UpdateClause(t);
-        return clause;
-    }
-
-    /// <summary>
     /// set val = queryAlias.val
     /// </summary>
     /// <param name="source"></param>
@@ -162,7 +145,7 @@ public static class ReadQueryExtension
     /// <param name="queryAlias"></param>
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
-    private static WhereClause ToWhereClause(IEnumerable<string> keys, string alias, string queryAlias)
+    private static WhereClause ToWhereClauseAsUpdate(IEnumerable<string> keys, string alias, string queryAlias)
     {
         ValueBase? cnd = null;
         foreach (var item in keys)
@@ -193,11 +176,53 @@ public static class ReadQueryExtension
 
         return new UpdateQuery()
         {
-            UpdateClause = source.ToUpdateClause(table),
+            UpdateClause = new UpdateClause(table),
             SetClause = source.ToSetClause(keys, table.Alias, queryAlias),
             Parameters = source.GetParameters(),
             FromClause = source.ToFromClause(queryAlias),
-            WhereClause = ToWhereClause(keys, table.Alias, queryAlias),
+            WhereClause = ToWhereClauseAsUpdate(keys, table.Alias, queryAlias),
+        };
+    }
+
+    public static DeleteQuery ToDeleteQuery(this IReadQuery source, string table, IEnumerable<string> keys)
+    {
+        var t = table.ToPhysicalTable().ToSelectable();
+        return source.ToDeleteQuery(t, keys);
+    }
+
+    private static WhereClause ToWhereClauseAsDelete(this IReadQuery source, IEnumerable<string> keys, string alias, string queryAlias)
+    {
+        var ks = keys.ToList();
+
+        var cnd = new ValueCollection();
+        foreach (var item in ks)
+        {
+            cnd.Add(new ColumnValue(alias, item));
+        }
+        if (cnd == null) throw new Exception();
+
+        var sq = source.ToSubQuery(queryAlias, (x) =>
+        {
+            if (ks.Where(k => k.AreEqual(x.Alias)).Any()) return true;
+            return false;
+        });
+        var exp = new InExpression(cnd.ToBracket(), sq.ToValue());
+        return new WhereClause(exp);
+    }
+
+    public static DeleteQuery ToDeleteQuery(this IReadQuery source, SelectableTable table, IEnumerable<string> keys)
+    {
+        var queryAlias = "q";
+
+        /*
+         * delete from a where (key1, key2) in (select (key1, key2) from table)
+         */
+
+        return new DeleteQuery()
+        {
+            DeleteClause = new DeleteClause(table),
+            Parameters = source.GetParameters(),
+            WhereClause = source.ToWhereClauseAsDelete(keys, table.Alias, queryAlias),
         };
     }
 }
