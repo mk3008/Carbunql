@@ -80,13 +80,13 @@ public static class ValueParser
             return new BracketValue(Parse(inner));
         }
 
-        if (item == "case")
+        if (item.AreEqual("case"))
         {
             var text = "case " + r.ReadUntilCaseExpressionEnd();
             return CaseExpressionParser.Parse(text);
         }
 
-        if (item == "exists")
+        if (item.AreEqual("exists"))
         {
             r.ReadToken("(");
             var (first, inner) = r.ReadUntilCloseBracket();
