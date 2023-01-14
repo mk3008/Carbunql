@@ -40,7 +40,6 @@ public static class ReadQueryExtension
         return (sq, f);
     }
 
-
     public static SelectQuery ToSubQuery(this IReadQuery source, string alias, Predicate<SelectableItem> columnFilter)
     {
         var s = source.GetSelectClause();
@@ -54,14 +53,6 @@ public static class ReadQueryExtension
             sq.Select(f, item.Alias);
         }
         return sq;
-    }
-
-    public static QueryCommand ToCreateTableCommand(this IReadQuery source, string table, bool isTemporary = false, CommandTextBuilder? builder = null)
-    {
-        builder ??= new CommandTextBuilder();
-        var cmd = source.ToCommand(builder);
-        cmd.CommandText = "CREATE " + (isTemporary ? "TEMPORARY TABLE " : "TABLE ") + table + "\r\nAS\r\n" + cmd.CommandText;
-        return cmd;
     }
 
     public static CreateTableQuery ToCreateTableQuery(this IReadQuery source, string table)
@@ -161,7 +152,7 @@ public static class ReadQueryExtension
             cnd.Equal(new ColumnValue(queryAlias, item));
         }
         if (cnd == null) throw new Exception();
-        return new WhereClause(cnd);
+        return cnd.ToWhereClause();
     }
 
     public static UpdateQuery ToUpdateQuery(this IReadQuery source, string table, IEnumerable<string> keys)
@@ -195,10 +186,7 @@ public static class ReadQueryExtension
         var ks = keys.ToList();
 
         var cnd = new ValueCollection();
-        foreach (var item in ks)
-        {
-            cnd.Add(new ColumnValue(alias, item));
-        }
+        ks.ForEach(x => cnd.Add(new ColumnValue(alias, x)));
         if (cnd == null) throw new Exception();
 
         var sq = source.ToSubQuery(queryAlias, (x) =>
@@ -207,16 +195,12 @@ public static class ReadQueryExtension
             return false;
         });
         var exp = new InExpression(cnd.ToBracket(), sq.ToValue());
-        return new WhereClause(exp);
+        return exp.ToWhereClause();
     }
 
     public static DeleteQuery ToDeleteQuery(this IReadQuery source, SelectableTable table, IEnumerable<string> keys)
     {
         var queryAlias = "q";
-
-        /*
-         * delete from a where (key1, key2) in (select (key1, key2) from table)
-         */
 
         return new DeleteQuery()
         {

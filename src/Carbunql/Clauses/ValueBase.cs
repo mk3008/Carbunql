@@ -34,4 +34,9 @@ public abstract class ValueBase : IQueryCommand
     {
         return new BracketValue(this);
     }
+
+    public WhereClause ToWhereClause()
+    {
+        return new WhereClause(this);
+    }
 }
