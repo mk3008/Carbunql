@@ -6,7 +6,7 @@ namespace Carbunql.Analysis;
 
 public static class ValuesQueryParser
 {
-    internal static ValuesQuery Parse(string text)
+    public static ValuesQuery Parse(string text)
     {
         using var r = new TokenReader(text);
         return Parse(r);
@@ -14,11 +14,9 @@ public static class ValuesQueryParser
 
     internal static ValuesQuery Parse(TokenReader r)
     {
-        var sq = new ValuesQuery();
-
         r.ReadToken("values");
 
-        sq.ValuesClause = ValuesClauseParser.Parse(r);
+        var sq = ValuesClauseParser.Parse(r);
         sq.OrderClause = ParseOrderOrDefault(r);
 
         var tokens = new string[] { "union", "except", "minus", "intersect" };

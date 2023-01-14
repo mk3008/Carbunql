@@ -5,6 +5,8 @@ namespace Carbunql;
 
 public abstract class ReadQuery : IReadQuery
 {
+    public abstract SelectClause? GetSelectClause();
+
     public OperatableQuery? OperatableQuery { get; private set; }
 
     public OrderClause? OrderClause { get; set; }
@@ -24,7 +26,7 @@ public abstract class ReadQuery : IReadQuery
     {
         var prm = EmptyParameters.Get();
         prm = prm.Merge(Parameters);
-        prm = prm.Merge(OperatableQuery!.GetParameters());
+        prm = prm.Merge(OperatableQuery?.GetParameters());
         return prm;
     }
 
@@ -36,16 +38,6 @@ public abstract class ReadQuery : IReadQuery
         if (OperatableQuery != null) foreach (var item in OperatableQuery.GetTokens(parent)) yield return item;
         if (OrderClause != null) foreach (var item in OrderClause.GetTokens(parent)) yield return item;
         if (LimitClause != null) foreach (var item in LimitClause.GetTokens(parent)) yield return item;
-    }
-
-    public String ToText()
-    {
-        return GetTokens(null).ToText();
-    }
-
-    public QueryCommand ToCommand()
-    {
-        return new QueryCommand(ToText(), GetParameters());
     }
 
     public ReadQuery GetQuery()

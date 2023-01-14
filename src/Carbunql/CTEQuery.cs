@@ -38,15 +38,7 @@ public class CTEQuery : IReadQuery
         return prm;
     }
 
-    public String ToText()
-    {
-        return GetTokens(null).ToText();
-    }
-
-    public QueryCommand ToCommand()
-    {
-        return new QueryCommand(ToText(), GetParameters());
-    }
+    public SelectClause? GetSelectClause() => GetQuery().GetSelectClause();
 
     public ReadQuery GetQuery()
     {

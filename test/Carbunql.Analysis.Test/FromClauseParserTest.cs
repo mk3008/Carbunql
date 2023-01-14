@@ -43,7 +43,7 @@ public class FromClauseParserTest
         Monitor.Log(item);
 
         Assert.IsType<VirtualTable>(item.Root.Table);
-        Assert.IsType<ValuesClause>(((VirtualTable)item.Root.Table).Query);
+        Assert.IsType<ValuesQuery>(((VirtualTable)item.Root.Table).Query);
     }
 
     [Fact]

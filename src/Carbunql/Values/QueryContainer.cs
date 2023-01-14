@@ -2,7 +2,7 @@
 
 namespace Carbunql.Values;
 
-public abstract class QueryContainer : ValueBase
+public class QueryContainer : ValueBase
 {
     public QueryContainer(IQueryCommandable query)
     {

@@ -29,9 +29,4 @@ public class OperatableQuery : IQueryCommandable
         yield return current;
         foreach (var item in Query.GetTokens(current)) yield return item;
     }
-
-    public QueryCommand ToCommand()
-    {
-        return Query.ToCommand();
-    }
 }

@@ -6,7 +6,7 @@ namespace Carbunql.Analysis;
 
 public static class SelectQueryParser
 {
-    internal static SelectQuery Parse(string text)
+    public static SelectQuery Parse(string text)
     {
         using var r = new TokenReader(text);
         return Parse(r);

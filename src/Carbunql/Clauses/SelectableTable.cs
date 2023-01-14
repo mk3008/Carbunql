@@ -32,26 +32,34 @@ public class SelectableTable : IQueryCommand, ISelectable
     {
         if (!string.IsNullOrEmpty(Alias) && Alias != Table.GetDefaultName())
         {
-            var tp = GetType();
             yield return new Token(this, parent, Alias);
+        }
 
-            if (ColumnAliases != null)
-            {
-                var bracket = Token.ReservedBracketStart(this, parent);
-                yield return bracket;
-                foreach (var item in ColumnAliases.GetTokens(bracket)) yield return item;
-                yield return Token.ReservedBracketEnd(this, parent);
-            }
+        if (ColumnAliases != null)
+        {
+            var bracket = Token.ReservedBracketStart(this, parent);
+            yield return bracket;
+            foreach (var item in ColumnAliases.GetTokens(bracket)) yield return item;
+            yield return Token.ReservedBracketEnd(this, parent);
         }
     }
 
     public virtual IEnumerable<Token> GetTokens(Token? parent)
     {
         foreach (var item in Table.GetTokens(parent)) yield return item;
+
         if (!string.IsNullOrEmpty(Alias) && Alias != Table.GetDefaultName())
         {
             yield return Token.Reserved(this, parent, "as");
-            foreach (var item in GetAliasTokens(parent)) yield return item;
+            yield return new Token(this, parent, Alias);
+        }
+
+        if (ColumnAliases != null)
+        {
+            var bracket = Token.ReservedBracketStart(this, parent);
+            yield return bracket;
+            foreach (var item in ColumnAliases.GetTokens(bracket)) yield return item;
+            yield return Token.ReservedBracketEnd(this, parent);
         }
     }
 }
