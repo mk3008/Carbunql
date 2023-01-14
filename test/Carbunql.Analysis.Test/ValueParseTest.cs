@@ -225,7 +225,20 @@ public class ValueParserTest
         var v = ValueParser.Parse(text);
         Monitor.Log(v);
 
-        //Assert.Equal("case tbl.col when 1 then 10 when 2 then 20 else 30 end", v.GetCommandText());
+        var lst = v.GetTokens().ToList();
+        Assert.Equal(15, lst.Count);
+    }
+
+
+    [Fact]
+    public void CaseExpression_Upper()
+    {
+        var text = "CASE tbl.col WHEN 1 THEN 10 WHEN 2 THEN 20 ELSE 30 END";
+        var v = ValueParser.Parse(text);
+        Monitor.Log(v);
+
+        var lst = v.GetTokens().ToList();
+        Assert.Equal(15, lst.Count);
     }
 
     [Fact]
@@ -256,6 +269,22 @@ public class ValueParserTest
         Monitor.Log(v);
 
         Assert.IsType<ExistsExpression>(v);
+
+        var lst = v.GetTokens().ToList();
+        Assert.Equal(17, lst.Count);
+    }
+
+    [Fact]
+    public void ExistsExpression_Upper()
+    {
+        var text = "EXISTS (select * from table_a a where a.id = b.table_a_id)";
+        var v = ValueParser.Parse(text);
+        Monitor.Log(v);
+
+        Assert.IsType<ExistsExpression>(v);
+
+        var lst = v.GetTokens().ToList();
+        Assert.Equal(17, lst.Count);
     }
 
     [Fact]
@@ -276,6 +305,22 @@ public class ValueParserTest
         Monitor.Log(v);
 
         Assert.IsType<FunctionValue>(v);
+
+        var lst = v.GetTokens().ToList();
+        Assert.Equal(8, lst.Count);
+    }
+
+    [Fact]
+    public void InFunction_Upper()
+    {
+        var text = "IN (1, 2, 3)";
+        var v = ValueParser.Parse(text);
+        Monitor.Log(v);
+
+        Assert.IsType<FunctionValue>(v);
+
+        var lst = v.GetTokens().ToList();
+        Assert.Equal(8, lst.Count);
     }
 
     [Fact]
