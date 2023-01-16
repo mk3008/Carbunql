@@ -84,7 +84,7 @@ FROM
 			var sq = QueryParser.Parse(sql);
 			var q = sq.ToCTE(alias);
 			var clause = sq.GetSelectClause();
-			if (clause == null) throw new Exception("select clause is not define.");
+			if (clause == null) throw new Exception("select clause is not defined.");
 
 			var nsql = new SelectQuery();
 			var t = nsql.From(alias);

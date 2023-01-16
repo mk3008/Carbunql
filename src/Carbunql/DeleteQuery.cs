@@ -5,24 +5,27 @@ namespace Carbunql;
 
 public class DeleteQuery : IQueryCommandable
 {
-    public DeleteClause? DeleteClause { get; set; }
+	public DeleteClause? DeleteClause { get; set; }
 
-    public WhereClause? WhereClause { get; set; }
+	public WithClause? WithClause { get; set; }
 
-    public IDictionary<string, object?>? Parameters { get; set; }
+	public WhereClause? WhereClause { get; set; }
 
-    public virtual IDictionary<string, object?> GetParameters()
-    {
-        var prm = EmptyParameters.Get();
-        prm = prm.Merge(Parameters);
-        return prm;
-    }
+	public IDictionary<string, object?>? Parameters { get; set; }
 
-    public IEnumerable<Token> GetTokens(Token? parent)
-    {
-        if (DeleteClause == null) throw new NullReferenceException();
+	public virtual IDictionary<string, object?> GetParameters()
+	{
+		var prm = EmptyParameters.Get();
+		prm = prm.Merge(Parameters);
+		return prm;
+	}
 
-        foreach (var item in DeleteClause.GetTokens(parent)) yield return item;
-        if (WhereClause != null) foreach (var item in WhereClause.GetTokens(parent)) yield return item;
-    }
+	public IEnumerable<Token> GetTokens(Token? parent)
+	{
+		if (DeleteClause == null) throw new NullReferenceException();
+
+		if (WithClause != null) foreach (var item in WithClause.GetTokens(parent)) yield return item;
+		foreach (var item in DeleteClause.GetTokens(parent)) yield return item;
+		if (WhereClause != null) foreach (var item in WhereClause.GetTokens(parent)) yield return item;
+	}
 }

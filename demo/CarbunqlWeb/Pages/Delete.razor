@@ -1,4 +1,4 @@
-@page "/insert"
+@page "/delete"
 @using Carbunql.Analysis;
 @using Carbunql;
 @using Carbunql.Building;
@@ -14,13 +14,13 @@
     </div>
 	<div class="row">
 		<div class="col-md-12 p-3">
-			<RadzenText TextStyle="TextStyle.H4">To Insert Query</RadzenText>
+			<RadzenText TextStyle="TextStyle.H4">To Delete Query</RadzenText>
 		</div>
 	</div>
 	<div class="row">
 		<div class="col-md-6 p-3">
 			<RadzenCard>
-				<RadzenText TextStyle="TextStyle.Subtitle2">Insert table name</RadzenText>
+				<RadzenText TextStyle="TextStyle.Subtitle2">Delete table name</RadzenText>
 				<RadzenTextBox Change=@OnChange @bind-Value=@table />
 			</RadzenCard>
 		</div>
@@ -82,7 +82,11 @@ FROM
 		{
 			var bld = new CommandTextBuilder();
 			var sq = QueryParser.Parse(sql);
-			var q = sq.ToInsertQuery(table);
+			var clause =sq.GetQuery()?.GetSelectClause();
+			if (clause == null) throw new Exception("select clause is not defined.");
+			var cols = clause.Select(x => x.Alias).ToList();
+
+			var q = sq.ToDeleteQuery(table, cols);
 			fsql = bld.Execute(q);
 		}
 		catch (Exception ex)

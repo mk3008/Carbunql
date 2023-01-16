@@ -198,7 +198,7 @@ public static class ReadQueryExtension
 	public static DeleteQuery ToDeleteQuery(this IReadQuery source, string table, IEnumerable<string> keys)
 	{
 		var t = table.ToPhysicalTable().ToSelectable();
-		return source.ToDeleteQuery(t, keys);
+		return source.ToDeleteQuery(t, keys, source.GetWithClause());
 	}
 
 	private static WhereClause ToWhereClauseAsDelete(this IReadQuery source, IEnumerable<string> keys, string alias, string queryAlias)
@@ -218,7 +218,7 @@ public static class ReadQueryExtension
 		return exp.ToWhereClause();
 	}
 
-	public static DeleteQuery ToDeleteQuery(this IReadQuery source, SelectableTable table, IEnumerable<string> keys)
+	public static DeleteQuery ToDeleteQuery(this IReadQuery source, SelectableTable table, IEnumerable<string> keys, WithClause? wclause = null)
 	{
 		var queryAlias = "q";
 
@@ -226,6 +226,7 @@ public static class ReadQueryExtension
 		{
 			DeleteClause = new DeleteClause(table),
 			Parameters = source.GetParameters(),
+			WithClause = wclause,
 			WhereClause = source.ToWhereClauseAsDelete(keys, table.Alias, queryAlias),
 		};
 	}

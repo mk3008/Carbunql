@@ -7,6 +7,8 @@ public interface IReadQuery : IQueryCommandable
 {
 	SelectClause? GetSelectClause();
 
+	WithClause? GetWithClause();
+
 	ReadQuery GetQuery();
 }
 
