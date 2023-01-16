@@ -45,4 +45,9 @@ public abstract class ReadQuery : IReadQuery
 	{
 		return this;
 	}
+
+	public WithClause? GetWithClause()
+	{
+		return null;
+	}
 }
