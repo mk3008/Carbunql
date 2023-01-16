@@ -4,13 +4,16 @@
 		<RadzenLabel Text="Carbunql demo"/>
 	</div>
 </RadzenHeader>
-@*<RadzenSidebar @bind-Expanded="@isExpanded">
+<RadzenSidebar @bind-Expanded="@isExpanded">
 	<RadzenPanelMenu>
-		<RadzenPanelMenuItem Text="Home" Icon="home" Path="/" />
-		<RadzenPanelMenuItem Text="Counter" Path="counter" />
-		<RadzenPanelMenuItem Text="FetchData" Path="fetchdata" />
+		<RadzenPanelMenuItem Text="Format" Icon="segment" Path="/" />
+@*		<RadzenPanelMenuItem Text="ToSubQuery" Icon="keyboard_double_arrow_right" Path="insert" />
+		<RadzenPanelMenuItem Text="ToCTE" Icon="keyboard_double_arrow_up" Path="insert" />*@
+		<RadzenPanelMenuItem Text="ToInsert" Icon="add_circle" Path="insert" />
+@*		<RadzenPanelMenuItem Text="ToUpdate" Icon="edit" Path="insert" />
+		<RadzenPanelMenuItem Text="ToDelete" Icon="remove_circle" Path="insert" />*@
 	</RadzenPanelMenu>
-</RadzenSidebar>*@
+</RadzenSidebar>
 
 @code {
 	bool isExpanded = true;
