@@ -1,4 +1,4 @@
-@page "/insert"
+@page "/subquery"
 @using Carbunql.Analysis;
 @using Carbunql;
 @using Carbunql.Building;
@@ -14,14 +14,14 @@
     </div>
 	<div class="row">
 		<div class="col-md-12 p-3">
-			<RadzenText TextStyle="TextStyle.H4">To Insert Query</RadzenText>
+			<RadzenText TextStyle="TextStyle.H4">To SubQuery</RadzenText>
 		</div>
 	</div>
 	<div class="row">
 		<div class="col-md-6 p-3">
 			<RadzenCard>
-				<RadzenText TextStyle="TextStyle.Subtitle2">Insert table name</RadzenText>
-				<RadzenTextBox Change=@OnChange @bind-Value=@table />
+				<RadzenText TextStyle="TextStyle.Subtitle2">Alias</RadzenText>
+				<RadzenTextBox Change=@OnChange @bind-Value=@alias />
 			</RadzenCard>
 		</div>
 	</div>
@@ -42,16 +42,23 @@
 </div>
 
 @code {
-	string sql = @"select
-    t.id,
-    t.col1,
-    t.col2 as value
-from
-    table as t";
+	string sql = @"WITH
+    x AS (
+        SELECT
+            t.id,
+            t.col1 AS value
+        FROM
+            table AS t
+    )
+SELECT
+    x.id,
+    x.value as val
+FROM
+    x";
 
 	string fsql = string.Empty;
 
-	string table = "destinations";
+	string alias = "q";
 
 	protected override void OnInitialized()
 	{
@@ -75,7 +82,7 @@ from
 		{
 			var bld = new CommandTextBuilder();
 			var sq = QueryParser.Parse(sql);
-			var q = sq.ToInsertQuery(table);
+			var q = sq.ToSubQuery(alias, (x) => true);
 			fsql = bld.Execute(q);
 		}
 		catch (Exception ex)
