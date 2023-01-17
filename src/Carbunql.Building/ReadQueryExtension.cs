@@ -75,15 +75,15 @@ public static class ReadQueryExtension
 		return sq;
 	}
 
-	public static CreateTableQuery ToCreateTableQuery(this IReadQuery source, string table)
+	public static CreateTableQuery ToCreateTableQuery(this IReadQuery source, string table, bool isTemporary = true)
 	{
 		var t = table.ToPhysicalTable();
-		return source.ToCreateTableQuery(t);
+		return source.ToCreateTableQuery(t, isTemporary);
 	}
 
-	public static CreateTableQuery ToCreateTableQuery(this IReadQuery source, TableBase table)
+	public static CreateTableQuery ToCreateTableQuery(this IReadQuery source, TableBase table, bool isTemporary)
 	{
-		return new CreateTableQuery(new CreateTableClause(table))
+		return new CreateTableQuery(new CreateTableClause(table) { IsTemporary = isTemporary })
 		{
 			Parameters = source.GetParameters(),
 			Query = source,
