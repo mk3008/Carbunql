@@ -1,0 +1,98 @@
+@page "/createtable"
+@using Carbunql.Analysis;
+@using Carbunql;
+@using Carbunql.Building;
+
+<PageTitle>To Create Table</PageTitle>
+
+<div class="container-fluid">
+    <div class="row" Style="margin: 0px 0px 16px 0px;">
+        <RadzenMenu class="rz-shadow-3">
+            <RadzenMenuItem Text="Clear SQL" Icon="clear" Click=@OnClear>
+            </RadzenMenuItem>
+        </RadzenMenu>
+    </div>
+	<div class="row">
+		<div class="col-md-12 p-3">
+			<RadzenText TextStyle="TextStyle.H4">To Create Table</RadzenText>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6 p-3">
+			<RadzenCard>
+				<RadzenText TextStyle="TextStyle.Subtitle2">Create table name</RadzenText>
+				<RadzenTextBox Change=@OnChange @bind-Value=@table />
+
+				<RadzenText TextStyle="TextStyle.Subtitle2">Is temporary</RadzenText>
+				<RadzenSwitch Change=@(args => OnChange(sql)) @bind-Value=@istemp />
+			</RadzenCard>
+		</div>
+	</div>
+    <div class="row">
+		<div class="col-md-6 p-3">
+			<RadzenCard>
+				<RadzenText TextStyle="TextStyle.Subtitle2">Input</RadzenText>
+				<RadzenTextArea @bind-Value=@sql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" Placeholder="Enter select query(ex. select id, value from table)" />
+			</RadzenCard>
+        </div>
+		<div class="col-md-6 p-3">
+			<RadzenCard>
+				<RadzenText TextStyle="TextStyle.Subtitle2">Result</RadzenText>
+				<RadzenTextArea @bind-Value=@fsql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" />
+			</RadzenCard>
+        </div>
+    </div>
+</div>
+
+@code {
+	string sql = @"WITH
+    x AS (
+        SELECT
+            t.id,
+            t.col1 AS value
+        FROM
+            table AS t
+    )
+SELECT
+    x.id,
+    x.value as val
+FROM
+    x";
+
+	string fsql = string.Empty;
+
+	string table = "tmp";
+
+	bool istemp = true;
+
+	protected override void OnInitialized()
+	{
+		OnChange(sql);
+	}
+
+	void OnClear()
+	{
+		sql = string.Empty;
+		OnChange(sql);
+	}
+
+	void OnChange(string value)
+	{
+		if (string.IsNullOrEmpty(value))
+		{
+			fsql = string.Empty;
+			return;
+		}
+		try
+		{
+			var bld = new CommandTextBuilder();
+			var sq = QueryParser.Parse(sql);
+			var q = sq.ToCreateTableQuery(table, istemp);
+			fsql = bld.Execute(q);
+		}
+		catch (Exception ex)
+		{
+			fsql = ex.ToString();
+		}
+	}
+}

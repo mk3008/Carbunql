@@ -6,40 +6,40 @@ namespace Carbunql.Building.Test;
 
 public class CreateTableTest
 {
-    private readonly QueryCommandMonitor Monitor;
+	private readonly QueryCommandMonitor Monitor;
 
-    public CreateTableTest(ITestOutputHelper output)
-    {
-        Monitor = new QueryCommandMonitor(output);
-    }
+	public CreateTableTest(ITestOutputHelper output)
+	{
+		Monitor = new QueryCommandMonitor(output);
+	}
 
-    [Fact]
-    public void CreateTable()
-    {
-        var sql = "select a.id, a.value from table as a";
-        var q = QueryParser.Parse(sql);
+	[Fact]
+	public void CreateTable()
+	{
+		var sql = "select a.id, a.value from table as a";
+		var q = QueryParser.Parse(sql);
 
-        var ctq = q.ToCreateTableQuery("new_table");
-        ctq.CreateTableClause.IsTemporary = false;
+		var ctq = q.ToCreateTableQuery("new_table");
+		ctq.CreateTableClause.IsTemporary = false;
 
-        Monitor.Log(ctq);
+		Monitor.Log(ctq);
 
-        var lst = ctq.GetTokens().ToList();
+		var lst = ctq.GetTokens().ToList();
 
-        Assert.Equal(15, lst.Count());
-    }
+		Assert.Equal(15, lst.Count());
+	}
 
-    [Fact]
-    public void CreateTemporaryTable()
-    {
-        var sql = "select a.id, a.value from table as a";
-        var q = QueryParser.Parse(sql);
+	[Fact]
+	public void CreateTemporaryTable()
+	{
+		var sql = "select a.id, a.value from table as a";
+		var q = QueryParser.Parse(sql);
 
-        var ctq = q.ToCreateTableQuery("new_table");
-        Monitor.Log(ctq);
+		var ctq = q.ToCreateTableQuery("new_table");
+		Monitor.Log(ctq);
 
-        var lst = ctq.GetTokens().ToList();
+		var lst = ctq.GetTokens().ToList();
 
-        Assert.Equal(15, lst.Count());
-    }
+		Assert.Equal(15, lst.Count());
+	}
 }
