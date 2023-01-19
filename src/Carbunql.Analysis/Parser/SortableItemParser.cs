@@ -11,14 +11,12 @@ public static class SortableItemParser
 		return Parse(r);
 	}
 
-	public static SortableItem Parse(TokenReader r)
+	public static SortableItem Parse(ITokenReader r)
 	{
-		var breaktokens = TokenReader.BreakTokens;
-
 		var v = ValueParser.Parse(r);
 		var isasc = true;
 
-		if (r.PeekRawToken().AreContains(breaktokens))
+		if (r.PeekRawToken().AreContains(ReservedText.All()))
 		{
 			return new SortableItem(v);
 		}

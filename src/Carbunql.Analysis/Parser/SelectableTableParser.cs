@@ -5,38 +5,44 @@ namespace Carbunql.Analysis.Parser;
 
 public static class SelectableTableParser
 {
-    private static string[] SelectTableBreakTokens = new[] { "on" };
+	private static string[] SelectTableBreakTokens = new[] { "on" };
 
-    public static SelectableTable Parse(string text)
-    {
-        using var r = new TokenReader(text);
-        return Parse(r);
-    }
+	public static SelectableTable Parse(string text)
+	{
+		using var r = new TokenReader(text);
+		return Parse(r);
+	}
 
-    public static SelectableTable Parse(TokenReader r)
-    {
-        var relationtokens = TableJoinEnumReader.GetCommandAttributes().Select(x => x.Value.Text);
-        var breaktokens = TokenReader.BreakTokens.Union(relationtokens).Union(SelectTableBreakTokens);
+	private static bool ReservedTokenFilter(string text)
+	{
+		if (ReservedText.As == text) return false;
+		return true;
+	}
 
-        var v = TableParser.Parse(r);
+	public static SelectableTable Parse(ITokenReader r)
+	{
+		var relationtokens = TableJoinEnumReader.GetCommandAttributes().Select(x => x.Value.Text);
+		//var breaktokens = ITokenReader.BreakTokens.Union(relationtokens).Union(SelectTableBreakTokens);
 
-        if (r.PeekRawToken().AreContains(breaktokens))
-        {
-            return new SelectableTable(v, v.GetDefaultName());
-        }
+		var v = TableParser.Parse(r);
+		var t = r.PeekRawToken();
+		if (t == null || t.AreContains(ReservedText.All(ReservedTokenFilter)))
+		{
+			return new SelectableTable(v, v.GetDefaultName());
+		}
 
-        r.TryReadToken("as");
-        var alias = r.ReadToken();
+		r.TryReadToken("as");
+		var alias = r.ReadToken();
 
-        if (!r.PeekRawToken().AreEqual("("))
-        {
-            return new SelectableTable(v, alias);
-        }
+		if (!r.PeekRawToken().AreEqual("("))
+		{
+			return new SelectableTable(v, alias);
+		}
 
-        r.ReadToken("(");
-        var (_, inner) = r.ReadUntilCloseBracket();
-        var colAliases = ValueCollectionParser.Parse(inner);
+		r.ReadToken("(");
+		var (_, inner) = r.ReadUntilCloseBracket();
+		var colAliases = ValueCollectionParser.Parse(inner);
 
-        return new SelectableTable(v, alias, colAliases);
-    }
+		return new SelectableTable(v, alias, colAliases);
+	}
 }

@@ -5,34 +5,46 @@ namespace Carbunql.Analysis.Test;
 
 public class WithClauseParserTest
 {
-    private readonly QueryCommandMonitor Monitor;
+	private readonly QueryCommandMonitor Monitor;
 
-    public WithClauseParserTest(ITestOutputHelper output)
-    {
-        Monitor = new QueryCommandMonitor(output);
-    }
+	public WithClauseParserTest(ITestOutputHelper output)
+	{
+		Monitor = new QueryCommandMonitor(output);
+	}
 
-    [Fact]
-    public void Default()
-    {
-        var text = "with cte1 as (select id from table_a), cte2 as (select id from table_b)";
-        var item = WithClauseParser.Parse(text);
-        Monitor.Log(item);
-    }
+	[Fact]
+	public void Default()
+	{
+		var text = "with cte1 as (select id from table_a), cte2 as (select id from table_b)";
+		var item = WithClauseParser.Parse(text);
+		Monitor.Log(item);
+	}
 
-    [Fact]
-    public void Recursive()
-    {
-        var text = "with recursive cte1 as (select id from table_a), cte2 as (select id from table_b)";
-        var item = WithClauseParser.Parse(text);
-        Monitor.Log(item);
-    }
+	[Fact]
+	public void Recursive()
+	{
+		var text = "with recursive cte1 as (select id from table_a), cte2 as (select id from table_b)";
+		var item = WithClauseParser.Parse(text);
+		Monitor.Log(item);
+	}
 
-    [Fact]
-    public void Materialized()
-    {
-        var text = "with cte1 as materialized (select id from table_a), cte2 as not materialized (select id from table_b)";
-        var item = WithClauseParser.Parse(text);
-        Monitor.Log(item);
-    }
+	[Fact]
+	public void Materialized()
+	{
+		var text = "with cte1 as materialized (select id from table_a), cte2 as not materialized (select id from table_b)";
+		var item = WithClauseParser.Parse(text);
+		Monitor.Log(item);
+	}
+
+	//	[Fact]
+	//	public void Comment()
+	//	{
+	//		var text = @"with
+	//a as (
+	//--
+	//select 1
+	//)";
+	//		var item = WithClauseParser.Parse(text);
+	//		Monitor.Log(item);
+	//	}
 }

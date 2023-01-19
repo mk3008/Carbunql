@@ -10,7 +10,7 @@ public static class CaseExpressionParser
 		return Parse(r);
 	}
 
-	public static CaseExpression Parse(TokenReader r)
+	public static CaseExpression Parse(ITokenReader r)
 	{
 		r.ReadToken("case");
 

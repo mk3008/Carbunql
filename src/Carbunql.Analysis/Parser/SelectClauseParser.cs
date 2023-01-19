@@ -11,7 +11,7 @@ public static class SelectClauseParser
 		return Parse(r);
 	}
 
-	public static SelectClause Parse(TokenReader r)
+	public static SelectClause Parse(ITokenReader r)
 	{
 		r.TryReadToken("select");
 
@@ -24,7 +24,7 @@ public static class SelectClauseParser
 		return new SelectClause(ParseItems(r).ToList()) { HasDistinctKeyword = distinct, Top = top };
 	}
 
-	private static IEnumerable<SelectableItem> ParseItems(TokenReader r)
+	private static IEnumerable<SelectableItem> ParseItems(ITokenReader r)
 	{
 		do
 		{

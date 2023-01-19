@@ -10,7 +10,7 @@ public class GroupClauseParser
 		return Parse(r);
 	}
 
-	public static GroupClause Parse(TokenReader r)
+	public static GroupClause Parse(ITokenReader r)
 	{
 		var vals = ValueCollectionParser.Parse(r);
 		var group = new GroupClause(vals);

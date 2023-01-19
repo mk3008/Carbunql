@@ -2,7 +2,7 @@
 
 public class CTEQueryParser
 {
-    internal static CTEQuery Parse(TokenReader r)
+    internal static CTEQuery Parse(ITokenReader r)
     {
         var w = WithClauseParser.Parse(r);
         var q = ReadQueryParser.Parse(r);

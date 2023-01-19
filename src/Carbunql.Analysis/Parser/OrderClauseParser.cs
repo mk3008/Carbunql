@@ -11,12 +11,12 @@ public static class OrderClauseParser
 		return new OrderClause(ReadItems(r).ToList());
 	}
 
-	public static OrderClause Parse(TokenReader r)
+	public static OrderClause Parse(ITokenReader r)
 	{
 		return new OrderClause(ReadItems(r).ToList());
 	}
 
-	private static IEnumerable<SortableItem> ReadItems(TokenReader r)
+	private static IEnumerable<SortableItem> ReadItems(ITokenReader r)
 	{
 		do
 		{

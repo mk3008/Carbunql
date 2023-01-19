@@ -12,10 +12,8 @@ public static class CommonTableParser
 		return Parse(r);
 	}
 
-	public static CommonTable Parse(TokenReader r)
+	public static CommonTable Parse(ITokenReader r)
 	{
-		var breaktokens = TokenReader.BreakTokens;
-
 		var alias = r.ReadToken();
 		ValueCollection? colAliases = null;
 		if (r.PeekRawToken().AreEqual("("))

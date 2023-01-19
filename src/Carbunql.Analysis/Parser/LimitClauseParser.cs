@@ -11,7 +11,7 @@ public static class LimitClauseParser
 		return Parse(r);
 	}
 
-	public static LimitClause Parse(TokenReader r)
+	public static LimitClause Parse(ITokenReader r)
 	{
 		var condition = ParseItems(r).ToList();
 		if (r.TryReadToken("offset") != null)
@@ -22,7 +22,7 @@ public static class LimitClauseParser
 		return new LimitClause(condition);
 	}
 
-	private static IEnumerable<ValueBase> ParseItems(TokenReader r)
+	private static IEnumerable<ValueBase> ParseItems(ITokenReader r)
 	{
 		do
 		{

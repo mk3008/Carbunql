@@ -11,7 +11,7 @@ public static class FunctionValueParser
 		return Parse(r, functionName);
 	}
 
-	public static FunctionValue Parse(TokenReader r, string functionName)
+	public static FunctionValue Parse(ITokenReader r, string functionName)
 	{
 		r.ReadToken("(");
 		var (_, argstext) = r.ReadUntilCloseBracket();

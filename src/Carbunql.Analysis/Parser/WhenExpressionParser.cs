@@ -12,7 +12,7 @@ public class WhenExpressionParser
 		return Parse(r).ToList();
 	}
 
-	public static IEnumerable<WhenExpression> Parse(TokenReader r)
+	public static IEnumerable<WhenExpression> Parse(ITokenReader r)
 	{
 		var token = r.ReadToken("when");
 
@@ -30,7 +30,7 @@ public class WhenExpressionParser
 		}
 	}
 
-	private static (WhenExpression exp, string breaktoken) ParseWhenExpression(TokenReader r)
+	private static (WhenExpression exp, string breaktoken) ParseWhenExpression(ITokenReader r)
 	{
 		var breaktokens = new string[] { "when", "else", "end" };
 		var breaktoken = string.Empty;

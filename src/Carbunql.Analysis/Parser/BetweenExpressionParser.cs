@@ -11,7 +11,7 @@ public static class BetweenExpressionParser
 		return Parse(value, r);
 	}
 
-	public static BetweenExpression Parse(ValueBase value, TokenReader r)
+	public static BetweenExpression Parse(ValueBase value, ITokenReader r)
 	{
 		var start = ValueParser.ParseCore(r);
 		r.ReadToken("and");
