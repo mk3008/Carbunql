@@ -21,9 +21,6 @@ public static class SelectableTableParser
 
 	public static SelectableTable Parse(ITokenReader r)
 	{
-		var relationtokens = TableJoinEnumReader.GetCommandAttributes().Select(x => x.Value.Text);
-		//var breaktokens = ITokenReader.BreakTokens.Union(relationtokens).Union(SelectTableBreakTokens);
-
 		var v = TableParser.Parse(r);
 		var t = r.PeekRawToken();
 		if (t == null || t.AreContains(ReservedText.All(ReservedTokenFilter)))

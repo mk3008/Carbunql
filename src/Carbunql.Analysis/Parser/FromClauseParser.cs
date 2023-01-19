@@ -13,7 +13,7 @@ public static class FromClauseParser
 
 	public static FromClause Parse(ITokenReader r)
 	{
-		var relationtokens = TableJoinEnumReader.GetCommandAttributes().Select(x => x.Value.Text);
+		var relationtokens = ReservedText.GetRelationTexts();
 
 		var root = SelectableTableParser.Parse(r);
 		var from = new FromClause(root);

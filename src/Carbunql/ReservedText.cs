@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Carbunql.Analysis;
+﻿namespace Carbunql;
 
 public static class ReservedText
 {
@@ -65,6 +58,15 @@ public static class ReservedText
 		yield return Left;
 		yield return Right;
 		yield return Cross;
+	}
+
+	public static IEnumerable<string> GetRelationTexts()
+	{
+		yield return Inner;
+		yield return Left;
+		yield return Right;
+		yield return Cross;
+		yield return Comma;
 	}
 
 	public static IEnumerable<string> All(Predicate<string> fn)
