@@ -20,11 +20,10 @@
 	<div class="row">
 		<div class="col-md-6 p-3">
 			<RadzenCard>
-				<RadzenText TextStyle="TextStyle.Subtitle2">Create table name</RadzenText>
-				<RadzenTextBox Change=@OnChange @bind-Value=@table />
-
-				<RadzenText TextStyle="TextStyle.Subtitle2">Is temporary</RadzenText>
-				<RadzenSwitch Change=@(args => OnChange(sql)) @bind-Value=@istemp />
+					<RadzenText TextStyle="TextStyle.Subtitle2">Create table name</RadzenText>
+					<RadzenTextBox Change=@OnChange @bind-Value=@table />
+					<RadzenText TextStyle="TextStyle.Subtitle2" class=" mt-3">Is temporary</RadzenText>
+					<RadzenSwitch Change=@(args => OnChange(sql)) @bind-Value=@istemp />
 			</RadzenCard>
 		</div>
 	</div>
