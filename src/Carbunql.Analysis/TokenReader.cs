@@ -37,28 +37,7 @@ public class TokenReader : LexReader, ITokenReader
 		return TokenCache;
 	}
 
-	public string? TryReadToken(string expectRawToken)
-	{
-		var s = PeekRawToken();
-		if (!s.AreEqual(expectRawToken)) return null;
-		return ReadToken();
-	}
 
-	public string ReadToken(string expectRawToken)
-	{
-		var s = PeekRawToken();
-		if (string.IsNullOrEmpty(s)) throw new SyntaxException($"expect '{expectRawToken}', actual is empty.");
-		if (!s.AreEqual(expectRawToken)) throw new SyntaxException($"expect '{expectRawToken}', actual '{s}'.");
-		return ReadToken();
-	}
-
-	public string ReadToken(string[] expectRawTokens)
-	{
-		var s = PeekRawToken();
-		if (string.IsNullOrEmpty(s)) throw new SyntaxException($"token is empty.");
-		if (!s.AreContains(expectRawTokens)) throw new SyntaxException($"near '{s}'.");
-		return ReadToken();
-	}
 
 	public string ReadToken(bool skipComment = true)
 	{
@@ -70,37 +49,37 @@ public class TokenReader : LexReader, ITokenReader
 		{
 			if (PeekRawToken().AreEqual("not"))
 			{
-				return token + " " + ReadToken("not");
+				return token + " " + this.ReadToken("not");
 			}
 			return token;
 		}
 
 		if (token.AreContains(new string[] { "inner", "cross" }))
 		{
-			var outer = TryReadToken("outer");
+			var outer = this.TryReadToken("outer");
 			if (!string.IsNullOrEmpty(outer)) token += " " + outer;
-			var t = ReadToken("join");
+			var t = this.ReadToken("join");
 			return token + " " + t;
 		}
 
 		if (token.AreContains(new string[] { "group", "partition", "order" }))
 		{
-			var t = ReadToken("by");
+			var t = this.ReadToken("by");
 			return token + " " + t;
 		}
 
 		if (token.AreContains(new string[] { "left", "right" }))
 		{
 			if (PeekRawToken().AreEqual("(")) return token;
-			var outer = TryReadToken("outer");
+			var outer = this.TryReadToken("outer");
 			if (!string.IsNullOrEmpty(outer)) token += " " + outer;
-			var t = ReadToken("join");
+			var t = this.ReadToken("join");
 			return token + " " + t;
 		}
 
 		if (token.AreEqual("nulls"))
 		{
-			var t = ReadToken(new string[] { "first", "last" });
+			var t = this.ReadToken(new string[] { "first", "last" });
 			return token + " " + t;
 		}
 
@@ -108,7 +87,7 @@ public class TokenReader : LexReader, ITokenReader
 		{
 			if (PeekRawToken().AreEqual("all"))
 			{
-				return token + " " + ReadToken("all");
+				return token + " " + this.ReadToken("all");
 			}
 			return token;
 		}
@@ -117,7 +96,7 @@ public class TokenReader : LexReader, ITokenReader
 		{
 			if (PeekRawToken().AreEqual("materialized"))
 			{
-				return token + " " + ReadToken("materialized");
+				return token + " " + this.ReadToken("materialized");
 			}
 			return token;
 		}
