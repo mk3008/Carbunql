@@ -1,6 +1,7 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Values;
+using Cysharp.Text;
 
 namespace Carbunql.Analysis.Parser;
 
@@ -82,7 +83,7 @@ public static class ValueParser
 
 		if (item.AreEqual("case"))
 		{
-			var text = "case " + r.ReadUntilCaseExpressionEnd();
+			var text = "case " + ReadUntilCaseExpressionEnd(r);
 			return CaseExpressionParser.Parse(text);
 		}
 
@@ -119,5 +120,27 @@ public static class ValueParser
 		r.ReadToken("(");
 		var (_, inner) = r.ReadUntilCloseBracket();
 		return sufix + "(" + inner + ")";
+	}
+
+	private static string ReadUntilCaseExpressionEnd(ITokenReader r)
+	{
+		using var inner = ZString.CreateStringBuilder();
+
+		foreach (var word in r.ReadRawTokens(skipSpace: false))
+		{
+			if (word == null) break;
+
+			inner.Append(word);
+			if (word.TrimStart().AreEqual("end"))
+			{
+				return inner.ToString();
+			}
+			if (word.TrimStart().AreEqual("case"))
+			{
+				inner.Append(ReadUntilCaseExpressionEnd(r));
+			}
+		}
+
+		throw new SyntaxException("case expression is not end");
 	}
 }

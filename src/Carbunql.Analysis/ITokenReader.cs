@@ -6,13 +6,11 @@ public interface ITokenReader
 {
 	string? PeekRawToken(bool skipComment = true);
 
+	string? ReadRawToken(bool skipSpace = true);
+
 	string ReadToken(bool skipComment = true);
 
-	string ReadUntilToken(string breaktoken);
-
 	string ReadUntilToken(Func<string, bool> fn);
-
-	string ReadUntilCaseExpressionEnd();
 
 	(string first, string inner) ReadUntilCloseBracket();
 }
@@ -40,5 +38,21 @@ public static class ITokenReaderExtension
 		var s = source.PeekRawToken();
 		if (!s.AreEqual(expectRawToken)) return null;
 		return source.ReadToken();
+	}
+
+	public static string ReadUntilToken(this ITokenReader source, string breaktoken)
+	{
+		return source.ReadUntilToken(x => x.AreEqual(breaktoken));
+	}
+
+
+	public static IEnumerable<string> ReadRawTokens(this ITokenReader source, bool skipSpace = true)
+	{
+		var token = source.ReadRawToken(skipSpace: skipSpace);
+		while (!string.IsNullOrEmpty(token))
+		{
+			yield return token;
+			token = source.ReadRawToken(skipSpace: skipSpace);
+		}
 	}
 }

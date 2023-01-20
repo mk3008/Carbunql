@@ -37,8 +37,6 @@ public class TokenReader : LexReader, ITokenReader
 		return TokenCache;
 	}
 
-
-
 	public string ReadToken(bool skipComment = true)
 	{
 		string? token = ReadRawToken();
@@ -123,7 +121,7 @@ public class TokenReader : LexReader, ITokenReader
 		return token;
 	}
 
-	private string? ReadRawToken(bool skipSpace = true)
+	public string? ReadRawToken(bool skipSpace = true)
 	{
 		if (!string.IsNullOrEmpty(TokenCache))
 		{
@@ -134,15 +132,6 @@ public class TokenReader : LexReader, ITokenReader
 		return ReadLexs(skipSpace).FirstOrDefault();
 	}
 
-	private IEnumerable<string> ReadRawTokens(bool skipSpace = true)
-	{
-		var token = ReadRawToken(skipSpace: skipSpace);
-		while (!string.IsNullOrEmpty(token))
-		{
-			yield return token;
-			token = ReadRawToken(skipSpace: skipSpace);
-		}
-	}
 
 	public (string first, string inner) ReadUntilCloseBracket()
 	{
@@ -150,7 +139,7 @@ public class TokenReader : LexReader, ITokenReader
 		using var sb = ZString.CreateStringBuilder();
 		var fs = string.Empty;
 
-		foreach (var word in ReadRawTokens(skipSpace: false))
+		foreach (var word in this.ReadRawTokens(skipSpace: false))
 		{
 			if (word == null) break;
 			if (string.IsNullOrEmpty(fs)) fs = word;
@@ -178,7 +167,7 @@ public class TokenReader : LexReader, ITokenReader
 	{
 		using var inner = ZString.CreateStringBuilder();
 
-		foreach (var word in ReadRawTokens(skipSpace: false))
+		foreach (var word in this.ReadRawTokens(skipSpace: false))
 		{
 			if (word == null) break;
 
@@ -196,39 +185,12 @@ public class TokenReader : LexReader, ITokenReader
 		throw new SyntaxException("block comment is not closed");
 	}
 
-	public string ReadUntilCaseExpressionEnd()
-	{
-		using var inner = ZString.CreateStringBuilder();
-
-		foreach (var word in ReadRawTokens(skipSpace: false))
-		{
-			if (word == null) break;
-
-			inner.Append(word);
-			if (word.TrimStart().AreEqual("end"))
-			{
-				return inner.ToString();
-			}
-			if (word.TrimStart().AreEqual("case"))
-			{
-				inner.Append(ReadUntilCaseExpressionEnd());
-			}
-		}
-
-		throw new SyntaxException("case expression is not end");
-	}
-
-	public string ReadUntilToken(string breaktoken)
-	{
-		return ReadUntilToken(x => x.AreEqual(breaktoken));
-	}
-
 	public string ReadUntilToken(Func<string, bool> fn)
 	{
 		using var inner = ZString.CreateStringBuilder();
 
 		SkipSpace();
-		foreach (var word in ReadRawTokens(skipSpace: false))
+		foreach (var word in this.ReadRawTokens(skipSpace: false))
 		{
 			if (word == null) break;
 			if (fn(word.TrimStart()))
