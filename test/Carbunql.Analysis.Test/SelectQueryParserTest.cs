@@ -4,17 +4,17 @@ namespace Carbunql.Analysis.Test;
 
 public class SelectQueryParserTest
 {
-    private readonly QueryCommandMonitor Monitor;
+	private readonly QueryCommandMonitor Monitor;
 
-    public SelectQueryParserTest(ITestOutputHelper output)
-    {
-        Monitor = new QueryCommandMonitor(output);
-    }
+	public SelectQueryParserTest(ITestOutputHelper output)
+	{
+		Monitor = new QueryCommandMonitor(output);
+	}
 
-    [Fact]
-    public void SortSample()
-    {
-        var text = @"
+	[Fact]
+	public void SortSample()
+	{
+		var text = @"
 select
     *
 from 
@@ -24,33 +24,33 @@ order by
     a.val desc,
     a.table_a_id";
 
-        var item = QueryParser.Parse(text) as SelectQuery;
-        if (item == null) throw new Exception();
+		var item = QueryParser.Parse(text) as SelectQuery;
+		if (item == null) throw new Exception();
 
-        Monitor.Log(item);
+		Monitor.Log(item);
 
-        var lst = item.GetTokens().ToList();
+		var lst = item.GetTokens().ToList();
 
-        Assert.Equal(20, lst.Count);
+		Assert.Equal(20, lst.Count);
 
-        Assert.NotNull(item.SelectClause);
-        Assert.Single(item.SelectClause);
-        Assert.NotNull(item.OrderClause);
-        Assert.Equal(3, item.OrderClause!.Count());
+		Assert.NotNull(item.SelectClause);
+		Assert.Single(item.SelectClause);
+		Assert.NotNull(item.OrderClause);
+		Assert.Equal(3, item.OrderClause!.Count());
 
-        Assert.Equal("table_a", lst[3].Text);
-        Assert.Equal("as", lst[4].Text);
-        Assert.Equal("a", lst[5].Text);
-        Assert.Equal("order by", lst[6].Text);
-        Assert.Equal("a", lst[7].Text);
-        Assert.Equal(".", lst[8].Text);
-        Assert.Equal("name", lst[9].Text);
-    }
+		Assert.Equal("table_a", lst[3].Text);
+		Assert.Equal("as", lst[4].Text);
+		Assert.Equal("a", lst[5].Text);
+		Assert.Equal("order by", lst[6].Text);
+		Assert.Equal("a", lst[7].Text);
+		Assert.Equal(".", lst[8].Text);
+		Assert.Equal("name", lst[9].Text);
+	}
 
-    [Fact]
-    public void NumericSample()
-    {
-        var text = @"
+	[Fact]
+	public void NumericSample()
+	{
+		var text = @"
 select
     1 as v1,
     -1 as v2,
@@ -59,41 +59,41 @@ select
     +1 * 1 as v5
 ";
 
-        var item = QueryParser.Parse(text) as SelectQuery;
-        if (item == null) throw new Exception();
+		var item = QueryParser.Parse(text) as SelectQuery;
+		if (item == null) throw new Exception();
 
-        Monitor.Log(item);
+		Monitor.Log(item);
 
-        var lst = item.GetTokens().ToList();
+		var lst = item.GetTokens().ToList();
 
-        Assert.Equal(26, lst.Count);
+		Assert.Equal(26, lst.Count);
 
-        Assert.Equal(",", lst[8].Text);
-        Assert.Equal("1", lst[9].Text);
-        Assert.Equal("-", lst[10].Text);
-        Assert.Equal("1", lst[11].Text);
-        Assert.Equal("as", lst[12].Text);
-        Assert.Equal("v3", lst[13].Text);
+		Assert.Equal(",", lst[8].Text);
+		Assert.Equal("1", lst[9].Text);
+		Assert.Equal("-", lst[10].Text);
+		Assert.Equal("1", lst[11].Text);
+		Assert.Equal("as", lst[12].Text);
+		Assert.Equal("v3", lst[13].Text);
 
-        Assert.Equal(",", lst[14].Text);
-        Assert.Equal("-1", lst[15].Text);
-        Assert.Equal("*", lst[16].Text);
-        Assert.Equal("1", lst[17].Text);
-        Assert.Equal("as", lst[18].Text);
-        Assert.Equal("v4", lst[19].Text);
+		Assert.Equal(",", lst[14].Text);
+		Assert.Equal("-1", lst[15].Text);
+		Assert.Equal("*", lst[16].Text);
+		Assert.Equal("1", lst[17].Text);
+		Assert.Equal("as", lst[18].Text);
+		Assert.Equal("v4", lst[19].Text);
 
-        Assert.Equal(",", lst[20].Text);
-        Assert.Equal("+1", lst[21].Text);
-        Assert.Equal("*", lst[22].Text);
-        Assert.Equal("1", lst[23].Text);
-        Assert.Equal("as", lst[24].Text);
-        Assert.Equal("v5", lst[25].Text);
-    }
+		Assert.Equal(",", lst[20].Text);
+		Assert.Equal("+1", lst[21].Text);
+		Assert.Equal("*", lst[22].Text);
+		Assert.Equal("1", lst[23].Text);
+		Assert.Equal("as", lst[24].Text);
+		Assert.Equal("v5", lst[25].Text);
+	}
 
-    [Fact]
-    public void CaseSample()
-    {
-        var text = @"
+	[Fact]
+	public void CaseSample()
+	{
+		var text = @"
 select
     1 as v0
     , case a.id when 1 then 'a' when 2 then 'b' end as v1
@@ -110,17 +110,17 @@ select
 from 
     table_a a";
 
-        var item = QueryParser.Parse(text) as SelectQuery;
-        if (item == null) throw new Exception();
+		var item = QueryParser.Parse(text) as SelectQuery;
+		if (item == null) throw new Exception();
 
-        Monitor.Log(item);
-    }
+		Monitor.Log(item);
+	}
 
 
-    [Fact]
-    public void RelationSample()
-    {
-        var text = @"
+	[Fact]
+	public void RelationSample()
+	{
+		var text = @"
 select
     a.table_a_id as id,
     3.14 as val,
@@ -133,53 +133,53 @@ from
     left join table_c c on a.table_a_id = c.table_a_id
     right outer join table_d d on a.table_a_id = d.table_a_id";
 
-        var item = QueryParser.Parse(text) as SelectQuery;
-        if (item == null) throw new Exception();
-        Monitor.Log(item);
+		var item = QueryParser.Parse(text) as SelectQuery;
+		if (item == null) throw new Exception();
+		Monitor.Log(item);
 
-        Assert.NotNull(item.SelectClause);
-        Assert.Equal(5, item.SelectClause!.Count);
-        Assert.Equal(3, item.FromClause!.Relations!.Count());
-    }
+		Assert.NotNull(item.SelectClause);
+		Assert.Equal(5, item.SelectClause!.Count);
+		Assert.Equal(3, item.FromClause!.Relations!.Count());
+	}
 
-    [Fact]
-    public void RelationSample_NoAlias()
-    {
-        var text = @"
+	[Fact]
+	public void RelationSample_NoAlias()
+	{
+		var text = @"
 select * from a inner join b on a.id = b.id";
 
-        var item = QueryParser.Parse(text) as SelectQuery;
-        if (item == null) throw new Exception();
-        Monitor.Log(item);
+		var item = QueryParser.Parse(text) as SelectQuery;
+		if (item == null) throw new Exception();
+		Monitor.Log(item);
 
-        var lst = item.GetTokens().ToList();
-        Assert.Equal(14, lst.Count);
-        Assert.Equal("a", lst[3].Text);
-        Assert.Equal("inner join", lst[4].Text);
-        Assert.Equal("b", lst[5].Text);
-    }
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(14, lst.Count);
+		Assert.Equal("a", lst[3].Text);
+		Assert.Equal("inner join", lst[4].Text);
+		Assert.Equal("b", lst[5].Text);
+	}
 
-    [Fact]
-    public void RelationSample_Comma()
-    {
-        var text = @"select * from a, b where a.id = b.id";
+	[Fact]
+	public void RelationSample_Comma()
+	{
+		var text = @"select * from a, b where a.id = b.id";
 
-        var item = QueryParser.Parse(text) as SelectQuery;
-        if (item == null) throw new Exception();
-        Monitor.Log(item);
+		var item = QueryParser.Parse(text) as SelectQuery;
+		if (item == null) throw new Exception();
+		Monitor.Log(item);
 
-        var lst = item.GetTokens().ToList();
-        Assert.Equal(14, lst.Count);
-        Assert.Equal("a", lst[3].Text);
-        Assert.Equal(",", lst[4].Text);
-        Assert.Equal("b", lst[5].Text);
-        Assert.Equal("where", lst[6].Text);
-    }
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(14, lst.Count);
+		Assert.Equal("a", lst[3].Text);
+		Assert.Equal(",", lst[4].Text);
+		Assert.Equal("b", lst[5].Text);
+		Assert.Equal("where", lst[6].Text);
+	}
 
-    [Fact]
-    public void GroupSample()
-    {
-        var text = @"
+	[Fact]
+	public void GroupSample()
+	{
+		var text = @"
 select
     a.name,
     a.sub_name,
@@ -193,21 +193,21 @@ having
     sum(a.val) > 0
     and sum(a.val) < 10";
 
-        var item = QueryParser.Parse(text) as SelectQuery;
-        if (item == null) throw new Exception();
-        Monitor.Log(item);
+		var item = QueryParser.Parse(text) as SelectQuery;
+		if (item == null) throw new Exception();
+		Monitor.Log(item);
 
-        Assert.NotNull(item.SelectClause);
-        Assert.Equal(3, item.SelectClause!.Count);
-        Assert.NotNull(item.GroupClause);
-        Assert.Equal(2, item.GroupClause!.Count());
-        Assert.NotNull(item.HavingClause);
-    }
+		Assert.NotNull(item.SelectClause);
+		Assert.Equal(3, item.SelectClause!.Count);
+		Assert.NotNull(item.GroupClause);
+		Assert.Equal(2, item.GroupClause!.Count());
+		Assert.NotNull(item.HavingClause);
+	}
 
-    [Fact]
-    public void UnionSample()
-    {
-        var text = @"
+	[Fact]
+	public void UnionSample()
+	{
+		var text = @"
 select
     a.id
 from
@@ -223,15 +223,15 @@ select
 from
     table_c as c";
 
-        var item = QueryParser.Parse(text) as SelectQuery;
-        if (item == null) throw new Exception();
-        Monitor.Log(item);
-    }
+		var item = QueryParser.Parse(text) as SelectQuery;
+		if (item == null) throw new Exception();
+		Monitor.Log(item);
+	}
 
-    [Fact]
-    public void WithSample()
-    {
-        var text = @"
+	[Fact]
+	public void WithSample()
+	{
+		var text = @"
 with
 a as (
     select
@@ -250,97 +250,97 @@ select
 from
     b";
 
-        var item = QueryParser.Parse(text);
-        Monitor.Log(item);
+		var item = QueryParser.Parse(text);
+		Monitor.Log(item);
 
-        Assert.IsType<CTEQuery>(item);
-        var cte = (CTEQuery)item;
-        Assert.NotNull(cte.Query);
-    }
+		Assert.IsType<CTEQuery>(item);
+		var cte = (CTEQuery)item;
+		Assert.NotNull(cte.Query);
+	}
 
-    [Fact]
-    public void LimitSample()
-    {
-        var text = @"
+	[Fact]
+	public void LimitSample()
+	{
+		var text = @"
 select
     a.id
 from
     table_a as a
 limit 10";
 
-        var item = QueryParser.Parse(text) as SelectQuery;
-        if (item == null) throw new Exception();
-        Monitor.Log(item);
-    }
+		var item = QueryParser.Parse(text) as SelectQuery;
+		if (item == null) throw new Exception();
+		Monitor.Log(item);
+	}
 
-    [Fact]
-    public void LimitSample_NoAlias()
-    {
-        var text = @"
+	[Fact]
+	public void LimitSample_NoAlias()
+	{
+		var text = @"
 select
     a.id
 from
     table_a
 limit 10";
 
-        var item = QueryParser.Parse(text) as SelectQuery;
-        if (item == null) throw new Exception();
-        Monitor.Log(item);
+		var item = QueryParser.Parse(text) as SelectQuery;
+		if (item == null) throw new Exception();
+		Monitor.Log(item);
 
-        var lst = item.GetTokens().ToList();
-        Assert.Equal(8, lst.Count());
-        Assert.Equal("from", lst[4].Text);
-        Assert.Equal("table_a", lst[5].Text);
-        Assert.Equal("limit", lst[6].Text);
-        Assert.Equal("10", lst[7].Text);
-    }
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(8, lst.Count());
+		Assert.Equal("from", lst[4].Text);
+		Assert.Equal("table_a", lst[5].Text);
+		Assert.Equal("limit", lst[6].Text);
+		Assert.Equal("10", lst[7].Text);
+	}
 
-    [Fact]
-    public void LimitSample_Postgres()
-    {
-        var text = @"
+	[Fact]
+	public void LimitSample_Postgres()
+	{
+		var text = @"
 select
     a.id
 from
     table_a as a
 limit 10 offset 3";
 
-        var item = QueryParser.Parse(text) as SelectQuery;
-        if (item == null) throw new Exception();
-        Monitor.Log(item);
-    }
+		var item = QueryParser.Parse(text) as SelectQuery;
+		if (item == null) throw new Exception();
+		Monitor.Log(item);
+	}
 
-    [Fact]
-    public void LimitSample_MySQL()
-    {
-        var text = @"
+	[Fact]
+	public void LimitSample_MySQL()
+	{
+		var text = @"
 select
     a.id
 from
     table_a as a
 limit 3, 10";
 
-        var item = QueryParser.Parse(text) as SelectQuery;
-        if (item == null) throw new Exception();
-        Monitor.Log(item);
-    }
+		var item = QueryParser.Parse(text) as SelectQuery;
+		if (item == null) throw new Exception();
+		Monitor.Log(item);
+	}
 
-    [Fact]
-    public void FunctionTableSample()
-    {
-        var text = @"SELECT current_date + s.a AS dates FROM generate_series(0,14,7) AS s(a)";
+	[Fact]
+	public void FunctionTableSample()
+	{
+		var text = @"SELECT current_date + s.a AS dates FROM generate_series(0,14,7) AS s(a)";
 
-        var item = QueryParser.Parse(text) as SelectQuery;
-        if (item == null) throw new Exception();
-        Monitor.Log(item);
+		var item = QueryParser.Parse(text) as SelectQuery;
+		if (item == null) throw new Exception();
+		Monitor.Log(item);
 
-        Assert.Equal(22, item.GetTokens().ToList().Count);
-    }
+		Assert.Equal(22, item.GetTokens().ToList().Count);
+	}
 
-    [Fact]
-    public void Sample()
-    {
-        var text = @"
+	[Fact]
+	public void Sample()
+	{
+		var text = @"
 with
 dat(line_id, name, unit_price, amount, tax_rate) as ( 
     values
@@ -414,13 +414,28 @@ from
 order by 
     line_id";
 
-        var item = QueryParser.Parse(text);
-        Monitor.Log(item);
+		var item = QueryParser.Parse(text);
+		Monitor.Log(item);
 
-        Assert.Equal(324, item.GetTokens().ToList().Count);
+		Assert.Equal(324, item.GetTokens().ToList().Count);
 
-        Assert.IsType<CTEQuery>(item);
-        var cte = (CTEQuery)item;
-        Assert.NotNull(cte.Query);
-    }
+		Assert.IsType<CTEQuery>(item);
+		var cte = (CTEQuery)item;
+		Assert.NotNull(cte.Query);
+	}
+
+	[Fact]
+	public void SemicolonBreak()
+	{
+		var text = @"
+select
+    a.id
+from
+    table_a; as a
+limit 10";
+
+		var item = QueryParser.Parse(text) as SelectQuery;
+		if (item == null) throw new Exception();
+		Monitor.Log(item);
+	}
 }

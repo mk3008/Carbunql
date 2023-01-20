@@ -7,9 +7,16 @@ public class TokenReader : LexReader, ITokenReader
 {
 	public TokenReader(string text) : base(text)
 	{
+		BreakTokens = new() { ";" };
 	}
 
+	public List<string> BreakTokens { get; init; }
+
 	private string? TokenCache { get; set; } = string.Empty;
+
+	private int CommentLevel { get; set; } = 0;
+
+	private bool IsTerminate { get; set; } = false;
 
 	public string? PeekRawToken(bool skipComment = true)
 	{
@@ -26,11 +33,15 @@ public class TokenReader : LexReader, ITokenReader
 			var t = ReadToken(skipComment: false);
 			if (t == "--")
 			{
+				CommentLevel++;
 				ReadUntilLineEnd();
+				CommentLevel--;
 			}
 			else
 			{
+				CommentLevel++;
 				this.ReadUntilCloseBlockComment();
+				CommentLevel--;
 			}
 			TokenCache = ReadRawToken(skipSpace: true);
 		}
@@ -123,13 +134,24 @@ public class TokenReader : LexReader, ITokenReader
 
 	public string? ReadRawToken(bool skipSpace = true)
 	{
+		if (IsTerminate) return null;
+
 		if (!string.IsNullOrEmpty(TokenCache))
 		{
 			var s = TokenCache;
 			TokenCache = string.Empty;
 			return s;
 		}
-		return ReadLexs(skipSpace).FirstOrDefault();
+		var t = ReadLexs(skipSpace).FirstOrDefault();
+
+		// terminate
+		if (CommentLevel == 0 && t.AreContains(BreakTokens))
+		{
+			IsTerminate = true;
+			return null;
+		}
+
+		return t;
 	}
 
 	public (string first, string inner) ReadUntilCloseBracket()
