@@ -30,7 +30,7 @@ public class TokenReader : LexReader, ITokenReader
 			}
 			else
 			{
-				ReadUntilCloseBlockComment();
+				this.ReadUntilCloseBlockComment();
 			}
 			TokenCache = ReadRawToken(skipSpace: true);
 		}
@@ -115,7 +115,7 @@ public class TokenReader : LexReader, ITokenReader
 
 		if (token == "/*")
 		{
-			ReadUntilCloseBlockComment();
+			this.ReadUntilCloseBlockComment();
 			return ReadToken(skipComment);
 		}
 		return token;
@@ -131,7 +131,6 @@ public class TokenReader : LexReader, ITokenReader
 		}
 		return ReadLexs(skipSpace).FirstOrDefault();
 	}
-
 
 	public (string first, string inner) ReadUntilCloseBracket()
 	{
@@ -161,27 +160,5 @@ public class TokenReader : LexReader, ITokenReader
 		}
 
 		throw new SyntaxException("bracket is not closed");
-	}
-
-	private string ReadUntilCloseBlockComment()
-	{
-		using var inner = ZString.CreateStringBuilder();
-
-		foreach (var word in this.ReadRawTokens(skipSpace: false))
-		{
-			if (word == null) break;
-
-			inner.Append(word);
-			if (word.AreEqual("*/"))
-			{
-				return inner.ToString();
-			}
-			if (word.AreEqual("/*"))
-			{
-				inner.Append(ReadUntilCloseBlockComment());
-			}
-		}
-
-		throw new SyntaxException("block comment is not closed");
 	}
 }

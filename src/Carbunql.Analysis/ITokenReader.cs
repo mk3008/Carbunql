@@ -73,4 +73,26 @@ public static class ITokenReaderExtension
 
 		throw new SyntaxException($"breaktoken token is not found");
 	}
+
+	public static string ReadUntilCloseBlockComment(this ITokenReader source)
+	{
+		using var inner = ZString.CreateStringBuilder();
+
+		foreach (var word in source.ReadRawTokens(skipSpace: false))
+		{
+			if (word == null) break;
+
+			inner.Append(word);
+			if (word.AreEqual("*/"))
+			{
+				return inner.ToString();
+			}
+			if (word.AreEqual("/*"))
+			{
+				inner.Append(source.ReadUntilCloseBlockComment());
+			}
+		}
+
+		throw new SyntaxException("block comment is not closed");
+	}
 }
