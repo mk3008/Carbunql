@@ -184,22 +184,4 @@ public class TokenReader : LexReader, ITokenReader
 
 		throw new SyntaxException("block comment is not closed");
 	}
-
-	public string ReadUntilToken(Func<string, bool> fn)
-	{
-		using var inner = ZString.CreateStringBuilder();
-
-		SkipSpace();
-		foreach (var word in this.ReadRawTokens(skipSpace: false))
-		{
-			if (word == null) break;
-			if (fn(word.TrimStart()))
-			{
-				return inner.ToString();
-			}
-			inner.Append(word);
-		}
-
-		throw new SyntaxException($"breaktoken token is not found");
-	}
 }

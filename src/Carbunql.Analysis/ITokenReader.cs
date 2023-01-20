@@ -1,4 +1,5 @@
 ﻿using Carbunql.Extensions;
+using Cysharp.Text;
 
 namespace Carbunql.Analysis;
 
@@ -10,7 +11,7 @@ public interface ITokenReader
 
 	string ReadToken(bool skipComment = true);
 
-	string ReadUntilToken(Func<string, bool> fn);
+	void SkipSpace();
 
 	(string first, string inner) ReadUntilCloseBracket();
 }
@@ -45,7 +46,6 @@ public static class ITokenReaderExtension
 		return source.ReadUntilToken(x => x.AreEqual(breaktoken));
 	}
 
-
 	public static IEnumerable<string> ReadRawTokens(this ITokenReader source, bool skipSpace = true)
 	{
 		var token = source.ReadRawToken(skipSpace: skipSpace);
@@ -54,5 +54,23 @@ public static class ITokenReaderExtension
 			yield return token;
 			token = source.ReadRawToken(skipSpace: skipSpace);
 		}
+	}
+
+	public static string ReadUntilToken(this ITokenReader source, Func<string, bool> fn)
+	{
+		using var inner = ZString.CreateStringBuilder();
+
+		source.SkipSpace();
+		foreach (var word in source.ReadRawTokens(skipSpace: false))
+		{
+			if (word == null) break;
+			if (fn(word.TrimStart()))
+			{
+				return inner.ToString();
+			}
+			inner.Append(word);
+		}
+
+		throw new SyntaxException($"breaktoken token is not found");
 	}
 }
