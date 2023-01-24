@@ -36,15 +36,18 @@ public class WithClauseParserTest
 		Monitor.Log(item);
 	}
 
-	//	[Fact]
-	//	public void Comment()
-	//	{
-	//		var text = @"with
-	//a as (
-	//--
-	//select 1
-	//)";
-	//		var item = WithClauseParser.Parse(text);
-	//		Monitor.Log(item);
-	//	}
+	[Fact]
+	public void Comment()
+	{
+		var text = @"with
+a as (
+--
+select 1
+)";
+		var item = WithClauseParser.Parse(text);
+		Monitor.Log(item);
+
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(7, lst.Count);
+	}
 }

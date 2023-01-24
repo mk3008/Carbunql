@@ -40,8 +40,7 @@ public class TokenReader : LexReader, ITokenReader
 		var commentTokens = new string[] { "--", "/*" };
 		while (tmp.AreContains(commentTokens))
 		{
-			var t = ReadToken();
-			if (t == "--")
+			if (tmp == "--")
 			{
 				//line comment
 				CommentLevel++;
