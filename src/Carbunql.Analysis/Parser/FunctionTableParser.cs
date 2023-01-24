@@ -14,9 +14,7 @@ public static class FunctionTableParser
 
 	public static FunctionTable Parse(ITokenReader r, string functionName)
 	{
-		r.ReadToken("(");
-		var (_, argstext) = r.ReadUntilCloseBracket();
-		var arg = ValueCollectionParser.Parse(argstext);
+		var arg = ValueCollectionParser.ParseAsInner(r);
 
 		return new FunctionTable(functionName, arg);
 	}

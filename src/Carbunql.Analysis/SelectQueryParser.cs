@@ -12,6 +12,14 @@ public static class SelectQueryParser
 		return Parse(r);
 	}
 
+	public static SelectQuery ParseAsInner(ITokenReader r)
+	{
+		r.ReadToken("(");
+		var ir = new InnerTokenReader(r);
+		var v = Parse(ir);
+		return v;
+	}
+
 	internal static SelectQuery Parse(ITokenReader r)
 	{
 		var sq = new SelectQuery();

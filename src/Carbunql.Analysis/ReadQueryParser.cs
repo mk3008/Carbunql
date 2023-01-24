@@ -15,6 +15,6 @@ public static class ReadQueryParser
 		if (r.PeekRawToken().AreEqual("select")) return SelectQueryParser.Parse(r);
 		if (r.PeekRawToken().AreEqual("values")) return ValuesQueryParser.Parse(r);
 
-		throw new NotSupportedException();
+		throw new NotSupportedException(r.PeekRawToken());
 	}
 }

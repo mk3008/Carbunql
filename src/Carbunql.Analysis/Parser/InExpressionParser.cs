@@ -15,16 +15,20 @@ public static class InExpressionParser
 	public static InExpression Parse(ValueBase value, ITokenReader r)
 	{
 		r.ReadToken("(");
-		var (first, inner) = r.ReadUntilCloseBracket();
+		var ir = new InnerTokenReader(r);
+		var first = ir.PeekRawToken();
+		if (first == null) throw new NotSupportedException();
+
 		if (first.AreEqual("select"))
 		{
 			//sub query
-			return new InExpression(value, ValueParser.Parse("(" + inner + ")"));
+			var iq = new InlineQuery(SelectQueryParser.Parse(ir));
+			return new InExpression(value, iq);
 		}
 		else
 		{
 			//value collection
-			var bv = new BracketValue(ValueCollectionParser.Parse(inner));
+			var bv = new BracketValue(ValueCollectionParser.Parse(ir));
 			return new InExpression(value, bv);
 		}
 	}

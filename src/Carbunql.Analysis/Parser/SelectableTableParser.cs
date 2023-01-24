@@ -36,9 +36,7 @@ public static class SelectableTableParser
 			return new SelectableTable(v, alias);
 		}
 
-		r.ReadToken("(");
-		var (_, inner) = r.ReadUntilCloseBracket();
-		var colAliases = ValueCollectionParser.Parse(inner);
+		var colAliases = ValueCollectionParser.ParseAsInner(r);
 
 		return new SelectableTable(v, alias, colAliases);
 	}

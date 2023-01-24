@@ -1,4 +1,6 @@
-﻿using Carbunql.Values;
+﻿using Carbunql.Clauses;
+using Carbunql.Extensions;
+using Carbunql.Values;
 
 namespace Carbunql.Analysis.Parser;
 
@@ -12,26 +14,30 @@ public static class CaseExpressionParser
 
 	public static CaseExpression Parse(ITokenReader r)
 	{
-		r.ReadToken("case");
+		var c = ParseCaseExpression(r);
 
-		var cndtext = r.ReadUntilToken("when");
-
-		CaseExpression? c = null;
-		if (string.IsNullOrEmpty(cndtext))
-		{
-			c = new CaseExpression();
-		}
-		else
-		{
-			var cnd = ValueParser.Parse(cndtext);
-			c = new CaseExpression(cnd);
-		}
-
-		var exptext = r.ReadUntilToken("end");
-		foreach (var w in WhenExpressionParser.Parse("when " + exptext + " end"))
+		var ir = new InnerTokenReader(r, "end");
+		foreach (var w in WhenExpressionParser.Parse(ir))
 		{
 			c.WhenExpressions.Add(w);
 		}
 		return c;
+	}
+
+	private static CaseExpression ParseCaseExpression(ITokenReader r)
+	{
+		r.TryReadToken("case");
+
+		var ir = new InnerTokenReader(r, "when");
+		var t = ir.PeekRawToken();
+		if (string.IsNullOrEmpty(t))
+		{
+			return new CaseExpression();
+		}
+		else
+		{
+			var cnd = ValueParser.Parse(ir);
+			return new CaseExpression(cnd);
+		}
 	}
 }

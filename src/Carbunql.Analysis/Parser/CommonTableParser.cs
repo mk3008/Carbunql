@@ -18,9 +18,7 @@ public static class CommonTableParser
 		ValueCollection? colAliases = null;
 		if (r.PeekRawToken().AreEqual("("))
 		{
-			r.ReadToken("(");
-			var (_, names) = r.ReadUntilCloseBracket();
-			colAliases = ValueCollectionParser.Parse(names);
+			colAliases = ValueCollectionParser.ParseAsInner(r);
 		}
 
 		r.ReadToken("as");
@@ -37,20 +35,14 @@ public static class CommonTableParser
 			material = Materialized.NotMaterialized;
 		}
 
-		r.ReadToken("(");
-		var (first, inner) = r.ReadUntilCloseBracket();
-		if (first.AreContains(new[] { "select", "values" }))
+		var t = VirtualTableParser.Parse(r);
+		if (colAliases != null)
 		{
-			var t = TableParser.Parse("(" + inner + ")");
-			if (colAliases != null)
-			{
-				return new CommonTable(t, alias, colAliases) { Materialized = material };
-			}
-			else
-			{
-				return new CommonTable(t, alias) { Materialized = material };
-			}
+			return new CommonTable(t, alias, colAliases) { Materialized = material };
 		}
-		throw new NotSupportedException();
+		else
+		{
+			return new CommonTable(t, alias) { Materialized = material };
+		}
 	}
 }

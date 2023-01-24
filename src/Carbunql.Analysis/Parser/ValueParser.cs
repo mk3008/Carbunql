@@ -73,25 +73,30 @@ public static class ValueParser
 
 		if (item == "(")
 		{
-			var (first, inner) = r.ReadUntilCloseBracket();
-			if (first.AreEqual("select"))
+			var innerReader = new InnerTokenReader(r);
+			var pt = innerReader.PeekRawToken();
+
+			ValueBase? v = null;
+			if (pt.AreEqual("select"))
 			{
-				return new InlineQuery(SelectQueryParser.Parse(inner));
+				v = new InlineQuery(SelectQueryParser.Parse(innerReader));
 			}
-			return new BracketValue(Parse(inner));
+			else
+			{
+				v = new BracketValue(Parse(innerReader));
+			}
+			return v;
 		}
 
 		if (item.AreEqual("case"))
 		{
-			var text = "case " + ReadUntilCaseExpressionEnd(r);
-			return CaseExpressionParser.Parse(text);
+			var ir = new InnerTokenReader(r, "end");
+			return CaseExpressionParser.Parse(ir);
 		}
 
 		if (item.AreEqual("exists"))
 		{
-			r.ReadToken("(");
-			var (first, inner) = r.ReadUntilCloseBracket();
-			return new ExistsExpression(SelectQueryParser.Parse(inner));
+			return new ExistsExpression(SelectQueryParser.ParseAsInner(r));
 		}
 
 		if (r.PeekRawToken().AreEqual("("))
@@ -118,18 +123,21 @@ public static class ValueParser
 		if (!r.PeekRawToken().AreEqual("(")) return sufix;
 
 		r.ReadToken("(");
-		var (_, inner) = r.ReadUntilCloseBracket();
-		return sufix + "(" + inner + ")";
+		//var (_, inner) = r.ReadUntilCloseBracket();
+
+		var innerReader = new InnerTokenReader(r);
+		var v = ValueParser.Parse(innerReader);
+
+		return sufix + "(" + v.ToText() + ")";
 	}
 
 	private static string ReadUntilCaseExpressionEnd(ITokenReader r)
 	{
 		using var inner = ZString.CreateStringBuilder();
 
-		foreach (var word in r.ReadRawTokens(skipSpace: false))
+		var word = r.ReadToken();
+		while (!string.IsNullOrEmpty(word))
 		{
-			if (word == null) break;
-
 			inner.Append(word);
 			if (word.TrimStart().AreEqual("end"))
 			{
@@ -139,6 +147,7 @@ public static class ValueParser
 			{
 				inner.Append(ReadUntilCaseExpressionEnd(r));
 			}
+			word = r.ReadToken();
 		}
 
 		throw new SyntaxException("case expression is not end");

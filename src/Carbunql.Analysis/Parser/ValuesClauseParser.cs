@@ -23,13 +23,12 @@ internal static class ValuesClauseParser
 		};
 
 		r.TryReadToken("values");
-		r.ReadToken("(");
+		//r.ReadToken("(");
 
 		var lst = new List<ValueCollection>();
 		do
 		{
-			var (_, inner) = r.ReadUntilCloseBracket();
-			lst.Add(ValueCollectionParser.Parse(inner));
+			lst.Add(ValueCollectionParser.ParseAsInner(r));
 		} while (fn());
 
 		return new ValuesQuery(lst);

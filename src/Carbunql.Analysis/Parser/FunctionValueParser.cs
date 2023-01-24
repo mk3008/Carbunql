@@ -13,9 +13,7 @@ public static class FunctionValueParser
 
 	public static FunctionValue Parse(ITokenReader r, string functionName)
 	{
-		r.ReadToken("(");
-		var (_, argstext) = r.ReadUntilCloseBracket();
-		var arg = ValueCollectionParser.Parse(argstext);
+		var arg = ValueCollectionParser.ParseAsInner(r);
 
 		if (!r.PeekRawToken().AreEqual("over"))
 		{

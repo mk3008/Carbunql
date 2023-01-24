@@ -1,5 +1,6 @@
 ﻿using Carbunql.Extensions;
 using Cysharp.Text;
+using System.Reflection.PortableExecutable;
 
 namespace Carbunql.Analysis;
 
@@ -7,51 +8,84 @@ public class TokenReader : LexReader, ITokenReader
 {
 	public TokenReader(string text) : base(text)
 	{
-		BreakTokens = new() { ";" };
+		BreakTokens = (new List<string>() { ";" }).AsReadOnly();
 	}
 
-	public List<string> BreakTokens { get; init; }
+	public IReadOnlyList<string> BreakTokens { get; init; }
 
 	private string? TokenCache { get; set; } = string.Empty;
 
-	private int CommentLevel { get; set; } = 0;
+	public int CommentLevel { get; private set; } = 0;
 
-	private bool IsTerminate { get; set; } = false;
+	private bool IsTerminated { get; set; } = false;
 
-	public string? PeekRawToken(bool skipComment = true)
+	public string TerminatedToken { get; private set; } = string.Empty;
+
+	private string? ReadTokenMain()
 	{
-		if (string.IsNullOrEmpty(TokenCache))
+		//Token reading processing and termination judgment are performed
+
+		if (!string.IsNullOrEmpty(TokenCache))
 		{
-			TokenCache = ReadRawToken(skipSpace: true);
+			var s = TokenCache;
+			TokenCache = null;
+			return s;
 		}
 
-		if (!skipComment || string.IsNullOrEmpty(TokenCache)) return TokenCache;
+		if (IsTerminated) return null;
 
-		var tokens = new string[] { "--", "/*" };
-		while (TokenCache.AreContains(tokens))
+		var tmp = ReadLexs(skipSpace: true).FirstOrDefault();
+
+		//skip comment block
+		var commentTokens = new string[] { "--", "/*" };
+		while (tmp.AreContains(commentTokens))
 		{
-			var t = ReadToken(skipComment: false);
+			var t = ReadToken();
 			if (t == "--")
 			{
+				//line comment
 				CommentLevel++;
 				ReadUntilLineEnd();
 				CommentLevel--;
 			}
 			else
 			{
+				//block comment
 				CommentLevel++;
-				this.ReadUntilCloseBlockComment();
+				ReadUntilCloseBlockComment();
 				CommentLevel--;
 			}
-			TokenCache = ReadRawToken(skipSpace: true);
+			tmp = ReadLexs(skipSpace: true).FirstOrDefault();
 		}
+
+		// termination check
+		if (string.IsNullOrEmpty(tmp))
+		{
+			IsTerminated = true;
+			TerminatedToken = string.Empty;
+		}
+		else if (CommentLevel == 0 && tmp.AreContains(BreakTokens))
+		{
+			IsTerminated = true;
+			TerminatedToken = tmp;
+		}
+
+		return tmp;
+	}
+
+	public string? PeekRawToken()
+	{
+		//Cache ReadRawToken to implement peek functionality
+		if (!string.IsNullOrEmpty(TokenCache)) return TokenCache;
+
+		TokenCache = ReadTokenMain();
 		return TokenCache;
 	}
 
-	public string ReadToken(bool skipComment = true)
+	public string ReadToken()
 	{
-		string? token = ReadRawToken();
-		if (string.IsNullOrEmpty(token)) return string.Empty;
+		var token = ReadTokenMain();
+		if (token == null) return string.Empty;
 
 		// Explore possible two-word tokens
 		if (token.AreEqual("is"))
@@ -116,71 +150,64 @@ public class TokenReader : LexReader, ITokenReader
 			return token + ReadToken();
 		}
 
-		if (!skipComment) return token;
-
 		if (token == "--")
 		{
 			ReadUntilLineEnd();
-			return ReadToken(skipComment);
+			return ReadToken();
 		}
 
 		if (token == "/*")
 		{
 			this.ReadUntilCloseBlockComment();
-			return ReadToken(skipComment);
+			return ReadToken();
 		}
+
 		return token;
 	}
 
-	public string? ReadRawToken(bool skipSpace = true)
+	public string ReadUntilToken(string breaktoken)
 	{
-		if (IsTerminate) return null;
-
-		if (!string.IsNullOrEmpty(TokenCache))
-		{
-			var s = TokenCache;
-			TokenCache = string.Empty;
-			return s;
-		}
-		var t = ReadLexs(skipSpace).FirstOrDefault();
-
-		// terminate
-		if (CommentLevel == 0 && t.AreContains(BreakTokens))
-		{
-			IsTerminate = true;
-			return null;
-		}
-
-		return t;
+		return ReadUntilToken(x => x.AreEqual(breaktoken));
 	}
 
-	public (string first, string inner) ReadUntilCloseBracket()
+	public string ReadUntilToken(Func<string, bool> fn)
 	{
-		SkipSpace();
-		using var sb = ZString.CreateStringBuilder();
-		var fs = string.Empty;
+		using var inner = ZString.CreateStringBuilder();
 
-		foreach (var word in this.ReadRawTokens(skipSpace: false))
+		SkipSpace();
+		foreach (var word in ReadLexs(skipSpace: false))
 		{
 			if (word == null) break;
-			if (string.IsNullOrEmpty(fs)) fs = word;
 
-			if (word.AreEqual(")"))
+			if (fn(word.TrimStart()))
 			{
-				return (fs, sb.ToString());
+				return inner.ToString();
 			}
+			inner.Append(word);
+		}
 
-			if (word.AreEqual("("))
+		throw new SyntaxException($"breaktoken token is not found");
+	}
+
+	public string ReadUntilCloseBlockComment()
+	{
+		using var inner = ZString.CreateStringBuilder();
+
+		foreach (var word in ReadLexs(skipSpace: false))
+		{
+			if (word == null) break;
+
+			inner.Append(word);
+			if (word.AreEqual("*/"))
 			{
-				var (_, inner) = ReadUntilCloseBracket();
-				sb.Append("(" + inner + ")");
+				return inner.ToString();
 			}
-			else
+			if (word.AreEqual("/*"))
 			{
-				sb.Append(word);
+				inner.Append(ReadUntilCloseBlockComment());
 			}
 		}
 
-		throw new SyntaxException("bracket is not closed");
+		throw new SyntaxException("block comment is not closed");
 	}
 }

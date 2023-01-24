@@ -14,22 +14,12 @@ public static class TableParser
 
 	public static TableBase Parse(ITokenReader r)
 	{
-		var item = r.ReadToken();
-
-		if (item == "(")
+		if (r.PeekRawToken().AreEqual("("))
 		{
-			//virtualTable
-			var (first, inner) = r.ReadUntilCloseBracket();
-			if (first.AreEqual("select"))
-			{
-				return new VirtualTable(SelectQueryParser.Parse(inner));
-			}
-			else if (first.AreEqual("values"))
-			{
-				return new VirtualTable(ValuesClauseParser.Parse(inner));
-			}
-			throw new NotSupportedException();
+			return VirtualTableParser.Parse(r);
 		}
+
+		var item = r.ReadToken();
 
 		if (r.PeekRawToken().AreEqual("."))
 		{

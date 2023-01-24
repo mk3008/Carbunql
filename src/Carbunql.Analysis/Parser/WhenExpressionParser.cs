@@ -1,4 +1,5 @@
-﻿using Carbunql.Extensions;
+﻿using Carbunql.Clauses;
+using Carbunql.Extensions;
 using Carbunql.Values;
 
 namespace Carbunql.Analysis.Parser;
@@ -14,7 +15,8 @@ public class WhenExpressionParser
 
 	public static IEnumerable<WhenExpression> Parse(ITokenReader r)
 	{
-		var token = r.ReadToken("when");
+		r.TryReadToken("when");
+		var token = "when";
 
 		while (token.AreEqual("when"))
 		{
@@ -25,29 +27,31 @@ public class WhenExpressionParser
 
 		if (token.AreEqual("else"))
 		{
-			var val = ValueParser.Parse(r.ReadUntilToken("end"));
+			var val = Parse(r, "end");
 			yield return new WhenExpression(val);
 		}
 	}
 
 	private static (WhenExpression exp, string breaktoken) ParseWhenExpression(ITokenReader r)
 	{
-		var breaktokens = new string[] { "when", "else", "end" };
-		var breaktoken = string.Empty;
-
-		var fn = (string t) =>
-		{
-			if (t.AreContains(breaktokens))
-			{
-				breaktoken = t;
-				return true;
-			}
-			return false;
-		};
-
-		var cnd = ValueParser.Parse(r.ReadUntilToken("then"));
-		var val = ValueParser.Parse(r.ReadUntilToken(fn));
+		var cnd = Parse(r, "then");
+		var (val, breaktoken) = Parse(r, new string[] { "when", "else", "end" });
 		var exp = new WhenExpression(cnd, val);
 		return (exp, breaktoken);
+	}
+
+	private static ValueBase Parse(ITokenReader r, string endToken)
+	{
+		var ir = new InnerTokenReader(r, endToken);
+		var val = ValueParser.Parse(ir);
+		return val;
+	}
+
+	private static (ValueBase, string) Parse(ITokenReader r, IEnumerable<string> endTokens)
+	{
+		var ir = new InnerTokenReader(r, endTokens);
+		var val = ValueParser.Parse(ir);
+		var endToken = ir.TerminatedToken;
+		return (val, endToken);
 	}
 }
