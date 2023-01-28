@@ -17,17 +17,17 @@ public static class WindowFunctionParser
 		r.ReadToken("(");
 		var ir = new InnerTokenReader(r);
 		var v = Parse(ir);
-		r.ReadToken(")");
 		return v;
 	}
 
 	public static WindowFunction Parse(ITokenReader r)
 	{
-		var winfn = new WindowFunction();
+		r.TryReadToken("(");
+		var token = r.ReadToken();
 
+		var winfn = new WindowFunction();
 		do
 		{
-			var token = r.ReadToken();
 			if (token.AreEqual("partition by"))
 			{
 				winfn.PartitionBy = PartitionClauseParser.Parse(r);
@@ -36,7 +36,8 @@ public static class WindowFunctionParser
 			{
 				winfn.OrderBy = OrderClauseParser.Parse(r);
 			}
-		} while (r.PeekRawToken() != null);
+			token = r.ReadToken();
+		} while (!string.IsNullOrEmpty(token) && !token.AreEqual(")"));
 
 		return winfn;
 	}

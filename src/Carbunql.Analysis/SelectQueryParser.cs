@@ -58,7 +58,7 @@ public static class SelectQueryParser
 
 	private static GroupClause? ParseGroupOrDefault(ITokenReader r)
 	{
-		if (r.TryReadToken("group") == null) return null;
+		if (r.TryReadToken(new string[] { "group", "group by" }) == null) return null;
 		return GroupClauseParser.Parse(r);
 	}
 

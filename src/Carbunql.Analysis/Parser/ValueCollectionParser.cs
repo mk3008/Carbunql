@@ -21,6 +21,10 @@ public static class ValueCollectionParser
 	{
 		r.TryReadToken("(");
 		var ir = new InnerTokenReader(r);
+		if (ir.PeekRawToken().AreEqual(")")){
+			ir.ReadToken(")");
+			return new ValueCollection();
+		}
 		var v = new ValueCollection(ReadValues(ir).ToList());
 		return v;
 	}

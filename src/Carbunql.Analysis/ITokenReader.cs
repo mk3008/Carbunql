@@ -48,4 +48,11 @@ public static class ITokenReaderExtension
 		if (!s.AreEqual(expectRawToken)) return null;
 		return source.ReadToken();
 	}
+
+	public static string? TryReadToken(this ITokenReader source, string[] expectRawTokens)
+	{
+		var s = source.PeekRawToken();
+		if (!s.AreContains(expectRawTokens)) return null;
+		return source.ReadToken();
+	}
 }

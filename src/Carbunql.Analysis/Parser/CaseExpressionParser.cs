@@ -30,7 +30,7 @@ public static class CaseExpressionParser
 
 		var ir = new InnerTokenReader(r, "when");
 		var t = ir.PeekRawToken();
-		if (string.IsNullOrEmpty(t))
+		if (t.AreEqual("when"))
 		{
 			return new CaseExpression();
 		}

@@ -215,6 +215,9 @@ public class ValueParserTest
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
 
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(14, lst.Count);
+
 		//Assert.Equal("row_number() over(order by tbl.col, tbl.col2)", v.GetCommandText());
 	}
 
@@ -247,6 +250,9 @@ public class ValueParserTest
 		var text = "case when tbl.col1 = 1 then 10 when tbl.col2 = 2 then 20 else 30 end";
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(20, lst.Count);
 
 		//Assert.Equal("case when tbl.col1 = 1 then 10 when tbl.col2 = 2 then 20 else 30 end", v.GetCommandText());
 	}
