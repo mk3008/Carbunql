@@ -9,21 +9,23 @@ public class LexReader : CharReader
 	{
 	}
 
-	public IEnumerable<char> ForceBreakSymbols { get; set; } = ".,();".ToArray();
+	private IEnumerable<char> SpaceChars { get; set; } = " \r\n\t".ToArray();
 
-	public IEnumerable<char> BitwiseOperatorSymbols { get; set; } = "&|^#~".ToArray();
+	private IEnumerable<char> ForceBreakSymbols { get; set; } = ".,();".ToArray();
 
-	public IEnumerable<char> ArithmeticOperatorSymbols { get; set; } = "+-*/".ToArray();
+	private IEnumerable<char> BitwiseOperatorSymbols { get; set; } = "&|^#~".ToArray();
 
-	public IEnumerable<char> ComparisonOperatorSymbols { get; set; } = "<>!=".ToArray();
+	private IEnumerable<char> ArithmeticOperatorSymbols { get; set; } = "+-*/".ToArray();
 
-	public IEnumerable<char> PrefixSymbols { get; set; } = "?:@".ToArray();
+	private IEnumerable<char> ComparisonOperatorSymbols { get; set; } = "<>!=".ToArray();
 
-	public IEnumerable<char> SingleSymbols => ForceBreakSymbols.Union(BitwiseOperatorSymbols);
+	private IEnumerable<char> PrefixSymbols { get; set; } = "?:@".ToArray();
 
-	public IEnumerable<char> MultipleSymbols => ArithmeticOperatorSymbols.Union(ComparisonOperatorSymbols);
+	private IEnumerable<char> SingleSymbols => ForceBreakSymbols.Union(BitwiseOperatorSymbols);
 
-	public IEnumerable<char> AllSymbols => SingleSymbols.Union(MultipleSymbols).Union(PrefixSymbols).Union(SpaceChars);
+	private IEnumerable<char> MultipleSymbols => ArithmeticOperatorSymbols.Union(ComparisonOperatorSymbols);
+
+	private IEnumerable<char> AllSymbols => SingleSymbols.Union(MultipleSymbols).Union(PrefixSymbols).Union(SpaceChars);
 
 	public string ReadLex(bool skipSpace = true)
 	{
@@ -84,7 +86,7 @@ public class LexReader : CharReader
 		// ex. + or !=
 		if (MultipleSymbols.Contains(fc))
 		{
-			foreach (var item in ReadWhile((x) => x != '/' && x != '*' && MultipleSymbols.Contains(x)))
+			foreach (var item in ReadChars((x) => x != '/' && x != '*' && MultipleSymbols.Contains(x)))
 			{
 				sb.Append(item);
 			}
@@ -94,7 +96,7 @@ public class LexReader : CharReader
 		// ex. 123.45
 		if (fc.IsInteger())
 		{
-			foreach (var item in ReadWhile((x) => "0123456789.".ToArray().Contains(x)))
+			foreach (var item in ReadChars((x) => "0123456789.".ToArray().Contains(x)))
 			{
 				sb.Append(item);
 			}
@@ -107,7 +109,7 @@ public class LexReader : CharReader
 			return true;
 		};
 
-		foreach (var item in ReadWhile(whileFn))
+		foreach (var item in ReadChars(whileFn))
 		{
 			sb.Append(item);
 		}
@@ -122,5 +124,57 @@ public class LexReader : CharReader
 			yield return w;
 			w = ReadLex(skipSpace);
 		}
+	}
+
+	private string ReadWhileSpace()
+	{
+		using var sb = ZString.CreateStringBuilder();
+		foreach (var item in ReadChars(x => SpaceChars.Contains(x)))
+		{
+			sb.Append(item);
+		}
+		return sb.ToString();
+	}
+
+	public void SkipSpace() => ReadWhileSpace();
+
+	public string ReadUntilLineEnd()
+	{
+		using var sb = ZString.CreateStringBuilder();
+		foreach (var item in ReadChars())
+		{
+			if (item != '\n' && item != '\r')
+			{
+				sb.Append(item);
+				continue;
+			}
+
+			if (item == '\r')
+			{
+				var c = PeekOrDefaultChar();
+				if (c != null && c.Value == '\n') ReadChar();
+			}
+			break;
+		}
+		return sb.ToString();
+	}
+
+	private string ReadUntilSingleQuote()
+	{
+		using var sb = ZString.CreateStringBuilder();
+		foreach (var item in ReadChars())
+		{
+			sb.Append(item);
+			if (item == '\'')
+			{
+				if (PeekOrDefaultChar() == '\'')
+				{
+					sb.Append(ReadChar());
+					continue;
+				}
+				return sb.ToString();
+			}
+		}
+		throw new SyntaxException("single quote is not closed.");
 	}
 }

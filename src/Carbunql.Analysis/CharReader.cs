@@ -12,41 +12,16 @@ public class CharReader : IDisposable
 		Reader = new StringReader(Text);
 	}
 
-	public IEnumerable<char> SpaceChars { get; set; } = " \r\n\t".ToArray();
-
 	public string Text { get; init; }
 
 	private StringReader Reader { get; init; }
 
-	public char? PeekOrDefault()
+	protected char? PeekOrDefaultChar()
 	{
 		var i = Reader.Peek();
 		if (i < 0) return null;
 		return (char)i;
 	}
-
-	public char? TryReadChar(char expect)
-	{
-		var c = PeekOrDefault();
-		if (c == expect) return ReadChar();
-		return null;
-	}
-
-	//public bool PeekAreEqual(char expect) => PeekOrDefault() == expect;
-
-	//public IEnumerable<char> ReadUntil(Func<char, bool> untilFn) => ReadWhile(x => !untilFn(x));
-
-	public IEnumerable<char> ReadWhile(Func<char, bool> whileFn)
-	{
-		var c = PeekOrDefault();
-		while (c != null && whileFn(c.Value))
-		{
-			yield return ReadChar();
-			c = PeekOrDefault();
-		}
-	}
-
-	public IEnumerable<char> ReadChars() => ReadWhile((_) => true);
 
 	public char ReadChar()
 	{
@@ -55,56 +30,23 @@ public class CharReader : IDisposable
 		return (char)i;
 	}
 
-	public string ReadWhileSpace()
+	public char? TryReadChar(char expect)
 	{
-		using var sb = ZString.CreateStringBuilder();
-		foreach (var item in ReadWhile(x => SpaceChars.Contains(x)))
-		{
-			sb.Append(item);
-		}
-		return sb.ToString();
+		var c = PeekOrDefaultChar();
+		if (c == expect) return ReadChar();
+		return null;
 	}
 
-	public string ReadUntilSingleQuote()
+	public IEnumerable<char> ReadChars() => ReadChars((_) => true);
+
+	public IEnumerable<char> ReadChars(Func<char, bool> whileFn)
 	{
-		using var sb = ZString.CreateStringBuilder();
-		foreach (var item in ReadChars())
+		var c = PeekOrDefaultChar();
+		while (c != null && whileFn(c.Value))
 		{
-			sb.Append(item);
-			if (item == '\'')
-			{
-				if (PeekOrDefault() == '\'')
-				{
-					sb.Append(ReadChar());
-					continue;
-				}
-				return sb.ToString();
-			}
+			yield return ReadChar();
+			c = PeekOrDefaultChar();
 		}
-		throw new SyntaxException("single quote is not closed.");
-	}
-
-	public void SkipSpace() => ReadWhile(x => SpaceChars.Contains(x)).ToList();
-
-	public string ReadUntilLineEnd()
-	{
-		using var sb = ZString.CreateStringBuilder();
-		foreach (var item in ReadChars())
-		{
-			if (item != '\n' && item != '\r')
-			{
-				sb.Append(item);
-				continue;
-			}
-
-			if (item == '\r')
-			{
-				var c = PeekOrDefault();
-				if (c != null && c.Value == '\n') ReadChar();
-			}
-			break;
-		}
-		return sb.ToString();
 	}
 
 	protected virtual void Dispose(bool disposing)
