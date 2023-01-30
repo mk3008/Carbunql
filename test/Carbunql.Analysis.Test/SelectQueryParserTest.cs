@@ -65,7 +65,6 @@ select
 		Monitor.Log(item);
 
 		var lst = item.GetTokens().ToList();
-
 		Assert.Equal(26, lst.Count);
 
 		Assert.Equal(",", lst[8].Text);
@@ -114,6 +113,9 @@ from
 		if (item == null) throw new Exception();
 
 		Monitor.Log(item);
+
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(132, lst.Count);
 	}
 
 
@@ -137,6 +139,9 @@ from
 		if (item == null) throw new Exception();
 		Monitor.Log(item);
 
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(78, lst.Count);
+
 		Assert.NotNull(item.SelectClause);
 		Assert.Equal(5, item.SelectClause!.Count);
 		Assert.Equal(3, item.FromClause!.Relations!.Count());
@@ -154,6 +159,7 @@ select * from a inner join b on a.id = b.id";
 
 		var lst = item.GetTokens().ToList();
 		Assert.Equal(14, lst.Count);
+
 		Assert.Equal("a", lst[3].Text);
 		Assert.Equal("inner join", lst[4].Text);
 		Assert.Equal("b", lst[5].Text);
@@ -170,6 +176,7 @@ select * from a inner join b on a.id = b.id";
 
 		var lst = item.GetTokens().ToList();
 		Assert.Equal(14, lst.Count);
+
 		Assert.Equal("a", lst[3].Text);
 		Assert.Equal(",", lst[4].Text);
 		Assert.Equal("b", lst[5].Text);
@@ -196,6 +203,9 @@ having
 		var item = QueryParser.Parse(text) as SelectQuery;
 		if (item == null) throw new Exception();
 		Monitor.Log(item);
+
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(47, lst.Count);
 
 		Assert.NotNull(item.SelectClause);
 		Assert.Equal(3, item.SelectClause!.Count);
@@ -226,6 +236,9 @@ from
 		var item = QueryParser.Parse(text) as SelectQuery;
 		if (item == null) throw new Exception();
 		Monitor.Log(item);
+
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(26, lst.Count);
 	}
 
 	[Fact]
@@ -253,6 +266,9 @@ from
 		var item = QueryParser.Parse(text);
 		Monitor.Log(item);
 
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(28, lst.Count);
+
 		Assert.IsType<CTEQuery>(item);
 		var cte = (CTEQuery)item;
 		Assert.NotNull(cte.Query);
@@ -271,6 +287,9 @@ limit 10";
 		var item = QueryParser.Parse(text) as SelectQuery;
 		if (item == null) throw new Exception();
 		Monitor.Log(item);
+
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(10, lst.Count);
 	}
 
 	[Fact]
@@ -289,6 +308,7 @@ limit 10";
 
 		var lst = item.GetTokens().ToList();
 		Assert.Equal(8, lst.Count());
+
 		Assert.Equal("from", lst[4].Text);
 		Assert.Equal("table_a", lst[5].Text);
 		Assert.Equal("limit", lst[6].Text);
@@ -308,6 +328,9 @@ limit 10 offset 3";
 		var item = QueryParser.Parse(text) as SelectQuery;
 		if (item == null) throw new Exception();
 		Monitor.Log(item);
+
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(12, lst.Count);
 	}
 
 	[Fact]
@@ -323,6 +346,9 @@ limit 3, 10";
 		var item = QueryParser.Parse(text) as SelectQuery;
 		if (item == null) throw new Exception();
 		Monitor.Log(item);
+
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(12, lst.Count);
 	}
 
 	[Fact]
@@ -330,11 +356,12 @@ limit 3, 10";
 	{
 		var text = @"SELECT current_date + s.a AS dates FROM generate_series(0,14,7) AS s(a)";
 
-		var item = QueryParser.Parse(text) as SelectQuery;
+		var item = QueryParser.Parse(text);
 		if (item == null) throw new Exception();
 		Monitor.Log(item);
 
-		Assert.Equal(22, item.GetTokens().ToList().Count);
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(22, lst.Count);
 	}
 
 	[Fact]
@@ -417,7 +444,8 @@ order by
 		var item = QueryParser.Parse(text);
 		Monitor.Log(item);
 
-		Assert.Equal(324, item.GetTokens().ToList().Count);
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(323, lst.Count);
 
 		Assert.IsType<CTEQuery>(item);
 		var cte = (CTEQuery)item;
@@ -437,5 +465,8 @@ limit 10";
 		var item = QueryParser.Parse(text) as SelectQuery;
 		if (item == null) throw new Exception();
 		Monitor.Log(item);
+
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(6, lst.Count);
 	}
 }

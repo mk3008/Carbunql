@@ -20,8 +20,8 @@ public class ValueParserTest
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
 
-		//Assert.Equal("col", v.GetCommandText());
-		//Assert.Equal("col", v.GetDefaultName());
+		var lst = v.GetTokens().ToList();
+		Assert.Single(lst);
 	}
 
 	[Fact]
@@ -31,8 +31,8 @@ public class ValueParserTest
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
 
-		//Assert.Equal("tbl.col", v.GetCommandText());
-		//Assert.Equal("col", v.GetDefaultName());
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(3, lst.Count);
 	}
 
 	[Fact]
@@ -42,7 +42,8 @@ public class ValueParserTest
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
 
-		//Assert.Equal("3.14", v.GetCommandText());
+		var lst = v.GetTokens().ToList();
+		Assert.Single(lst);
 	}
 
 	[Fact]
@@ -54,7 +55,8 @@ public class ValueParserTest
 
 		Assert.IsType<LiteralValue>(v);
 
-		//Assert.Equal("3.14", v.GetCommandText());
+		var lst = v.GetTokens().ToList();
+		Assert.Single(lst);
 	}
 
 	[Fact]
@@ -64,7 +66,8 @@ public class ValueParserTest
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
 
-		//Assert.Equal("'abc''s'", v.GetCommandText());
+		var lst = v.GetTokens().ToList();
+		Assert.Single(lst);
 	}
 
 	[Fact]
@@ -74,7 +77,8 @@ public class ValueParserTest
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
 
-		//Assert.Equal("true", v.GetCommandText());
+		var lst = v.GetTokens().ToList();
+		Assert.Single(lst);
 	}
 
 	[Fact]
@@ -84,7 +88,8 @@ public class ValueParserTest
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
 
-		//Assert.Equal("false", v.GetCommandText());
+		var lst = v.GetTokens().ToList();
+		Assert.Single(lst);
 	}
 
 	[Fact]
@@ -93,6 +98,9 @@ public class ValueParserTest
 		var text = "1*3.14";
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(3, lst.Count);
 
 		Assert.IsType<LiteralValue>(v);
 		var lv = (LiteralValue)v;
@@ -111,6 +119,9 @@ public class ValueParserTest
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
 
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(3, lst.Count);
+
 		Assert.IsType<LiteralValue>(v);
 		var lv = (LiteralValue)v;
 		Assert.Equal("-1", lv.CommandText);
@@ -128,8 +139,8 @@ public class ValueParserTest
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
 
-		//Assert.Equal("tbl.col1 * tbl.col2", v.GetCommandText());
-		//Assert.Equal("", v.GetDefaultName());
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(7, lst.Count);
 	}
 
 	[Fact]
@@ -139,7 +150,8 @@ public class ValueParserTest
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
 
-		//Assert.Equal("(1 + 1) * 2", v.GetCommandText());
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(7, lst.Count);
 	}
 
 	[Fact]
@@ -149,7 +161,8 @@ public class ValueParserTest
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
 
-		//Assert.Equal("not true", v.GetCommandText());
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(2, lst.Count);
 	}
 
 	[Fact]
@@ -159,7 +172,8 @@ public class ValueParserTest
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
 
-		//Assert.Equal("not (1 + 1 = 1)", v.GetCommandText());
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(8, lst.Count);
 	}
 
 	[Fact]
@@ -169,7 +183,8 @@ public class ValueParserTest
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
 
-		//Assert.Equal("sum(tbl.col + tbl.col2)", v.GetCommandText());
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(10, lst.Count);
 	}
 
 	[Fact]
@@ -178,6 +193,9 @@ public class ValueParserTest
 		var text = "concat('a', 'b')";
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(6, lst.Count);
 
 		Assert.IsType<FunctionValue>(v);
 		var lv = (FunctionValue)v;
@@ -192,6 +210,9 @@ public class ValueParserTest
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
 
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(6, lst.Count);
+
 		Assert.IsType<FunctionValue>(v);
 		var lv = (FunctionValue)v;
 		Assert.Equal("concat", lv.Name);
@@ -199,17 +220,18 @@ public class ValueParserTest
 	}
 
 	[Fact]
-	public void WindowFunction()
+	public void WindowFunction_PartitionByOrderBy()
 	{
 		var text = "row_number() over(partition by tbl.col, tbl.col2 order by tbl.col3, tbl.col4)";
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
 
-		//Assert.Equal("row_number() over(partition by tbl.col, tbl.col2 order by tbl.col3, tbl.col4)", v.GetCommandText());
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(22, lst.Count);
 	}
 
 	[Fact]
-	public void WindowFunction2()
+	public void WindowFunction_OrderBy()
 	{
 		var text = "row_number() over(order by tbl.col, tbl.col2)";
 		var v = ValueParser.Parse(text);
@@ -217,8 +239,17 @@ public class ValueParserTest
 
 		var lst = v.GetTokens().ToList();
 		Assert.Equal(14, lst.Count);
+	}
 
-		//Assert.Equal("row_number() over(order by tbl.col, tbl.col2)", v.GetCommandText());
+	[Fact]
+	public void WindowFunction_Argument()
+	{
+		var text = "sum(d.tax) over (partition by d.tax_rate)";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(13, lst.Count);
 	}
 
 	[Fact]
@@ -231,7 +262,6 @@ public class ValueParserTest
 		var lst = v.GetTokens().ToList();
 		Assert.Equal(15, lst.Count);
 	}
-
 
 	[Fact]
 	public void CaseExpression_Upper()
@@ -253,8 +283,6 @@ public class ValueParserTest
 
 		var lst = v.GetTokens().ToList();
 		Assert.Equal(20, lst.Count);
-
-		//Assert.Equal("case when tbl.col1 = 1 then 10 when tbl.col2 = 2 then 20 else 30 end", v.GetCommandText());
 	}
 
 	[Fact]
@@ -263,6 +291,9 @@ public class ValueParserTest
 		var text = "(select a.val from table_a a where a.id = b.table_a_id)";
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(18, lst.Count);
 
 		Assert.IsType<InlineQuery>(v);
 	}
@@ -274,10 +305,10 @@ public class ValueParserTest
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
 
-		Assert.IsType<ExistsExpression>(v);
-
 		var lst = v.GetTokens().ToList();
 		Assert.Equal(17, lst.Count);
+
+		Assert.IsType<ExistsExpression>(v);
 	}
 
 	[Fact]
@@ -287,10 +318,10 @@ public class ValueParserTest
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
 
-		Assert.IsType<ExistsExpression>(v);
-
 		var lst = v.GetTokens().ToList();
 		Assert.Equal(17, lst.Count);
+
+		Assert.IsType<ExistsExpression>(v);
 	}
 
 	[Fact]
@@ -301,6 +332,9 @@ public class ValueParserTest
 		Monitor.Log(v);
 
 		Assert.IsType<InExpression>(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(10, lst.Count);
 	}
 
 	[Fact]
@@ -323,10 +357,10 @@ public class ValueParserTest
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
 
-		Assert.IsType<FunctionValue>(v);
-
 		var lst = v.GetTokens().ToList();
 		Assert.Equal(8, lst.Count);
+
+		Assert.IsType<FunctionValue>(v);
 	}
 
 	[Fact]
@@ -335,6 +369,9 @@ public class ValueParserTest
 		var text = "a.id between 1 and 2";
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(7, lst.Count);
 	}
 
 	[Fact]
@@ -343,6 +380,9 @@ public class ValueParserTest
 		var text = "a.name like 'test%'";
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(5, lst.Count);
 	}
 
 	[Fact]
@@ -365,5 +405,29 @@ public class ValueParserTest
 
 		var lst = v.GetTokens().ToList();
 		Assert.Equal(5, lst.Count);
+	}
+
+	[Fact]
+	public void Sufix()
+	{
+		var text = "'2000-01-01'::timestamp";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(2, lst.Count);
+	}
+
+	[Fact]
+	public void SufixBracket()
+	{
+		var text = "'3.14'::numeric(8,2)";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(2, lst.Count);
+
+		Assert.Equal("::numeric(8, 2)", lst[1].Text);
 	}
 }
