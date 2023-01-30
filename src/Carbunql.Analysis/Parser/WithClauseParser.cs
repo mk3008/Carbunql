@@ -13,9 +13,9 @@ public static class WithClauseParser
 
 	public static WithClause Parse(ITokenReader r)
 	{
-		r.ReadToken("with");
+		r.Read("with");
 
-		var recursive = r.TryReadToken("recursive") != null ? true : false;
+		var recursive = r.ReadOrDefault("recursive") != null ? true : false;
 		return new WithClause(ParseCommonTables(r).ToList()) { HasRecursiveKeyword = recursive };
 	}
 
@@ -23,9 +23,9 @@ public static class WithClauseParser
 	{
 		do
 		{
-			if (r.PeekRawToken().AreEqual(",")) r.ReadToken();
+			if (r.Peek().AreEqual(",")) r.Read();
 			yield return CommonTableParser.Parse(r);
 		}
-		while (r.PeekRawToken().AreEqual(","));
+		while (r.Peek().AreEqual(","));
 	}
 }

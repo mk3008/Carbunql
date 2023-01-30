@@ -22,16 +22,16 @@ public static class SelectableTableParser
 	public static SelectableTable Parse(ITokenReader r)
 	{
 		var v = TableParser.Parse(r);
-		var t = r.PeekRawToken();
-		if (t == null || t.AreContains(ReservedText.All(ReservedTokenFilter)))
+		var t = r.Peek();
+		if (string.IsNullOrEmpty(t) || t.AreContains(ReservedText.All(ReservedTokenFilter)))
 		{
 			return new SelectableTable(v, v.GetDefaultName());
 		}
 
-		r.TryReadToken("as");
-		var alias = r.ReadToken();
+		r.ReadOrDefault("as");
+		var alias = r.Read();
 
-		if (!r.PeekRawToken().AreEqual("("))
+		if (!r.Peek().AreEqual("("))
 		{
 			return new SelectableTable(v, alias);
 		}

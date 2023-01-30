@@ -14,16 +14,16 @@ public static class WindowFunctionParser
 
 	public static WindowFunction ParseAsInner(ITokenReader r)
 	{
-		r.ReadToken("(");
-		var ir = new InnerTokenReader(r);
+		r.Read("(");
+		var ir = new BracketInnerTokenReader(r);
 		var v = Parse(ir);
 		return v;
 	}
 
 	public static WindowFunction Parse(ITokenReader r)
 	{
-		r.TryReadToken("(");
-		var token = r.ReadToken();
+		r.ReadOrDefault("(");
+		var token = r.Read();
 
 		var winfn = new WindowFunction();
 		do
@@ -36,7 +36,7 @@ public static class WindowFunctionParser
 			{
 				winfn.OrderBy = OrderClauseParser.Parse(r);
 			}
-			token = r.ReadToken();
+			token = r.Read();
 		} while (!string.IsNullOrEmpty(token) && !token.AreEqual(")"));
 
 		return winfn;

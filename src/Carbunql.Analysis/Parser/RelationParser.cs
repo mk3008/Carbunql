@@ -13,18 +13,18 @@ public static class RelationParser
 
 	public static Relation Parse(ITokenReader r)
 	{
-		if (r.PeekRawToken().AreContains((x) =>
+		if (r.Peek().AreContains((x) =>
 		{
 			if (x.AreEqual(ReservedText.Cross)) return true;
 			if (x.AreEqual(ReservedText.Comma)) return true;
 			return false;
 		}))
 		{
-			var join = r.ReadToken();
+			var join = r.Read();
 			var table = SelectableTableParser.Parse(r);
 			return new Relation(table, join);
 		}
-		else if (r.PeekRawToken().AreContains((x) =>
+		else if (r.Peek().AreContains((x) =>
 		{
 			if (x.AreEqual(ReservedText.Inner)) return true;
 			if (x.AreEqual(ReservedText.Left)) return true;
@@ -32,9 +32,9 @@ public static class RelationParser
 			return false;
 		}))
 		{
-			var join = r.ReadToken();
+			var join = r.Read();
 			var table = SelectableTableParser.Parse(r);
-			r.ReadToken("on");
+			r.Read("on");
 			var val = ValueParser.Parse(r);
 			return new Relation(table, join, val);
 		}

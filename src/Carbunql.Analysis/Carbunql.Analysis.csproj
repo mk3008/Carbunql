@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="TokenReaderold.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Carbunql\Carbunql.csproj" />
   </ItemGroup>
 

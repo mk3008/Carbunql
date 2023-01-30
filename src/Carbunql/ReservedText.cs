@@ -9,9 +9,9 @@ public static class ReservedText
 	public static string Select => "select";
 	public static string From => "from";
 	public static string Where => "where";
-	public static string Group => "group";
+	public static string Group => "group by";
 	public static string Having => "having";
-	public static string Order => "order";
+	public static string Order => "order by";
 	public static string Union => "union";
 	public static string Minus => "minus";
 	public static string Except => "except";
@@ -25,10 +25,10 @@ public static class ReservedText
 	public static string And => "and";
 	public static string Or => "or";
 	public static string On => "on";
-	public static string Inner => "inner";
-	public static string Left => "left";
-	public static string Right => "right";
-	public static string Cross => "cross";
+	public static string Inner => "inner join";
+	public static string Left => "left join";
+	public static string Right => "right join";
+	public static string Cross => "cross join";
 	public static IEnumerable<string> All()
 	{
 		yield return Comma;

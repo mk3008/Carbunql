@@ -14,30 +14,41 @@ public static class CaseExpressionParser
 
 	public static CaseExpression Parse(ITokenReader r)
 	{
-		var c = ParseCaseExpression(r);
+		var exp = ParseCaseExpression(r);
 
-		var ir = new InnerTokenReader(r, "end");
-		foreach (var w in WhenExpressionParser.Parse(ir))
+		foreach (var w in ParseWhenExpressions(r))
 		{
-			c.WhenExpressions.Add(w);
+			exp.WhenExpressions.Add(w);
 		}
-		return c;
+		r.Read("end");
+
+		return exp;
 	}
 
 	private static CaseExpression ParseCaseExpression(ITokenReader r)
 	{
-		r.TryReadToken("case");
+		r.ReadOrDefault("case");
 
-		var ir = new InnerTokenReader(r, "when");
-		var t = ir.PeekRawToken();
-		if (t.AreEqual("when"))
+		if (r.Peek().AreEqual("when"))
 		{
 			return new CaseExpression();
 		}
 		else
 		{
-			var cnd = ValueParser.Parse(ir);
-			return new CaseExpression(cnd);
+			var v = ValueParser.Parse(r);
+			return new CaseExpression(v);
 		}
+	}
+
+	private static IEnumerable<WhenExpression> ParseWhenExpressions(ITokenReader r)
+	{
+		var lst = new List<WhenExpression>();
+		do
+		{
+			lst.Add(WhenExpressionParser.Parse(r));
+		}
+		while (r.Peek().AreContains(new string[] { "when", "else" }));
+
+		return lst;
 	}
 }

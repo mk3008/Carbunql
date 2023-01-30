@@ -19,13 +19,18 @@ public static class ValueCollectionParser
 
 	public static ValueCollection ParseAsInner(ITokenReader r)
 	{
-		r.TryReadToken("(");
-		var ir = new InnerTokenReader(r);
-		if (ir.PeekRawToken().AreEqual(")")){
-			ir.ReadToken(")");
+		r.ReadOrDefault("(");
+
+		// no argument. '()'
+		if (r.Peek().AreEqual(")"))
+		{
+			r.Read(")");
 			return new ValueCollection();
 		}
+
+		var ir = new BracketInnerTokenReader(r);
 		var v = new ValueCollection(ReadValues(ir).ToList());
+		r.ReadOrDefault(")");
 		return v;
 	}
 
@@ -33,9 +38,9 @@ public static class ValueCollectionParser
 	{
 		do
 		{
-			if (r.PeekRawToken().AreEqual(",")) r.ReadToken();
+			if (r.Peek().AreEqual(",")) r.Read();
 			yield return ValueParser.Parse(r);
 		}
-		while (r.PeekRawToken().AreEqual(","));
+		while (r.Peek().AreEqual(","));
 	}
 }

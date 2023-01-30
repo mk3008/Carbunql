@@ -8,21 +8,24 @@ public class VirtualTableParser
 {
 	public static VirtualTable Parse(ITokenReader r)
 	{
-		r.ReadToken("(");
-		var ir = new InnerTokenReader(r);
+		r.Read("(");
 
-		var first = ir.PeekRawToken();
+		var first = r.Peek();
 
 		if (first == null) throw new NotSupportedException();
 
 		//virtualTable
 		if (first.AreEqual("select"))
 		{
-			return new VirtualTable(SelectQueryParser.Parse(ir));
+			var t = new VirtualTable(SelectQueryParser.Parse(r));
+			r.ReadOrDefault(")");
+			return t;
 		}
 		else if (first.AreEqual("values"))
 		{
-			return new VirtualTable(ValuesClauseParser.Parse(ir));
+			var t = new VirtualTable(ValuesClauseParser.Parse(r));
+			r.Read(")");
+			return t;
 		}
 		throw new NotSupportedException();
 	}

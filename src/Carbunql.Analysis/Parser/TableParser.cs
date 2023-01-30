@@ -14,22 +14,22 @@ public static class TableParser
 
 	public static TableBase Parse(ITokenReader r)
 	{
-		if (r.PeekRawToken().AreEqual("("))
+		if (r.Peek().AreEqual("("))
 		{
 			return VirtualTableParser.Parse(r);
 		}
 
-		var item = r.ReadToken();
+		var item = r.Read();
 
-		if (r.PeekRawToken().AreEqual("."))
+		if (r.Peek().AreEqual("."))
 		{
 			//schema.table
 			var schema = item;
-			r.ReadToken(".");
-			return new PhysicalTable(schema, r.ReadToken());
+			r.Read(".");
+			return new PhysicalTable(schema, r.Read());
 		}
 
-		if (r.PeekRawToken().AreEqual("("))
+		if (r.Peek().AreEqual("("))
 		{
 			return FunctionTableParser.Parse(r, item);
 		}

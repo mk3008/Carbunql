@@ -14,13 +14,13 @@ public static class SelectableItemParser
 	public static SelectableItem Parse(ITokenReader r)
 	{
 		var v = ValueParser.Parse(r);
-		r.TryReadToken("as");
+		r.ReadOrDefault("as");
 
-		if (r.PeekRawToken().AreContains(ReservedText.All()))
+		if (r.Peek().AreContains(ReservedText.All()))
 		{
 			return new SelectableItem(v, v.GetDefaultName());
 		}
 
-		return new SelectableItem(v, r.ReadToken());
+		return new SelectableItem(v, r.Read());
 	}
 }

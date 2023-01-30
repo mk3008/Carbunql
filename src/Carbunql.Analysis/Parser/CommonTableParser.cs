@@ -14,24 +14,24 @@ public static class CommonTableParser
 
 	public static CommonTable Parse(ITokenReader r)
 	{
-		var alias = r.ReadToken();
+		var alias = r.Read();
 		ValueCollection? colAliases = null;
-		if (r.PeekRawToken().AreEqual("("))
+		if (r.Peek().AreEqual("("))
 		{
 			colAliases = ValueCollectionParser.ParseAsInner(r);
 		}
 
-		r.ReadToken("as");
+		r.Read("as");
 
 		var material = Materialized.Undefined;
-		if (r.PeekRawToken().AreEqual("materialized"))
+		if (r.Peek().AreEqual("materialized"))
 		{
-			r.ReadToken("materialized");
+			r.Read("materialized");
 			material = Materialized.Materialized;
 		}
-		else if (r.PeekRawToken().AreEqual("not"))
+		else if (r.Peek().AreEqual("not materialized"))
 		{
-			r.ReadToken("not");
+			r.Read("not materialized");
 			material = Materialized.NotMaterialized;
 		}
 

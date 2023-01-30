@@ -15,12 +15,12 @@ public static class FunctionValueParser
 	{
 		var arg = ValueCollectionParser.ParseAsInner(r);
 
-		if (!r.PeekRawToken().AreEqual("over"))
+		if (!r.Peek().AreEqual("over"))
 		{
 			return new FunctionValue(functionName, arg);
 		}
 
-		r.ReadToken("over");
+		r.Read("over");
 		var winfn = WindowFunctionParser.Parse(r);
 		return new FunctionValue(functionName, arg, winfn);
 	}

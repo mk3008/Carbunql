@@ -14,9 +14,9 @@ public static class InExpressionParser
 
 	public static InExpression Parse(ValueBase value, ITokenReader r)
 	{
-		r.ReadToken("(");
-		var ir = new InnerTokenReader(r);
-		var first = ir.PeekRawToken();
+		r.Read("(");
+		var ir = new BracketInnerTokenReader(r);
+		var first = ir.Peek();
 		if (first == null) throw new NotSupportedException();
 
 		if (first.AreEqual("select"))

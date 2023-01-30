@@ -15,15 +15,15 @@ public static class ValueParser
 
 	public static ValueBase Parse(ITokenReader r)
 	{
-		var operatorTokens = new string[] { "+", "-", "*", "/", "=", "!=", ">", "<", "<>", ">=", "<=", "||", "&", "|", "^", "#", "~", "and", "or", "is" };
+		var operatorTokens = new string[] { "+", "-", "*", "/", "=", "!=", ">", "<", "<>", ">=", "<=", "||", "&", "|", "^", "#", "~", "and", "or", "is", "is not" };
 
 		ValueBase value = ParseMain(r);
 		var sufix = TryReadSufix(r);
 		if (sufix != null) value.Sufix = sufix;
 
-		if (r.PeekRawToken().AreContains(operatorTokens))
+		if (r.Peek().AreContains(operatorTokens))
 		{
-			var op = r.ReadToken();
+			var op = r.Read();
 			value.AddOperatableValue(op, Parse(r));
 		}
 		return value;
@@ -32,15 +32,15 @@ public static class ValueParser
 	private static ValueBase ParseMain(ITokenReader r)
 	{
 		var v = ParseCore(r);
-		if (r.TryReadToken("between") != null)
+		if (r.ReadOrDefault("between") != null)
 		{
 			return BetweenExpressionParser.Parse(v, r);
 		}
-		if (r.TryReadToken("like") != null)
+		if (r.ReadOrDefault("like") != null)
 		{
 			return LikeExpressionParser.Parse(v, r);
 		}
-		if (r.TryReadToken("in") != null)
+		if (r.ReadOrDefault("in") != null)
 		{
 			return InExpressionParser.Parse(v, r);
 		}
@@ -49,15 +49,12 @@ public static class ValueParser
 
 	internal static ValueBase ParseCore(ITokenReader r)
 	{
-		//var breaktokens = ITokenReader.BreakTokens;
-
-		var item = r.ReadToken();
+		var item = r.Read();
 
 		if (item.AreEqual("not"))
 		{
 			return new NegativeValue(Parse(r));
 		}
-
 		if (item.IsNumeric() || item.StartsWith("'") || item.AreEqual("true") || item.AreEqual("false"))
 		{
 			return new LiteralValue(item);
@@ -73,8 +70,8 @@ public static class ValueParser
 
 		if (item == "(")
 		{
-			var innerReader = new InnerTokenReader(r);
-			var pt = innerReader.PeekRawToken();
+			var innerReader = new BracketInnerTokenReader(r);
+			var pt = innerReader.Peek();
 
 			ValueBase? v = null;
 			if (pt.AreEqual("select"))
@@ -84,14 +81,14 @@ public static class ValueParser
 			else
 			{
 				v = new BracketValue(Parse(innerReader));
+				r.ReadOrDefault(")");
 			}
 			return v;
 		}
 
 		if (item.AreEqual("case"))
 		{
-			var ir = new InnerTokenReader(r, "end");
-			return CaseExpressionParser.Parse(ir);
+			return CaseExpressionParser.Parse(r);
 		}
 
 		if (item.AreEqual("exists"))
@@ -99,17 +96,19 @@ public static class ValueParser
 			return new ExistsExpression(SelectQueryParser.ParseAsInner(r));
 		}
 
-		if (r.PeekRawToken().AreEqual("("))
+		if (r.Peek().AreEqual("("))
 		{
-			return FunctionValueParser.Parse(r, item);
+			var t = FunctionValueParser.Parse(r, item);
+			r.ReadOrDefault(")");
+			return t;
 		}
 
-		if (r.PeekRawToken().AreEqual("."))
+		if (r.Peek().AreEqual("."))
 		{
 			//table.column
 			var table = item;
-			r.ReadToken(".");
-			return new ColumnValue(table, r.ReadToken());
+			r.Read(".");
+			return new ColumnValue(table, r.Read());
 		}
 
 		//omit table column
@@ -118,15 +117,16 @@ public static class ValueParser
 
 	private static string? TryReadSufix(ITokenReader r)
 	{
-		if (!r.PeekRawToken().AreEqual(":")) return null;
-		var sufix = r.ReadToken(":");
-		if (!r.PeekRawToken().AreEqual("(")) return sufix;
+		//ex ::timestamp, ::numeric(8)
+		if (!r.Peek().StartsWith("::")) return null;
+		var sufix = r.Read();
+		if (!r.Peek().AreEqual("(")) return sufix;
 
-		r.ReadToken("(");
-		//var (_, inner) = r.ReadUntilCloseBracket();
+		r.Read("(");
 
-		var innerReader = new InnerTokenReader(r);
-		var v = ValueParser.Parse(innerReader);
+		var innerReader = new BracketInnerTokenReader(r);
+		var v = ValueCollectionParser.Parse(innerReader);
+		r.ReadOrDefault(")");
 
 		return sufix + "(" + v.ToText() + ")";
 	}
@@ -135,7 +135,7 @@ public static class ValueParser
 	{
 		using var inner = ZString.CreateStringBuilder();
 
-		var word = r.ReadToken();
+		var word = r.Read();
 		while (!string.IsNullOrEmpty(word))
 		{
 			inner.Append(word);
@@ -147,7 +147,7 @@ public static class ValueParser
 			{
 				inner.Append(ReadUntilCaseExpressionEnd(r));
 			}
-			word = r.ReadToken();
+			word = r.Read();
 		}
 
 		throw new SyntaxException("case expression is not end");

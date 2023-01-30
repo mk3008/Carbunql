@@ -16,14 +16,13 @@ internal static class ValuesClauseParser
 	{
 		var fn = () =>
 		{
-			if (!r.PeekRawToken().AreEqual(",")) return false;
-			r.ReadToken(",");
-			r.ReadToken("(");
+			if (!r.Peek().AreEqual(",")) return false;
+			r.Read(",");
+			r.Read("(");
 			return true;
 		};
 
-		r.TryReadToken("values");
-		//r.ReadToken("(");
+		r.ReadOrDefault("values");
 
 		var lst = new List<ValueCollection>();
 		do

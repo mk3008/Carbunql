@@ -5,11 +5,11 @@ namespace Carbunql.Analysis;
 
 public interface ITokenReader
 {
-	string? PeekRawToken();
+	string Peek();
 
-	string ReadToken();
+	string Read();
 
-	int CommentLevel { get; }
+	int CurrentBracketLevel { get; }
 
 	string TerminatedToken { get; }
 
@@ -18,41 +18,27 @@ public interface ITokenReader
 
 public static class ITokenReaderExtension
 {
-	public static string ReadToken(this ITokenReader source, string expectRawToken)
+	public static string Read(this ITokenReader source, string expect)
 	{
-		var s = source.PeekRawToken();
-		if (string.IsNullOrEmpty(s)) throw new SyntaxException($"expect '{expectRawToken}', actual is empty.");
-		if (!s.AreEqual(expectRawToken)) throw new SyntaxException($"expect '{expectRawToken}', actual '{s}'.");
-		return source.ReadToken();
+		var s = source.Peek();
+		if (string.IsNullOrEmpty(s)) throw new SyntaxException($"expect '{expect}', actual is empty.");
+		if (!s.AreEqual(expect)) throw new SyntaxException($"expect '{expect}', actual '{s}'.");
+		return source.Read();
 	}
 
-	public static string ReadToken(this ITokenReader source, string[] expectRawTokens)
+	public static string? ReadOrDefault(this ITokenReader source, string expect)
 	{
-		var s = source.PeekRawToken();
+		var s = source.Peek();
+		if (string.IsNullOrEmpty(s)) return null;
+		if (!s.AreEqual(expect)) return null;
+		return source.Read();
+	}
+
+	public static string Read(this ITokenReader source, IEnumerable<string> expects)
+	{
+		var s = source.Peek();
 		if (string.IsNullOrEmpty(s)) throw new SyntaxException($"token is empty.");
-		if (!s.AreContains(expectRawTokens)) throw new SyntaxException($"near '{s}'.");
-		return source.ReadToken();
-	}
-
-	public static string ReadToken(this ITokenReader source, IEnumerable<string> expectRawTokens)
-	{
-		var s = source.PeekRawToken();
-		if (string.IsNullOrEmpty(s)) throw new SyntaxException($"token is empty.");
-		if (!s.AreContains(expectRawTokens)) throw new SyntaxException($"near '{s}'.");
-		return source.ReadToken();
-	}
-
-	public static string? TryReadToken(this ITokenReader source, string expectRawToken)
-	{
-		var s = source.PeekRawToken();
-		if (!s.AreEqual(expectRawToken)) return null;
-		return source.ReadToken();
-	}
-
-	public static string? TryReadToken(this ITokenReader source, string[] expectRawTokens)
-	{
-		var s = source.PeekRawToken();
-		if (!s.AreContains(expectRawTokens)) return null;
-		return source.ReadToken();
+		if (!s.AreContains(expects)) throw new SyntaxException($"near '{s}'.");
+		return source.Read();
 	}
 }

@@ -14,7 +14,7 @@ public static class LimitClauseParser
 	public static LimitClause Parse(ITokenReader r)
 	{
 		var condition = ParseItems(r).ToList();
-		if (r.TryReadToken("offset") != null)
+		if (r.ReadOrDefault("offset") != null)
 		{
 			var offset = ValueParser.Parse(r);
 			return new LimitClause(condition) { Offset = offset };
@@ -26,9 +26,9 @@ public static class LimitClauseParser
 	{
 		do
 		{
-			if (r.PeekRawToken().AreEqual(",")) r.ReadToken();
+			if (r.Peek().AreEqual(",")) r.Read();
 			yield return ValueParser.Parse(r);
 		}
-		while (r.PeekRawToken().AreEqual(","));
+		while (r.Peek().AreEqual(","));
 	}
 }

@@ -16,35 +16,34 @@ public static class SortableItemParser
 		var v = ValueParser.Parse(r);
 		var isasc = true;
 
-		if (r.PeekRawToken().AreContains(ReservedText.All()))
+		if (r.Peek().AreContains(ReservedText.All()))
 		{
 			return new SortableItem(v);
 		}
 
-		if (r.PeekRawToken().AreEqual("asc"))
+		if (r.Peek().AreEqual("asc"))
 		{
-			r.ReadToken("asc");
+			r.Read("asc");
 			isasc = true;
 		}
-		else if (r.PeekRawToken().AreEqual("desc"))
+		else if (r.Peek().AreEqual("desc"))
 		{
-			r.ReadToken("desc");
+			r.Read("desc");
 			isasc = false;
 		}
 
-		if (r.PeekRawToken().AreEqual("nulls"))
+		if (r.Peek().AreEqual("nulls first"))
 		{
-			var t = r.ReadToken("nulls");
-			if (t.AreEqual("nulls first"))
-			{
-				return new SortableItem(v, isasc, NullSort.First);
-			}
-			else if (t.AreEqual("nulls last"))
-			{
-				return new SortableItem(v, isasc, NullSort.Last);
-			}
-			throw new NotSupportedException();
+			r.Read("nulls first");
+			return new SortableItem(v, isasc, NullSort.First);
 		}
+
+		if (r.Peek().AreEqual("nulls last"))
+		{
+			r.Read("nulls last");
+			return new SortableItem(v, isasc, NullSort.Last);
+		}
+
 		return new SortableItem(v, isasc, NullSort.Undefined);
 	}
 }

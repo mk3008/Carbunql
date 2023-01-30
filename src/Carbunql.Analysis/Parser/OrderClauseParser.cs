@@ -20,9 +20,9 @@ public static class OrderClauseParser
 	{
 		do
 		{
-			r.TryReadToken(",");
+			r.ReadOrDefault(",");
 			yield return SortableItemParser.Parse(r);
 		}
-		while (r.PeekRawToken().AreEqual(","));
+		while (r.Peek().AreEqual(","));
 	}
 }

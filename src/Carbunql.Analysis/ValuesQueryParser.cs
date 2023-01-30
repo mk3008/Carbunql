@@ -14,15 +14,15 @@ public static class ValuesQueryParser
 
 	internal static ValuesQuery Parse(ITokenReader r)
 	{
-		r.ReadToken("values");
+		r.Read("values");
 
 		var sq = ValuesClauseParser.Parse(r);
 		sq.OrderClause = ParseOrderOrDefault(r);
 
 		var tokens = new string[] { "union", "except", "minus", "intersect" };
-		if (r.PeekRawToken().AreContains(tokens))
+		if (r.Peek().AreContains(tokens))
 		{
-			var op = r.ReadToken();
+			var op = r.Read();
 			sq.AddOperatableValue(op, Parse(r));
 		}
 
@@ -32,13 +32,13 @@ public static class ValuesQueryParser
 
 	private static OrderClause? ParseOrderOrDefault(ITokenReader r)
 	{
-		if (r.TryReadToken("order") == null) return null;
+		if (r.ReadOrDefault("order") == null) return null;
 		return OrderClauseParser.Parse(r);
 	}
 
 	private static LimitClause? ParseLimitOrDefault(ITokenReader r)
 	{
-		if (r.TryReadToken("limit") == null) return null;
+		if (r.ReadOrDefault("limit") == null) return null;
 		return LimitClauseParser.Parse(r);
 	}
 }

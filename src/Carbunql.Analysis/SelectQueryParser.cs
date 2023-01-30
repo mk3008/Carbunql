@@ -14,8 +14,8 @@ public static class SelectQueryParser
 
 	public static SelectQuery ParseAsInner(ITokenReader r)
 	{
-		r.ReadToken("(");
-		var ir = new InnerTokenReader(r);
+		r.Read("(");
+		var ir = new BracketInnerTokenReader(r);
 		var v = Parse(ir);
 		return v;
 	}
@@ -24,7 +24,7 @@ public static class SelectQueryParser
 	{
 		var sq = new SelectQuery();
 
-		r.ReadToken("select");
+		r.Read("select");
 
 		sq.SelectClause = SelectClauseParser.Parse(r);
 		sq.FromClause = ParseFromOrDefault(r);
@@ -33,10 +33,10 @@ public static class SelectQueryParser
 		sq.HavingClause = ParseHavingOrDefault(r);
 		sq.OrderClause = ParseOrderOrDefault(r);
 
-		var tokens = new string[] { "union", "except", "minus", "intersect" };
-		if (r.PeekRawToken().AreContains(tokens))
+		var tokens = new string[] { "union", "union all", "except", "minus", "intersect" };
+		if (r.Peek().AreContains(tokens))
 		{
-			var op = r.ReadToken();
+			var op = r.Read();
 			sq.AddOperatableValue(op, Parse(r));
 		}
 
@@ -46,37 +46,37 @@ public static class SelectQueryParser
 
 	private static FromClause? ParseFromOrDefault(ITokenReader r)
 	{
-		if (r.TryReadToken("from") == null) return null;
+		if (r.ReadOrDefault("from") == null) return null;
 		return FromClauseParser.Parse(r);
 	}
 
 	private static WhereClause? ParseWhereOrDefault(ITokenReader r)
 	{
-		if (r.TryReadToken("where") == null) return null;
+		if (r.ReadOrDefault("where") == null) return null;
 		return WhereClauseParser.Parse(r);
 	}
 
 	private static GroupClause? ParseGroupOrDefault(ITokenReader r)
 	{
-		if (r.TryReadToken(new string[] { "group", "group by" }) == null) return null;
+		if (r.ReadOrDefault("group by") == null) return null;
 		return GroupClauseParser.Parse(r);
 	}
 
 	private static HavingClause? ParseHavingOrDefault(ITokenReader r)
 	{
-		if (r.TryReadToken("having") == null) return null;
+		if (r.ReadOrDefault("having") == null) return null;
 		return HavingClauseParser.Parse(r);
 	}
 
 	private static OrderClause? ParseOrderOrDefault(ITokenReader r)
 	{
-		if (r.TryReadToken("order") == null) return null;
+		if (r.ReadOrDefault("order by") == null) return null;
 		return OrderClauseParser.Parse(r);
 	}
 
 	private static LimitClause? ParseLimitOrDefault(ITokenReader r)
 	{
-		if (r.TryReadToken("limit") == null) return null;
+		if (r.ReadOrDefault("limit") == null) return null;
 		return LimitClauseParser.Parse(r);
 	}
 }
