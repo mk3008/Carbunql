@@ -1,6 +1,5 @@
 ﻿using Carbunql.Extensions;
 using Cysharp.Text;
-using System.Security.Cryptography;
 
 namespace Carbunql.Analysis;
 
@@ -62,7 +61,7 @@ public class VanillaTokenReader : LexReader
 		TokenCache = string.Empty;
 	}
 
-	private string TryReadSingleToken(string expect)
+	private string ReadSingleToken(string expect)
 	{
 		var token = Peek();
 		if (token.AreEqual(expect))
@@ -73,7 +72,7 @@ public class VanillaTokenReader : LexReader
 		throw new Exception($"expect : '{expect}', actual : '{token}'");
 	}
 
-	private string TryReadSingleToken(IEnumerable<string> expects)
+	private string ReadSingleToken(IEnumerable<string> expects)
 	{
 		var token = Peek();
 		if (token.AreContains(expects))
@@ -85,7 +84,7 @@ public class VanillaTokenReader : LexReader
 		throw new Exception($"expects : {expects}, actual : '{token}'");
 	}
 
-	private string? TryReadSingleTokenOrDefault(string? expect)
+	private string? ReadSingleTokenOrDefault(string? expect)
 	{
 		var token = Peek();
 		if (expect != null && token.AreEqual(expect))
@@ -96,7 +95,7 @@ public class VanillaTokenReader : LexReader
 		return null;
 	}
 
-	private string ReadSingleTokenOrDefault()
+	private string ReadSingleToken()
 	{
 		var token = Peek();
 		Commit();
@@ -105,20 +104,20 @@ public class VanillaTokenReader : LexReader
 
 	private string ReadAndJoinOrDefault(string basetoken, string expect)
 	{
-		var next = TryReadSingleTokenOrDefault(expect);
+		var next = ReadSingleTokenOrDefault(expect);
 		if (next == null) return basetoken;
 		return basetoken + " " + next;
 	}
 
 	private string ReadAndJoin(string basetoken, string expect)
 	{
-		var next = TryReadSingleToken(expect);
+		var next = ReadSingleToken(expect);
 		return basetoken + " " + next;
 	}
 
 	private string ReadAndJoin(string basetoken, IEnumerable<string> expects)
 	{
-		var next = TryReadSingleToken(expects);
+		var next = ReadSingleToken(expects);
 		return basetoken + " " + next;
 	}
 
@@ -146,7 +145,7 @@ public class VanillaTokenReader : LexReader
 
 	public virtual string Read()
 	{
-		var token = ReadSingleTokenOrDefault();
+		var token = ReadSingleToken();
 
 		if (string.IsNullOrEmpty(token)) return string.Empty;
 
@@ -183,7 +182,7 @@ public class VanillaTokenReader : LexReader
 			//left(), right() function
 			if (Peek().AreEqual("(")) return token;
 
-			TryReadSingleTokenOrDefault("outer");
+			ReadSingleTokenOrDefault("outer");
 			return ReadAndJoin(token, "join");
 		}
 
@@ -208,7 +207,7 @@ public class VanillaTokenReader : LexReader
 			var c = PeekOrDefaultChar();
 			if (c == ':')
 			{
-				return token + ReadSingleTokenOrDefault();
+				return token + ReadSingleToken();
 			}
 		}
 

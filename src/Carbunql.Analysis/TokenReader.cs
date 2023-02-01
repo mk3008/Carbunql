@@ -1,6 +1,5 @@
 ﻿namespace Carbunql.Analysis;
 
-
 public class TokenReader : VanillaTokenReader, ITokenReader
 {
 	public TokenReader(string text) : base(text)

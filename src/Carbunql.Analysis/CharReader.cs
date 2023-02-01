@@ -30,7 +30,7 @@ public class CharReader : IDisposable
 		return (char)i;
 	}
 
-	public char? TryReadChar(char expect)
+	public char? ReadCharOrDefault(char expect)
 	{
 		var c = PeekOrDefaultChar();
 		if (c == expect) return ReadChar();

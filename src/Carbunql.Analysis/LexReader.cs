@@ -55,28 +55,28 @@ public class LexReader : CharReader
 		// ex. | or ||
 		if (fc == '|')
 		{
-			sb.Append(TryReadChar('|'));
+			sb.Append(ReadCharOrDefault('|'));
 			return sb.ToString();
 		}
 
 		// ex. - or --
 		if (fc == '-')
 		{
-			sb.Append(TryReadChar('-'));
+			sb.Append(ReadCharOrDefault('-'));
 			return sb.ToString();
 		}
 
 		// ex. / or /*
 		if (fc == '/')
 		{
-			sb.Append(TryReadChar('*'));
+			sb.Append(ReadCharOrDefault('*'));
 			return sb.ToString();
 		}
 
 		// ex. * or */
 		if (fc == '*')
 		{
-			sb.Append(TryReadChar('/'));
+			sb.Append(ReadCharOrDefault('/'));
 			return sb.ToString();
 		}
 
