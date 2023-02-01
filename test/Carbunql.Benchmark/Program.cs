@@ -6,12 +6,12 @@ using Carbunql.Extensions;
 
 class Program
 {
-    static void Main(string[] args) => BenchmarkRunner.Run<Test>();
+	static void Main(string[] args) => BenchmarkRunner.Run<Test>();
 }
 
 public class Test
 {
-    public static string Sql = @"with
+	public static string Sql = @"with
 dat(line_id, name, unit_price, amount, tax_rate) as ( 
     values
     (1, 'apple' , 105, 5, 0.07),
@@ -85,40 +85,40 @@ order by
     line_id";
 
 
-    private SqModel.SelectQuery sqmodel = SqModel.Analysis.SqlParser.Parse(Sql);
+	private SqModel.SelectQuery sqmodel = SqModel.Analysis.SqlParser.Parse(Sql);
 
-    [Benchmark]
-    public string SqModelParse()
-    {
-        var sq = SqModel.Analysis.SqlParser.Parse(Sql);
-        return "success";// sq.ToQuery().CommandText;
-    }
+	[Benchmark]
+	public string SqModelParse()
+	{
+		var sq = SqModel.Analysis.SqlParser.Parse(Sql);
+		return "success";// sq.ToQuery().CommandText;
+	}
 
-    [Benchmark]
-    public string SqModelString()
-    {
-        return sqmodel.ToQuery().CommandText;
-    }
+	[Benchmark]
+	public string SqModelString()
+	{
+		return sqmodel.ToQuery().CommandText;
+	}
 
-    private ReadQuery carbunql = ReadQueryParser.Parse(Sql);
+	private IReadQuery carbunql = QueryParser.Parse(Sql);
 
-    [Benchmark]
-    public string CarbunqlParse()
-    {
-        var sq = QueryParser.Parse(Sql);
-        return "success";// sq.GetTokens().ToString(" ");
-    }
+	[Benchmark]
+	public string CarbunqlParse()
+	{
+		var sq = QueryParser.Parse(Sql);
+		return "success";// sq.GetTokens().ToString(" ");
+	}
 
-    [Benchmark]
-    public string CarbunqlString()
-    {
-        return carbunql.GetTokens(null).ToText();
-    }
+	[Benchmark]
+	public string CarbunqlString()
+	{
+		return carbunql.GetTokens(null).ToText();
+	}
 
-    [Benchmark]
-    public string CarbunqlFormatString()
-    {
-        var cmd = new CommandTextBuilder();
-        return cmd.Execute(carbunql);
-    }
+	[Benchmark]
+	public string CarbunqlFormatString()
+	{
+		var cmd = new CommandTextBuilder();
+		return cmd.Execute(carbunql);
+	}
 }
