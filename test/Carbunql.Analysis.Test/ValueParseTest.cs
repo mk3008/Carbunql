@@ -430,4 +430,15 @@ public class ValueParserTest
 
 		Assert.Equal("::numeric(8, 2)", lst[1].Text);
 	}
+
+	[Fact]
+	public void Extract()
+	{
+		var text = "extract(month from '2020-05-01'::date)";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(7, lst.Count);
+	}
 }
