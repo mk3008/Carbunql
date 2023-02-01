@@ -10,7 +10,7 @@ public class WhereClauseParser
 		return Parse(r);
 	}
 
-	public static WhereClause Parse(TokenReader r)
+	public static WhereClause Parse(ITokenReader r)
 	{
 		var val = ValueParser.Parse(r);
 		var where = new WhereClause(val);

@@ -10,7 +10,7 @@ public static class HavingClauseParser
 		return Parse(r);
 	}
 
-	public static HavingClause Parse(TokenReader r)
+	public static HavingClause Parse(ITokenReader r)
 	{
 		var val = ValueParser.Parse(r);
 		var having = new HavingClause(val);

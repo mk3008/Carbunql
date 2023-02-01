@@ -11,10 +11,10 @@ public static class BetweenExpressionParser
 		return Parse(value, r);
 	}
 
-	public static BetweenExpression Parse(ValueBase value, TokenReader r)
+	public static BetweenExpression Parse(ValueBase value, ITokenReader r)
 	{
 		var start = ValueParser.ParseCore(r);
-		r.ReadToken("and");
+		r.Read("and");
 		var end = ValueParser.ParseCore(r);
 		return new BetweenExpression(value, start, end);
 	}

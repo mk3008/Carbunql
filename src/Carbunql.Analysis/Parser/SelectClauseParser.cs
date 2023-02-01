@@ -11,12 +11,12 @@ public static class SelectClauseParser
 		return Parse(r);
 	}
 
-	public static SelectClause Parse(TokenReader r)
+	public static SelectClause Parse(ITokenReader r)
 	{
-		r.TryReadToken("select");
+		r.ReadOrDefault("select");
 
-		var distinct = r.TryReadToken("distinct") != null ? true : false;
-		if (r.TryReadToken("top") == null)
+		var distinct = r.ReadOrDefault("distinct") != null ? true : false;
+		if (r.ReadOrDefault("top") == null)
 		{
 			return new SelectClause(ParseItems(r).ToList()) { HasDistinctKeyword = distinct };
 		}
@@ -24,13 +24,13 @@ public static class SelectClauseParser
 		return new SelectClause(ParseItems(r).ToList()) { HasDistinctKeyword = distinct, Top = top };
 	}
 
-	private static IEnumerable<SelectableItem> ParseItems(TokenReader r)
+	private static IEnumerable<SelectableItem> ParseItems(ITokenReader r)
 	{
 		do
 		{
-			if (r.PeekRawToken().AreEqual(",")) r.ReadToken();
+			if (r.Peek().AreEqual(",")) r.Read();
 			yield return SelectableItemParser.Parse(r);
 		}
-		while (r.PeekRawToken().AreEqual(","));
+		while (r.Peek().AreEqual(","));
 	}
 }

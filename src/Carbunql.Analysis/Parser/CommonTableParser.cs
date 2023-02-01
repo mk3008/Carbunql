@@ -12,47 +12,37 @@ public static class CommonTableParser
 		return Parse(r);
 	}
 
-	public static CommonTable Parse(TokenReader r)
+	public static CommonTable Parse(ITokenReader r)
 	{
-		var breaktokens = TokenReader.BreakTokens;
-
-		var alias = r.ReadToken();
+		var alias = r.Read();
 		ValueCollection? colAliases = null;
-		if (r.PeekRawToken().AreEqual("("))
+		if (r.Peek().AreEqual("("))
 		{
-			r.ReadToken("(");
-			var (_, names) = r.ReadUntilCloseBracket();
-			colAliases = ValueCollectionParser.Parse(names);
+			colAliases = ValueCollectionParser.ParseAsInner(r);
 		}
 
-		r.ReadToken("as");
+		r.Read("as");
 
 		var material = Materialized.Undefined;
-		if (r.PeekRawToken().AreEqual("materialized"))
+		if (r.Peek().AreEqual("materialized"))
 		{
-			r.ReadToken("materialized");
+			r.Read("materialized");
 			material = Materialized.Materialized;
 		}
-		else if (r.PeekRawToken().AreEqual("not"))
+		else if (r.Peek().AreEqual("not materialized"))
 		{
-			r.ReadToken("not");
+			r.Read("not materialized");
 			material = Materialized.NotMaterialized;
 		}
 
-		r.ReadToken("(");
-		var (first, inner) = r.ReadUntilCloseBracket();
-		if (first.AreContains(new[] { "select", "values" }))
+		var t = VirtualTableParser.Parse(r);
+		if (colAliases != null)
 		{
-			var t = TableParser.Parse("(" + inner + ")");
-			if (colAliases != null)
-			{
-				return new CommonTable(t, alias, colAliases) { Materialized = material };
-			}
-			else
-			{
-				return new CommonTable(t, alias) { Materialized = material };
-			}
+			return new CommonTable(t, alias, colAliases) { Materialized = material };
 		}
-		throw new NotSupportedException();
+		else
+		{
+			return new CommonTable(t, alias) { Materialized = material };
+		}
 	}
 }

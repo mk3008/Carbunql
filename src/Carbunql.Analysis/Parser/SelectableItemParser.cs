@@ -11,18 +11,16 @@ public static class SelectableItemParser
 		return Parse(r);
 	}
 
-	public static SelectableItem Parse(TokenReader r)
+	public static SelectableItem Parse(ITokenReader r)
 	{
-		var breaktokens = TokenReader.BreakTokens;
-
 		var v = ValueParser.Parse(r);
-		r.TryReadToken("as");
+		r.ReadOrDefault("as");
 
-		if (r.PeekRawToken().AreContains(breaktokens))
+		if (r.Peek().AreContains(ReservedText.All()))
 		{
 			return new SelectableItem(v, v.GetDefaultName());
 		}
 
-		return new SelectableItem(v, r.ReadToken());
+		return new SelectableItem(v, r.Read());
 	}
 }

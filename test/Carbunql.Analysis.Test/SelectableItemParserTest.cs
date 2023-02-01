@@ -5,98 +5,142 @@ namespace Carbunql.Analysis.Test;
 
 public class SelectableItemParserTest
 {
-    private readonly QueryCommandMonitor Monitor;
+	private readonly QueryCommandMonitor Monitor;
 
-    public SelectableItemParserTest(ITestOutputHelper output)
-    {
-        Monitor = new QueryCommandMonitor(output);
-    }
+	public SelectableItemParserTest(ITestOutputHelper output)
+	{
+		Monitor = new QueryCommandMonitor(output);
+	}
 
-    [Fact]
-    public void NotTableColumn()
-    {
-        var text = "3.14";
-        var item = SelectableItemParser.Parse(text);
-        Monitor.Log(item);
+	[Fact]
+	public void NotTableColumn()
+	{
+		var text = "3.14";
+		var item = SelectableItemParser.Parse(text);
+		Monitor.Log(item);
 
-        //Assert.Equal("3.14", item.GetCommandText());
-        //Assert.Equal("", item.Alias);
-    }
+		var lst = item.GetTokens().ToList();
+		Assert.Single(lst);
+	}
 
-    [Fact]
-    public void NotTableColumnAlias()
-    {
-        var text = "3.14 as val";
-        var item = SelectableItemParser.Parse(text);
-        Monitor.Log(item);
+	[Fact]
+	public void NotTableColumnAlias()
+	{
+		var text = "3.14 as val";
+		var item = SelectableItemParser.Parse(text);
+		Monitor.Log(item);
 
-        //Assert.Equal("3.14 as val", item.GetCommandText());
-        //Assert.Equal("val", item.Alias);
-    }
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(3, lst.Count);
+	}
 
-    [Fact]
-    public void TableColumn()
-    {
-        var text = "t.col";
-        var item = SelectableItemParser.Parse(text);
-        Monitor.Log(item);
+	[Fact]
+	public void TableColumn()
+	{
+		var text = "t.col";
+		var item = SelectableItemParser.Parse(text);
+		Monitor.Log(item);
 
-        //Assert.Equal("t.col", item.GetCommandText());
-        //Assert.Equal("col", item.Alias);
-    }
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(3, lst.Count);
+	}
 
-    [Fact]
-    public void TableColumnAliasRedundant()
-    {
-        var text = "t.col as col";
-        var item = SelectableItemParser.Parse(text);
-        Monitor.Log(item);
+	[Fact]
+	public void TableColumnAliasRedundant()
+	{
+		var text = "t.col as col";
+		var item = SelectableItemParser.Parse(text);
+		Monitor.Log(item);
 
-        //Assert.Equal("t.col", item.GetCommandText());
-        //Assert.Equal("col", item.Alias);
-    }
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(3, lst.Count);
+	}
 
-    [Fact]
-    public void TableColumnAlias()
-    {
-        var text = "t.col as col1";
-        var item = SelectableItemParser.Parse(text);
-        Monitor.Log(item);
+	[Fact]
+	public void TableColumnAlias()
+	{
+		var text = "t.col as col1";
+		var item = SelectableItemParser.Parse(text);
+		Monitor.Log(item);
 
-        //Assert.Equal("t.col as col1", item.GetCommandText());
-        //Assert.Equal("col1", item.Alias);
-    }
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(5, lst.Count);
+	}
 
-    [Fact]
-    public void TableColumnAlias1()
-    {
-        var text = "t.col col1";
-        var item = SelectableItemParser.Parse(text);
-        Monitor.Log(item);
+	[Fact]
+	public void TableColumnAlias1()
+	{
+		var text = "t.col col1";
+		var item = SelectableItemParser.Parse(text);
+		Monitor.Log(item);
 
-        //Assert.Equal("t.col as col1", item.GetCommandText());
-        //Assert.Equal("col1", item.Alias);
-    }
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(5, lst.Count);
+	}
 
-    [Fact]
-    public void BreakToken()
-    {
-        var text = "t.col ,";
-        var item = SelectableItemParser.Parse(text);
-        Monitor.Log(item);
+	[Fact]
+	public void BreakToken()
+	{
+		var text = "t.col ,";
+		var item = SelectableItemParser.Parse(text);
+		Monitor.Log(item);
 
-        //Assert.Equal("t.col", item.GetCommandText());
-        //Assert.Equal("col", item.Alias);
-    }
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(3, lst.Count);
+	}
 
-    [Fact]
-    public void RowNumberTest()
-    {
-        var text = "row_number() over (partition by d.tax_rate order by d.raw_tax % 1 desc, d.line_id) as val";
-        var item = SelectableItemParser.Parse(text);
-        Monitor.Log(item);
+	[Fact]
+	public void RowNumberTest()
+	{
+		var text = "row_number() over (partition by d.tax_rate order by d.raw_tax % 1 desc, d.line_id) as val";
+		var item = SelectableItemParser.Parse(text);
+		Monitor.Log(item);
 
-        //Assert.Equal("t.col", item.GetCommandText());
-        //Assert.Equal("col", item.Alias);
-    }
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(16, lst.Count);
+	}
+
+	[Fact]
+	public void Calc()
+	{
+		var text = "(tbl.col1 + tbl.col2) / tbl.col3 as colcalc";
+		var item = SelectableItemParser.Parse(text);
+		Monitor.Log(item);
+
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(15, lst.Count);
+	}
+
+	[Fact]
+	public void Bracket()
+	{
+		var text = "(1) as 1";
+		var item = SelectableItemParser.Parse(text);
+		Monitor.Log(item);
+
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(5, lst.Count);
+	}
+
+	[Fact]
+	public void BracketNest()
+	{
+		var text = "(((1))) as 1";
+		var item = SelectableItemParser.Parse(text);
+		Monitor.Log(item);
+
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(9, lst.Count);
+	}
+
+	[Fact]
+	public void Function()
+	{
+		var text = "sum(a.val) as val";
+		var item = SelectableItemParser.Parse(text);
+		Monitor.Log(item);
+
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(8, lst.Count);
+	}
 }

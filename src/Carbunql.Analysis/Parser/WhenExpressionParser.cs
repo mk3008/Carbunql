@@ -1,53 +1,46 @@
-﻿using Carbunql.Extensions;
+﻿using Carbunql.Clauses;
+using Carbunql.Extensions;
 using Carbunql.Values;
+using System.Collections.Generic;
 
 namespace Carbunql.Analysis.Parser;
 
 public class WhenExpressionParser
 {
 
-	public static List<WhenExpression> Parse(string text)
+	public static WhenExpression Parse(string text)
 	{
 		using var r = new TokenReader(text);
-		return Parse(r).ToList();
+		return Parse(r);
 	}
 
-	public static IEnumerable<WhenExpression> Parse(TokenReader r)
+	public static WhenExpression Parse(ITokenReader r)
 	{
-		var token = r.ReadToken("when");
-
-		while (token.AreEqual("when"))
+		if (r.Peek().AreEqual("when"))
 		{
-			var (x, y) = ParseWhenExpression(r);
-			token = y;
-			yield return x;
-		}
+			return ParseWhen(r);
 
-		if (token.AreEqual("else"))
-		{
-			var val = ValueParser.Parse(r.ReadUntilToken("end"));
-			yield return new WhenExpression(val);
 		}
+		else if (r.Peek().AreEqual("else"))
+		{
+			return ParseElse(r);
+		}
+		throw new SyntaxException($"expects 'when', 'else'.(actual : {r.Peek()})");
 	}
 
-	private static (WhenExpression exp, string breaktoken) ParseWhenExpression(TokenReader r)
+	private static WhenExpression ParseWhen(ITokenReader r)
 	{
-		var breaktokens = new string[] { "when", "else", "end" };
-		var breaktoken = string.Empty;
+		r.Read("when");
+		var whenv = ValueParser.Parse(r);
+		r.Read("then");
+		var thenv = ValueParser.Parse(r);
+		return new WhenExpression(whenv, thenv);
+	}
 
-		var fn = (string t) =>
-		{
-			if (t.AreContains(breaktokens))
-			{
-				breaktoken = t;
-				return true;
-			}
-			return false;
-		};
-
-		var cnd = ValueParser.Parse(r.ReadUntilToken("then"));
-		var val = ValueParser.Parse(r.ReadUntilToken(fn));
-		var exp = new WhenExpression(cnd, val);
-		return (exp, breaktoken);
+	private static WhenExpression ParseElse(ITokenReader r)
+	{
+		r.Read("else");
+		var v = ValueParser.Parse(r);
+		return new WhenExpression(v);
 	}
 }

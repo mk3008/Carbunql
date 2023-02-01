@@ -1,4 +1,6 @@
-﻿using Carbunql.Values;
+﻿using Carbunql.Clauses;
+using Carbunql.Extensions;
+using Carbunql.Values;
 
 namespace Carbunql.Analysis.Parser;
 
@@ -10,28 +12,43 @@ public static class CaseExpressionParser
 		return Parse(r);
 	}
 
-	public static CaseExpression Parse(TokenReader r)
+	public static CaseExpression Parse(ITokenReader r)
 	{
-		r.ReadToken("case");
+		var exp = ParseCaseExpression(r);
 
-		var cndtext = r.ReadUntilToken("when");
-
-		CaseExpression? c = null;
-		if (string.IsNullOrEmpty(cndtext))
+		foreach (var w in ParseWhenExpressions(r))
 		{
-			c = new CaseExpression();
+			exp.WhenExpressions.Add(w);
+		}
+		r.Read("end");
+
+		return exp;
+	}
+
+	private static CaseExpression ParseCaseExpression(ITokenReader r)
+	{
+		r.ReadOrDefault("case");
+
+		if (r.Peek().AreEqual("when"))
+		{
+			return new CaseExpression();
 		}
 		else
 		{
-			var cnd = ValueParser.Parse(cndtext);
-			c = new CaseExpression(cnd);
+			var v = ValueParser.Parse(r);
+			return new CaseExpression(v);
 		}
+	}
 
-		var exptext = r.ReadUntilToken("end");
-		foreach (var w in WhenExpressionParser.Parse("when " + exptext + " end"))
+	private static IEnumerable<WhenExpression> ParseWhenExpressions(ITokenReader r)
+	{
+		var lst = new List<WhenExpression>();
+		do
 		{
-			c.WhenExpressions.Add(w);
+			lst.Add(WhenExpressionParser.Parse(r));
 		}
-		return c;
+		while (r.Peek().AreContains(new string[] { "when", "else" }));
+
+		return lst;
 	}
 }

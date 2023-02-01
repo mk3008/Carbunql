@@ -4,20 +4,20 @@ namespace Carbunql.Clauses;
 
 public class Relation : IQueryCommand
 {
-	public Relation(SelectableTable query, TableJoin types)
+	public Relation(SelectableTable query, string types)
 	{
 		Table = query;
 		TableJoin = types;
 	}
 
-	public Relation(SelectableTable query, TableJoin types, ValueBase condition)
+	public Relation(SelectableTable query, string types, ValueBase condition)
 	{
 		Table = query;
 		TableJoin = types;
 		Condition = condition;
 	}
 
-	public TableJoin TableJoin { get; init; }
+	public string TableJoin { get; init; }
 
 	public ValueBase? Condition { get; set; }
 
@@ -25,7 +25,7 @@ public class Relation : IQueryCommand
 
 	public IEnumerable<Token> GetTokens(Token? parent)
 	{
-		yield return Token.Reserved(this, parent, TableJoin.ToCommandText());
+		yield return Token.Reserved(this, parent, TableJoin);
 		foreach (var item in Table.GetTokens(parent)) yield return item;
 
 		if (Condition != null)
