@@ -10,8 +10,6 @@ public interface ITokenReader
 	string Read();
 
 	int CurrentBracketLevel { get; }
-
-	string TerminatedToken { get; }
 }
 
 public static class ITokenReaderExtension

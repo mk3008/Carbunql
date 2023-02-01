@@ -9,8 +9,6 @@ public class TokenReader : VanillaTokenReader, ITokenReader
 
 	private bool IsTeminated { get; set; } = false;
 
-	public string TerminatedToken { get; private set; } = string.Empty;
-
 	private string TokenCache { get; set; } = string.Empty;
 
 	public string Peek()
@@ -39,7 +37,6 @@ public class TokenReader : VanillaTokenReader, ITokenReader
 		if (token == ";")
 		{
 			IsTeminated = true;
-			TerminatedToken = token;
 		}
 
 		return token;

@@ -18,8 +18,6 @@ public class BracketInnerTokenReader : ITokenReader, IDisposable
 
 	private bool IsTerminated { get; set; } = false;
 
-	public string TerminatedToken { get; private set; } = string.Empty;
-
 	public string Peek()
 	{
 		if (IsTerminated) return string.Empty;
@@ -35,7 +33,6 @@ public class BracketInnerTokenReader : ITokenReader, IDisposable
 		if (token == ")" && RootBracketLevel == Reader.CurrentBracketLevel)
 		{
 			IsTerminated = true;
-			TerminatedToken = token;
 		}
 		return token;
 	}
