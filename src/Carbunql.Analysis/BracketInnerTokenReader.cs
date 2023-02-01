@@ -40,11 +40,6 @@ public class BracketInnerTokenReader : ITokenReader, IDisposable
 		return token;
 	}
 
-	public void SkipSpace()
-	{
-		Reader.SkipSpace();
-	}
-
 	public void Dispose()
 	{
 		Reader.ReadOrDefault(")");

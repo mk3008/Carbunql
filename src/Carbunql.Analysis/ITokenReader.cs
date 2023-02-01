@@ -12,8 +12,6 @@ public interface ITokenReader
 	int CurrentBracketLevel { get; }
 
 	string TerminatedToken { get; }
-
-	void SkipSpace();
 }
 
 public static class ITokenReaderExtension
