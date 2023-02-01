@@ -2,7 +2,7 @@
 
 namespace Carbunql.Analysis;
 
-public class BracketInnerTokenReader : ITokenReader
+public class BracketInnerTokenReader : ITokenReader, IDisposable
 {
 	public BracketInnerTokenReader(ITokenReader r)
 	{
@@ -43,5 +43,10 @@ public class BracketInnerTokenReader : ITokenReader
 	public void SkipSpace()
 	{
 		Reader.SkipSpace();
+	}
+
+	public void Dispose()
+	{
+		Reader.ReadOrDefault(")");
 	}
 }

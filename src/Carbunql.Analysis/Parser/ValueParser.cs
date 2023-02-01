@@ -70,18 +70,17 @@ public static class ValueParser
 
 		if (item == "(")
 		{
-			var innerReader = new BracketInnerTokenReader(r);
-			var pt = innerReader.Peek();
+			using var ir = new BracketInnerTokenReader(r);
+			var pt = ir.Peek();
 
 			ValueBase? v = null;
 			if (pt.AreEqual("select"))
 			{
-				v = new InlineQuery(SelectQueryParser.Parse(innerReader));
+				v = new InlineQuery(SelectQueryParser.Parse(ir));
 			}
 			else
 			{
-				v = new BracketValue(Parse(innerReader));
-				r.ReadOrDefault(")");
+				v = new BracketValue(Parse(ir));
 			}
 			return v;
 		}
@@ -124,9 +123,8 @@ public static class ValueParser
 
 		r.Read("(");
 
-		var innerReader = new BracketInnerTokenReader(r);
-		var v = ValueCollectionParser.Parse(innerReader);
-		r.ReadOrDefault(")");
+		using var ir = new BracketInnerTokenReader(r);
+		var v = ValueCollectionParser.Parse(ir);
 
 		return sufix + "(" + v.ToText() + ")";
 	}

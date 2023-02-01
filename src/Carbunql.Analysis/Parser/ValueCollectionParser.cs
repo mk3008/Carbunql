@@ -28,9 +28,8 @@ public static class ValueCollectionParser
 			return new ValueCollection();
 		}
 
-		var ir = new BracketInnerTokenReader(r);
+		using var ir = new BracketInnerTokenReader(r);
 		var v = new ValueCollection(ReadValues(ir).ToList());
-		r.ReadOrDefault(")");
 		return v;
 	}
 
