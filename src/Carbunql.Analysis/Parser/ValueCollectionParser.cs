@@ -30,6 +30,7 @@ public static class ValueCollectionParser
 
 		using var ir = new BracketInnerTokenReader(r);
 		var v = new ValueCollection(ReadValues(ir).ToList());
+
 		return v;
 	}
 
@@ -38,7 +39,16 @@ public static class ValueCollectionParser
 		do
 		{
 			if (r.Peek().IsEqualNoCase(",")) r.Read();
-			yield return ValueParser.Parse(r);
+			var v = ValueParser.Parse(r);
+
+			if (r.ReadOrDefault("from") != null)
+			{
+				yield return FromExpressionParser.Parse(v, r);
+			}
+			else
+			{
+				yield return v;
+			}
 		}
 		while (r.Peek().IsEqualNoCase(","));
 	}
