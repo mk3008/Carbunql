@@ -23,6 +23,6 @@ public static class OrderClauseParser
 			r.ReadOrDefault(",");
 			yield return SortableItemParser.Parse(r);
 		}
-		while (r.Peek().AreEqual(","));
+		while (r.Peek().IsEqualNoCase(","));
 	}
 }

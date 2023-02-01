@@ -28,16 +28,16 @@ public static class WindowFunctionParser
 		var winfn = new WindowFunction();
 		do
 		{
-			if (token.AreEqual("partition by"))
+			if (token.IsEqualNoCase("partition by"))
 			{
 				winfn.PartitionBy = PartitionClauseParser.Parse(r);
 			}
-			else if (token.AreEqual("order by"))
+			else if (token.IsEqualNoCase("order by"))
 			{
 				winfn.OrderBy = OrderClauseParser.Parse(r);
 			}
 			token = r.Read();
-		} while (!string.IsNullOrEmpty(token) && !token.AreEqual(")"));
+		} while (!string.IsNullOrEmpty(token) && !token.IsEqualNoCase(")"));
 
 		return winfn;
 	}

@@ -16,12 +16,12 @@ public class WhenExpressionParser
 
 	public static WhenExpression Parse(ITokenReader r)
 	{
-		if (r.Peek().AreEqual("when"))
+		if (r.Peek().IsEqualNoCase("when"))
 		{
 			return ParseWhen(r);
 
 		}
-		else if (r.Peek().AreEqual("else"))
+		else if (r.Peek().IsEqualNoCase("else"))
 		{
 			return ParseElse(r);
 		}

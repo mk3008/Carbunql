@@ -13,10 +13,10 @@ public static class RelationParser
 
 	public static Relation Parse(ITokenReader r)
 	{
-		if (r.Peek().AreContains((x) =>
+		if (r.Peek().IsEqualNoCase((x) =>
 		{
-			if (x.AreEqual(ReservedText.Cross)) return true;
-			if (x.AreEqual(ReservedText.Comma)) return true;
+			if (x.IsEqualNoCase(ReservedText.Cross)) return true;
+			if (x.IsEqualNoCase(ReservedText.Comma)) return true;
 			return false;
 		}))
 		{
@@ -24,11 +24,11 @@ public static class RelationParser
 			var table = SelectableTableParser.Parse(r);
 			return new Relation(table, join);
 		}
-		else if (r.Peek().AreContains((x) =>
+		else if (r.Peek().IsEqualNoCase((x) =>
 		{
-			if (x.AreEqual(ReservedText.Inner)) return true;
-			if (x.AreEqual(ReservedText.Left)) return true;
-			if (x.AreEqual(ReservedText.Right)) return true;
+			if (x.IsEqualNoCase(ReservedText.Inner)) return true;
+			if (x.IsEqualNoCase(ReservedText.Left)) return true;
+			if (x.IsEqualNoCase(ReservedText.Right)) return true;
 			return false;
 		}))
 		{

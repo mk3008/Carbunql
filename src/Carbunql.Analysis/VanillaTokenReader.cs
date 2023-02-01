@@ -30,7 +30,7 @@ public class VanillaTokenReader : LexReader
 		if (token == null) return;
 
 		//skip comment block
-		while (token.AreContains(CommentTokens))
+		while (token.IsEqualNoCase(CommentTokens))
 		{
 			if (token == "--")
 			{
@@ -64,7 +64,7 @@ public class VanillaTokenReader : LexReader
 	private string ReadSingleToken(string expect)
 	{
 		var token = Peek();
-		if (token.AreEqual(expect))
+		if (token.IsEqualNoCase(expect))
 		{
 			Commit();
 			return token;
@@ -75,7 +75,7 @@ public class VanillaTokenReader : LexReader
 	private string ReadSingleToken(IEnumerable<string> expects)
 	{
 		var token = Peek();
-		if (token.AreContains(expects))
+		if (token.IsEqualNoCase(expects))
 		{
 			Commit();
 			return token;
@@ -87,7 +87,7 @@ public class VanillaTokenReader : LexReader
 	private string? ReadSingleTokenOrDefault(string? expect)
 	{
 		var token = Peek();
-		if (expect != null && token.AreEqual(expect))
+		if (expect != null && token.IsEqualNoCase(expect))
 		{
 			Commit();
 			return token;
@@ -130,11 +130,11 @@ public class VanillaTokenReader : LexReader
 			if (word == null) break;
 
 			inner.Append(word);
-			if (word.AreEqual("*/"))
+			if (word.IsEqualNoCase("*/"))
 			{
 				return inner.ToString();
 			}
-			if (word.AreEqual("/*"))
+			if (word.IsEqualNoCase("/*"))
 			{
 				inner.Append(ReadUntilCloseBlockComment());
 			}
@@ -162,46 +162,46 @@ public class VanillaTokenReader : LexReader
 		}
 
 		// Explore possible two-word tokens
-		if (token.AreEqual("is"))
+		if (token.IsEqualNoCase("is"))
 		{
 			return ReadAndJoinOrDefault(token, "not");
 		}
 
-		if (token.AreContains(JoinTokens))
+		if (token.IsEqualNoCase(JoinTokens))
 		{
 			return ReadAndJoin(token, "join");
 		}
 
-		if (token.AreContains(new string[] { "group", "partition", "order" }))
+		if (token.IsEqualNoCase(new string[] { "group", "partition", "order" }))
 		{
 			return ReadAndJoin(token, "by");
 		}
 
-		if (token.AreContains(OuterJoinTokens))
+		if (token.IsEqualNoCase(OuterJoinTokens))
 		{
 			//left(), right() function
-			if (Peek().AreEqual("(")) return token;
+			if (Peek().IsEqualNoCase("(")) return token;
 
 			ReadSingleTokenOrDefault("outer");
 			return ReadAndJoin(token, "join");
 		}
 
-		if (token.AreEqual("nulls"))
+		if (token.IsEqualNoCase("nulls"))
 		{
 			return ReadAndJoin(token, NullsSortTokens);
 		}
 
-		if (token.AreEqual("union"))
+		if (token.IsEqualNoCase("union"))
 		{
 			return ReadAndJoinOrDefault(token, "all");
 		}
 
-		if (token.AreEqual("not"))
+		if (token.IsEqualNoCase("not"))
 		{
 			return ReadAndJoinOrDefault(token, "materialized");
 		}
 
-		if (token.AreEqual(":"))
+		if (token.IsEqualNoCase(":"))
 		{
 			//ex ::text
 			var c = PeekOrDefaultChar();

@@ -18,7 +18,7 @@ public static class FromClauseParser
 		var root = SelectableTableParser.Parse(r);
 		var from = new FromClause(root);
 
-		if (!r.Peek().AreContains(relationtokens))
+		if (!r.Peek().IsEqualNoCase(relationtokens))
 		{
 			return from;
 		}
@@ -28,7 +28,7 @@ public static class FromClauseParser
 		{
 			from.Relations.Add(RelationParser.Parse(r));
 
-		} while (r.Peek().AreContains(relationtokens));
+		} while (r.Peek().IsEqualNoCase(relationtokens));
 
 		return from;
 	}

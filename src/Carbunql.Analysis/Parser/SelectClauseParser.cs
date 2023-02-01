@@ -28,9 +28,9 @@ public static class SelectClauseParser
 	{
 		do
 		{
-			if (r.Peek().AreEqual(",")) r.Read();
+			if (r.Peek().IsEqualNoCase(",")) r.Read();
 			yield return SelectableItemParser.Parse(r);
 		}
-		while (r.Peek().AreEqual(","));
+		while (r.Peek().IsEqualNoCase(","));
 	}
 }

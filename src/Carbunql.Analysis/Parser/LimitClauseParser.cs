@@ -26,9 +26,9 @@ public static class LimitClauseParser
 	{
 		do
 		{
-			if (r.Peek().AreEqual(",")) r.Read();
+			if (r.Peek().IsEqualNoCase(",")) r.Read();
 			yield return ValueParser.Parse(r);
 		}
-		while (r.Peek().AreEqual(","));
+		while (r.Peek().IsEqualNoCase(","));
 	}
 }

@@ -12,8 +12,8 @@ public static class ReadQueryParser
 
 	public static ReadQuery Parse(ITokenReader r)
 	{
-		if (r.Peek().AreEqual("select")) return SelectQueryParser.Parse(r);
-		if (r.Peek().AreEqual("values")) return ValuesQueryParser.Parse(r);
+		if (r.Peek().IsEqualNoCase("select")) return SelectQueryParser.Parse(r);
+		if (r.Peek().IsEqualNoCase("values")) return ValuesQueryParser.Parse(r);
 
 		throw new NotSupportedException(r.Peek());
 	}

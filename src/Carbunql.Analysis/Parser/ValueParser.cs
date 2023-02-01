@@ -21,7 +21,7 @@ public static class ValueParser
 		var sufix = TryReadSufix(r);
 		if (sufix != null) value.Sufix = sufix;
 
-		if (r.Peek().AreContains(operatorTokens))
+		if (r.Peek().IsEqualNoCase(operatorTokens))
 		{
 			var op = r.Read();
 			value.AddOperatableValue(op, Parse(r));
@@ -51,11 +51,11 @@ public static class ValueParser
 	{
 		var item = r.Read();
 
-		if (item.AreEqual("not"))
+		if (item.IsEqualNoCase("not"))
 		{
 			return new NegativeValue(Parse(r));
 		}
-		if (item.IsNumeric() || item.StartsWith("'") || item.AreEqual("true") || item.AreEqual("false"))
+		if (item.IsNumeric() || item.StartsWith("'") || item.IsEqualNoCase("true") || item.IsEqualNoCase("false"))
 		{
 			return new LiteralValue(item);
 		}
@@ -74,7 +74,7 @@ public static class ValueParser
 			var pt = ir.Peek();
 
 			ValueBase? v = null;
-			if (pt.AreEqual("select"))
+			if (pt.IsEqualNoCase("select"))
 			{
 				v = new InlineQuery(SelectQueryParser.Parse(ir));
 			}
@@ -85,24 +85,24 @@ public static class ValueParser
 			return v;
 		}
 
-		if (item.AreEqual("case"))
+		if (item.IsEqualNoCase("case"))
 		{
 			return CaseExpressionParser.Parse(r);
 		}
 
-		if (item.AreEqual("exists"))
+		if (item.IsEqualNoCase("exists"))
 		{
 			return new ExistsExpression(SelectQueryParser.ParseAsInner(r));
 		}
 
-		if (r.Peek().AreEqual("("))
+		if (r.Peek().IsEqualNoCase("("))
 		{
 			var t = FunctionValueParser.Parse(r, item);
 			r.ReadOrDefault(")");
 			return t;
 		}
 
-		if (r.Peek().AreEqual("."))
+		if (r.Peek().IsEqualNoCase("."))
 		{
 			//table.column
 			var table = item;
@@ -119,7 +119,7 @@ public static class ValueParser
 		//ex ::timestamp, ::numeric(8)
 		if (!r.Peek().StartsWith("::")) return null;
 		var sufix = r.Read();
-		if (!r.Peek().AreEqual("(")) return sufix;
+		if (!r.Peek().IsEqualNoCase("(")) return sufix;
 
 		r.Read("(");
 
@@ -137,11 +137,11 @@ public static class ValueParser
 		while (!string.IsNullOrEmpty(word))
 		{
 			inner.Append(word);
-			if (word.TrimStart().AreEqual("end"))
+			if (word.TrimStart().IsEqualNoCase("end"))
 			{
 				return inner.ToString();
 			}
-			if (word.TrimStart().AreEqual("case"))
+			if (word.TrimStart().IsEqualNoCase("case"))
 			{
 				inner.Append(ReadUntilCaseExpressionEnd(r));
 			}

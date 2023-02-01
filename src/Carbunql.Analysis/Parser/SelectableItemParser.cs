@@ -16,7 +16,7 @@ public static class SelectableItemParser
 		var v = ValueParser.Parse(r);
 		r.ReadOrDefault("as");
 
-		if (r.Peek().AreContains(ReservedText.All()))
+		if (r.Peek().IsEqualNoCase(ReservedText.All()))
 		{
 			return new SelectableItem(v, v.GetDefaultName());
 		}

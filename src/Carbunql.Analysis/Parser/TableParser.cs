@@ -14,14 +14,14 @@ public static class TableParser
 
 	public static TableBase Parse(ITokenReader r)
 	{
-		if (r.Peek().AreEqual("("))
+		if (r.Peek().IsEqualNoCase("("))
 		{
 			return VirtualTableParser.Parse(r);
 		}
 
 		var item = r.Read();
 
-		if (r.Peek().AreEqual("."))
+		if (r.Peek().IsEqualNoCase("."))
 		{
 			//schema.table
 			var schema = item;
@@ -29,7 +29,7 @@ public static class TableParser
 			return new PhysicalTable(schema, r.Read());
 		}
 
-		if (r.Peek().AreEqual("("))
+		if (r.Peek().IsEqualNoCase("("))
 		{
 			return FunctionTableParser.Parse(r, item);
 		}

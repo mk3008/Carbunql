@@ -16,7 +16,7 @@ internal static class ValuesClauseParser
 	{
 		var fn = () =>
 		{
-			if (!r.Peek().AreEqual(",")) return false;
+			if (!r.Peek().IsEqualNoCase(",")) return false;
 			r.Read(",");
 			r.Read("(");
 			return true;

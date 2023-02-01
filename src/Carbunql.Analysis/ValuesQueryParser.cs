@@ -20,7 +20,7 @@ public static class ValuesQueryParser
 		sq.OrderClause = ParseOrderOrDefault(r);
 
 		var tokens = new string[] { "union", "except", "minus", "intersect" };
-		if (r.Peek().AreContains(tokens))
+		if (r.Peek().IsEqualNoCase(tokens))
 		{
 			var op = r.Read();
 			sq.AddOperatableValue(op, Parse(r));

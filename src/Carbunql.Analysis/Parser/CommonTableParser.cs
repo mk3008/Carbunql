@@ -16,7 +16,7 @@ public static class CommonTableParser
 	{
 		var alias = r.Read();
 		ValueCollection? colAliases = null;
-		if (r.Peek().AreEqual("("))
+		if (r.Peek().IsEqualNoCase("("))
 		{
 			colAliases = ValueCollectionParser.ParseAsInner(r);
 		}
@@ -24,12 +24,12 @@ public static class CommonTableParser
 		r.Read("as");
 
 		var material = Materialized.Undefined;
-		if (r.Peek().AreEqual("materialized"))
+		if (r.Peek().IsEqualNoCase("materialized"))
 		{
 			r.Read("materialized");
 			material = Materialized.Materialized;
 		}
-		else if (r.Peek().AreEqual("not materialized"))
+		else if (r.Peek().IsEqualNoCase("not materialized"))
 		{
 			r.Read("not materialized");
 			material = Materialized.NotMaterialized;

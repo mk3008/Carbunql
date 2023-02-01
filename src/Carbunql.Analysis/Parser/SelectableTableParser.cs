@@ -23,7 +23,7 @@ public static class SelectableTableParser
 	{
 		var v = TableParser.Parse(r);
 		var t = r.Peek();
-		if (string.IsNullOrEmpty(t) || t.AreContains(ReservedText.All(ReservedTokenFilter)))
+		if (string.IsNullOrEmpty(t) || t.IsEqualNoCase(ReservedText.All(ReservedTokenFilter)))
 		{
 			return new SelectableTable(v, v.GetDefaultName());
 		}
@@ -31,7 +31,7 @@ public static class SelectableTableParser
 		r.ReadOrDefault("as");
 		var alias = r.Read();
 
-		if (!r.Peek().AreEqual("("))
+		if (!r.Peek().IsEqualNoCase("("))
 		{
 			return new SelectableTable(v, alias);
 		}

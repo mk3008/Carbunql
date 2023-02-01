@@ -211,7 +211,7 @@ public static class ReadQueryExtension
 
 		var sq = source.ToSubQuery(queryAlias, (x) =>
 		{
-			if (ks.Where(k => k.AreEqual(x.Alias)).Any()) return true;
+			if (ks.Where(k => k.IsEqualNoCase(x.Alias)).Any()) return true;
 			return false;
 		});
 		var exp = new InExpression(cnd.ToBracket(), sq.ToValue());

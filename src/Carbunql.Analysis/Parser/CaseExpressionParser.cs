@@ -29,7 +29,7 @@ public static class CaseExpressionParser
 	{
 		r.ReadOrDefault("case");
 
-		if (r.Peek().AreEqual("when"))
+		if (r.Peek().IsEqualNoCase("when"))
 		{
 			return new CaseExpression();
 		}
@@ -47,7 +47,7 @@ public static class CaseExpressionParser
 		{
 			lst.Add(WhenExpressionParser.Parse(r));
 		}
-		while (r.Peek().AreContains(new string[] { "when", "else" }));
+		while (r.Peek().IsEqualNoCase(new string[] { "when", "else" }));
 
 		return lst;
 	}
