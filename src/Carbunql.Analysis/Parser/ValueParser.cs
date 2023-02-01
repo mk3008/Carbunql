@@ -44,10 +44,6 @@ public static class ValueParser
 		{
 			return InExpressionParser.Parse(v, r);
 		}
-		if (r.ReadOrDefault("from") != null)
-		{
-			return FromExpressionParser.Parse(v, r);
-		}
 		return v;
 	}
 

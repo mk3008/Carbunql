@@ -13,7 +13,7 @@ public static class FromExpressionParser
 
 	public static FromExpression Parse(ValueBase unit, ITokenReader r)
 	{
-		var value = ValueParser.ParseCore(r);
+		var value = ValueParser.Parse(r);
 		return new FromExpression(unit, value);
 	}
 }

@@ -16,8 +16,8 @@ public class FromExpression : ValueBase
 
 	public override IEnumerable<Token> GetCurrentTokens(Token? parent)
 	{
-		foreach (var item in Unit.GetCurrentTokens(parent)) yield return item;
+		foreach (var item in Unit.GetTokens(parent)) yield return item;
 		yield return Token.Reserved(this, parent, "from");
-		foreach (var item in Value.GetCurrentTokens(parent)) yield return item;
+		foreach (var item in Value.GetTokens(parent)) yield return item;
 	}
 }
