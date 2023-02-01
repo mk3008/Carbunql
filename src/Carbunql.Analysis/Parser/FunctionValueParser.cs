@@ -15,7 +15,7 @@ public static class FunctionValueParser
 	{
 		var arg = ValueCollectionParser.ParseAsInner(r);
 
-		if (!r.Peek().AreEqual("over"))
+		if (!r.Peek().IsEqualNoCase("over"))
 		{
 			return new FunctionValue(functionName, arg);
 		}

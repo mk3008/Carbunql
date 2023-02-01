@@ -19,7 +19,7 @@ public static class InExpressionParser
 		var first = ir.Peek();
 		if (first == null) throw new NotSupportedException();
 
-		if (first.AreEqual("select"))
+		if (first.IsEqualNoCase("select"))
 		{
 			//sub query
 			var iq = new InlineQuery(SelectQueryParser.Parse(ir));

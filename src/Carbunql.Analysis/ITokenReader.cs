@@ -17,7 +17,7 @@ public static class ITokenReaderExtension
 	{
 		var s = source.Peek();
 		if (string.IsNullOrEmpty(s)) throw new SyntaxException($"expect '{expect}', actual is empty.");
-		if (!s.AreEqual(expect)) throw new SyntaxException($"expect '{expect}', actual '{s}'.");
+		if (!s.IsEqualNoCase(expect)) throw new SyntaxException($"expect '{expect}', actual '{s}'.");
 		return source.Read();
 	}
 
@@ -25,7 +25,7 @@ public static class ITokenReaderExtension
 	{
 		var s = source.Peek();
 		if (string.IsNullOrEmpty(s)) return null;
-		if (!s.AreEqual(expect)) return null;
+		if (!s.IsEqualNoCase(expect)) return null;
 		return source.Read();
 	}
 
@@ -33,7 +33,7 @@ public static class ITokenReaderExtension
 	{
 		var s = source.Peek();
 		if (string.IsNullOrEmpty(s)) throw new SyntaxException($"token is empty.");
-		if (!s.AreContains(expects)) throw new SyntaxException($"near '{s}'.");
+		if (!s.IsEqualNoCase(expects)) throw new SyntaxException($"near '{s}'.");
 		return source.Read();
 	}
 }

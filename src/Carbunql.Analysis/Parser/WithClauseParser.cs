@@ -23,9 +23,9 @@ public static class WithClauseParser
 	{
 		do
 		{
-			if (r.Peek().AreEqual(",")) r.Read();
+			if (r.Peek().IsEqualNoCase(",")) r.Read();
 			yield return CommonTableParser.Parse(r);
 		}
-		while (r.Peek().AreEqual(","));
+		while (r.Peek().IsEqualNoCase(","));
 	}
 }

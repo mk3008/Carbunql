@@ -15,13 +15,13 @@ public class VirtualTableParser
 		if (first == null) throw new NotSupportedException();
 
 		//virtualTable
-		if (first.AreEqual("select"))
+		if (first.IsEqualNoCase("select"))
 		{
 			var t = new VirtualTable(SelectQueryParser.Parse(r));
 			r.ReadOrDefault(")");
 			return t;
 		}
-		else if (first.AreEqual("values"))
+		else if (first.IsEqualNoCase("values"))
 		{
 			var t = new VirtualTable(ValuesClauseParser.Parse(r));
 			r.Read(")");

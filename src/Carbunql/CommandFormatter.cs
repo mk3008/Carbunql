@@ -13,9 +13,9 @@ public class CommandFormatter
     {
         if (token.Text.Equals(",") && token.Sender is Relation) return false;
 
-        if (!token.Text.AreEqual("on") && token.Sender is Relation) return true;
-        if (token.Text.AreEqual("else") || token.Text.AreEqual("when")) return true;
-        if (token.Text.AreEqual("and"))
+        if (!token.Text.IsEqualNoCase("on") && token.Sender is Relation) return true;
+        if (token.Text.IsEqualNoCase("else") || token.Text.IsEqualNoCase("when")) return true;
+        if (token.Text.IsEqualNoCase("and"))
         {
             if (token.Sender is BetweenExpression) return false;
             if (token.Parent != null && token.Parent.Sender is WhereClause) return true;
@@ -66,7 +66,7 @@ public class CommandFormatter
         if (token.Parent.Sender is ValuesQuery) return false;
         if (token.Sender is FunctionValue) return false;
         if (token.Sender is FunctionTable) return false;
-        if (token.Text.Equals(")") && token.Parent.Text.AreEqual("over")) return true;
+        if (token.Text.Equals(")") && token.Parent.Text.IsEqualNoCase("over")) return true;
 
         return true;
     }

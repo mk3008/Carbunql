@@ -22,7 +22,7 @@ public static class ValueCollectionParser
 		r.ReadOrDefault("(");
 
 		// no argument. '()'
-		if (r.Peek().AreEqual(")"))
+		if (r.Peek().IsEqualNoCase(")"))
 		{
 			r.Read(")");
 			return new ValueCollection();
@@ -37,9 +37,9 @@ public static class ValueCollectionParser
 	{
 		do
 		{
-			if (r.Peek().AreEqual(",")) r.Read();
+			if (r.Peek().IsEqualNoCase(",")) r.Read();
 			yield return ValueParser.Parse(r);
 		}
-		while (r.Peek().AreEqual(","));
+		while (r.Peek().IsEqualNoCase(","));
 	}
 }
