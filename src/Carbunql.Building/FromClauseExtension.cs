@@ -38,6 +38,11 @@ public static class FromClauseExtension
 		return f;
 	}
 
+	public static FromClause From(this SelectQuery source, Func<IReadQuery> builder)
+	{
+		return source.From(builder(), "q");
+	}
+
 	public static FromClause As(this FromClause source, string alias)
 	{
 		source.Root.SetAlias(alias);

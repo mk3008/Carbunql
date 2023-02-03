@@ -55,6 +55,33 @@ public class Demo
 	}
 
 	[Fact]
+	public void BuildSubQuery()
+	{
+		var sq = new SelectQuery();
+		sq.From(() =>
+		{
+			var x = new SelectQuery();
+			x.From("table_a").As("a");
+			x.SelectAll();
+			return x;
+		}).As("b");
+		sq.SelectAll();
+
+		var cmd = sq.ToCommand();
+
+		if (cmd.Parameters.Any())
+		{
+			Output.WriteLine("/*");
+			foreach (var prm in cmd.Parameters)
+			{
+				Output.WriteLine($"    {prm.Key} = {prm.Value}");
+			}
+			Output.WriteLine("*/");
+		}
+		Output.WriteLine(cmd.CommandText);
+	}
+
+	[Fact]
 	public void FractionAdjustment_Function()
 	{
 		var sql = @"
