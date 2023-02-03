@@ -26,7 +26,7 @@ public class CTEQuery : IReadQuery
 		foreach (var item in Query.GetTokens(parent)) yield return item;
 	}
 
-	public IDictionary<string, object?>? Parameters { get; set; }
+	public IDictionary<string, object?> Parameters { get; set; } = new Dictionary<string, object?>();
 
 	public virtual IDictionary<string, object?> GetParameters()
 	{
