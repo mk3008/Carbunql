@@ -23,6 +23,13 @@ public static class ValueBaseExtension
 		return source.Equal(new ColumnValue(column));
 	}
 
+	public static ValueBase Equal(this ValueBase source, object value)
+	{
+		var v = value.ToString();
+		if (v == null) return source.IsNull();
+		return source.Equal(new LiteralValue(v));
+	}
+
 	public static ValueBase Equal(this ValueBase source, string table, string column)
 	{
 		return source.Equal(new ColumnValue(table, column));
@@ -96,10 +103,20 @@ public static class ValueBaseExtension
 		return source;
 	}
 
+	public static ValueBase And(this ValueBase source, Func<ValueBase> builder)
+	{
+		return source.And(builder());
+	}
+
 	public static ValueBase Or(this ValueBase source, ValueBase operand)
 	{
 		source.GetLast().AddOperatableValue("or", operand);
 		return source;
+	}
+
+	public static ValueBase Or(this ValueBase source, Func<ValueBase> builder)
+	{
+		return source.Or(builder());
 	}
 
 	public static ValueBase ToGroup(this ValueBase source)
