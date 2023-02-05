@@ -16,7 +16,7 @@ public class CTEQuery : IReadQuery
 
 	public WithClause WithClause { get; } = new();
 
-	public ReadQuery? Query { get; set; }
+	public SelectQuery? Query { get; set; }
 
 	public IEnumerable<Token> GetTokens(Token? parent)
 	{
