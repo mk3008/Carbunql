@@ -98,7 +98,6 @@ public static class ValueParser
 		if (r.Peek().IsEqualNoCase("("))
 		{
 			var t = FunctionValueParser.Parse(r, item);
-			r.ReadOrDefault(")");
 			return t;
 		}
 

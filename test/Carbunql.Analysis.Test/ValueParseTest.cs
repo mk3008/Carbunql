@@ -220,6 +220,17 @@ public class ValueParserTest
 	}
 
 	[Fact]
+	public void Function_Nest()
+	{
+		var text = "coalesce(min(1), 1)";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(9, lst.Count);
+	}
+
+	[Fact]
 	public void WindowFunction_PartitionByOrderBy()
 	{
 		var text = "row_number() over(partition by tbl.col, tbl.col2 order by tbl.col3, tbl.col4)";
