@@ -445,7 +445,7 @@ order by
 		Monitor.Log(item);
 
 		var lst = item.GetTokens().ToList();
-		Assert.Equal(323, lst.Count);
+		Assert.Equal(330, lst.Count);
 
 		Assert.IsType<CTEQuery>(item);
 		var cte = (CTEQuery)item;

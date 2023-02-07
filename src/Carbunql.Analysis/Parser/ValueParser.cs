@@ -15,7 +15,7 @@ public static class ValueParser
 
 	public static ValueBase Parse(ITokenReader r)
 	{
-		var operatorTokens = new string[] { "+", "-", "*", "/", "=", "!=", ">", "<", "<>", ">=", "<=", "||", "&", "|", "^", "#", "~", "and", "or", "is", "is not" };
+		var operatorTokens = new string[] { "+", "-", "*", "/", "%", "=", "!=", ">", "<", "<>", ">=", "<=", "||", "&", "|", "^", "#", "~", "~*", "!~", "!~*", "and", "or", "is", "is not" };
 
 		ValueBase value = ParseMain(r);
 		var sufix = TryReadSufix(r);
