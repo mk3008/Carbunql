@@ -15,7 +15,9 @@ public class LexReader : CharReader
 
 	private IEnumerable<char> BitwiseOperatorSymbols { get; set; } = "&|^#~".ToArray();
 
-	private IEnumerable<char> ArithmeticOperatorSymbols { get; set; } = "+-*/".ToArray();
+	private IEnumerable<char> ArithmeticOperatorSymbols { get; set; } = "+-*/%".ToArray();
+
+	private IEnumerable<char> RegexOperatorSymbols { get; set; } = "!~*".ToArray();
 
 	private IEnumerable<char> ComparisonOperatorSymbols { get; set; } = "<>!=".ToArray();
 
@@ -23,9 +25,9 @@ public class LexReader : CharReader
 
 	private IEnumerable<char> SingleSymbols => ForceBreakSymbols.Union(BitwiseOperatorSymbols);
 
-	private IEnumerable<char> MultipleSymbols => ArithmeticOperatorSymbols.Union(ComparisonOperatorSymbols);
+	private IEnumerable<char> MultipleSymbols => ArithmeticOperatorSymbols.Union(ComparisonOperatorSymbols).Union(RegexOperatorSymbols);
 
-	private IEnumerable<char> AllSymbols => SingleSymbols.Union(MultipleSymbols).Union(PrefixSymbols).Union(SpaceChars);
+	private IEnumerable<char> AllSymbols => SingleSymbols.Union(MultipleSymbols).Union(PrefixSymbols).Union(SpaceChars).Union(RegexOperatorSymbols);
 
 	public string ReadLex(bool skipSpace = true)
 	{
@@ -86,7 +88,7 @@ public class LexReader : CharReader
 		// ex. + or !=
 		if (MultipleSymbols.Contains(fc))
 		{
-			foreach (var item in ReadChars((x) => x != '/' && x != '*' && MultipleSymbols.Contains(x)))
+			foreach (var item in ReadChars((x) => x != '/' && MultipleSymbols.Contains(x)))
 			{
 				sb.Append(item);
 			}

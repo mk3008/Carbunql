@@ -155,6 +155,28 @@ public class ValueParserTest
 	}
 
 	[Fact]
+	public void Expression4()
+	{
+		var text = "1%1";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(3, lst.Count);
+	}
+
+	[Fact]
+	public void Regex()
+	{
+		var text = "'a' !~* 'a'";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(3, lst.Count);
+	}
+
+	[Fact]
 	public void Not()
 	{
 		var text = "not true";
