@@ -474,4 +474,15 @@ public class ValueParserTest
 		var lst = v.GetTokens().ToList();
 		Assert.Equal(7, lst.Count);
 	}
+
+	[Fact]
+	public void Cast()
+	{
+		var text = "cast('3.14' as numeric(8,2))";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(11, lst.Count);
+	}
 }
