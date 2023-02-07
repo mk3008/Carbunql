@@ -201,16 +201,6 @@ public class VanillaTokenReader : LexReader
 			return ReadAndJoinOrDefault(token, "materialized");
 		}
 
-		if (token.IsEqualNoCase(":"))
-		{
-			//ex ::text
-			var c = PeekOrDefaultChar();
-			if (c == ':')
-			{
-				return token + ReadSingleToken();
-			}
-		}
-
 		return token;
 	}
 }

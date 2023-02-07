@@ -18,8 +18,6 @@ public static class ValueParser
 		var operatorTokens = new string[] { "+", "-", "*", "/", "%", "=", "!=", ">", "<", "<>", ">=", "<=", "||", "&", "|", "^", "#", "~", "~*", "!~", "!~*", "and", "or", "is", "is not" };
 
 		ValueBase value = ParseMain(r);
-		var sufix = TryReadSufix(r);
-		if (sufix != null) value.Sufix = sufix;
 
 		if (r.Peek().IsEqualNoCase(operatorTokens))
 		{
@@ -36,13 +34,17 @@ public static class ValueParser
 		{
 			return BetweenExpressionParser.Parse(v, r);
 		}
-		if (r.ReadOrDefault("like") != null)
+		else if (r.ReadOrDefault("like") != null)
 		{
 			return LikeExpressionParser.Parse(v, r);
 		}
-		if (r.ReadOrDefault("in") != null)
+		else if (r.ReadOrDefault("in") != null)
 		{
 			return InExpressionParser.Parse(v, r);
+		}
+		else if (r.ReadOrDefault("::") != null)
+		{
+			return CastValueParser.Parse(v, "::", r);
 		}
 		return v;
 	}
@@ -111,21 +113,6 @@ public static class ValueParser
 
 		//omit table column
 		return new ColumnValue(item);
-	}
-
-	private static string? TryReadSufix(ITokenReader r)
-	{
-		//ex ::timestamp, ::numeric(8)
-		if (!r.Peek().StartsWith("::")) return null;
-		var sufix = r.Read();
-		if (!r.Peek().IsEqualNoCase("(")) return sufix;
-
-		r.Read("(");
-
-		using var ir = new BracketInnerTokenReader(r);
-		var v = ValueCollectionParser.Parse(ir);
-
-		return sufix + "(" + v.ToText() + ")";
 	}
 
 	private static string ReadUntilCaseExpressionEnd(ITokenReader r)

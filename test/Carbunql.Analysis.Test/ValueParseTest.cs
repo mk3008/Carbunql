@@ -448,7 +448,18 @@ public class ValueParserTest
 		Monitor.Log(v);
 
 		var lst = v.GetTokens().ToList();
-		Assert.Equal(2, lst.Count);
+		Assert.Equal(3, lst.Count);
+	}
+
+	[Fact]
+	public void Parameter()
+	{
+		var text = ":val";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Single(lst);
 	}
 
 	[Fact]
@@ -459,9 +470,7 @@ public class ValueParserTest
 		Monitor.Log(v);
 
 		var lst = v.GetTokens().ToList();
-		Assert.Equal(2, lst.Count);
-
-		Assert.Equal("::numeric(8, 2)", lst[1].Text);
+		Assert.Equal(8, lst.Count);
 	}
 
 	[Fact]
@@ -472,7 +481,7 @@ public class ValueParserTest
 		Monitor.Log(v);
 
 		var lst = v.GetTokens().ToList();
-		Assert.Equal(7, lst.Count);
+		Assert.Equal(8, lst.Count);
 	}
 
 	[Fact]
