@@ -50,4 +50,10 @@ public class CTEQuery : IReadQuery
 	{
 		return WithClause;
 	}
+
+	public SelectQuery GetSelectQuery()
+	{
+		if (Query == null) throw new NullReferenceException(nameof(Query));
+		return Query;
+	}
 }

@@ -50,4 +50,6 @@ public abstract class ReadQuery : IReadQuery
 	{
 		return null;
 	}
+
+	public abstract SelectQuery GetSelectQuery();
 }
