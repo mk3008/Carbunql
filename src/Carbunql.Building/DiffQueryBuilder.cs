@@ -2,6 +2,7 @@
 using Carbunql.Clauses;
 using Carbunql.Values;
 using Carbunql.Extensions;
+using System.Linq;
 
 namespace Carbunql.Building;
 
@@ -22,11 +23,13 @@ public class DiffQueryBuilder
 		var rightSq = QueryParser.Parse(rightSql);
 
 		var commons = GetCommonColumns(leftSq, rightSq);
-		var keys = commons.Where(x => x.IsEqualNoCase(keyColumns)).ToList();
-		var vals = commons.Where(x => !x.IsEqualNoCase(keyColumns)).ToList();
+
+		var keycols = keyColumns.ToList().Select(x => x.Trim());
+		var keys = commons.Where(x => x.IsEqualNoCase(keycols)).ToList();
+		var vals = commons.Where(x => !x.IsEqualNoCase(keycols)).ToList();
 
 		if (!keys.Any()) throw new ArgumentException("key columns are not found.");
-		if (!keys.Any()) throw new ArgumentException("value columns are not found.");
+		if (!vals.Any()) throw new ArgumentException("value columns are not found.");
 
 		var cteq = new CTEQuery();
 		var leftTable = cteq.With(leftSq).As(LeftCteName);

@@ -140,7 +140,7 @@ public static class ValueBaseExtension
 				v = item;
 				continue;
 			}
-			v.AddOperatableValue(@operator, item);
+			v.GetLast().AddOperatableValue(@operator, item);
 		}
 
 		if (v == null) throw new NullReferenceException();

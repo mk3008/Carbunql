@@ -5,9 +5,9 @@ using Xunit.Abstractions;
 
 namespace Carbunql.Building.Test;
 
-public class DemoBuildDiffQUery
+public class DemoBuildDiffQuery
 {
-	public DemoBuildDiffQUery(ITestOutputHelper output)
+	public DemoBuildDiffQuery(ITestOutputHelper output)
 	{
 		Monitor = new QueryCommandMonitor(output);
 		Output = output;
@@ -34,7 +34,7 @@ public class DemoBuildDiffQUery
 	[Fact]
 	public void Build()
 	{
-		var sql1 = "select id, name, value1, value2 from system_a.table";
+		var sql1 = "select id, name, value1, value2, value3 from system_a.table";
 		var sql2 = "select id, name, value1, value2, value3 from system_b.table";
 
 		var builder = new DiffQueryBuilder();
