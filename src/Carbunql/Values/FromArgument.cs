@@ -2,9 +2,9 @@
 
 namespace Carbunql.Values;
 
-public class FromExpression : ValueBase
+public class FromArgument : ValueBase
 {
-	public FromExpression(ValueBase unit, ValueBase value)
+	public FromArgument(ValueBase unit, ValueBase value)
 	{
 		Unit = unit;
 		Value = value;

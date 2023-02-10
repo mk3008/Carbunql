@@ -43,11 +43,11 @@ public static class ValueCollectionParser
 
 			if (r.ReadOrDefault("from") != null)
 			{
-				yield return FromExpressionParser.Parse(v, r);
+				yield return FromArgumentParser.Parse(v, r);
 			}
 			else if (r.ReadOrDefault("as") != null)
 			{
-				yield return AsExpressionParser.Parse(v, r);
+				yield return AsArgumentParser.Parse(v, r);
 			}
 			else
 			{
