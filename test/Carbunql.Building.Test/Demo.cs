@@ -31,7 +31,6 @@ public class Demo
 		Output.WriteLine(cmd.CommandText);
 	}
 
-
 	[Fact]
 	public void BuildSelectQuery()
 	{
@@ -81,10 +80,10 @@ public class Demo
 	public void BuildSubQuery()
 	{
 		var sq = new SelectQuery();
-		var (_, _) = sq.From(() =>
+		sq.From(() =>
 		{
 			var x = new SelectQuery();
-			var (_, _) = x.From("table_a").As("a");
+			x.From("table_a").As("a");
 			x.SelectAll();
 			return x;
 		}).As("b");
@@ -196,6 +195,8 @@ public class Demo
 	public void BuildCTEQuery()
 	{
 		var cq = new CTEQuery();
+
+		// a as (select * from table_a)
 		var ct_a = cq.With(() =>
 		{
 			var sq = new SelectQuery();
@@ -203,6 +204,8 @@ public class Demo
 			sq.SelectAll();
 			return sq;
 		}).As("a");
+
+		// b as (select * from table_b)
 		var ct_b = cq.With(() =>
 		{
 			var sq = new SelectQuery();
@@ -211,8 +214,10 @@ public class Demo
 			return sq;
 		}).As("b");
 
+		// get select query
 		var sq = cq.GetOrNewSelectQuery();
 
+		// select * from a iner join b a.id = b.id
 		var (from, a) = sq.From(ct_a).As("a");
 		from.InnerJoin(ct_b).On(a, "id");
 
