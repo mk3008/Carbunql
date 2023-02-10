@@ -27,4 +27,9 @@ public class SelectQuery : ReadQuery, IQueryCommandable
 		if (GroupClause != null) foreach (var item in GroupClause.GetTokens(parent)) yield return item;
 		if (HavingClause != null) foreach (var item in HavingClause.GetTokens(parent)) yield return item;
 	}
+
+	public override SelectQuery GetSelectQuery()
+	{
+		return this;
+	}
 }

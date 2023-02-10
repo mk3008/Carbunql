@@ -21,7 +21,7 @@ public abstract class ReadQuery : IReadQuery
 		return query;
 	}
 
-	public IDictionary<string, object?>? Parameters { get; set; }
+	public IDictionary<string, object?> Parameters { get; set; } = new Dictionary<string, object?>();
 
 	public virtual IDictionary<string, object?> GetParameters()
 	{
@@ -50,4 +50,6 @@ public abstract class ReadQuery : IReadQuery
 	{
 		return null;
 	}
+
+	public abstract SelectQuery GetSelectQuery();
 }

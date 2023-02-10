@@ -19,7 +19,6 @@ internal static class IDictionaryExtension
 	public static IDictionary<T1, T2> Merge<T1, T2>(this IDictionary<T1, T2> source, IDictionary<T1, T2>? dic) where T1 : notnull
 	{
 		if (dic == null || !dic.Any()) return source;
-		if (!source.Any()) return ImmutableDictionary<T1, T2>.Empty;
 
 		var c = new Dictionary<T1, T2>();
 		source.ForEach(x => c[x.Key] = x.Value);

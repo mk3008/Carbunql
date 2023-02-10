@@ -44,10 +44,20 @@ public static class ReadQueryExtension
 		return new FromClause(t);
 	}
 
+	public static ExistsExpression ToExists(this IReadQuery source)
+	{
+		return new ExistsExpression(source);
+	}
+
+	public static NegativeValue ToNotExists(this IReadQuery source)
+	{
+		return new NegativeValue(source.ToExists());
+	}
+
 	public static (SelectQuery, FromClause) ToSubQuery(this IReadQuery source, string alias)
 	{
 		var sq = new SelectQuery();
-		var f = sq.From(source, alias);
+		var (f, _) = sq.From(source).As(alias);
 		return (sq, f);
 	}
 
@@ -57,7 +67,7 @@ public static class ReadQueryExtension
 		if (s == null) throw new NotSupportedException();
 
 		var sq = new SelectQuery();
-		var f = sq.From(source.GetQuery(), alias);
+		var (f, _) = sq.From(source.GetQuery()).As(alias);
 		foreach (var item in s.Items)
 		{
 			if (!columnFilter(item)) continue;

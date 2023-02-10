@@ -37,8 +37,8 @@ public class SelectItemTest
 	public void SelectAllTest_OneTable()
 	{
 		var sq = new SelectQuery();
-		var f = sq.From("table_a").As("a");
-		sq.SelectAll(f.Root);
+		var (f, a) = sq.From("table_a").As("a");
+		sq.SelectAll(a);
 
 		Monitor.Log(sq);
 
@@ -60,10 +60,10 @@ public class SelectItemTest
 	public void ColumnTest()
 	{
 		var sq = new SelectQuery();
-		var f = sq.From("table_a").As("a");
+		var (f, a) = sq.From("table_a").As("a");
 
-		sq.Select(f.Root, "a_id");
-		sq.Select(f.Root, "a_id").As("v1");
+		sq.Select(a, "a_id");
+		sq.Select(a, "a_id").As("v1");
 		sq.Select(3.14).As("v2");
 		sq.Select(new DateTime(2022, 1, 1)).As("v3");
 		sq.Select("a.price * a.amount").As("expression_val");
@@ -101,7 +101,7 @@ public class SelectItemTest
 	public void CaseTest()
 	{
 		var sq = new SelectQuery();
-		var f = sq.From("table_a").As("a");
+		var (f, a) = sq.From("table_a").As("a");
 
 		sq.Select(() =>
 		{
@@ -134,7 +134,7 @@ public class SelectItemTest
 	public void CaseWhenTest()
 	{
 		var sq = new SelectQuery();
-		var f = sq.From("table_a").As("a");
+		var (f, a) = sq.From("table_a").As("a");
 
 		sq.Select(() =>
 		{

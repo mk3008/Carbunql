@@ -16,7 +16,7 @@ public class CTEQuery : IReadQuery
 
 	public WithClause WithClause { get; } = new();
 
-	public ReadQuery? Query { get; set; }
+	public SelectQuery? Query { get; set; }
 
 	public IEnumerable<Token> GetTokens(Token? parent)
 	{
@@ -26,7 +26,7 @@ public class CTEQuery : IReadQuery
 		foreach (var item in Query.GetTokens(parent)) yield return item;
 	}
 
-	public IDictionary<string, object?>? Parameters { get; set; }
+	public IDictionary<string, object?> Parameters { get; set; } = new Dictionary<string, object?>();
 
 	public virtual IDictionary<string, object?> GetParameters()
 	{
@@ -49,5 +49,11 @@ public class CTEQuery : IReadQuery
 	public WithClause? GetWithClause()
 	{
 		return WithClause;
+	}
+
+	public SelectQuery GetSelectQuery()
+	{
+		if (Query == null) throw new NullReferenceException(nameof(Query));
+		return Query;
 	}
 }

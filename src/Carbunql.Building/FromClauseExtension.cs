@@ -16,6 +16,18 @@ public static class FromClauseExtension
 		return new SelectableTable(source, alias);
 	}
 
+	public static FromClause From(this SelectQuery source, CommonTable table)
+	{
+		return source.From(table.ToPhysicalTable().ToSelectable());
+	}
+
+	public static FromClause From(this SelectQuery source, SelectableTable table)
+	{
+		var f = new FromClause(table);
+		source.FromClause = f;
+		return f;
+	}
+
 	public static FromClause From(this SelectQuery source, string table)
 	{
 		return source.From(string.Empty, table);
@@ -24,90 +36,124 @@ public static class FromClauseExtension
 	public static FromClause From(this SelectQuery source, string schema, string table)
 	{
 		var st = new PhysicalTable(schema, table).ToSelectable();
-		var f = new FromClause(st);
-		source.FromClause = f;
-		return f;
+		return source.From(st);
 	}
 
-	public static FromClause From(this SelectQuery source, IReadQuery subQuery, string alias)
+	public static FromClause From(this SelectQuery source, IReadQuery subQuery)
 	{
 		var vt = new VirtualTable(subQuery);
-		var st = vt.ToSelectable(alias);
-		var f = new FromClause(st);
-		source.FromClause = f;
-		return f;
+		var st = vt.ToSelectable("q");
+		return source.From(st);
 	}
 
-	public static FromClause As(this FromClause source, string alias)
+	public static FromClause From(this SelectQuery source, Func<IReadQuery> builder)
+	{
+		return source.From(builder());
+	}
+
+	public static (FromClause, SelectableTable) As(this FromClause source, string alias)
 	{
 		source.Root.SetAlias(alias);
-		return source;
+		return (source, source.Root);
 	}
 
 	public static Relation InnerJoin(this FromClause source, string table)
 	{
-		return source.InnerJoin(source.Root, string.Empty, table);
+		var st = new PhysicalTable(table).ToSelectable();
+		return source.InnerJoin(st);
 	}
 
 	public static Relation InnerJoin(this FromClause source, string schema, string table)
 	{
-		return source.InnerJoin(source.Root, schema, table);
+		var st = new PhysicalTable(schema, table).ToSelectable();
+		return source.InnerJoin(st);
 	}
 
-	public static Relation InnerJoin(this FromClause source, SelectableTable sourceTable, string schema, string table)
+	public static Relation InnerJoin(this FromClause source, CommonTable table)
 	{
-		return source.Join(schema, table, "inner join");
+		return source.InnerJoin(table.ToPhysicalTable().ToSelectable());
+	}
+
+	public static Relation InnerJoin(this FromClause source, SelectableTable table)
+	{
+		return source.Join(table, "inner join");
 	}
 
 	public static Relation LeftJoin(this FromClause source, string table)
 	{
-		return source.LeftJoin(source.Root, string.Empty, table);
+		var st = new PhysicalTable(table).ToSelectable();
+		return source.LeftJoin(st);
 	}
 
 	public static Relation LeftJoin(this FromClause source, string schema, string table)
 	{
-		return source.LeftJoin(source.Root, schema, table);
+		var st = new PhysicalTable(schema, table).ToSelectable();
+		return source.LeftJoin(st);
 	}
 
-	public static Relation LeftJoin(this FromClause source, SelectableTable sourceTable, string schema, string table)
+	public static Relation LeftJoin(this FromClause source, CommonTable table)
 	{
-		return source.Join(schema, table, "left join");
+		return source.LeftJoin(table.ToPhysicalTable().ToSelectable());
+	}
+
+	public static Relation LeftJoin(this FromClause source, SelectableTable table)
+	{
+		return source.Join(table, "left join");
 	}
 
 	public static Relation RightJoin(this FromClause source, string table)
 	{
-		return source.RightJoin(source.Root, string.Empty, table);
+		var st = new PhysicalTable(table).ToSelectable();
+		return source.RightJoin(st);
 	}
 
 	public static Relation RightJoin(this FromClause source, string schema, string table)
 	{
-		return source.RightJoin(source.Root, schema, table);
+		var st = new PhysicalTable(schema, table).ToSelectable();
+		return source.RightJoin(st);
 	}
 
-	public static Relation RightJoin(this FromClause source, SelectableTable sourceTable, string schema, string table)
+	public static Relation RightJoin(this FromClause source, CommonTable table)
 	{
-		return source.Join(schema, table, "right join");
+		return source.RightJoin(table.ToPhysicalTable().ToSelectable());
+	}
+
+	public static Relation RightJoin(this FromClause source, SelectableTable table)
+	{
+		return source.Join(table, "right join");
 	}
 
 	public static Relation CrossJoin(this FromClause source, string table)
 	{
-		return source.CrossJoin(source.Root, string.Empty, table);
+		var st = new PhysicalTable(table).ToSelectable();
+		return source.CrossJoin(st);
 	}
 
 	public static Relation CrossJoin(this FromClause source, string schema, string table)
 	{
-		return source.CrossJoin(source.Root, schema, table);
+		var st = new PhysicalTable(schema, table).ToSelectable();
+		return source.CrossJoin(st);
 	}
 
-	public static Relation CrossJoin(this FromClause source, SelectableTable sourceTable, string schema, string table)
+	public static Relation CrossJoin(this FromClause source, CommonTable table)
 	{
-		return source.Join(schema, table, "cross join");
+		return source.CrossJoin(table.ToPhysicalTable().ToSelectable());
+	}
+
+	public static Relation CrossJoin(this FromClause source, SelectableTable table)
+	{
+		return source.Join(table, "cross join");
 	}
 
 	public static Relation Join(this FromClause source, string schema, string table, string join)
 	{
 		var st = new PhysicalTable(schema, table).ToSelectable();
-		var r = new Relation(st, join);
+		return source.Join(st, join);
+	}
+
+	public static Relation Join(this FromClause source, SelectableTable table, string join)
+	{
+		var r = new Relation(table, join);
 
 		source.Relations ??= new();
 		source.Relations.Add(r);

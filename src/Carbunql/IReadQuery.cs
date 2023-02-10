@@ -10,6 +10,8 @@ public interface IReadQuery : IQueryCommandable
 	WithClause? GetWithClause();
 
 	ReadQuery GetQuery();
+
+	SelectQuery GetSelectQuery();
 }
 
 public static class IReadQueryExtension
