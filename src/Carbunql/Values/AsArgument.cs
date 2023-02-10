@@ -2,9 +2,9 @@
 
 namespace Carbunql.Values;
 
-public class AsExpression : ValueBase
+public class AsArgument : ValueBase
 {
-	public AsExpression(ValueBase value, ValueBase type)
+	public AsArgument(ValueBase value, ValueBase type)
 	{
 		Value = value;
 		Type = type;
