@@ -128,4 +128,32 @@ public static class ValueBaseExtension
 	{
 		return new SortableItem(source) { IsAscending = isAscending };
 	}
+
+	public static ValueBase Merge(this IEnumerable<ValueBase> source, string @operator)
+	{
+		ValueBase? v = null;
+
+		foreach (var item in source)
+		{
+			if (v == null)
+			{
+				v = item;
+				continue;
+			}
+			v.AddOperatableValue(@operator, item);
+		}
+
+		if (v == null) throw new NullReferenceException();
+		return v;
+	}
+
+	public static ValueBase MergeAnd(this IEnumerable<ValueBase> source)
+	{
+		return Merge(source, "and");
+	}
+
+	public static ValueBase MergeOr(this IEnumerable<ValueBase> source)
+	{
+		return Merge(source, "or");
+	}
 }

@@ -14,7 +14,7 @@ public abstract class ReadQuery : IReadQuery
 
 	public LimitClause? LimitClause { get; set; }
 
-	public ReadQuery AddOperatableValue(string @operator, ReadQuery query)
+	public IReadQuery AddOperatableValue(string @operator, IReadQuery query)
 	{
 		if (OperatableQuery != null) throw new InvalidOperationException();
 		OperatableQuery = new OperatableQuery(@operator, query);

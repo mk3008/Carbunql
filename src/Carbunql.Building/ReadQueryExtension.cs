@@ -240,4 +240,26 @@ public static class ReadQueryExtension
 			WhereClause = source.ToWhereClauseAsDelete(keys, table.Alias, queryAlias),
 		};
 	}
+
+	public static void UnionAll(this IReadQuery source, IReadQuery query)
+	{
+		var sq = source.GetSelectQuery();
+		sq.AddOperatableValue("union all", query);
+	}
+
+	public static void UnionAll(this IReadQuery source, Func<IReadQuery> builder)
+	{
+		source.UnionAll(builder());
+	}
+
+	public static void Union(this IReadQuery source, IReadQuery query)
+	{
+		var sq = source.GetSelectQuery();
+		sq.AddOperatableValue("union", query);
+	}
+
+	public static void Union(this IReadQuery source, Func<IReadQuery> builder)
+	{
+		source.Union(builder());
+	}
 }

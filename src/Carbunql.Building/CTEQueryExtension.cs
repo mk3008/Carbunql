@@ -4,7 +4,7 @@ namespace Carbunql.Building;
 
 public static class QueryBaseExtension
 {
-	public static CommonTable With(this CTEQuery source, SelectQuery q)
+	public static CommonTable With(this CTEQuery source, IReadQuery q)
 	{
 		return source.With(q.ToCommonTable("cte"));
 	}
