@@ -16,7 +16,7 @@ public static class OrderClauseParser
 		return new OrderClause(ReadItems(r).ToList());
 	}
 
-	private static IEnumerable<SortableItem> ReadItems(ITokenReader r)
+	private static IEnumerable<IQueryCommand> ReadItems(ITokenReader r)
 	{
 		do
 		{

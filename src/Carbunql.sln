@@ -13,9 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carbunql.Benchmark", "..\te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CarbunqlWeb", "..\demo\CarbunqlWeb\CarbunqlWeb.csproj", "{8AD9DC40-BAB2-4469-A90F-AD41A2BB65A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carbunql.Building.Test", "..\test\Carbunql.Building.Test\Carbunql.Building.Test.csproj", "{1BE5C98E-D8BC-493B-8F3D-F4A762C9B348}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carbunql.Building.Test", "..\test\Carbunql.Building.Test\Carbunql.Building.Test.csproj", "{1BE5C98E-D8BC-493B-8F3D-F4A762C9B348}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carbunql.Building", "Carbunql.Building\Carbunql.Building.csproj", "{C119C4CA-EF4F-43DA-9369-32BA39BDE72C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carbunql.Building", "Carbunql.Building\Carbunql.Building.csproj", "{C119C4CA-EF4F-43DA-9369-32BA39BDE72C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
