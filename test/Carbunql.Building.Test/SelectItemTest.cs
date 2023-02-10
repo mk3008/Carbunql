@@ -72,7 +72,7 @@ public class SelectItemTest
 
 		var lst = sq.GetTokens().ToList();
 
-		Assert.Equal(33, lst.Count());
+		Assert.Equal(34, lst.Count());
 
 		Assert.Equal("select", lst[0].Text);
 
@@ -93,7 +93,8 @@ public class SelectItemTest
 		Assert.Equal("3.14", lst[11].Text);
 
 		Assert.Equal("'2022/01/01 0:00:00'", lst[15].Text);
-		Assert.Equal("::timestamp", lst[16].Text);
+		Assert.Equal("::", lst[16].Text);
+		Assert.Equal("timestamp", lst[17].Text);
 	}
 
 	[Fact]
