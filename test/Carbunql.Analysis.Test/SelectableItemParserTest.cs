@@ -97,7 +97,7 @@ public class SelectableItemParserTest
 		Monitor.Log(item);
 
 		var lst = item.GetTokens().ToList();
-		Assert.Equal(16, lst.Count);
+		Assert.Equal(23, lst.Count);
 	}
 
 	[Fact]

@@ -30,7 +30,7 @@ public class BracketInnerTokenReader : ITokenReader, IDisposable
 		if (IsTerminated) return string.Empty;
 
 		var token = Reader.Read();
-		if (token == ")" && RootBracketLevel == Reader.CurrentBracketLevel)
+		if (token == ")" && RootBracketLevel > Reader.CurrentBracketLevel)
 		{
 			IsTerminated = true;
 		}

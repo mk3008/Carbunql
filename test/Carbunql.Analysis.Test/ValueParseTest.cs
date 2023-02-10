@@ -155,6 +155,28 @@ public class ValueParserTest
 	}
 
 	[Fact]
+	public void Expression4()
+	{
+		var text = "1%1";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(3, lst.Count);
+	}
+
+	[Fact]
+	public void Regex()
+	{
+		var text = "'a' !~* 'a'";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(3, lst.Count);
+	}
+
+	[Fact]
 	public void Not()
 	{
 		var text = "not true";
@@ -217,6 +239,17 @@ public class ValueParserTest
 		var lv = (FunctionValue)v;
 		Assert.Equal("concat", lv.Name);
 		Assert.NotNull(lv.Argument);
+	}
+
+	[Fact]
+	public void Function_Nest()
+	{
+		var text = "coalesce(min(1), 1)";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(9, lst.Count);
 	}
 
 	[Fact]
@@ -415,7 +448,18 @@ public class ValueParserTest
 		Monitor.Log(v);
 
 		var lst = v.GetTokens().ToList();
-		Assert.Equal(2, lst.Count);
+		Assert.Equal(3, lst.Count);
+	}
+
+	[Fact]
+	public void Parameter()
+	{
+		var text = ":val";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Single(lst);
 	}
 
 	[Fact]
@@ -426,9 +470,7 @@ public class ValueParserTest
 		Monitor.Log(v);
 
 		var lst = v.GetTokens().ToList();
-		Assert.Equal(2, lst.Count);
-
-		Assert.Equal("::numeric(8, 2)", lst[1].Text);
+		Assert.Equal(8, lst.Count);
 	}
 
 	[Fact]
@@ -439,6 +481,17 @@ public class ValueParserTest
 		Monitor.Log(v);
 
 		var lst = v.GetTokens().ToList();
-		Assert.Equal(7, lst.Count);
+		Assert.Equal(8, lst.Count);
+	}
+
+	[Fact]
+	public void Cast()
+	{
+		var text = "cast('3.14' as numeric(8,2))";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(11, lst.Count);
 	}
 }

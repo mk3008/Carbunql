@@ -45,6 +45,10 @@ public static class ValueCollectionParser
 			{
 				yield return FromExpressionParser.Parse(v, r);
 			}
+			else if (r.ReadOrDefault("as") != null)
+			{
+				yield return AsExpressionParser.Parse(v, r);
+			}
 			else
 			{
 				yield return v;
