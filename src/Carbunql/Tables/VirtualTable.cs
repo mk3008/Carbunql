@@ -18,4 +18,23 @@ public class VirtualTable : TableBase
 		foreach (var item in Query.GetTokens(bracket)) yield return item;
 		yield return Token.ReservedBracketEnd(this, parent);
 	}
+
+	public override IDictionary<string, object?> GetParameters()
+	{
+		return Query.GetParameters();
+	}
+
+	public override IList<string> GetValueNames()
+	{
+		if (Query is IReadQuery q)
+		{
+			var s = q.GetSelectQuery().SelectClause;
+			if (s == null) return base.GetValueNames();
+			return s.Select(x => x.Alias).ToList();
+		}
+		else
+		{
+			return base.GetValueNames();
+		}
+	}
 }

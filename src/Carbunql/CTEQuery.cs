@@ -33,6 +33,8 @@ public class CTEQuery : IReadQuery
 		if (Query == null) throw new NullReferenceException(nameof(Query));
 
 		var prm = EmptyParameters.Get();
+		WithClause.CommonTables.ForEach(t => prm = prm.Merge(t.GetParameters()));
+
 		prm = prm.Merge(Parameters);
 		prm = prm.Merge(Query.GetParameters());
 		return prm;

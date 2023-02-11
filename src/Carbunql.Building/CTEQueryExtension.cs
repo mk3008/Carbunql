@@ -4,8 +4,18 @@ namespace Carbunql.Building;
 
 public static class QueryBaseExtension
 {
+	public static CTEQuery ImportCommonTable(this CTEQuery source, CTEQuery tagert)
+	{
+		foreach (var item in tagert.WithClause)
+		{
+			source.WithClause.Add(item);
+		}
+		return source;
+	}
+
 	public static CommonTable With(this CTEQuery source, IReadQuery q)
 	{
+		if (q is CTEQuery x) source.ImportCommonTable(x);
 		return source.With(q.ToCommonTable("cte"));
 	}
 

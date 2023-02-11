@@ -7,29 +7,30 @@ namespace Carbunql.Building;
 
 public static class ReadQueryExtension
 {
-	private static CTEQuery ImportCommonTable(this CTEQuery source, CTEQuery tagert)
-	{
-		foreach (var item in tagert.WithClause)
-		{
-			source.WithClause.Add(item);
-		}
-		return source;
-	}
-
-	public static CTEQuery ToCTE(this IReadQuery source, string alias)
+	public static (CTEQuery, CommonTable) ToCTE(this IReadQuery source, string alias)
 	{
 		var sq = new CTEQuery();
 
 		if (source is CTEQuery q) sq.ImportCommonTable(q);
+		var ct = source.ToCommonTable(alias);
+		sq.WithClause.Add(ct);
 
-		sq.WithClause.Add(source.ToCommonTable(alias));
-
-		return sq;
+		return (sq, ct);
 	}
 
 	public static CommonTable ToCommonTable(this IReadQuery source, string alias)
 	{
 		return new CommonTable(new VirtualTable(source.GetQuery()), alias);
+	}
+
+	public static CommonTable ToCommonTable(this IReadQuery source, string alias, IList<string> columnAliases)
+	{
+		return new CommonTable(new VirtualTable(source.GetQuery()), alias, columnAliases.ToValueCollection());
+	}
+
+	public static SelectableTable ToSelectableTable(this IReadQuery source)
+	{
+		return source.ToSelectableTable("t");
 	}
 
 	public static SelectableTable ToSelectableTable(this IReadQuery source, string alias)
@@ -54,11 +55,16 @@ public static class ReadQueryExtension
 		return new NegativeValue(source.ToExists());
 	}
 
-	public static (SelectQuery, FromClause) ToSubQuery(this IReadQuery source, string alias)
+	public static SelectQuery ToSubQuery(this IReadQuery source)
+	{
+		return source.ToSubQuery("q");
+	}
+
+	public static SelectQuery ToSubQuery(this IReadQuery source, string alias)
 	{
 		var sq = new SelectQuery();
-		var (f, _) = sq.From(source).As(alias);
-		return (sq, f);
+		sq.From(source).As(alias);
+		return sq;
 	}
 
 	public static IReadQuery ToSubQuery(this IReadQuery source, string alias, Predicate<SelectableItem> columnFilter)

@@ -15,4 +15,9 @@ public static class CommonTableExtension
 	{
 		return new PhysicalTable(source.Alias);
 	}
+
+	public static IList<string> GetValueNames(this CommonTable source)
+	{
+		return source.Table.GetValueNames();
+	}
 }
