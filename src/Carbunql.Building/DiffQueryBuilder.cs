@@ -14,8 +14,8 @@ public class DiffQueryBuilder
 	public string LeftValueColumnPrefix { get; init; } = "lf_";
 	public string RightValueColumnPrefix { get; init; } = "rt_";
 
-	public string DetailCteName { get; init; } = "detail_ds";
-	public string SummaryCteName { get; init; } = "summary_ds";
+	public string DetailAlias { get; init; } = "detail";
+	public string SummaryAlias { get; init; } = "summary";
 
 	public IReadQuery Execute(string leftSql, string rightSql, IEnumerable<string> keyColumns)
 	{
@@ -35,8 +35,8 @@ public class DiffQueryBuilder
 		var leftTable = cteq.With(leftSq).As(LeftCteName);
 		var rightTable = cteq.With(rightSq).As(RightCteName);
 
-		var detail = cteq.With(BuildSelectDetailQuery(leftTable, rightTable, keys, vals)).As(DetailCteName);
-		var summary = cteq.With(BuildSelectSummaryQuery(detail, keys, vals)).As(SummaryCteName);
+		var detail = cteq.With(BuildSelectDetailQuery(leftTable, rightTable, keys, vals)).As(DetailAlias);
+		var summary = cteq.With(BuildSelectSummaryQuery(detail, keys, vals)).As(SummaryAlias);
 
 		var sq = cteq.GetOrNewSelectQuery();
 		var (f, d) = sq.From(summary).As("d");

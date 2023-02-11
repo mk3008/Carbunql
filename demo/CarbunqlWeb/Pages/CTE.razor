@@ -82,15 +82,15 @@ FROM
 		{
 			var bld = new CommandTextBuilder();
 			var sq = QueryParser.Parse(sql);
-			var q = sq.ToCTE(alias);
+			var (q, cte) = sq.ToCTE(alias);
 			var clause = sq.GetSelectClause();
 			if (clause == null) throw new Exception("select clause is not defined.");
 
 			var nsql = new SelectQuery();
-			var t = nsql.From(alias);
-			foreach (var item in clause)
+			var t = nsql.From(cte);
+			foreach (var item in cte.GetValueNames())
 			{
-				nsql.Select(t, item.Alias);
+				nsql.Select(t, item);
 			}
 			q.Query = nsql;
 			fsql = bld.Execute(q);
