@@ -1,0 +1,108 @@
+﻿@page "/pivot_month"
+@using Carbunql.Analysis;
+@using Carbunql;
+@using Carbunql.Building;
+
+<PageTitle>To PivotQuery (month)</PageTitle>
+
+<div class="container-fluid">
+	<div class="row" Style="margin: 0px 0px 16px 0px;">
+		<RadzenMenu class="rz-shadow-3">
+			<RadzenMenuItem Text="Clear SQL" Icon="clear" Click=@OnClear>
+			</RadzenMenuItem>
+		</RadzenMenu>
+	</div>
+	<div class="row">
+		<div class="col-md-12 p-3">
+			<RadzenText TextStyle="TextStyle.H4">To PivotQuery (month)</RadzenText>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6 p-3">
+			<RadzenCard>
+				<RadzenText TextStyle="TextStyle.Subtitle2">Date</RadzenText>
+				<RadzenDatePicker Change=@OnChange @bind-Value=@date />
+
+				<RadzenText TextStyle="TextStyle.Subtitle2">Date colum name</RadzenText>
+				<RadzenTextBox Change=@OnChange @bind-Value=@datecolumn />
+
+				<RadzenText TextStyle="TextStyle.Subtitle2">Group columns</RadzenText>
+				<RadzenTextBox Change=@OnChange @bind-Value=@keys />
+
+				<RadzenText TextStyle="TextStyle.Subtitle2">Summary column</RadzenText>
+				<RadzenTextBox Change=@OnChange @bind-Value=@value />
+			</RadzenCard>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6 p-3">
+			<RadzenCard>
+				<RadzenText TextStyle="TextStyle.Subtitle2">Input</RadzenText>
+				<RadzenTextArea @bind-Value=@sql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" Placeholder="Enter select query(ex. select id, value from table)" />
+			</RadzenCard>
+		</div>
+		<div class="col-md-6 p-3">
+			<RadzenCard>
+				<RadzenText TextStyle="TextStyle.Subtitle2">Result</RadzenText>
+				<RadzenTextArea @bind-Value=@fsql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" />
+			</RadzenCard>
+		</div>
+	</div>
+</div>
+
+@code {
+	string sql = @"select
+    t.ym, t.shop_id, t.sales_amount
+from
+    (
+        values
+        ('2020-01-01'::date, 1, 10),
+        ('2020-01-01'::date, 2, 30),
+        ('2020-01-01'::date, 4, 50),
+        ('2020-02-01'::date, 1, 100),
+        ('2020-02-01'::date, 2, 60),
+        ('2020-02-01'::date, 3, 20)
+    ) t(ym, shop_id, sales_amount)";
+
+	string fsql = string.Empty;
+
+	string datecolumn = "ym";
+
+	string keys = "shop_id";
+
+	string value = "sales_amount";
+
+	DateTime date = new DateTime(2020, 1, 1);
+
+	protected override void OnInitialized()
+	{
+		OnChange();
+	}
+
+	void OnClear()
+	{
+		sql = string.Empty;
+		OnChange();
+	}
+
+	void OnChange()
+	{
+		if (string.IsNullOrEmpty(sql))
+		{
+			fsql = string.Empty;
+			return;
+		}
+		try
+		{
+			var builder = new MonthPivotQueryBuilder() { StartDate = date };
+
+			var groupkeys = keys.Split(",").ToList().Select(x => x.Trim()).ToList();
+			var sq = builder.Execute(sql, datecolumn, groupkeys, value);
+			fsql = sq.ToCommand().CommandText;
+		}
+		catch (Exception ex)
+		{
+			fsql = ex.ToString();
+		}
+	}
+}

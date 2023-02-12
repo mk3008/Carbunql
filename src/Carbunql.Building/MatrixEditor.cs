@@ -20,7 +20,7 @@ public static class MatrixEditor
 
 		var vq = new ValuesQuery(rows);
 		var headers = new List<string>() { key };
-		columnHeaders.ForEach(x => headers.Add(x));
+		columnHeaders.ForEach(x => headers.Add(x.Trim()));
 
 		return vq.ToCommonTable("matrix", headers);
 	}
