@@ -6,9 +6,9 @@ namespace Carbunql.Building;
 
 public class YmPivotQueryBuilder
 {
-	public string YmColumn { get; set; } = "ym";
-
 	public DateTime StartDate { get; set; }
+
+	public string DateFormat { get; set; } = "MM";
 
 	public int Range { get; set; } = 12;
 
@@ -18,96 +18,62 @@ public class YmPivotQueryBuilder
 
 	public string MatrixAlias { get; set; } = "matrix";
 
-	public IReadQuery Execute(string sql, string ymColumn, IList<string> headerColumns, string valueColumn, List<string>? valuesHeader = null)
+	public IReadQuery Execute(string sql, string ymColumn, IList<string> groupColumns, string valueColumn, List<string>? columnHeaders = null)
 	{
-		if (valuesHeader == null)
-		{
-			valuesHeader = new List<string>();
-			for (int i = 0; i < Range; i++) valuesHeader.Add("ym_" + i);
-			if (HasSummary) valuesHeader.Add("ym_total");
-		}
-
 		var (cteq, ds) = QueryParser.Parse(sql).ToCTE(DatasourceAlias);
 
-		var matrix = cteq.With(BuildMatrixTable(valuesHeader));
+		var matrix = cteq.With(CreateMatrixTable(ymColumn, columnHeaders));
 
 		var sq = cteq.GetOrNewSelectQuery();
 		var (f, d) = sq.From(ds).As("d");
-		var m = f.InnerJoin(matrix).As("m").On(d, YmColumn);
+		var m = f.InnerJoin(matrix).As("m").On(d, ymColumn);
 
-		foreach (var item in headerColumns)
-		{
-			sq.Select(d, item);
-		}
+		foreach (var item in groupColumns) sq.Select(d, item);
 
-		for (int i = 0; i < Range; i++)
+		var ca = matrix!.ColumnAliases;
+		foreach (var item in ca!.Where(x => x.ToText() != ymColumn).Select(x => x.ToText()))
 		{
-			var alias = valuesHeader[i];
 			var c = new ColumnValue(d, valueColumn);
-			c.Expression("*", new ColumnValue(m, alias));
-			sq.Select(new FunctionValue("sum", c)).As(alias);
+			c.Expression("*", new ColumnValue(m, item));
+			sq.Select(new FunctionValue("sum", c)).As(item);
 		}
 
-		if (HasSummary)
-		{
-			var alias = valuesHeader.Last();
-			var c = new ColumnValue(d, valueColumn);
-			c.Expression("*", new ColumnValue(m, alias));
-			sq.Select(new FunctionValue("sum", c)).As(alias);
-		}
+		foreach (var item in groupColumns) sq.Group(d, item);
 
-		foreach (var item in headerColumns)
-		{
-			sq.Group(d, item);
-		}
+		foreach (var item in groupColumns) sq.Order(d, item);
 
 		return cteq;
 	}
 
-	private CommonTable BuildMatrixTable(List<string> valuesHeader)
+	private CommonTable CreateMatrixTable(string ymColumn, List<string>? columnHeaders)
 	{
-		var startYm = new DateTime(StartDate.Year, StartDate.Month, 1);
-		var shift = 0;
-		var endym = startYm.AddMonths(Range);
+		var startym = new DateTime(StartDate.Year, StartDate.Month, 1);
+		var endym = startym.AddMonths(Range);
 
-		var rows = new List<ValueCollection>();
-		var dic = new Dictionary<string, object?>();
+		var keyValues = new List<string>();
 
-		while (startYm < endym)
+		var ym = startym;
+		while (ym < endym)
 		{
-			var row = new ValueCollection();
-
-			var key = ":ym" + shift;
-			var val = startYm;
-			dic.Add(key, val);
-
-			row.Add(new LiteralValue(key));
-
-			for (int i = 0; i < Range; i++)
-			{
-				if (shift == i)
-				{
-					row.Add(new LiteralValue("1"));
-				}
-				else
-				{
-					row.Add(new LiteralValue("0"));
-				}
-			}
-
-			if (HasSummary)
-			{
-				row.Add(new LiteralValue("1"));
-			}
-
-			rows.Add(row);
-			shift++;
-			startYm = startYm.AddMonths(1);
+			keyValues.Add($"cast('{ym}' as date)");
+			ym = ym.AddMonths(1);
 		}
 
-		var vq = new ValuesQuery(rows);
-		foreach (var item in dic) vq.Parameters.Add(item);
+		if (columnHeaders == null)
+		{
+			columnHeaders = new List<string>();
+			ym = startym;
+			while (ym < endym)
+			{
+				columnHeaders.Add("v" + ym.ToString(DateFormat));
+				ym = ym.AddMonths(1);
+			}
+		}
 
-		return vq.ToCommonTable(MatrixAlias, valuesHeader);
+		var ct = MatrixEditor.Create(ymColumn, keyValues, columnHeaders);
+
+		if (HasSummary) MatrixEditor.AddTotalSummaryColumn(ct);
+
+		return ct;
 	}
 }

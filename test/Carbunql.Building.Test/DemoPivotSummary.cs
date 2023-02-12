@@ -34,10 +34,22 @@ public class DemoPivotSummary
 	[Fact]
 	public void Build()
 	{
-		var sql = "select ym, shop_id, shop_name, sales_amout from table_a";
+		var sql = @"
+select 
+	t.ym, t.shop_id, t.sales_amount
+from
+	(
+		values
+		('2020-01-01'::date, 1, 10),
+		('2020-01-01'::date, 2, 30),
+		('2020-01-01'::date, 4, 50),
+		('2020-02-01'::date, 1, 100),
+		('2020-02-01'::date, 2, 60),
+		('2020-02-01'::date, 3, 20)
+	) t(ym, shop_id, sales_amount)";
 
 		var builder = new YmPivotQueryBuilder() { StartDate = new DateTime(2020, 1, 1) };
-		var sq = builder.Execute(sql, "ym", new List<String> { "ym", "shop_id", "shop_name" }, "sales_amount");
+		var sq = builder.Execute(sql, "ym", new List<String> { "shop_id" }, "sales_amount");
 
 		DebugPrint(sq.ToCommand());
 	}
