@@ -4,13 +4,11 @@ using Carbunql.Values;
 
 namespace Carbunql.Building;
 
-public class YmPivotQueryBuilder
+public class DatePivotQueryBuilder
 {
-	public DateTime StartDate { get; set; }
+	public DateTime Month { get; set; }
 
-	public string DateFormat { get; set; } = "MM";
-
-	public int Range { get; set; } = 12;
+	public string DateFormat { get; set; } = "dd";
 
 	public bool HasSummary { get; set; } = true;
 
@@ -18,20 +16,20 @@ public class YmPivotQueryBuilder
 
 	public string MatrixAlias { get; set; } = "matrix";
 
-	public IReadQuery Execute(string sql, string ymColumn, IList<string> groupColumns, string valueColumn, List<string>? columnHeaders = null)
+	public IReadQuery Execute(string sql, string dateColumn, IList<string> groupColumns, string valueColumn, List<string>? columnHeaders = null)
 	{
 		var (cteq, ds) = QueryParser.Parse(sql).ToCTE(DatasourceAlias);
 
-		var matrix = cteq.With(CreateMatrixTable(ymColumn, columnHeaders));
+		var matrix = cteq.With(CreateMatrixTable(dateColumn, columnHeaders));
 
 		var sq = cteq.GetOrNewSelectQuery();
 		var (f, d) = sq.From(ds).As("d");
-		var m = f.InnerJoin(matrix).As("m").On(d, ymColumn);
+		var m = f.InnerJoin(matrix).As("m").On(d, dateColumn);
 
 		foreach (var item in groupColumns) sq.Select(d, item);
 
 		var ca = matrix!.ColumnAliases;
-		foreach (var item in ca!.Where(x => x.ToText() != ymColumn).Select(x => x.ToText()))
+		foreach (var item in ca!.Where(x => x.ToText() != dateColumn).Select(x => x.ToText()))
 		{
 			var c = new ColumnValue(d, valueColumn);
 			c.Expression("*", new ColumnValue(m, item));
@@ -47,26 +45,26 @@ public class YmPivotQueryBuilder
 
 	private CommonTable CreateMatrixTable(string ymColumn, List<string>? columnHeaders)
 	{
-		var startym = new DateTime(StartDate.Year, StartDate.Month, 1);
-		var endym = startym.AddMonths(Range);
+		var startdate = new DateTime(Month.Year, Month.Month, 1);
+		var enddate = startdate.AddMonths(1);
 
 		var keyValues = new List<string>();
 
-		var ym = startym;
-		while (ym < endym)
+		var d = startdate;
+		while (d < enddate)
 		{
-			keyValues.Add($"cast('{ym}' as date)");
-			ym = ym.AddMonths(1);
+			keyValues.Add($"cast('{d}' as date)");
+			d = d.AddDays(1);
 		}
 
 		if (columnHeaders == null)
 		{
 			columnHeaders = new List<string>();
-			ym = startym;
-			while (ym < endym)
+			d = startdate;
+			while (d < enddate)
 			{
-				columnHeaders.Add("v" + ym.ToString(DateFormat));
-				ym = ym.AddMonths(1);
+				columnHeaders.Add("v" + d.ToString(DateFormat));
+				d = d.AddDays(1);
 			}
 		}
 
