@@ -28,7 +28,7 @@ public class VirtualTable : TableBase
 	{
 		if (Query is IReadQuery q)
 		{
-			var s = q.GetSelectQuery().SelectClause;
+			var s = q.GetOrNewSelectQuery().SelectClause;
 			if (s == null) return base.GetValueNames();
 			return s.Select(x => x.Alias).ToList();
 		}

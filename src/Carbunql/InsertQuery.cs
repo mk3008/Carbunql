@@ -20,19 +20,10 @@ public class InsertQuery : IQueryCommandable
 
 	public IEnumerable<Token> GetTokens(Token? parent)
 	{
-		if (InsertClause == null) throw new NullReferenceException();
-
-		if (Query != null)
-		{
-			var clause = Query.GetWithClause();
-			if (clause != null) foreach (var item in clause.GetTokens(parent)) yield return item;
-		}
+		if (Query == null) yield break;
+		if (InsertClause == null) yield break;
 
 		foreach (var item in InsertClause.GetTokens(parent)) yield return item;
-		if (Query != null)
-		{
-			var q = Query.GetQuery();
-			if (q != null) foreach (var item in q.GetTokens(parent)) yield return item;
-		}
+		foreach (var item in Query.GetTokens(parent)) yield return item;
 	}
 }

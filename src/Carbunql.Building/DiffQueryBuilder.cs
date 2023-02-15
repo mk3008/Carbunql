@@ -31,14 +31,13 @@ public class DiffQueryBuilder
 		if (!keys.Any()) throw new ArgumentException("key columns are not found.");
 		if (!vals.Any()) throw new ArgumentException("value columns are not found.");
 
-		var cteq = new CTEQuery();
-		var leftTable = cteq.With(leftSq).As(LeftCteName);
-		var rightTable = cteq.With(rightSq).As(RightCteName);
+		var sq = new SelectQuery();
+		var leftTable = sq.With(leftSq).As(LeftCteName);
+		var rightTable = sq.With(rightSq).As(RightCteName);
 
-		var detail = cteq.With(BuildSelectDetailQuery(leftTable, rightTable, keys, vals)).As(DetailAlias);
-		var summary = cteq.With(BuildSelectSummaryQuery(detail, keys, vals)).As(SummaryAlias);
+		var detail = sq.With(BuildSelectDetailQuery(leftTable, rightTable, keys, vals)).As(DetailAlias);
+		var summary = sq.With(BuildSelectSummaryQuery(detail, keys, vals)).As(SummaryAlias);
 
-		var sq = cteq.GetOrNewSelectQuery();
 		var (f, d) = sq.From(summary).As("d");
 
 		keys.ForEach(x => sq.Select(d, x));
@@ -55,15 +54,13 @@ public class DiffQueryBuilder
 
 		keys.ForEach(x => sq.Order(d, x));
 
-		cteq.Query = sq;
-
-		return cteq;
+		return sq;
 	}
 
 	private List<string> GetCommonColumns(IReadQuery sq1, IReadQuery sq2)
 	{
-		var cols1 = sq1.GetSelectQuery().SelectClause?.Select(x => x.Alias);
-		var cols2 = sq2.GetSelectQuery().SelectClause?.Select(x => x.Alias);
+		var cols1 = sq1.GetOrNewSelectQuery().SelectClause?.Select(x => x.Alias);
+		var cols2 = sq2.GetOrNewSelectQuery().SelectClause?.Select(x => x.Alias);
 
 		if (cols1 == null || cols2 == null) throw new NotSupportedException();
 

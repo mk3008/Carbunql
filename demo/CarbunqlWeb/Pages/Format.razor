@@ -59,9 +59,8 @@
 		}
 		try
 		{
-			var bld = new CommandTextBuilder();
 			var sq = QueryParser.Parse(sql);
-			fsql = bld.Execute(sq);
+			fsql = sq.ToCommand().CommandText;
 		}
 		catch (Exception ex)
 		{

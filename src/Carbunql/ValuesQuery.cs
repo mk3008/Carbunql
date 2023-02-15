@@ -1,4 +1,6 @@
-﻿using Carbunql.Values;
+﻿using Carbunql.Extensions;
+using Carbunql.Tables;
+using Carbunql.Values;
 
 namespace Carbunql.Clauses;
 
@@ -8,8 +10,6 @@ public class ValuesQuery : ReadQuery
 	{
 		Rows = rows;
 	}
-
-	public override SelectClause? GetSelectClause() => null;
 
 	public List<ValueCollection> Rows { get; init; } = new();
 
@@ -36,8 +36,38 @@ public class ValuesQuery : ReadQuery
 		}
 	}
 
-	public override SelectQuery GetSelectQuery()
+	public override WithClause? GetWithClause() => null;
+
+	public override SelectClause? GetSelectClause() => null;
+
+	public override SelectQuery GetOrNewSelectQuery()
 	{
-		throw new NotSupportedException();
+		return ToSelectQuery();
+	}
+
+	public SelectQuery ToSelectQuery()
+	{
+		if (!Rows.Any() || Rows.First().Count() == 0) throw new Exception();
+		var cnt = Rows.First().Count();
+
+		var columnAlias = new ValueCollection();
+		cnt.ForEach(x => columnAlias.Add(new LiteralValue("c" + x)));
+
+		var sq = new SelectQuery();
+		sq.SelectClause = new SelectClause();
+
+		var vt = new VirtualTable(this);
+		var st = new SelectableTable(vt, "v", columnAlias);
+		if (st.ColumnAliases == null) throw new Exception();
+
+		sq.FromClause = new FromClause(st); ;
+
+		foreach (var item in st.ColumnAliases)
+		{
+			var c = new ColumnValue("v", item.ToText());
+			sq.SelectClause.Add(new SelectableItem(c, c.GetDefaultName()));
+		}
+
+		return sq;
 	}
 }

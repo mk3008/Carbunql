@@ -11,6 +11,8 @@ public class CommandFormatter
 
 	public virtual bool IsLineBreakOnBeforeWriteToken(Token token)
 	{
+		if (token.Text.IsEqualNoCase("with")) return true;
+
 		if (token.Text.Equals(",") && token.Sender is Relation) return false;
 
 		if (!token.Text.IsEqualNoCase("on") && token.Sender is Relation) return true;
