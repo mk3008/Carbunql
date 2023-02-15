@@ -80,14 +80,14 @@ FROM
 		}
 		try
 		{
-			var bld = new CommandTextBuilder();
 			var sq = QueryParser.Parse(sql);
-			var clause =sq.GetQuery()?.GetSelectClause();
+
+			var clause =sq.GetSelectClause();
 			if (clause == null) throw new Exception("select clause is not defined.");
 			var cols = clause.Select(x => x.Alias).ToList();
 
 			var q = sq.ToDeleteQuery(table, cols);
-			fsql = bld.Execute(q);
+			fsql = q.ToCommand().CommandText;
 		}
 		catch (Exception ex)
 		{

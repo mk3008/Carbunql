@@ -80,20 +80,15 @@ FROM
 		}
 		try
 		{
-			var bld = new CommandTextBuilder();
-			var sq = QueryParser.Parse(sql);
-			var (q, cte) = sq.ToCTE(alias);
-			var clause = sq.GetSelectClause();
-			if (clause == null) throw new Exception("select clause is not defined.");
+			var tmp = QueryParser.Parse(sql);
+			var (sq, ct) = tmp.ToCTE(alias);
+						
+			if (tmp.GetSelectClause() == null) throw new Exception("select clause is not defined.");
 
-			var nsql = new SelectQuery();
-			var t = nsql.From(cte);
-			foreach (var item in cte.GetValueNames())
-			{
-				nsql.Select(t, item);
-			}
-			q.Query = nsql;
-			fsql = bld.Execute(q);
+			var t = sq.From(ct);
+			foreach (var item in ct.GetValueNames()) sq.Select(t, item);
+
+			fsql = sq.ToCommand().CommandText;
 		}
 		catch (Exception ex)
 		{

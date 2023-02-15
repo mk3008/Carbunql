@@ -269,9 +269,7 @@ from
 		var lst = item.GetTokens().ToList();
 		Assert.Equal(28, lst.Count);
 
-		Assert.IsType<CTEQuery>(item);
-		var cte = (CTEQuery)item;
-		Assert.NotNull(cte.Query);
+		Assert.NotNull(item.GetWithClause());
 	}
 
 	[Fact]
@@ -447,9 +445,7 @@ order by
 		var lst = item.GetTokens().ToList();
 		Assert.Equal(330, lst.Count);
 
-		Assert.IsType<CTEQuery>(item);
-		var cte = (CTEQuery)item;
-		Assert.NotNull(cte.Query);
+		Assert.NotNull(item.GetWithClause());
 	}
 
 	[Fact]

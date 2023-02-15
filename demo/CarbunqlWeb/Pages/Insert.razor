@@ -80,10 +80,9 @@ FROM
 		}
 		try
 		{
-			var bld = new CommandTextBuilder();
 			var sq = QueryParser.Parse(sql);
 			var q = sq.ToInsertQuery(table);
-			fsql = bld.Execute(q);
+			fsql = q.ToCommand().CommandText;
 		}
 		catch (Exception ex)
 		{

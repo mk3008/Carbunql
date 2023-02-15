@@ -46,10 +46,7 @@ public abstract class ReadQuery : IReadQuery
 		return this;
 	}
 
-	public WithClause? GetWithClause()
-	{
-		return null;
-	}
+	public abstract WithClause? GetWithClause();
 
-	public abstract SelectQuery GetSelectQuery();
+	public abstract SelectQuery GetOrNewSelectQuery();
 }

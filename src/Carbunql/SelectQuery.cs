@@ -5,9 +5,9 @@ namespace Carbunql;
 
 public class SelectQuery : ReadQuery, IQueryCommandable
 {
-	public SelectClause? SelectClause { get; set; }
+	public WithClause? WithClause { get; set; } = new();
 
-	public override SelectClause? GetSelectClause() => SelectClause;
+	public SelectClause? SelectClause { get; set; }
 
 	public FromClause? FromClause { get; set; }
 
@@ -21,6 +21,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable
 	{
 		if (SelectClause == null) yield break;
 
+		if (parent == null && WithClause != null) foreach (var item in WithClause.GetTokens()) yield return item;
 		foreach (var item in SelectClause.GetTokens(parent)) yield return item;
 		if (FromClause != null) foreach (var item in FromClause.GetTokens(parent)) yield return item;
 		if (WhereClause != null) foreach (var item in WhereClause.GetTokens(parent)) yield return item;
@@ -28,8 +29,9 @@ public class SelectQuery : ReadQuery, IQueryCommandable
 		if (HavingClause != null) foreach (var item in HavingClause.GetTokens(parent)) yield return item;
 	}
 
-	public override SelectQuery GetSelectQuery()
-	{
-		return this;
-	}
+	public override WithClause? GetWithClause() => WithClause;
+
+	public override SelectClause? GetSelectClause() => SelectClause;
+
+	public override SelectQuery GetOrNewSelectQuery() => this;
 }

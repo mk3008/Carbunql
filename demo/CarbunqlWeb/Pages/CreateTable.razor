@@ -84,10 +84,9 @@ FROM
 		}
 		try
 		{
-			var bld = new CommandTextBuilder();
 			var sq = QueryParser.Parse(sql);
 			var q = sq.ToCreateTableQuery(table, istemp);
-			fsql = bld.Execute(q);
+			fsql = q.ToCommand().CommandText;
 		}
 		catch (Exception ex)
 		{

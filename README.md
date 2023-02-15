@@ -192,28 +192,25 @@ WHERE
 using Carbunql;
 using Carbunql.Building;
 
-var cq = new CTEQuery();
+var sq = new SelectQuery();
 
 // a as (select * from table_a)
-var ct_a = cq.With(() =>
+var ct_a = sq.With(() =>
 {
-    var sq = new SelectQuery();
-    sq.From("table_a");
-    sq.SelectAll();
-    return sq;
+    var q = new SelectQuery();
+    q.From("table_a");
+    q.SelectAll();
+    return q;
 }).As("a");
 
 // b as (select * from table_b)
-var ct_b = cq.With(() =>
+var ct_b = sq.With(() =>
 {
-    var sq = new SelectQuery();
-    sq.From("table_b");
-    sq.SelectAll();
-    return sq;
+    var q = new SelectQuery();
+    q.From("table_b");
+    q.SelectAll();
+    return q;
 }).As("b");
-
-// get select query
-var sq = cq.GetOrNewSelectQuery();
 
 // select * from a iner join b a.id = b.id
 var (from, a) = sq.From(ct_a).As("a");

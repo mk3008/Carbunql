@@ -194,7 +194,7 @@ public class Demo
 	[Fact]
 	public void BuildCTEQuery()
 	{
-		var cq = new CTEQuery();
+		var cq = new SelectQuery();
 
 		// a as (select * from table_a)
 		var ct_a = cq.With(() =>

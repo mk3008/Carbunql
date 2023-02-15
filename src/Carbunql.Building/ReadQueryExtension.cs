@@ -7,11 +7,12 @@ namespace Carbunql.Building;
 
 public static class ReadQueryExtension
 {
-	public static (CTEQuery, CommonTable) ToCTE(this IReadQuery source, string alias)
+	public static (SelectQuery, CommonTable) ToCTE(this IReadQuery source, string alias)
 	{
-		var sq = new CTEQuery();
+		var sq = new SelectQuery();
+		sq.ImportCommonTable(source);
 
-		if (source is CTEQuery q) sq.ImportCommonTable(q);
+		sq.WithClause ??= new WithClause();
 		var ct = source.ToCommonTable(alias);
 		sq.WithClause.Add(ct);
 
@@ -20,12 +21,12 @@ public static class ReadQueryExtension
 
 	public static CommonTable ToCommonTable(this IReadQuery source, string alias)
 	{
-		return new CommonTable(new VirtualTable(source.GetQuery()), alias);
+		return new CommonTable(new VirtualTable(source), alias);
 	}
 
 	public static CommonTable ToCommonTable(this IReadQuery source, string alias, IList<string> columnAliases)
 	{
-		return new CommonTable(new VirtualTable(source.GetQuery()), alias, columnAliases.ToValueCollection());
+		return new CommonTable(new VirtualTable(source), alias, columnAliases.ToValueCollection());
 	}
 
 	public static SelectableTable ToSelectableTable(this IReadQuery source)
@@ -73,19 +74,13 @@ public static class ReadQueryExtension
 		if (s == null) throw new NotSupportedException();
 
 		var sq = new SelectQuery();
-		var (f, _) = sq.From(source.GetQuery()).As(alias);
+		sq.ImportCommonTable(source);
+
+		var (_, t) = sq.From(source).As(alias);
 		foreach (var item in s.Items)
 		{
 			if (!columnFilter(item)) continue;
-			sq.Select(f, item.Alias);
-		}
-
-		if (source is CTEQuery q)
-		{
-			var cte = new CTEQuery();
-			cte.ImportCommonTable(q);
-			cte.Query = sq;
-			return cte;
+			sq.Select(t, item.Alias);
 		}
 
 		return sq;
@@ -249,7 +244,7 @@ public static class ReadQueryExtension
 
 	public static void UnionAll(this IReadQuery source, IReadQuery query)
 	{
-		var sq = source.GetSelectQuery();
+		var sq = source.GetOrNewSelectQuery();
 		sq.AddOperatableValue("union all", query);
 	}
 
@@ -260,7 +255,7 @@ public static class ReadQueryExtension
 
 	public static void Union(this IReadQuery source, IReadQuery query)
 	{
-		var sq = source.GetSelectQuery();
+		var sq = source.GetOrNewSelectQuery();
 		sq.AddOperatableValue("union", query);
 	}
 

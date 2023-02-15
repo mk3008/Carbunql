@@ -2,10 +2,11 @@
 
 public class CTEQueryParser
 {
-	internal static CTEQuery Parse(ITokenReader r)
+	internal static SelectQuery Parse(ITokenReader r)
 	{
 		var w = WithClauseParser.Parse(r);
-		var q = ReadQueryParser.Parse(r);
-		return new CTEQuery(w) { Query = (SelectQuery)q };
+		var sq = SelectQueryParser.Parse(r);
+		sq.WithClause = w;
+		return sq;
 	}
 }

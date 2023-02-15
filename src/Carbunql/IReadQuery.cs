@@ -9,15 +9,13 @@ public interface IReadQuery : IQueryCommandable
 
 	WithClause? GetWithClause();
 
-	ReadQuery GetQuery();
-
-	SelectQuery GetSelectQuery();
+	SelectQuery GetOrNewSelectQuery();
 }
 
 public static class IReadQueryExtension
 {
 	public static ValueBase ToValue(this IReadQuery source)
 	{
-		return new QueryContainer(source.GetQuery());
+		return new QueryContainer(source);
 	}
 }
