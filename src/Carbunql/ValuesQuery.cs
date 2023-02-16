@@ -1,4 +1,5 @@
-﻿using Carbunql.Building;
+﻿using Carbunql.Analysis;
+using Carbunql.Building;
 using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Tables;
@@ -11,6 +12,15 @@ public class ValuesQuery : ReadQuery
 	public ValuesQuery(List<ValueCollection> rows)
 	{
 		Rows = rows;
+	}
+
+	public ValuesQuery(string query)
+	{
+		var q = ValuesQueryParser.Parse(query);
+		Rows = q.Rows;
+		OperatableQuery = q.OperatableQuery;
+		OrderClause = q.OrderClause;
+		LimitClause = q.LimitClause;
 	}
 
 	public List<ValueCollection> Rows { get; init; } = new();

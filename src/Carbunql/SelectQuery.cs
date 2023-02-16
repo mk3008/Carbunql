@@ -1,10 +1,27 @@
-﻿using Carbunql.Clauses;
+﻿using Carbunql.Analysis;
+using Carbunql.Clauses;
 using Carbunql.Values;
 
 namespace Carbunql;
 
 public class SelectQuery : ReadQuery, IQueryCommandable
 {
+	public SelectQuery() { }
+
+	public SelectQuery(string query)
+	{
+		var q = SelectQueryParser.Parse(query);
+		WithClause = q.WithClause;
+		SelectClause = q.SelectClause;
+		FromClause = q.FromClause;
+		WhereClause = q.WhereClause;
+		GroupClause = q.GroupClause;
+		HavingClause = q.HavingClause;
+		OperatableQuery = q.OperatableQuery;
+		OrderClause = q.OrderClause;
+		LimitClause = q.LimitClause;
+	}
+
 	public WithClause? WithClause { get; set; } = new();
 
 	public SelectClause? SelectClause { get; set; }

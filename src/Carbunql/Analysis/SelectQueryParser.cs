@@ -9,6 +9,8 @@ public static class SelectQueryParser
 	public static SelectQuery Parse(string text)
 	{
 		using var r = new TokenReader(text);
+
+		if (r.Peek().IsEqualNoCase("with")) return CTEQueryParser.Parse(r);
 		return Parse(r);
 	}
 
