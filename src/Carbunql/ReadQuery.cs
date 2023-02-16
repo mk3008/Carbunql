@@ -8,7 +8,7 @@ public abstract class ReadQuery : IReadQuery
 {
 	public abstract SelectClause? GetSelectClause();
 
-	public OperatableQuery? OperatableQuery { get; private set; }
+	public OperatableQuery? OperatableQuery { get; internal set; }
 
 	public OrderClause? OrderClause { get; set; }
 
