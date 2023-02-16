@@ -1,8 +1,9 @@
-﻿using Carbunql.Extensions;
+﻿using Carbunql.Clauses;
+using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
 
-namespace Carbunql.Clauses;
+namespace Carbunql;
 
 public class ValuesQuery : ReadQuery
 {
