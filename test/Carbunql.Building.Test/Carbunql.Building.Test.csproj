@@ -22,9 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Carbunql.Building\Carbunql.Building.csproj" />
     <ProjectReference Include="..\..\src\Carbunql\Carbunql.csproj" />
-    <ProjectReference Include="..\Carbunql.Analysis.Test\Carbunql.Analysis.Test.csproj" />
   </ItemGroup>
 
 </Project>

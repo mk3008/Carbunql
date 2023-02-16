@@ -17,22 +17,22 @@ public static class ValuesQueryParser
 		r.Read("values");
 
 		var sq = ValuesClauseParser.Parse(r);
-		sq.OrderClause = ParseOrderOrDefault(r);
 
-		var tokens = new string[] { "union", "except", "minus", "intersect" };
+		var tokens = new string[] { "union", "union all", "except", "minus", "intersect" };
 		if (r.Peek().IsEqualNoCase(tokens))
 		{
 			var op = r.Read();
 			sq.AddOperatableValue(op, Parse(r));
 		}
 
+		sq.OrderClause = ParseOrderOrDefault(r);
 		sq.LimitClause = ParseLimitOrDefault(r);
 		return sq;
 	}
 
 	private static OrderClause? ParseOrderOrDefault(ITokenReader r)
 	{
-		if (r.ReadOrDefault("order") == null) return null;
+		if (r.ReadOrDefault("order by") == null) return null;
 		return OrderClauseParser.Parse(r);
 	}
 

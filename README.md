@@ -18,6 +18,35 @@ https://mk3008.github.io/Carbunql
 - Only select queries can be parsed
 
 # Sample
+## Parse
+Just pass the select query string to the constructor of the SelectQuery class.
+```cs
+using Carbunql;
+
+var text = @"
+select a.column_1 as col1, a.column_2 as col2
+from table_a as a
+left join table_b as b on a.id = b.table_a_id
+where b.table_a_id is null
+";
+
+var sq = new SelectQuery(text);
+string sql = sq.ToCommand().CommandText;
+```
+
+```sql
+SELECT
+    a.column_1 AS col1,
+    a.column_2 AS col2
+FROM
+    table_a AS a
+    LEFT JOIN table_b AS b ON a.id = b.table_a_id
+WHERE
+    b.table_a_id IS null
+```
+
+## Building
+You can build using the SelectQuery class.
 ```cs
 using Carbunql;
 using Carbunql.Building;
@@ -41,8 +70,7 @@ sq.WhereColumn(c, "table_b_id").IsNull();
 // parameter
 sq.Parameters.Add(":id", 1);
 
-var cmd = sq.ToCommand();
-DebugPrint(cmd);
+string sql = sq.ToCommand().CommandText;
 ```
 
 ```sql
@@ -80,7 +108,7 @@ sq.From(() =>
 }).As("b");
 sq.SelectAll();
 
-var cmd = sq.ToCommand();
+string sql = sq.ToCommand().CommandText;
 ```
 
 ```sql
@@ -123,7 +151,7 @@ sq.Where(() =>
     return c1.ToGroup().Or(c2.ToGroup()).ToGroup();
 });
 
-var cmd = sq.ToCommand();
+string sql = sq.ToCommand().CommandText;
 ```
 
 ```sql
@@ -160,7 +188,7 @@ sq.Where(() =>
     return x.ToNotExists();
 });
 
-var cmd = sq.ToCommand();
+string sql = sq.ToCommand().CommandText;
 ```
 
 ```sql
@@ -218,7 +246,7 @@ from.InnerJoin(ct_b).On(a, "id");
 
 sq.SelectAll();
 
-var cmd = cq.ToCommand();
+string sql = sq.ToCommand().CommandText;
 ```
 
 ```sql

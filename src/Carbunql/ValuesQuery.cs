@@ -1,14 +1,26 @@
-﻿using Carbunql.Extensions;
+﻿using Carbunql.Analysis;
+using Carbunql.Building;
+using Carbunql.Clauses;
+using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
 
-namespace Carbunql.Clauses;
+namespace Carbunql;
 
 public class ValuesQuery : ReadQuery
 {
 	public ValuesQuery(List<ValueCollection> rows)
 	{
 		Rows = rows;
+	}
+
+	public ValuesQuery(string query)
+	{
+		var q = ValuesQueryParser.Parse(query);
+		Rows = q.Rows;
+		OperatableQuery = q.OperatableQuery;
+		OrderClause = q.OrderClause;
+		LimitClause = q.LimitClause;
 	}
 
 	public List<ValueCollection> Rows { get; init; } = new();
@@ -54,19 +66,16 @@ public class ValuesQuery : ReadQuery
 		cnt.ForEach(x => columnAlias.Add(new LiteralValue("c" + x)));
 
 		var sq = new SelectQuery();
-		sq.SelectClause = new SelectClause();
 
 		var vt = new VirtualTable(this);
-		var st = new SelectableTable(vt, "v", columnAlias);
-		if (st.ColumnAliases == null) throw new Exception();
+		var f = sq.From(vt.ToSelectable("v", columnAlias));
 
-		sq.FromClause = new FromClause(st); ;
+		foreach (var item in columnAlias) sq.Select(f, item.ToText());
 
-		foreach (var item in st.ColumnAliases)
-		{
-			var c = new ColumnValue("v", item.ToText());
-			sq.SelectClause.Add(new SelectableItem(c, c.GetDefaultName()));
-		}
+		sq.OrderClause = OrderClause;
+		sq.LimitClause = LimitClause;
+
+		sq.Parameters = Parameters;
 
 		return sq;
 	}

@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Carbunql.Analysis\Carbunql.Analysis.csproj" />
+    <ProjectReference Include="..\..\src\Carbunql\Carbunql.csproj" />
   </ItemGroup>
 
 </Project>

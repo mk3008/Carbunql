@@ -5,8 +5,6 @@ VisualStudioVersion = 17.1.32228.430
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carbunql", "Carbunql\Carbunql.csproj", "{DBAF5ECB-F3FB-48D9-B10F-CEB16FDF49DD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carbunql.Analysis", "Carbunql.Analysis\Carbunql.Analysis.csproj", "{9DAF1065-3E94-4509-8C53-729D76692BD9}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carbunql.Analysis.Test", "..\test\Carbunql.Analysis.Test\Carbunql.Analysis.Test.csproj", "{B19BE1E1-4517-4B42-869E-991EE4D25603}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carbunql.Benchmark", "..\test\Carbunql.Benchmark\Carbunql.Benchmark.csproj", "{729B9348-C87C-40AD-82B6-BE9BB7DA4AC1}"
@@ -14,8 +12,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CarbunqlWeb", "..\demo\CarbunqlWeb\CarbunqlWeb.csproj", "{8AD9DC40-BAB2-4469-A90F-AD41A2BB65A3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carbunql.Building.Test", "..\test\Carbunql.Building.Test\Carbunql.Building.Test.csproj", "{1BE5C98E-D8BC-493B-8F3D-F4A762C9B348}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carbunql.Building", "Carbunql.Building\Carbunql.Building.csproj", "{C119C4CA-EF4F-43DA-9369-32BA39BDE72C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,10 +23,6 @@ Global
 		{DBAF5ECB-F3FB-48D9-B10F-CEB16FDF49DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DBAF5ECB-F3FB-48D9-B10F-CEB16FDF49DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DBAF5ECB-F3FB-48D9-B10F-CEB16FDF49DD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9DAF1065-3E94-4509-8C53-729D76692BD9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9DAF1065-3E94-4509-8C53-729D76692BD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9DAF1065-3E94-4509-8C53-729D76692BD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9DAF1065-3E94-4509-8C53-729D76692BD9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B19BE1E1-4517-4B42-869E-991EE4D25603}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B19BE1E1-4517-4B42-869E-991EE4D25603}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B19BE1E1-4517-4B42-869E-991EE4D25603}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -47,10 +39,6 @@ Global
 		{1BE5C98E-D8BC-493B-8F3D-F4A762C9B348}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1BE5C98E-D8BC-493B-8F3D-F4A762C9B348}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1BE5C98E-D8BC-493B-8F3D-F4A762C9B348}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C119C4CA-EF4F-43DA-9369-32BA39BDE72C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C119C4CA-EF4F-43DA-9369-32BA39BDE72C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C119C4CA-EF4F-43DA-9369-32BA39BDE72C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C119C4CA-EF4F-43DA-9369-32BA39BDE72C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
