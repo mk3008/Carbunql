@@ -1,6 +1,8 @@
-﻿namespace Carbunql.Clauses;
+﻿using Carbunql.Extensions;
 
-public class HavingClause : IQueryCommand
+namespace Carbunql.Clauses;
+
+public class HavingClause : IQueryCommandable
 {
 	public HavingClause(ValueBase condition)
 	{
@@ -8,6 +10,11 @@ public class HavingClause : IQueryCommand
 	}
 
 	public ValueBase Condition { get; init; }
+
+	public IDictionary<string, object?> GetParameters()
+	{
+		return Condition.GetParameters();
+	}
 
 	public IEnumerable<Token> GetTokens(Token? parent)
 	{

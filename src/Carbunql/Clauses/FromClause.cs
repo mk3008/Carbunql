@@ -1,6 +1,8 @@
-﻿namespace Carbunql.Clauses;
+﻿using Carbunql.Extensions;
 
-public class FromClause : IQueryCommand
+namespace Carbunql.Clauses;
+
+public class FromClause : IQueryCommandable
 {
 	public FromClause(SelectableTable root)
 	{
@@ -10,6 +12,17 @@ public class FromClause : IQueryCommand
 	public SelectableTable Root { get; init; }
 
 	public List<Relation>? Relations { get; set; }
+
+	public IDictionary<string, object?> GetParameters()
+	{
+		var prm = EmptyParameters.Get();
+		prm = prm.Merge(Root.GetParameters());
+		if (Relations != null)
+		{
+			foreach (var item in Relations) prm = prm.Merge(item.GetParameters());
+		}
+		return prm;
+	}
 
 	public IEnumerable<Token> GetTokens(Token? parent)
 	{

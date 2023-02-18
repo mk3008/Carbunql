@@ -1,6 +1,6 @@
 ﻿namespace Carbunql.Clauses;
 
-public class WhereClause : IQueryCommand
+public class WhereClause : IQueryCommandable
 {
 	public WhereClause(ValueBase condition)
 	{
@@ -8,6 +8,11 @@ public class WhereClause : IQueryCommand
 	}
 
 	public ValueBase Condition { get; init; }
+
+	public IDictionary<string, object?> GetParameters()
+	{
+		return Condition.GetParameters();
+	}
 
 	public IEnumerable<Token> GetTokens(Token? parent)
 	{

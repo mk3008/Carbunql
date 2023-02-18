@@ -1,8 +1,9 @@
-﻿using System.Collections;
+﻿using Carbunql.Extensions;
+using System.Collections;
 
 namespace Carbunql.Clauses;
 
-public class WithClause : IList<CommonTable>, IQueryCommand
+public class WithClause : IList<CommonTable>, IQueryCommandable
 {
 	public WithClause()
 	{
@@ -45,6 +46,16 @@ public class WithClause : IList<CommonTable>, IQueryCommand
 			}
 			foreach (var token in item.GetTokens(clause)) yield return token;
 		}
+	}
+
+	public IDictionary<string, object?> GetParameters()
+	{
+		var prm = EmptyParameters.Get();
+		foreach (var item in CommonTables)
+		{
+			prm = prm.Merge(item.GetParameters());
+		}
+		return prm;
 	}
 
 	#region implements IList<CommonTable>

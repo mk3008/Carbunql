@@ -2,7 +2,7 @@
 
 namespace Carbunql.Clauses;
 
-public class Relation : IQueryCommand
+public class Relation : IQueryCommandable
 {
 	public Relation(SelectableTable query, string types)
 	{
@@ -22,6 +22,13 @@ public class Relation : IQueryCommand
 	public ValueBase? Condition { get; set; }
 
 	public SelectableTable Table { get; init; }
+
+	public IDictionary<string, object?> GetParameters()
+	{
+		var prm = EmptyParameters.Get();
+		prm = prm.Merge(Table.GetParameters());
+		return prm.Merge(Condition?.GetParameters());
+	}
 
 	public IEnumerable<Token> GetTokens(Token? parent)
 	{
