@@ -64,4 +64,23 @@ public class SelectQueryGeneratorTest
         Assert.Equal(12, lst.Count());
         Assert.Equal("@model_id", lst[1].Text);
     }
+
+    [Fact]
+    public void ListToSelectQuery()
+    {
+        var models = new List<Model>
+        {
+            new Model() { ModelID = 1, ModelName = "abc" },
+            new Model() { ModelID = 2, ModelName = "test" },
+            new Model() { ModelID = 3, ModelName = "xyz" }
+        };
+
+        var sq = SelectQueryGenerator.FromObject(models, "@", StringFormatter.ToLowerSnakeCase);
+        DebugPrint(sq.ToCommand());
+
+        var lst = sq.GetTokens().ToList();
+
+        Assert.Equal(38, lst.Count());
+        Assert.Equal("@description2", lst[35].Text);
+    }
 }
