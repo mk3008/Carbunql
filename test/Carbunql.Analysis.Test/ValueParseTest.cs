@@ -454,12 +454,37 @@ public class ValueParserTest
 	[Fact]
 	public void Parameter()
 	{
-		var text = ":val";
+		var text = ":val,";
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
 
 		var lst = v.GetTokens().ToList();
 		Assert.Single(lst);
+		Assert.IsType<ParameterValue>(lst.First().Sender);
+	}
+
+	[Fact]
+	public void Parameter_SQLServer()
+	{
+		var text = "@val,";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Single(lst);
+		Assert.IsType<ParameterValue>(lst.First().Sender);
+	}
+
+	[Fact]
+	public void Parameter_Nameless()
+	{
+		var text = "?,";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Single(lst);
+		Assert.IsType<ParameterValue>(lst.First().Sender);
 	}
 
 	[Fact]

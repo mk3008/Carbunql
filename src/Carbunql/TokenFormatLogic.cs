@@ -5,7 +5,7 @@ using Carbunql.Values;
 
 namespace Carbunql;
 
-public class CommandFormatter
+public class TokenFormatLogic
 {
 	public Action<string>? Logger { get; set; }
 

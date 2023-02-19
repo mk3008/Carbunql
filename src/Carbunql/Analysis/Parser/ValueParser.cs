@@ -53,6 +53,8 @@ public static class ValueParser
 	{
 		var item = r.Read();
 
+		if (String.IsNullOrEmpty(item)) throw new EndOfStreamException();
+
 		if (item.IsEqualNoCase("not"))
 		{
 			return new NegativeValue(Parse(r));
@@ -109,6 +111,11 @@ public static class ValueParser
 			var table = item;
 			r.Read(".");
 			return new ColumnValue(table, r.Read());
+		}
+
+		if (item.StartsWith(new String[] { ":", "@", "?"}))
+        {
+			return new ParameterValue(item);
 		}
 
 		//omit table column
