@@ -3,7 +3,7 @@ using Carbunql.Values;
 
 namespace Carbunql.Clauses;
 
-public abstract class ValueBase : IQueryCommand
+public abstract class ValueBase : IQueryCommandable
 {
 	public virtual string GetDefaultName() => string.Empty;
 
@@ -41,5 +41,10 @@ public abstract class ValueBase : IQueryCommand
 	public string ToText()
 	{
 		return GetTokens(null).ToText();
+	}
+
+	public virtual IDictionary<string, object?> GetParameters()
+	{
+		return EmptyParameters.Get();
 	}
 }

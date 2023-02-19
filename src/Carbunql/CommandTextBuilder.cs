@@ -5,19 +5,19 @@ namespace Carbunql;
 
 public class CommandTextBuilder
 {
-    public CommandTextBuilder(CommandFormatter formatter)
+    public CommandTextBuilder(TokenFormatLogic formatter)
     {
         Formatter = formatter;
     }
 
     public CommandTextBuilder()
     {
-        Formatter = new CommandFormatter();
+        Formatter = new TokenFormatLogic();
     }
 
     public Action<string>? Logger { get; set; }
 
-    public CommandFormatter Formatter { get; init; }
+    public TokenFormatLogic Formatter { get; init; }
 
     private Token? PrevToken { get; set; }
 

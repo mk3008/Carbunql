@@ -1,6 +1,6 @@
 ﻿using Carbunql.Analysis;
 using Carbunql.Clauses;
-using Carbunql.Values;
+using Carbunql.Extensions;
 
 namespace Carbunql;
 
@@ -51,4 +51,14 @@ public class SelectQuery : ReadQuery, IQueryCommandable
 	public override SelectClause? GetSelectClause() => SelectClause;
 
 	public override SelectQuery GetOrNewSelectQuery() => this;
+
+	public override IDictionary<string, object?> GetInnerParameters()
+	{
+		var prm = EmptyParameters.Get();
+		prm = prm.Merge(FromClause?.GetParameters());
+		prm = prm.Merge(WhereClause?.GetParameters());
+		prm = prm.Merge(GroupClause?.GetParameters());
+		prm = prm.Merge(HavingClause?.GetParameters());
+		return prm;
+	}
 }

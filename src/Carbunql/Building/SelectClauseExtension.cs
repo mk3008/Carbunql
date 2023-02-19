@@ -136,7 +136,7 @@ public static class SelectClauseExtension
 		source.Order(item);
 	}
 
-	public static void Order(this SelectQuery source, IQueryCommand value)
+	public static void Order(this SelectQuery source, IQueryCommandable value)
 	{
 		source.OrderClause ??= new OrderClause();
 		source.OrderClause.Add(value);

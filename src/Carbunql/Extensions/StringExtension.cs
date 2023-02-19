@@ -6,6 +6,15 @@ namespace Carbunql.Extensions;
 
 public static class StringExtension
 {
+	public static bool StartsWith(this string source, IEnumerable<string> prefixes)
+	{
+        foreach (var item in prefixes)
+        {
+			if (source.StartsWith(item)) return true;
+        }
+		return false;
+	}
+
 	public static bool IsEqualNoCase(this string? source, string? text)
 	{
 		if (source == null && text == null) return true;

@@ -23,11 +23,18 @@ public abstract class ReadQuery : IReadQuery
 
 	public IDictionary<string, object?> Parameters { get; set; } = new Dictionary<string, object?>();
 
-	public virtual IDictionary<string, object?> GetParameters()
+	public virtual IDictionary<string, object?> GetInnerParameters() => EmptyParameters.Get();
+
+	public IDictionary<string, object?> GetParameters()
 	{
 		var prm = EmptyParameters.Get();
-		prm = prm.Merge(Parameters);
+		prm = prm.Merge(GetWithClause()?.GetParameters());
+		prm = prm.Merge(GetSelectClause()?.GetParameters());
+		prm = prm.Merge(GetInnerParameters());
 		prm = prm.Merge(OperatableQuery?.GetParameters());
+		prm = prm.Merge(OrderClause?.GetParameters());
+		prm = prm.Merge(LimitClause?.GetParameters());
+		prm = prm.Merge(Parameters);
 		return prm;
 	}
 
