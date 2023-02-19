@@ -1,7 +1,6 @@
 ﻿using Carbunql.Analysis;
 using Carbunql.Clauses;
 using Carbunql.Extensions;
-using Carbunql.Values;
 
 namespace Carbunql;
 

@@ -43,26 +43,26 @@ public class SelectQueryGeneratorTest
     {
         var m = new Model() { ModelID = 2, ModelName = "test" };
 
-        var sq = SelectQueryGenerator.FromObject(m);
+        var sq = SelectQueryGenerator.FromItem(m);
         DebugPrint(sq.ToCommand());
 
         var lst = sq.GetTokens().ToList();
 
-        Assert.Equal(12, lst.Count());
-        Assert.Equal(":ModelID", lst[1].Text);
+        Assert.Equal(32, lst.Count());
+        Assert.Equal(":ModelID0", lst[16].Text);
     }
 
     [Fact]
     public void ObjectToSelectQuery_LowerSnakeCase()
     {
         var m = new Model() { ModelID = 2, ModelName = "test" };
-        var sq = SelectQueryGenerator.FromObject(m, "@", StringFormatter.ToLowerSnakeCase);
+        var sq = SelectQueryGenerator.FromItem(m, "@", StringFormatter.ToLowerSnakeCase);
         DebugPrint(sq.ToCommand());
 
         var lst = sq.GetTokens().ToList();
 
-        Assert.Equal(12, lst.Count());
-        Assert.Equal("@model_id", lst[1].Text);
+        Assert.Equal(32, lst.Count());
+        Assert.Equal("@model_id0", lst[16].Text);
     }
 
     [Fact]
@@ -75,12 +75,12 @@ public class SelectQueryGeneratorTest
             new Model() { ModelID = 3, ModelName = "xyz" }
         };
 
-        var sq = SelectQueryGenerator.FromObject(models, "@", StringFormatter.ToLowerSnakeCase);
+        var sq = SelectQueryGenerator.FromList(models, "@", StringFormatter.ToLowerSnakeCase);
         DebugPrint(sq.ToCommand());
 
         var lst = sq.GetTokens().ToList();
 
-        Assert.Equal(38, lst.Count());
-        Assert.Equal("@description2", lst[35].Text);
+        Assert.Equal(48, lst.Count());
+        Assert.Equal("@description2", lst[36].Text);
     }
 }

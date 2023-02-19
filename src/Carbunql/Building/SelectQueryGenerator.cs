@@ -4,46 +4,21 @@ namespace Carbunql.Building;
 
 public static class SelectQueryGenerator
 {
-    public static SelectQuery FromObject(object obj, string parameterSufix = ":", Func<string, string>? nameFormatter = null)
+    public static SelectQuery FromItem<T>(T item, string parameterSufix = ":", Func<string, string>? keyFormatter = null)
     {
-        return FromObject(obj, parameterSufix, nameFormatter, null);
+        return FromList<T>(new[] { item }, parameterSufix, keyFormatter);
     }
 
-    private static SelectQuery FromObject(object obj, string parameterSufix, Func<string, string>? nameFormatter, int? index)
+    public static SelectQuery FromList<T>(IEnumerable<T> lst, string parameterSufix = ":", Func<string, string>? keyFormatter = null)
     {
-        var sq = new SelectQuery();
-        foreach (var item in obj.GetType().GetProperties().ToList().Where(x => x.CanRead))
-        {
-            var value = item.GetValue(obj);
-            var name = item.Name;
-            if (nameFormatter != null) name = nameFormatter(name);
-            var key = parameterSufix + name;
-            if (index != null) key = key + index;
-            var c = new ParameterValue(key, value);
-            sq.Select(c).As(name);
-        }
-        return sq;
-    }
+        keyFormatter ??= (string x) => x;
 
-    public static SelectQuery FromObject<T>(IEnumerable<T> lst, string parameterSufix = ":", Func<string, string>? nameFormatter = null)
-    {
-        SelectQuery? sq = null;
-        var index = 0;
-        foreach (var item in lst)
-        {
-            if (item == null) continue;
-            var tmp = FromObject(item, parameterSufix, nameFormatter, index);
-            if (sq == null)
-            {
-                sq = tmp;
-            }
-            else
-            {
-                sq.UnionAll(tmp);
-            }
-            index++;
-        }
-        if (sq == null) throw new ArgumentException();
-        return sq;
+        var props = typeof(T).GetProperties().Where(x => x.CanRead).Select(x => x.Name).ToList();
+        var vq = ValuesQueryGenerator.FromList(lst, props, parameterSufix, keyFormatter);
+
+        var header = new ValueCollection();
+        props.ForEach(x => header.Add(keyFormatter(x)));
+
+        return vq.ToSelectQuery(header);
     }
 }

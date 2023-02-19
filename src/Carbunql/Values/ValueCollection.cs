@@ -1,4 +1,5 @@
 ﻿using Carbunql.Clauses;
+using Carbunql.Extensions;
 using System.Collections;
 
 namespace Carbunql.Values;
@@ -41,6 +42,13 @@ public class ValueCollection : ValueBase, IList<ValueBase>, IQueryCommand
             }
             foreach (var token in item.GetTokens(parent)) yield return token;
         }
+    }
+
+    public override IDictionary<string, object?> GetParameters()
+    {
+        var prm = EmptyParameters.Get();
+        Collection.ForEach(x => prm = prm.Merge(x.GetParameters()));
+        return prm;
     }
 
     #region implements IList<ValueBase>
