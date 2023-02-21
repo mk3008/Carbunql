@@ -13,7 +13,25 @@ public class CountTest
         Monitor = new QueryCommandMonitor(output);
     }
 
-    [Fact]
+	[Fact]
+	public void CountQuery_With()
+	{
+		var sql = @"with 
+dat as (
+    select a.id, a.value as v from table as a
+) 
+select * from dat";
+		var q = QueryParser.Parse(sql);
+
+		var sq = q.ToCountQuery();
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+
+		Assert.Equal(35, lst.Count());
+
+	}
+	[Fact]
     public void CountQuery()
     {
         var sql = "select a.id, a.value as v from table as a";
@@ -38,6 +56,6 @@ public class CountTest
 
         var lst = sq.GetTokens().ToList();
 
-        Assert.Equal(42, lst.Count());
+        Assert.Equal(24, lst.Count());
     }
 }
