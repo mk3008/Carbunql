@@ -16,16 +16,17 @@
 <RadzenSidebar @bind-Expanded="@isExpanded">
 	<RadzenPanelMenu>
 		<RadzenPanelMenuItem Text="Format" Icon="segment" Path="format" />
+		<RadzenPanelMenuItem Text="ToCount" Icon="functions" Path="count" />
 		<RadzenPanelMenuItem Text="ToSubQuery" Icon="keyboard_double_arrow_right" Path="subquery" />
-		<RadzenPanelMenuItem Text="ToCTEQuery" Icon="keyboard_double_arrow_up" Path="cte" />
-		<RadzenPanelMenuItem Text="ToInsertQuery" Icon="add_circle" Path="insert" />
-		<RadzenPanelMenuItem Text="ToUpdateQuery" Icon="edit" Path="update" />
-		<RadzenPanelMenuItem Text="ToDeleteQuery" Icon="remove_circle" Path="delete" />
-		<RadzenPanelMenuItem Text="ToCreateTable" Icon="view_list" Path="createtable" />
-		<RadzenPanelMenuItem Text="ToDiffQuery" Icon="difference" Path="diffquery" />
+		<RadzenPanelMenuItem Text="ToCTE" Icon="keyboard_double_arrow_up" Path="cte" />
+		<RadzenPanelMenuItem Text="ToInsert" Icon="add_circle" Path="insert" />
+		<RadzenPanelMenuItem Text="ToUpdate" Icon="edit" Path="update" />
+		<RadzenPanelMenuItem Text="ToDelete" Icon="remove_circle" Path="delete" />
+		<RadzenPanelMenuItem Text="ToCreate" Icon="view_list" Path="createtable" />
+		<RadzenPanelMenuItem Text="ToDiff" Icon="difference" Path="diffquery" />
 
-		<RadzenPanelMenuItem Text="ToPivotQuery(month)" Icon="pivot_table_chart" Path="pivot_month" />
-		<RadzenPanelMenuItem Text="ToPivotQuery(day)" Icon="pivot_table_chart" Path="pivot_day" />
+		<RadzenPanelMenuItem Text="ToPivot(month)" Icon="pivot_table_chart" Path="pivot_month" />
+		<RadzenPanelMenuItem Text="ToPivot(day)" Icon="pivot_table_chart" Path="pivot_day" />
 	</RadzenPanelMenu>
 </RadzenSidebar>
 
