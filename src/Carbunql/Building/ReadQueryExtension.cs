@@ -141,16 +141,16 @@ public static class ReadQueryExtension
 		};
 	}
 
-	/// <summary>
-	/// set val = queryAlias.val
-	/// </summary>
-	/// <param name="source"></param>
-	/// <param name="keys"></param>
-	/// <param name="alias"></param>
-	/// <param name="queryAlias"></param>
-	/// <returns></returns>
-	/// <exception cref="NotSupportedException"></exception>
-	private static SetClause ToSetClause(this IReadQuery source, IEnumerable<string> keys, string alias, string queryAlias)
+    /// <summary>
+    /// set val = queryAlias.val
+    /// </summary>
+    /// <param name="source"></param>
+    /// <param name="keys"></param>
+    /// <param name="alias"></param>
+    /// <param name="queryAlias"></param>
+    /// <returns></returns>
+    /// <exception cref="NotSupportedException"></exception>
+    private static SetClause ToSetClause(this IReadQuery source, IEnumerable<string> keys, string alias, string queryAlias)
 	{
 		var s = source.GetSelectClause();
 		if (s == null) throw new NotSupportedException("select clause is not found.");
@@ -276,4 +276,12 @@ public static class ReadQueryExtension
 	{
 		source.Union(builder());
 	}
+
+    public static SelectQuery ToCountQuery(this IReadQuery source, string alias = "row_count")
+    {
+		var sq = new SelectQuery();
+		var (f, q) = sq.From(source.GetOrNewSelectQuery()).As("q");
+		sq.Select("count(*)").As(alias);
+		return sq;
+    }
 }
