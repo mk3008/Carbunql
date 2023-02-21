@@ -1,4 +1,5 @@
 using Carbunql.Analysis;
+using Carbunql.Extensions;
 using Xunit.Abstractions;
 
 
@@ -45,15 +46,13 @@ public class InsertTest
     public void InsertQuery_ColumnFilter()
     {
         var sql = "select a.id, a.value as v from table as a";
-        var q = QueryParser.Parse(sql);
+        var tmp = QueryParser.Parse(sql);
 
-        q = q.ToSubQuery("q", (x) =>
-        {
-            if (x.Alias == "id") return false;
-            return true;
-        });
+        var sq = new SelectQuery();
+        var (f, q) = sq.From(tmp).As("q");
+        q.Table.GetValueNames().Where(x => x.IsEqualNoCase("id")).ToList().ForEach(x => sq.Select(q, x));
 
-        var iq = q.ToInsertQuery("new_table");
+        var iq = sq.ToInsertQuery("new_table");
         Monitor.Log(iq);
 
         var lst = iq.GetTokens().ToList();

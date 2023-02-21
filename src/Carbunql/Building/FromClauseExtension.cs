@@ -41,6 +41,7 @@ public static class FromClauseExtension
 
 	public static FromClause From(this SelectQuery source, IReadQuery subQuery)
 	{
+		source.ImportCommonTable(subQuery);
 		var vt = new VirtualTable(subQuery);
 		var st = vt.ToSelectable("q");
 		return source.From(st);

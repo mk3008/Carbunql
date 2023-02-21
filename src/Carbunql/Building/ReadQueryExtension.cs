@@ -75,24 +75,6 @@ public static class ReadQueryExtension
 		return sq;
 	}
 
-	public static IReadQuery ToSubQuery(this IReadQuery source, string alias, Predicate<SelectableItem> columnFilter)
-	{
-		var s = source.GetSelectClause();
-		if (s == null) throw new NotSupportedException();
-
-		var sq = new SelectQuery();
-		sq.ImportCommonTable(source);
-
-		var (_, t) = sq.From(source).As(alias);
-		foreach (var item in s.Items)
-		{
-			if (!columnFilter(item)) continue;
-			sq.Select(t, item.Alias);
-		}
-
-		return sq;
-	}
-
 	public static CreateTableQuery ToCreateTableQuery(this IReadQuery source, string table, bool isTemporary = true)
 	{
 		var t = table.ToPhysicalTable();
@@ -233,11 +215,14 @@ public static class ReadQueryExtension
 		ks.ForEach(x => cnd.Add(new ColumnValue(alias, x)));
 		if (cnd == null) throw new Exception();
 
-		var sq = source.ToSubQuery(queryAlias, (x) =>
+		var sq = new SelectQuery();
+		var (f, a)= sq.From(source).As(queryAlias);
+		foreach (var item in a.Table.GetValueNames())
 		{
-			if (ks.Where(k => k.IsEqualNoCase(x.Alias)).Any()) return true;
-			return false;
-		});
+			if (!ks.Where(k => k.IsEqualNoCase(item)).Any()) continue;
+			sq.Select(a, item);
+		}
+
 		var exp = new InExpression(cnd.ToBracket(), sq.ToValue());
 		return exp.ToWhereClause();
 	}
@@ -280,7 +265,7 @@ public static class ReadQueryExtension
     public static SelectQuery ToCountQuery(this IReadQuery source, string alias = "row_count")
     {
 		var sq = new SelectQuery();
-		var (f, q) = sq.From(source.GetOrNewSelectQuery()).As("q");
+		var (f, q) = sq.From(source).As("q");
 		sq.Select("count(*)").As(alias);
 		return sq;
     }
