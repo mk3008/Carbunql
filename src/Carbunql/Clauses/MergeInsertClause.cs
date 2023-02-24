@@ -1,0 +1,28 @@
+﻿using Carbunql.Values;
+
+namespace Carbunql.Clauses;
+
+public class MergeInsertClause : IQueryCommand
+{
+	public MergeInsertClause(ValueCollection columnAliases)
+	{
+		ColumnAliases = columnAliases;
+	}
+
+	public ValueCollection ColumnAliases { get; init; }
+
+	public virtual IEnumerable<Token> GetTokens(Token? parent)
+	{
+		var t = Token.Reserved(this, parent, "insert");
+
+		var bracket = Token.ReservedBracketStart(this, t);
+		yield return bracket;
+		foreach (var item in ColumnAliases.GetTokens(bracket)) yield return item;
+		yield return Token.ReservedBracketEnd(this, parent);
+	}
+
+	public virtual IDictionary<string, object?> GetParameters()
+	{
+		return ColumnAliases.GetParameters();
+	}
+}

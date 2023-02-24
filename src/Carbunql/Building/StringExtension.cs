@@ -1,4 +1,5 @@
-﻿using Carbunql.Values;
+﻿using Carbunql.Analysis.Parser;
+using Carbunql.Values;
 
 namespace Carbunql.Building;
 
@@ -9,7 +10,17 @@ public static class StringExtension
 		var vals = new ValueCollection();
 		foreach (var item in source)
 		{
-			vals.Add(new LiteralValue(item));
+			vals.Add(ValueParser.Parse(item));
+		}
+		return vals;
+	}
+
+	public static ValueCollection ToValueCollection(this IList<string> source, string alias)
+	{
+		var vals = new ValueCollection();
+		foreach (var item in source)
+		{
+			vals.Add(new ColumnValue(alias, item));
 		}
 		return vals;
 	}

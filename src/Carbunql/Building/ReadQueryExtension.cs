@@ -123,31 +123,6 @@ public static class ReadQueryExtension
 		};
 	}
 
-    /// <summary>
-    /// set val = queryAlias.val
-    /// </summary>
-    /// <param name="source"></param>
-    /// <param name="keys"></param>
-    /// <param name="alias"></param>
-    /// <param name="queryAlias"></param>
-    /// <returns></returns>
-    /// <exception cref="NotSupportedException"></exception>
-    private static SetClause ToSetClause(this IReadQuery source, IEnumerable<string> keys, string alias, string queryAlias)
-	{
-		var s = source.GetSelectClause();
-		if (s == null) throw new NotSupportedException("select clause is not found.");
-		var cols = s.Items.Where(x => !keys.Contains(x.Alias)).Select(x => x.Alias).ToList();
-
-		var clause = new SetClause();
-		foreach (var item in cols)
-		{
-			var c = new ColumnValue(alias, item);
-			c.Equal(new ColumnValue(queryAlias, item));
-			clause.Add(c);
-		};
-		return clause;
-	}
-
 	/// <summary>
 	/// where alias.key = queryAlias.key
 	/// </summary>
@@ -201,6 +176,8 @@ public static class ReadQueryExtension
 		};
 	}
 
+
+
 	public static DeleteQuery ToDeleteQuery(this IReadQuery source, string table, IEnumerable<string> keys)
 	{
 		var t = table.ToPhysicalTable().ToSelectable();
@@ -216,7 +193,7 @@ public static class ReadQueryExtension
 		if (cnd == null) throw new Exception();
 
 		var sq = new SelectQuery();
-		var (f, a)= sq.From(source).As(queryAlias);
+		var (f, a) = sq.From(source).As(queryAlias);
 		foreach (var item in a.Table.GetValueNames())
 		{
 			if (!ks.Where(k => k.IsEqualNoCase(item)).Any()) continue;
@@ -262,11 +239,132 @@ public static class ReadQueryExtension
 		source.Union(builder());
 	}
 
-    public static SelectQuery ToCountQuery(this IReadQuery source, string alias = "row_count")
-    {
+	public static SelectQuery ToCountQuery(this IReadQuery source, string alias = "row_count")
+	{
 		var sq = new SelectQuery();
 		var (f, q) = sq.From(source).As("q");
 		sq.Select("count(*)").As(alias);
 		return sq;
-    }
+	}
+
+	//public static MergeQuery ToMergeQuery(this IReadQuery source, string destinationTable, string key, bool isSequenceKey = true)
+	//{
+	//}
+	//public static MergeQuery ToMergeQuery(this IReadQuery source, SelectableTable destination, string key, bool isSequenceKey = true)
+	//{
+	//}
+
+	public static MergeQuery ToMergeQuery(this IReadQuery source, string destinationTable, IEnumerable<string> keys)
+	{
+		var s = source.GetSelectClause();
+		if (s == null) throw new NotSupportedException("select clause is not found.");
+		var columnAliases = s.Select(x => x.Alias).ToList().ToValueCollection();
+		var t = new SelectableTable(new PhysicalTable(destinationTable), "_d", columnAliases);
+
+		return source.ToMergeQuery(t, keys);
+	}
+
+	public static MergeQuery ToMergeQuery(this IReadQuery source, SelectableTable destination, IEnumerable<string> keys)
+	{
+		var destinationName = destination.Alias;
+		var sourceName = "_s";
+
+		var q = new MergeQuery()
+		{
+			WithClause = source.GetWithClause(),
+			UsingClause = source.ToUsingClause(keys, destinationName, sourceName),
+			MergeClause = new MergeClause(destination),
+			Parameters = source.GetParameters(),
+		};
+
+		q.WhenClause = new WhenClause
+		{
+			source.ToMergeInsert(keys, destinationName, sourceName),
+			source.ToMergeUpdate(keys, destinationName, sourceName)
+		};
+
+		return q;
+	}
+
+	private static UsingClause ToUsingClause(this IReadQuery source, IEnumerable<string> keys, string destinationName = "_d", string sourceName = "_s")
+	{
+		var s = source.GetSelectClause();
+		if (s == null) throw new NotSupportedException("select clause is not found.");
+		var cols = s.Where(x => keys.Contains(x.Alias)).Select(x => x.Alias).ToList();
+
+		ValueBase? v = null;
+		foreach (var item in cols)
+		{
+			if (v == null)
+			{
+				v = new ColumnValue(destinationName, item);
+			}
+			else
+			{
+				v.And(new ColumnValue(destinationName, item));
+			}
+			v.Equal(new ColumnValue(sourceName, item));
+		};
+		if (v == null) throw new Exception();
+
+		return new UsingClause(source.ToSelectableTable(sourceName), v);
+	}
+
+	private static MergeWhenInsert ToMergeInsert(this IReadQuery source, IEnumerable<string> keys, string destinationName = "_d", string sourceName = "_s")
+	{
+		var q = source.ToMergeInsertQuery(keys, destinationName, sourceName);
+		return new MergeWhenInsert(q);
+	}
+
+	private static MergeInsertQuery ToMergeInsertQuery(this IReadQuery source, IEnumerable<string> keys, string destinationName = "_d", string sourceName = "_s")
+	{
+		var s = source.GetSelectClause();
+		if (s == null) throw new NotSupportedException("select clause is not found.");
+		var cols = s.Where(x => !keys.Contains(x.Alias)).Select(x => x.Alias).ToList();
+
+		return new MergeInsertQuery()
+		{
+			Destination = cols.ToValueCollection(destinationName),
+			Datasource = cols.ToValueCollection(sourceName),
+		};
+	}
+
+	private static MergeWhenUpdate ToMergeUpdate(this IReadQuery source, IEnumerable<string> keys, string destinationName = "_d", string sourceName = "_s")
+	{
+		var q = source.ToMergeUpdateQuery(keys, destinationName, sourceName);
+		return new MergeWhenUpdate(q);
+	}
+
+	private static MergeUpdateQuery ToMergeUpdateQuery(this IReadQuery source, IEnumerable<string> keys, string destinationName = "_d", string sourceName = "_s")
+	{
+		return new MergeUpdateQuery()
+		{
+			SetClause = source.ToSetClause(keys, destinationName, sourceName),
+		};
+	}
+
+	/// <summary>
+	/// set val = queryAlias.val
+	/// </summary>
+	/// <param name="source"></param>
+	/// <param name="keys"></param>
+	/// <param name="destinationName"></param>
+	/// <param name="sourceName"></param>
+	/// <returns></returns>
+	/// <exception cref="NotSupportedException"></exception>
+	private static SetClause ToSetClause(this IReadQuery source, IEnumerable<string> keys, string destinationName = "_d", string sourceName = "_s")
+	{
+		var s = source.GetSelectClause();
+		if (s == null) throw new NotSupportedException("select clause is not found.");
+		var cols = s.Where(x => !keys.Contains(x.Alias)).Select(x => x.Alias).ToList();
+
+		var clause = new SetClause();
+		foreach (var item in cols)
+		{
+			var c = new ColumnValue(destinationName, item);
+			c.Equal(new ColumnValue(sourceName, item));
+			clause.Add(c);
+		};
+		return clause;
+	}
 }
