@@ -19,7 +19,7 @@ public class MergeWhenNothing : MergeCondition
 
 	public override IEnumerable<Token> GetTokens(Token? parent)
 	{
-		var txt = (IsMatchCondition) ? "matched" : "not matched";
+		var txt = (IsMatchCondition) ? "when matched" : "when not matched";
 		var t = Token.Reserved(this, parent, txt);
 		yield return t;
 		foreach (var item in GetConditionTokens(t)) yield return item;

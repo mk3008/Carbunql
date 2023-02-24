@@ -17,7 +17,7 @@ public class MergeWhenDelete : MergeCondition
 
 	public override IEnumerable<Token> GetTokens(Token? parent)
 	{
-		var t = Token.Reserved(this, parent, "matched");
+		var t = Token.Reserved(this, parent, "when matched");
 		yield return t;
 		foreach (var item in GetConditionTokens(t)) yield return item;
 		yield return Token.Reserved(this, parent, "then");

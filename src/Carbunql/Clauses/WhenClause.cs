@@ -21,8 +21,7 @@ public class WhenClause : IList<MergeCondition>, IQueryCommandable
 	{
 		foreach (var condition in Conditions)
 		{
-			var t = Token.Reserved(this, parent, "when");
-			foreach (var item in condition.GetTokens(t)) yield return item;
+			foreach (var item in condition.GetTokens(parent)) yield return item;
 		}
 	}
 

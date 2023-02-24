@@ -31,7 +31,6 @@ public class TokenFormatLogic
 	public virtual bool IsLineBreakOnAfterWriteToken(Token token)
 	{
 		if (token.Sender is OperatableQuery) return true;
-		//if (token.Text.IsEqualNoCase("update") && token.Sender is MergeUpdateQuery) return false;
 
 		if (token.Text.Equals(","))
 		{

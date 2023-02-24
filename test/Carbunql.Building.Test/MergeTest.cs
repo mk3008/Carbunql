@@ -20,11 +20,11 @@ public class MergeTest
 		var sql = "select a.id, a.sub_id, a.v1, a.v2 from table as a";
 		var q = QueryParser.Parse(sql);
 
-		var uq = q.ToMergeQuery("new_table", new[] { "id", "sub_id" });
+		var uq = q.ToMergeQuery("destination_table", new[] { "id", "sub_id" });
 		Monitor.Log(uq);
 
 		var lst = uq.GetTokens().ToList();
 
-		Assert.Equal(94, lst.Count());
+		Assert.Equal(90, lst.Count());
 	}
 }

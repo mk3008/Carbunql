@@ -259,7 +259,7 @@ public static class ReadQueryExtension
 		var s = source.GetSelectClause();
 		if (s == null) throw new NotSupportedException("select clause is not found.");
 		var columnAliases = s.Select(x => x.Alias).ToList().ToValueCollection();
-		var t = new SelectableTable(new PhysicalTable(destinationTable), "_d", columnAliases);
+		var t = new SelectableTable(new PhysicalTable(destinationTable), "d", columnAliases);
 
 		return source.ToMergeQuery(t, keys);
 	}
@@ -267,7 +267,7 @@ public static class ReadQueryExtension
 	public static MergeQuery ToMergeQuery(this IReadQuery source, SelectableTable destination, IEnumerable<string> keys)
 	{
 		var destinationName = destination.Alias;
-		var sourceName = "_s";
+		var sourceName = "s";
 
 		var q = new MergeQuery()
 		{
@@ -279,14 +279,14 @@ public static class ReadQueryExtension
 
 		q.WhenClause = new WhenClause
 		{
-			source.ToMergeInsert(keys, destinationName, sourceName),
-			source.ToMergeUpdate(keys, destinationName, sourceName)
+			source.ToMergeUpdate(keys, destinationName, sourceName),
+			source.ToMergeInsert(keys, destinationName, sourceName)
 		};
 
 		return q;
 	}
 
-	private static UsingClause ToUsingClause(this IReadQuery source, IEnumerable<string> keys, string destinationName = "_d", string sourceName = "_s")
+	private static UsingClause ToUsingClause(this IReadQuery source, IEnumerable<string> keys, string destinationName = "d", string sourceName = "s")
 	{
 		var s = source.GetSelectClause();
 		if (s == null) throw new NotSupportedException("select clause is not found.");
@@ -310,13 +310,13 @@ public static class ReadQueryExtension
 		return new UsingClause(source.ToSelectableTable(sourceName), v);
 	}
 
-	private static MergeWhenInsert ToMergeInsert(this IReadQuery source, IEnumerable<string> keys, string destinationName = "_d", string sourceName = "_s")
+	private static MergeWhenInsert ToMergeInsert(this IReadQuery source, IEnumerable<string> keys, string destinationName = "d", string sourceName = "s")
 	{
 		var q = source.ToMergeInsertQuery(keys, destinationName, sourceName);
 		return new MergeWhenInsert(q);
 	}
 
-	private static MergeInsertQuery ToMergeInsertQuery(this IReadQuery source, IEnumerable<string> keys, string destinationName = "_d", string sourceName = "_s")
+	private static MergeInsertQuery ToMergeInsertQuery(this IReadQuery source, IEnumerable<string> keys, string destinationName = "d", string sourceName = "s")
 	{
 		var s = source.GetSelectClause();
 		if (s == null) throw new NotSupportedException("select clause is not found.");
@@ -324,18 +324,18 @@ public static class ReadQueryExtension
 
 		return new MergeInsertQuery()
 		{
-			Destination = cols.ToValueCollection(destinationName),
+			Destination = cols.ToValueCollection(),
 			Datasource = cols.ToValueCollection(sourceName),
 		};
 	}
 
-	private static MergeWhenUpdate ToMergeUpdate(this IReadQuery source, IEnumerable<string> keys, string destinationName = "_d", string sourceName = "_s")
+	private static MergeWhenUpdate ToMergeUpdate(this IReadQuery source, IEnumerable<string> keys, string destinationName = "d", string sourceName = "s")
 	{
 		var q = source.ToMergeUpdateQuery(keys, destinationName, sourceName);
 		return new MergeWhenUpdate(q);
 	}
 
-	private static MergeUpdateQuery ToMergeUpdateQuery(this IReadQuery source, IEnumerable<string> keys, string destinationName = "_d", string sourceName = "_s")
+	private static MergeUpdateQuery ToMergeUpdateQuery(this IReadQuery source, IEnumerable<string> keys, string destinationName = "d", string sourceName = "s")
 	{
 		return new MergeUpdateQuery()
 		{
@@ -352,7 +352,7 @@ public static class ReadQueryExtension
 	/// <param name="sourceName"></param>
 	/// <returns></returns>
 	/// <exception cref="NotSupportedException"></exception>
-	private static MergeSetClause ToSetClause(this IReadQuery source, IEnumerable<string> keys, string destinationName = "_d", string sourceName = "_s")
+	private static MergeSetClause ToSetClause(this IReadQuery source, IEnumerable<string> keys, string destinationName = "d", string sourceName = "s")
 	{
 		var s = source.GetSelectClause();
 		if (s == null) throw new NotSupportedException("select clause is not found.");

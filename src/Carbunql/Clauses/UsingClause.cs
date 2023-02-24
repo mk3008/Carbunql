@@ -24,10 +24,8 @@ public class UsingClause : IQueryCommandable
 
 	private IEnumerable<Token> GetOnTokens(Token? parent)
 	{
-		var t = Token.Reserved(this, parent, "on");
-		yield return t;
-
-		foreach (var token in Condition.GetTokens(t)) yield return token;
+		yield return Token.Reserved(this, parent, "on");
+		foreach (var token in Condition.GetTokens(parent)) yield return token;
 	}
 
 	public IEnumerable<Token> GetTokens(Token? parent)
