@@ -1,95 +1,103 @@
-﻿using System.Collections;
+﻿using Carbunql.Extensions;
+using System.Collections;
 
 namespace Carbunql.Clauses;
 
-public abstract class QueryCommandCollection<T> : IList<T> where T : IQueryCommand
+public abstract class QueryCommandCollection<T> : IList<T> where T : IQueryCommandable
 {
-    public QueryCommandCollection()
-    {
-    }
+	public QueryCommandCollection()
+	{
+	}
 
-    public QueryCommandCollection(List<T> collection)
-    {
-        Items.AddRange(collection);
-    }
+	public QueryCommandCollection(List<T> collection)
+	{
+		Items.AddRange(collection);
+	}
 
-    public virtual IEnumerable<Token> GetTokens(Token? parent)
-    {
-        if (!Items.Any()) yield break;
+	public virtual IEnumerable<Token> GetTokens(Token? parent)
+	{
+		if (!Items.Any()) yield break;
 
-        var isFirst = true;
-        foreach (var item in Items)
-        {
-            if (isFirst)
-            {
-                isFirst = false;
-            }
-            else
-            {
-                yield return Token.Comma(this, parent);
-            }
-            foreach (var token in item.GetTokens(parent)) yield return token;
-        }
-    }
+		var isFirst = true;
+		foreach (var item in Items)
+		{
+			if (isFirst)
+			{
+				isFirst = false;
+			}
+			else
+			{
+				yield return Token.Comma(this, parent);
+			}
+			foreach (var token in item.GetTokens(parent)) yield return token;
+		}
+	}
 
-    public List<T> Items { get; set; } = new();
+	public virtual IDictionary<string, object?> GetParameters()
+	{
+		var prm = EmptyParameters.Get();
+		foreach (var item in Items) prm = prm.Merge(item.GetParameters());
+		return prm;
+	}
 
-    #region implements IList<T>
-    public T this[int index] { get => ((IList<T>)Items)[index]; set => ((IList<T>)Items)[index] = value; }
+	public List<T> Items { get; set; } = new();
 
-    public int Count => ((ICollection<T>)Items).Count;
+	#region implements IList<T>
+	public T this[int index] { get => ((IList<T>)Items)[index]; set => ((IList<T>)Items)[index] = value; }
 
-    public bool IsReadOnly => ((ICollection<T>)Items).IsReadOnly;
+	public int Count => ((ICollection<T>)Items).Count;
 
-    public void Add(T item)
-    {
-        ((ICollection<T>)Items).Add(item);
-    }
+	public bool IsReadOnly => ((ICollection<T>)Items).IsReadOnly;
 
-    public void Clear()
-    {
-        ((ICollection<T>)Items).Clear();
-    }
+	public void Add(T item)
+	{
+		((ICollection<T>)Items).Add(item);
+	}
 
-    public bool Contains(T item)
-    {
-        return ((ICollection<T>)Items).Contains(item);
-    }
+	public void Clear()
+	{
+		((ICollection<T>)Items).Clear();
+	}
 
-    public void CopyTo(T[] array, int arrayIndex)
-    {
-        ((ICollection<T>)Items).CopyTo(array, arrayIndex);
-    }
+	public bool Contains(T item)
+	{
+		return ((ICollection<T>)Items).Contains(item);
+	}
 
-    public IEnumerator<T> GetEnumerator()
-    {
-        return ((IEnumerable<T>)Items).GetEnumerator();
-    }
+	public void CopyTo(T[] array, int arrayIndex)
+	{
+		((ICollection<T>)Items).CopyTo(array, arrayIndex);
+	}
 
-    public int IndexOf(T item)
-    {
-        return ((IList<T>)Items).IndexOf(item);
-    }
+	public IEnumerator<T> GetEnumerator()
+	{
+		return ((IEnumerable<T>)Items).GetEnumerator();
+	}
 
-    public void Insert(int index, T item)
-    {
-        ((IList<T>)Items).Insert(index, item);
-    }
+	public int IndexOf(T item)
+	{
+		return ((IList<T>)Items).IndexOf(item);
+	}
 
-    public bool Remove(T item)
-    {
-        return ((ICollection<T>)Items).Remove(item);
-    }
+	public void Insert(int index, T item)
+	{
+		((IList<T>)Items).Insert(index, item);
+	}
 
-    public void RemoveAt(int index)
-    {
-        ((IList<T>)Items).RemoveAt(index);
-    }
+	public bool Remove(T item)
+	{
+		return ((ICollection<T>)Items).Remove(item);
+	}
 
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return ((IEnumerable)Items).GetEnumerator();
-    }
+	public void RemoveAt(int index)
+	{
+		((IList<T>)Items).RemoveAt(index);
+	}
 
-    #endregion
+	IEnumerator IEnumerable.GetEnumerator()
+	{
+		return ((IEnumerable)Items).GetEnumerator();
+	}
+
+	#endregion
 }
