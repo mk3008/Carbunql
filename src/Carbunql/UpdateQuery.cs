@@ -7,7 +7,7 @@ public class UpdateQuery : IQueryCommandable
 {
 	public UpdateClause? UpdateClause { get; set; }
 
-	public SetClause? SetClause { get; set; }
+	public MergeSetClause? SetClause { get; set; }
 
 	public FromClause? FromClause { get; set; }
 

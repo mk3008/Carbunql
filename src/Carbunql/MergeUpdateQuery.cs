@@ -5,7 +5,7 @@ namespace Carbunql;
 
 public class MergeUpdateQuery : IQueryCommandable
 {
-	public SetClause? SetClause { get; set; }
+	public MergeSetClause? SetClause { get; set; }
 
 	public virtual IDictionary<string, object?> GetParameters()
 	{
@@ -18,7 +18,7 @@ public class MergeUpdateQuery : IQueryCommandable
 	{
 		if (SetClause == null) throw new NullReferenceException();
 
-		var t = Token.Reserved(this, parent, "update");
+		var t = Token.Reserved(this, parent, "update set");
 		yield return t;
 		foreach (var item in SetClause.GetTokens(t)) yield return item;
 	}

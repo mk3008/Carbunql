@@ -352,13 +352,13 @@ public static class ReadQueryExtension
 	/// <param name="sourceName"></param>
 	/// <returns></returns>
 	/// <exception cref="NotSupportedException"></exception>
-	private static SetClause ToSetClause(this IReadQuery source, IEnumerable<string> keys, string destinationName = "_d", string sourceName = "_s")
+	private static MergeSetClause ToSetClause(this IReadQuery source, IEnumerable<string> keys, string destinationName = "_d", string sourceName = "_s")
 	{
 		var s = source.GetSelectClause();
 		if (s == null) throw new NotSupportedException("select clause is not found.");
 		var cols = s.Where(x => !keys.Contains(x.Alias)).Select(x => x.Alias).ToList();
 
-		var clause = new SetClause();
+		var clause = new MergeSetClause();
 		foreach (var item in cols)
 		{
 			var c = new ColumnValue(destinationName, item);
