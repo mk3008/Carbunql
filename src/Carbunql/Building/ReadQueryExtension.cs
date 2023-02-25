@@ -351,7 +351,7 @@ public static class ReadQueryExtension
 
 	private static MergeWhenInsert CreateMergeInsert(IEnumerable<string> keys, IEnumerable<string> allCols, string sourceName)
 	{
-		var vals = allCols.Where(x => x.IsEqualNoCase(keys)).ToList();
+		var vals = allCols.Where(x => !x.IsEqualNoCase(keys)).ToList();
 		var q = new MergeInsertQuery()
 		{
 			Destination = vals.ToValueCollection(),
