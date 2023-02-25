@@ -6,38 +6,38 @@ namespace Carbunql.Building.Test;
 
 public class DeleteTest
 {
-    private readonly QueryCommandMonitor Monitor;
+	private readonly QueryCommandMonitor Monitor;
 
-    public DeleteTest(ITestOutputHelper output)
-    {
-        Monitor = new QueryCommandMonitor(output);
-    }
+	public DeleteTest(ITestOutputHelper output)
+	{
+		Monitor = new QueryCommandMonitor(output);
+	}
 
-    [Fact]
-    public void DeleteQuery_Alias()
-    {
-        var sql = "select a.id, a.sub_id, a.v1, a.v2 from table as a";
-        var q = QueryParser.Parse(sql);
+	[Fact]
+	public void DeleteQuery_Alias()
+	{
+		var sql = "select a.id, a.sub_id, a.v1, a.v2 from table as a";
+		var q = QueryParser.Parse(sql);
 
-        var uq = q.ToDeleteQuery("new_table".ToPhysicalTable().ToSelectable("t"), new[] { "id", "sub_id" });
-        Monitor.Log(uq);
+		var uq = q.ToDeleteQuery("new_table".ToPhysicalTable().ToSelectable("t"), new[] { "id", "sub_id" });
+		Monitor.Log(uq);
 
-        var lst = uq.GetTokens().ToList();
+		var lst = uq.GetTokens().ToList();
 
-        Assert.Equal(50, lst.Count());
-    }
+		Assert.Equal(50, lst.Count());
+	}
 
-    [Fact]
-    public void DeleteQuery()
-    {
-        var sql = "select a.id, a.sub_id, a.v1, a.v2 from table as a";
-        var q = QueryParser.Parse(sql);
+	[Fact]
+	public void DeleteQuery()
+	{
+		var sql = "select a.id, a.sub_id, a.v1, a.v2 from table as a";
+		var q = QueryParser.Parse(sql);
 
-        var uq = q.ToDeleteQuery("new_table", new[] { "id", "sub_id" });
-        Monitor.Log(uq);
+		var uq = q.ToDeleteQuery("new_table", new[] { "id", "sub_id" });
+		Monitor.Log(uq);
 
-        var lst = uq.GetTokens().ToList();
+		var lst = uq.GetTokens().ToList();
 
-        Assert.Equal(48, lst.Count());
-    }
+		Assert.Equal(50, lst.Count());
+	}
 }

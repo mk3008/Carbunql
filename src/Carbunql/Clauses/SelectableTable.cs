@@ -1,4 +1,5 @@
-﻿using Carbunql.Values;
+﻿using Carbunql.Extensions;
+using Carbunql.Values;
 
 namespace Carbunql.Clauses;
 
@@ -65,6 +66,8 @@ public class SelectableTable : IQueryCommandable, ISelectable
 
 	public virtual IDictionary<string, object?> GetParameters()
 	{
-		return Table.GetParameters();
+		var prm = Table.GetParameters();
+		prm = prm.Merge(ColumnAliases?.GetParameters());
+		return prm;
 	}
 }
