@@ -152,7 +152,7 @@ public static class ReadQueryExtension
 
 	public static UpdateQuery ToUpdateQuery(this IReadQuery source, string table, IEnumerable<string> keys)
 	{
-		var t = table.ToPhysicalTable().ToSelectable("_t");
+		var t = table.ToPhysicalTable().ToSelectable("d");
 		return source.ToUpdateQuery(t, keys);
 	}
 
@@ -176,11 +176,34 @@ public static class ReadQueryExtension
 		};
 	}
 
+	/// <summary>
+	/// set val = queryAlias.val
+	/// </summary>
+	/// <param name="source"></param>
+	/// <param name="keys"></param>
+	/// <param name="alias"></param>
+	/// <param name="queryAlias"></param>
+	/// <returns></returns>
+	/// <exception cref="NotSupportedException"></exception>
+	private static SetClause ToSetClause(this IReadQuery source, IEnumerable<string> keys, string alias, string queryAlias)
+	{
+		var s = source.GetSelectClause();
+		if (s == null) throw new NotSupportedException("select clause is not found.");
+		var cols = s.Items.Where(x => !keys.Contains(x.Alias)).Select(x => x.Alias).ToList();
 
+		var clause = new SetClause();
+		foreach (var item in cols)
+		{
+			var c = new ColumnValue(alias, item);
+			c.Equal(new ColumnValue(queryAlias, item));
+			clause.Add(c);
+		};
+		return clause;
+	}
 
 	public static DeleteQuery ToDeleteQuery(this IReadQuery source, string table, IEnumerable<string> keys)
 	{
-		var t = table.ToPhysicalTable().ToSelectable();
+		var t = table.ToPhysicalTable().ToSelectable("d");
 		return source.ToDeleteQuery(t, keys, source.GetWithClause());
 	}
 
@@ -339,7 +362,7 @@ public static class ReadQueryExtension
 	{
 		return new MergeUpdateQuery()
 		{
-			SetClause = source.ToSetClause(keys, destinationName, sourceName),
+			SetClause = source.ToMergeSetClause(keys, destinationName, sourceName),
 		};
 	}
 
@@ -352,7 +375,7 @@ public static class ReadQueryExtension
 	/// <param name="sourceName"></param>
 	/// <returns></returns>
 	/// <exception cref="NotSupportedException"></exception>
-	private static MergeSetClause ToSetClause(this IReadQuery source, IEnumerable<string> keys, string destinationName = "d", string sourceName = "s")
+	private static MergeSetClause ToMergeSetClause(this IReadQuery source, IEnumerable<string> keys, string destinationName = "d", string sourceName = "s")
 	{
 		var s = source.GetSelectClause();
 		if (s == null) throw new NotSupportedException("select clause is not found.");

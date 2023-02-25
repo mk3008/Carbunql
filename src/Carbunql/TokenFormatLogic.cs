@@ -40,6 +40,7 @@ public class TokenFormatLogic
 			if (token.Sender is GroupClause) return true;
 			if (token.Sender is OrderClause) return true;
 			if (token.Sender is ValuesQuery) return true;
+			if (token.Sender is SetClause) return true;
 			if (token.Sender is PartitionClause) return true;
 		}
 
