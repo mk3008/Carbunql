@@ -2,7 +2,6 @@
 using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Carbunql.Building;
 
