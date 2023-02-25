@@ -1,7 +1,6 @@
 ﻿using Carbunql.Analysis.Parser;
 using Carbunql.Clauses;
 using Carbunql.Values;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Carbunql.Building;
 
