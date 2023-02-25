@@ -1,5 +1,7 @@
-﻿using Carbunql.Clauses;
+﻿using Carbunql.Analysis.Parser;
+using Carbunql.Clauses;
 using Carbunql.Values;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Carbunql.Building;
 
@@ -12,25 +14,22 @@ public static class ValueBaseExtension
 		return source.OperatableValue.Value.GetLast();
 	}
 
-	public static ValueBase Equal(this ValueBase source, ValueBase operand)
+	public static ValueBase Equal(this ValueBase source, string text)
 	{
-		source.GetLast().AddOperatableValue("=", operand);
-		return source;
+		return source.Equal(ValueParser.Parse(text));
 	}
 
-	public static ValueBase Equal(this ValueBase source, string column)
+	public static ValueBase Equal(this ValueBase source, int value)
 	{
-		return source.Equal(new ColumnValue(column));
-	}
-
-	public static ValueBase Equal(this ValueBase source, object value)
-	{
-		var v = value.ToString();
-		if (v == null) return source.IsNull();
-		return source.Equal(new LiteralValue(v));
+		return source.Equal(new LiteralValue(value.ToString()));
 	}
 
 	public static ValueBase Equal(this ValueBase source, string table, string column)
+	{
+		return source.Equal(new ColumnValue(table, column));
+	}
+
+	public static ValueBase Equal(this ValueBase source, FromClause table, string column)
 	{
 		return source.Equal(new ColumnValue(table, column));
 	}
@@ -40,15 +39,20 @@ public static class ValueBaseExtension
 		return source.Equal(new ColumnValue(table, column));
 	}
 
-	public static ValueBase NotEqual(this ValueBase source, ValueBase operand)
+	public static ValueBase Equal(this ValueBase source, ValueBase operand)
 	{
-		source.GetLast().AddOperatableValue("<>", operand);
+		source.GetLast().AddOperatableValue("=", operand);
 		return source;
 	}
 
-	public static ValueBase NotEqual(this ValueBase source, string column)
+	public static ValueBase NotEqual(this ValueBase source, string text)
 	{
-		return source.NotEqual(new ColumnValue(column));
+		return source.NotEqual(ValueParser.Parse(text));
+	}
+
+	public static ValueBase NotEqual(this ValueBase source, int value)
+	{
+		return source.NotEqual(new LiteralValue(value.ToString()));
 	}
 
 	public static ValueBase NotEqual(this ValueBase source, string table, string column)
@@ -56,9 +60,20 @@ public static class ValueBaseExtension
 		return source.NotEqual(new ColumnValue(table, column));
 	}
 
+	public static ValueBase NotEqual(this ValueBase source, FromClause table, string column)
+	{
+		return source.NotEqual(new ColumnValue(table, column));
+	}
+
 	public static ValueBase NotEqual(this ValueBase source, SelectableTable table, string column)
 	{
 		return source.NotEqual(new ColumnValue(table, column));
+	}
+
+	public static ValueBase NotEqual(this ValueBase source, ValueBase operand)
+	{
+		source.GetLast().AddOperatableValue("<>", operand);
+		return source;
 	}
 
 	public static ValueBase IsNull(this ValueBase source)
@@ -97,10 +112,24 @@ public static class ValueBaseExtension
 		return source;
 	}
 
-	public static ValueBase And(this ValueBase source, ValueBase operand)
+	public static ValueBase And(this ValueBase source, string text)
 	{
-		source.GetLast().AddOperatableValue("and", operand);
-		return source;
+		return source.And(ValueParser.Parse(text));
+	}
+
+	public static ValueBase And(this ValueBase source, string table, string column)
+	{
+		return source.And(new ColumnValue(table, column));
+	}
+
+	public static ValueBase And(this ValueBase source, FromClause table, string column)
+	{
+		return source.And(new ColumnValue(table, column));
+	}
+
+	public static ValueBase And(this ValueBase source, SelectableTable table, string column)
+	{
+		return source.And(new ColumnValue(table, column));
 	}
 
 	public static ValueBase And(this ValueBase source, Func<ValueBase> builder)
@@ -108,15 +137,42 @@ public static class ValueBaseExtension
 		return source.And(builder());
 	}
 
-	public static ValueBase Or(this ValueBase source, ValueBase operand)
+	public static ValueBase And(this ValueBase source, ValueBase operand)
 	{
-		source.GetLast().AddOperatableValue("or", operand);
+		source.GetLast().AddOperatableValue("and", operand);
 		return source;
+	}
+
+	public static ValueBase Or(this ValueBase source, string text)
+	{
+		return source.Or(ValueParser.Parse(text));
+	}
+
+	public static ValueBase Or(this ValueBase source, string table, string column)
+	{
+		return source.Or(new ColumnValue(table, column));
+	}
+
+	public static ValueBase Or(this ValueBase source, FromClause table, string column)
+	{
+		return source.Or(new ColumnValue(table, column));
+	}
+
+	public static ValueBase Or(this ValueBase source, SelectableTable table, string column)
+	{
+		return source.Or(new ColumnValue(table, column));
+
 	}
 
 	public static ValueBase Or(this ValueBase source, Func<ValueBase> builder)
 	{
 		return source.Or(builder());
+	}
+
+	public static ValueBase Or(this ValueBase source, ValueBase operand)
+	{
+		source.GetLast().AddOperatableValue("or", operand);
+		return source;
 	}
 
 	public static ValueBase ToGroup(this ValueBase source)

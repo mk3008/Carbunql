@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CarbunqlWeb", "..\demo\Carb
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carbunql.Building.Test", "..\test\Carbunql.Building.Test\Carbunql.Building.Test.csproj", "{1BE5C98E-D8BC-493B-8F3D-F4A762C9B348}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carbunql.Dapper", "Carbunql.Dapper\Carbunql.Dapper.csproj", "{FE6938B8-3DB2-4622-8DAF-2EC20F26B62F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carbunql.Dapper", "Carbunql.Dapper\Carbunql.Dapper.csproj", "{FE6938B8-3DB2-4622-8DAF-2EC20F26B62F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

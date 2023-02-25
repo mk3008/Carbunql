@@ -21,12 +21,16 @@ public class WhereTest
 		var (f, a) = sq.From("table_a").As("a");
 		sq.SelectAll();
 
-		sq.Where(() =>
-		{
-			ValueBase v = new ColumnValue(a, "a_id");
-			v = v.Equal(new LiteralValue("1"));
-			return v;
-		});
+		//*old style
+		//
+		//sq.Where(() =>
+		//{
+		//	ValueBase v = new ColumnValue(a, "a_id");
+		//	v = v.Equal(new LiteralValue("1"));
+		//	return v;
+		//});
+
+		sq.Where(a, "a_id").Equal(1);
 
 		Monitor.Log(sq);
 
