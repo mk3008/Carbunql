@@ -63,9 +63,7 @@ sq.Select(a, "id").As("a_id");
 sq.Select(b, "table_a_id").As("b_id");
 
 // where clause
-sq.WhereColumn(a, "id").Equal(":id");
-sq.WhereColumn(b, "is_visible").True();
-sq.WhereColumn(c, "table_b_id").IsNull();
+sq.Where(a, "id").Equal(":id").And(b, "is_visible").True().And(c, "table_b_id").IsNull();
 
 // parameter
 sq.Parameters.Add(":id", 1);
@@ -81,13 +79,10 @@ SELECT
     a.id AS a_id,
     b.table_a_id AS b_id
 FROM
-
     table_a AS a
     INNER JOIN table_b AS b ON a.table_a_id = b.table_a_id
-
     LEFT JOIN table_c AS c ON b.table_b_id = c.table_b_id
 WHERE
-
     a.id = :id
     AND b.is_visible = true
     AND c.table_b_id IS null
@@ -137,11 +132,11 @@ sq.Where(() =>
 {
     // a.id = 1 and a.value = 2
     var c1 = new ColumnValue(a, "id").Equal(1);
-    c1.And(() => new ColumnValue(a, "value").Equal(2));
+    c1.And(a, "value").Equal(2));
 
     // a.value = 3 and a.value = 4
     var c2 = new ColumnValue(a, "id").Equal(3);
-    c2.And(() => new ColumnValue(a, "value").Equal(4));
+    c2.And(a, "value").Equal(4);
 
     // (
     //     (a.id = 1 and a.value = 2)
@@ -176,7 +171,7 @@ sq.Where(() =>
     var x = new SelectQuery();
     var (_, b) = x.From("table_b").As("b");
     x.SelectAll();
-    x.WhereColumn(b, "id").Equal(a, "id");
+    x.Where(b, "id").Equal(a, "id");
     return x.ToExists();
 });
 sq.Where(() =>
@@ -184,7 +179,7 @@ sq.Where(() =>
     var x = new SelectQuery();
     var (_, b) = x.From("table_b").As("b");
     x.SelectAll();
-    x.WhereColumn(b, "id").Equal(a, "id");
+    x.Where(b, "id").Equal(a, "id");
     return x.ToNotExists();
 });
 

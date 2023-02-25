@@ -17,16 +17,6 @@ public class SelectClause : QueryCommandCollection<SelectableItem>, IQueryComman
 
 	public ValueBase? Top { get; set; }
 
-	public IDictionary<string, object?> GetParameters()
-	{
-		var prm = EmptyParameters.Get();
-		foreach (var item in Items)
-		{
-			prm = prm.Merge(item.GetParameters());
-		}
-		return prm;
-	}
-
 	public override IEnumerable<Token> GetTokens(Token? parent)
 	{
 		Token clause = GetClauseToken(parent);
