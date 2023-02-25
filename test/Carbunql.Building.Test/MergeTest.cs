@@ -25,6 +25,6 @@ public class MergeTest
 
 		var lst = uq.GetTokens().ToList();
 
-		Assert.Equal(90, lst.Count());
+		Assert.Equal(132, lst.Count());
 	}
 }

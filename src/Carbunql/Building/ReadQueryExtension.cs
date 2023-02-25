@@ -2,6 +2,7 @@
 using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Carbunql.Building;
 
@@ -270,24 +271,17 @@ public static class ReadQueryExtension
 		return sq;
 	}
 
-	//public static MergeQuery ToMergeQuery(this IReadQuery source, string destinationTable, string key, bool isSequenceKey = true)
-	//{
-	//}
-	//public static MergeQuery ToMergeQuery(this IReadQuery source, SelectableTable destination, string key, bool isSequenceKey = true)
-	//{
-	//}
-
-	public static MergeQuery ToMergeQuery(this IReadQuery source, string destinationTable, IEnumerable<string> keys)
+	public static MergeQuery ToMergeQuery(this IReadQuery source, string destinationTable, IEnumerable<string> keys, bool isSequence = false)
 	{
 		var s = source.GetSelectClause();
 		if (s == null) throw new NotSupportedException("select clause is not found.");
 		var columnAliases = s.Select(x => x.Alias).ToList().ToValueCollection();
 		var t = new SelectableTable(new PhysicalTable(destinationTable), "d", columnAliases);
 
-		return source.ToMergeQuery(t, keys);
+		return source.ToMergeQuery(t, keys, isSequence);
 	}
 
-	public static MergeQuery ToMergeQuery(this IReadQuery source, SelectableTable destination, IEnumerable<string> keys)
+	public static MergeQuery ToMergeQuery(this IReadQuery source, SelectableTable destination, IEnumerable<string> keys, bool isSequence = false)
 	{
 		var destinationName = destination.Alias;
 		var sourceName = "s";
@@ -297,13 +291,8 @@ public static class ReadQueryExtension
 			WithClause = source.GetWithClause(),
 			UsingClause = source.ToUsingClause(keys, destinationName, sourceName),
 			MergeClause = new MergeClause(destination),
+			WhenClause = CreateWhenClause(source, keys, destinationName, sourceName),
 			Parameters = source.GetParameters(),
-		};
-
-		q.WhenClause = new WhenClause
-		{
-			source.ToMergeUpdate(keys, destinationName, sourceName),
-			source.ToMergeInsert(keys, destinationName, sourceName)
 		};
 
 		return q;
@@ -333,49 +322,74 @@ public static class ReadQueryExtension
 		return new UsingClause(source.ToSelectableTable(sourceName), v);
 	}
 
-	private static MergeWhenInsert ToMergeInsert(this IReadQuery source, IEnumerable<string> keys, string destinationName = "d", string sourceName = "s")
+	private static WhenClause CreateWhenClause(IReadQuery source, IEnumerable<string> keys, string destinationName = "d", string sourceName = "s")
 	{
-		var q = source.ToMergeInsertQuery(keys, destinationName, sourceName);
-		return new MergeWhenInsert(q);
+		var w = new WhenClause
+		{
+			CreateMergeUpdate(source, keys, destinationName, sourceName)
+		};
+		foreach (var item in CreateMergeInsertList(source, keys, sourceName))
+		{
+			w.Add(item);
+		}
+		return w;
 	}
 
-	private static MergeInsertQuery ToMergeInsertQuery(this IReadQuery source, IEnumerable<string> keys, string destinationName = "d", string sourceName = "s")
+	private static List<MergeWhenInsert> CreateMergeInsertList(IReadQuery source, IEnumerable<string> keys, string sourceName = "s")
 	{
 		var s = source.GetSelectClause();
 		if (s == null) throw new NotSupportedException("select clause is not found.");
-		var cols = s.Where(x => !keys.Contains(x.Alias)).Select(x => x.Alias).ToList();
+		var allCols = s.Select(x => x.Alias);
 
-		return new MergeInsertQuery()
+		var lst = new List<MergeWhenInsert>
 		{
-			Destination = cols.ToValueCollection(),
-			Datasource = cols.ToValueCollection(sourceName),
+			CreateMergeInsert(keys, allCols, sourceName),
+			CreateMergeInsert(allCols, sourceName)
 		};
+		return lst;
 	}
 
-	private static MergeWhenUpdate ToMergeUpdate(this IReadQuery source, IEnumerable<string> keys, string destinationName = "d", string sourceName = "s")
+	private static MergeWhenInsert CreateMergeInsert(IEnumerable<string> keys, IEnumerable<string> allCols, string sourceName)
 	{
-		var q = source.ToMergeUpdateQuery(keys, destinationName, sourceName);
-		return new MergeWhenUpdate(q);
-	}
-
-	private static MergeUpdateQuery ToMergeUpdateQuery(this IReadQuery source, IEnumerable<string> keys, string destinationName = "d", string sourceName = "s")
-	{
-		return new MergeUpdateQuery()
+		var vals = allCols.Where(x => x.IsEqualNoCase(keys)).ToList();
+		var q = new MergeInsertQuery()
 		{
-			SetClause = source.ToMergeSetClause(keys, destinationName, sourceName),
+			Destination = vals.ToValueCollection(),
+			Datasource = vals.ToValueCollection(sourceName)
 		};
+		var m = new MergeWhenInsert(q);
+		ValueBase? v = null;
+		foreach (var item in keys)
+		{
+			if (v == null)
+			{
+				v = new ColumnValue(sourceName, item);
+			}
+			else
+			{
+				v.And(new ColumnValue(sourceName, item));
+			}
+			v.IsNull();
+		};
+		if (v == null) throw new Exception();
+
+		m.Condition = v;
+		return m;
 	}
 
-	/// <summary>
-	/// set val = queryAlias.val
-	/// </summary>
-	/// <param name="source"></param>
-	/// <param name="keys"></param>
-	/// <param name="destinationName"></param>
-	/// <param name="sourceName"></param>
-	/// <returns></returns>
-	/// <exception cref="NotSupportedException"></exception>
-	private static MergeSetClause ToMergeSetClause(this IReadQuery source, IEnumerable<string> keys, string destinationName = "d", string sourceName = "s")
+	private static MergeWhenInsert CreateMergeInsert(IEnumerable<string> allCols, string sourceName)
+	{
+		var vals = allCols.ToList();
+		var q = new MergeInsertQuery()
+		{
+			Destination = vals.ToValueCollection(),
+			Datasource = vals.ToValueCollection(sourceName)
+		};
+		var m = new MergeWhenInsert(q);
+		return m;
+	}
+
+	private static MergeWhenUpdate CreateMergeUpdate(IReadQuery source, IEnumerable<string> keys, string destinationName = "d", string sourceName = "s")
 	{
 		var s = source.GetSelectClause();
 		if (s == null) throw new NotSupportedException("select clause is not found.");
@@ -388,6 +402,8 @@ public static class ReadQueryExtension
 			c.Equal(new ColumnValue(sourceName, item));
 			clause.Add(c);
 		};
-		return clause;
+
+		var q = new MergeUpdateQuery() { SetClause = clause };
+		return new MergeWhenUpdate(q);
 	}
 }
