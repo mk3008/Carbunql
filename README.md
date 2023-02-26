@@ -16,6 +16,7 @@ https://mk3008.github.io/Carbunql
 ## Constraints
 - Minimum grammar check
 - Only select queries can be parsed
+- Comment is removed
 
 # Sample
 ## Parse
