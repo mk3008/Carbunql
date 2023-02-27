@@ -10,6 +10,8 @@ public interface IReadQuery : IQueryCommandable
 	WithClause? GetWithClause();
 
 	SelectQuery GetOrNewSelectQuery();
+
+	IEnumerable<string> GetColumnNames();
 }
 
 public static class IReadQueryExtension

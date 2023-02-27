@@ -1,5 +1,6 @@
 ﻿using Carbunql.Analysis.Parser;
 using Carbunql.Clauses;
+using Carbunql.Extensions;
 using Carbunql.Values;
 
 namespace Carbunql.Building;
@@ -35,6 +36,35 @@ public static class SelectClauseExtension
 		source.SelectClause ??= new();
 		source.SelectClause.Add(item);
 		return item;
+	}
+
+	public static void Select(this SelectQuery source, SelectableTable table, bool overwrite = false)
+	{
+		if (!table.GetColumnNames().Any()) throw new Exception("column names is empty.");
+
+		source.SelectClause ??= new();
+		var cols = source.GetColumnNames().ToList();
+		var newcols = table.GetColumnNames().ToList();
+
+		if (overwrite)
+		{
+			foreach (var item in cols.Where(x => x.IsEqualNoCase(newcols)))
+			{
+				var c = source.SelectClause.Where(x => x.Alias == item).First();
+				source.SelectClause.Remove(c);
+			}
+			cols = source.GetColumnNames().ToList();
+		}
+
+		foreach (var item in newcols.Where(x => !x.IsEqualNoCase(cols)))
+		{
+			source.Select(table, item);
+		}
+	}
+
+	public static void Select(this SelectQuery source, FromClause from, bool overwrite = false)
+	{
+		source.Select(from.Root);
 	}
 
 	public static SelectableItem Select(this SelectQuery source, FromClause from, string column)

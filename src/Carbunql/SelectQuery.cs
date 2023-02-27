@@ -1,6 +1,7 @@
 ﻿using Carbunql.Analysis;
 using Carbunql.Clauses;
 using Carbunql.Extensions;
+using Carbunql.Tables;
 
 namespace Carbunql;
 
@@ -60,5 +61,21 @@ public class SelectQuery : ReadQuery, IQueryCommandable
 		prm = prm.Merge(GroupClause?.GetParameters());
 		prm = prm.Merge(HavingClause?.GetParameters());
 		return prm;
+	}
+
+	public override SelectableTable ToSelectableTable(IEnumerable<string>? columnAliases)
+	{
+		var vt = new VirtualTable(this);
+		if (columnAliases != null)
+		{
+			return new SelectableTable(vt, "q", columnAliases.ToValueCollection());
+		}
+		return new SelectableTable(vt, "q");
+	}
+
+	public override IEnumerable<string> GetColumnNames()
+	{
+		if (SelectClause == null) return Enumerable.Empty<string>();
+		return SelectClause.Select(x => x.Alias);
 	}
 }

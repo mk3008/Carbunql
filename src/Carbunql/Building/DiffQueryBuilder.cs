@@ -59,8 +59,8 @@ public class DiffQueryBuilder
 
 	private List<string> GetCommonColumns(IReadQuery sq1, IReadQuery sq2)
 	{
-		var cols1 = sq1.GetOrNewSelectQuery().SelectClause?.Select(x => x.Alias);
-		var cols2 = sq2.GetOrNewSelectQuery().SelectClause?.Select(x => x.Alias);
+		var cols1 = sq1.GetColumnNames();
+		var cols2 = sq2.GetColumnNames();
 
 		if (cols1 == null || cols2 == null) throw new NotSupportedException();
 

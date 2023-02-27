@@ -84,7 +84,8 @@ FROM
 			var sq = new SelectQuery();
 			var (f, q) = sq.From(tmp).As("q");
 
-			q.Table.GetValueNames().ToList().ForEach(x => sq.Select(q,x));
+			sq.Select(q);
+
 
 			fsql = sq.ToCommand().CommandText;
 		}

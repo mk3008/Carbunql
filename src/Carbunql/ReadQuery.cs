@@ -56,4 +56,8 @@ public abstract class ReadQuery : IReadQuery
 	public abstract WithClause? GetWithClause();
 
 	public abstract SelectQuery GetOrNewSelectQuery();
+
+	public abstract IEnumerable<string> GetColumnNames();
+
+	public abstract SelectableTable ToSelectableTable(IEnumerable<string>? columnAliases);
 }
