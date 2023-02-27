@@ -217,7 +217,7 @@ public static class ReadQueryExtension
 
 		var sq = new SelectQuery();
 		var (f, a) = sq.From(source).As(queryAlias);
-		foreach (var item in a.Table.GetValueNames())
+		foreach (var item in a.Table.GetColumnNames())
 		{
 			if (!ks.Where(k => k.IsEqualNoCase(item)).Any()) continue;
 			sq.Select(a, item);

@@ -1,5 +1,7 @@
-﻿using Carbunql.Clauses;
+﻿using Carbunql.Analysis.Parser;
+using Carbunql.Clauses;
 using Carbunql.Tables;
+using Carbunql.Values;
 using Cysharp.Text;
 
 namespace Carbunql.Extensions;
@@ -8,10 +10,10 @@ public static class StringExtension
 {
 	public static bool StartsWith(this string source, IEnumerable<string> prefixes)
 	{
-        foreach (var item in prefixes)
-        {
+		foreach (var item in prefixes)
+		{
 			if (source.StartsWith(item)) return true;
-        }
+		}
 		return false;
 	}
 
@@ -85,5 +87,12 @@ public static class StringExtension
 	public static PhysicalTable ToPhysicalTable(this string source)
 	{
 		return new PhysicalTable(source);
+	}
+
+	public static ValueCollection ToValueCollection(this IEnumerable<string> source)
+	{
+		var v = new ValueCollection();
+		foreach (var item in source) v.Add(ValueParser.Parse(item));
+		return v;
 	}
 }

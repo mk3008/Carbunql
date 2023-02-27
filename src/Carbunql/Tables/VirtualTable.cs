@@ -24,17 +24,17 @@ public class VirtualTable : TableBase
 		return Query.GetParameters();
 	}
 
-	public override IList<string> GetValueNames()
+	public override IList<string> GetColumnNames()
 	{
 		if (Query is IReadQuery q)
 		{
 			var s = q.GetOrNewSelectQuery().SelectClause;
-			if (s == null) return base.GetValueNames();
+			if (s == null) return base.GetColumnNames();
 			return s.Select(x => x.Alias).ToList();
 		}
 		else
 		{
-			return base.GetValueNames();
+			return base.GetColumnNames();
 		}
 	}
 }

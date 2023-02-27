@@ -1,8 +1,9 @@
-﻿using Cysharp.Text;
+﻿using Carbunql.Values;
+using Cysharp.Text;
 
 namespace Carbunql.Extensions;
 
-public static class IEnumerableExtension
+public static class TokenExtension
 {
 	public static string ToText(this IEnumerable<Token> source)
 	{

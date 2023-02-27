@@ -9,86 +9,109 @@ namespace Carbunql;
 
 public class ValuesQuery : ReadQuery
 {
-    public ValuesQuery(List<ValueCollection> rows)
-    {
-        Rows = rows;
-    }
+	public ValuesQuery(List<ValueCollection> rows)
+	{
+		Rows = rows;
+	}
 
-    public ValuesQuery(string query)
-    {
-        var q = ValuesQueryParser.Parse(query);
-        Rows = q.Rows;
-        OperatableQuery = q.OperatableQuery;
-        OrderClause = q.OrderClause;
-        LimitClause = q.LimitClause;
-    }
+	public ValuesQuery(string query)
+	{
+		var q = ValuesQueryParser.Parse(query);
+		Rows = q.Rows;
+		OperatableQuery = q.OperatableQuery;
+		OrderClause = q.OrderClause;
+		LimitClause = q.LimitClause;
+	}
 
-    public List<ValueCollection> Rows { get; init; } = new();
+	public List<ValueCollection> Rows { get; init; } = new();
 
-    public override IEnumerable<Token> GetCurrentTokens(Token? parent)
-    {
-        var clause = Token.Reserved(this, parent, "values");
-        yield return clause;
+	public override IEnumerable<Token> GetCurrentTokens(Token? parent)
+	{
+		var clause = Token.Reserved(this, parent, "values");
+		yield return clause;
 
-        var isFirst = true;
-        foreach (var item in Rows)
-        {
-            if (isFirst)
-            {
-                isFirst = false;
-            }
-            else
-            {
-                yield return Token.Comma(this, clause);
-            }
-            var bracket = Token.ReservedBracketStart(this, clause);
-            yield return bracket;
-            foreach (var token in item.GetTokens(bracket)) yield return token;
-            yield return Token.ReservedBracketEnd(this, clause);
-        }
-    }
+		var isFirst = true;
+		foreach (var item in Rows)
+		{
+			if (isFirst)
+			{
+				isFirst = false;
+			}
+			else
+			{
+				yield return Token.Comma(this, clause);
+			}
+			var bracket = Token.ReservedBracketStart(this, clause);
+			yield return bracket;
+			foreach (var token in item.GetTokens(bracket)) yield return token;
+			yield return Token.ReservedBracketEnd(this, clause);
+		}
+	}
 
-    public override WithClause? GetWithClause() => null;
+	public override WithClause? GetWithClause() => null;
 
-    public override SelectClause? GetSelectClause() => null;
+	public override SelectClause? GetSelectClause() => null;
 
-    public override SelectQuery GetOrNewSelectQuery()
-    {
-        return ToSelectQuery();
-    }
+	public override SelectQuery GetOrNewSelectQuery()
+	{
+		return ToSelectQuery();
+	}
 
-    public override IDictionary<string, object?> GetInnerParameters()
-    {
-        var prm = EmptyParameters.Get();
-        Rows.ForEach(x => prm = prm.Merge(x.GetParameters()));
-        return prm;
-    }
+	public override IDictionary<string, object?> GetInnerParameters()
+	{
+		var prm = EmptyParameters.Get();
+		Rows.ForEach(x => prm = prm.Merge(x.GetParameters()));
+		return prm;
+	}
 
-    public SelectQuery ToSelectQuery()
-    {
-        if (!Rows.Any() || Rows.First().Count() == 0) throw new Exception();
-        var cnt = Rows.First().Count();
+	public SelectQuery ToSelectQuery()
+	{
+		var lst = GetDefaultColumnAliases();
+		return ToSelectQuery(lst);
+	}
 
-        var columnAlias = new ValueCollection();
-        cnt.ForEach(x => columnAlias.Add(new LiteralValue("c" + x)));
+	public SelectQuery ToSelectQuery(IEnumerable<string> columnAlias)
+	{
+		var sq = new SelectQuery();
+		var f = sq.From(ToSelectableTable(columnAlias));
 
-        return ToSelectQuery(columnAlias);
-    }
+		foreach (var item in columnAlias) sq.Select(f, item);
 
-    public SelectQuery ToSelectQuery(ValueCollection columnAlias)
-    {
-        var sq = new SelectQuery();
+		sq.OrderClause = OrderClause;
+		sq.LimitClause = LimitClause;
 
-        var vt = new VirtualTable(this);
-        var f = sq.From(vt.ToSelectable("v", columnAlias));
+		sq.Parameters = Parameters;
 
-        foreach (var item in columnAlias) sq.Select(f, item.ToText());
+		return sq;
+	}
 
-        sq.OrderClause = OrderClause;
-        sq.LimitClause = LimitClause;
+	private List<string> GetDefaultColumnAliases()
+	{
+		if (!Rows.Any() || Rows.First().Count == 0) throw new Exception();
+		var cnt = Rows.First().Count;
 
-        sq.Parameters = Parameters;
+		var lst = new List<string>();
+		cnt.ForEach(x => lst.Add("c" + x));
 
-        return sq;
-    }
+		return lst;
+	}
+
+	public override SelectableTable ToSelectableTable(IEnumerable<string>? columnAliases)
+	{
+		var vt = new VirtualTable(this);
+		if (columnAliases == null)
+		{
+			var lst = GetDefaultColumnAliases();
+			return vt.ToSelectable("v", lst);
+		}
+		else
+		{
+			return vt.ToSelectable("v", columnAliases);
+		}
+	}
+
+	public override IEnumerable<string> GetColumnNames()
+	{
+		return Enumerable.Empty<string>();
+	}
 }

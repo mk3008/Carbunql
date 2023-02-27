@@ -172,4 +172,56 @@ public class SelectItemTest
 
 		Assert.Equal("end", lst[20].Text);
 	}
+
+	[Fact]
+	public void SubQuerySelectAll()
+	{
+		var query_a = new SelectQuery("select table_a_id, v1, v2 from table_a");
+		var query_b = new SelectQuery("select table_b_id, table_a_id, v11, v12 from table_b");
+
+		var sq = new SelectQuery();
+		var (f, a) = sq.From(query_a).As("a");
+		var b = f.InnerJoin(query_b).As("b").On(a, "table_a_id");
+
+		sq.Select(a);
+		sq.Select(b, overwrite: false);
+
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+
+		Assert.Equal(60, lst.Count());
+
+		Assert.Equal("a", lst[1].Text);
+		Assert.Equal(".", lst[2].Text);
+		Assert.Equal("table_a_id", lst[3].Text);
+	}
+
+	[Fact]
+	public void SubQuerySelectAll_override()
+	{
+		var query_a = new SelectQuery("select table_a_id, v1, v2 from table_a");
+		var query_b = new SelectQuery("select table_b_id, table_a_id, v11, v12 from table_b");
+
+		var sq = new SelectQuery();
+		var (f, a) = sq.From(query_a).As("a");
+		var b = f.InnerJoin(query_b).As("b").On(a, "table_a_id");
+
+		sq.Select(a);
+		sq.Select(b, overwrite: true);
+
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+
+		Assert.Equal(60, lst.Count());
+
+		Assert.Equal("a", lst[1].Text);
+		Assert.Equal(".", lst[2].Text);
+		Assert.Equal("v1", lst[3].Text);
+
+		Assert.Equal("b", lst[13].Text);
+		Assert.Equal(".", lst[14].Text);
+		Assert.Equal("table_a_id", lst[15].Text);
+	}
 }

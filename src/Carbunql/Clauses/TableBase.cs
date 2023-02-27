@@ -1,4 +1,6 @@
-﻿using Carbunql.Values;
+﻿using Carbunql.Building;
+using Carbunql.Extensions;
+using Carbunql.Values;
 using System.Collections.Immutable;
 
 namespace Carbunql.Clauses;
@@ -16,6 +18,11 @@ public abstract class TableBase : IQueryCommandable
 		return new SelectableTable(this, alias);
 	}
 
+	public virtual SelectableTable ToSelectable(string alias, IEnumerable<string> columnAliases)
+	{
+		return new SelectableTable(this, alias, columnAliases.ToValueCollection());
+	}
+
 	public virtual SelectableTable ToSelectable(string alias, ValueCollection columnAliases)
 	{
 		return new SelectableTable(this, alias, columnAliases);
@@ -26,7 +33,7 @@ public abstract class TableBase : IQueryCommandable
 		return EmptyParameters.Get();
 	}
 
-	public virtual IList<string> GetValueNames()
+	public virtual IList<string> GetColumnNames()
 	{
 		return ImmutableList<string>.Empty;
 	}

@@ -82,11 +82,11 @@ FROM
 		{
 			var tmp = QueryParser.Parse(sql);
 			var (sq, ct) = tmp.ToCTE(alias);
-						
+
 			if (tmp.GetSelectClause() == null) throw new Exception("select clause is not defined.");
 
 			var t = sq.From(ct);
-			foreach (var item in ct.GetValueNames()) sq.Select(t, item);
+			sq.Select(t);
 
 			fsql = sq.ToCommand().CommandText;
 		}
