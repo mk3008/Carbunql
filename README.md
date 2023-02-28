@@ -265,3 +265,15 @@ FROM
     a
     INNER JOIN b ON a.id = b.id
 ```
+
+
+## Referenced Libraries
+### ZString / MIT License
+Copyright (c) 2020 Cysharp, Inc.
+
+https://github.com/Cysharp/ZString/blob/master/LICENSE
+
+### radzen-blazor / MIT License
+Copyright (c) 2018-2023 Radzen Ltd
+
+https://github.com/radzenhq/radzen-blazor/blob/master/LICENSE
