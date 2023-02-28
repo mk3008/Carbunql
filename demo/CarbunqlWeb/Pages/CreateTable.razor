@@ -6,18 +6,29 @@
 <PageTitle>To Create Table</PageTitle>
 
 <div class="container-fluid">
-    <div class="row" Style="margin: 0px 0px 16px 0px;">
+@*    <div class="row" Style="margin: 0px 0px 16px 0px;">
         <RadzenMenu class="rz-shadow-3">
             <RadzenMenuItem Text="Clear SQL" Icon="clear" Click=@OnClear>
             </RadzenMenuItem>
         </RadzenMenu>
-    </div>
+    </div>*@
 	<div class="row">
 		<div class="col-md-12 p-3">
 			<RadzenText TextStyle="TextStyle.H4">To Create Table</RadzenText>
+
+			<RadzenText>A select query can be converted to a create table query.</RadzenText>
+
+			<RadzenCard>
+				<RadzenText TextStyle="TextStyle.Subtitle2">Source code</RadzenText>
+				<RadzenTextArea @bind-Value=@sourcecode TValue="string" Style="width: 100%; min-height: 300px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" />
+			</RadzenCard>
 		</div>
 	</div>
 	<div class="row">
+				<div class="col-md-12 p-3">
+            <RadzenText TextStyle="TextStyle.H5">Demo</RadzenText>
+        </div>
+
 		<div class="col-md-6 p-3">
 			<RadzenCard>
 					<RadzenText TextStyle="TextStyle.Subtitle2">Create table name</RadzenText>
@@ -59,6 +70,14 @@ FROM
     x";
 
 	string fsql = string.Empty;
+
+	string sourcecode = @"using Carbunql;
+using Carbunql.Building;
+
+var sq = new SelectQuery(""select id, val from table_a as a"");
+var q = tmp.ToCreateTableQuery(""destinations"", isTemporary: true);
+
+Console.WriteLine(q.ToCommand().CommandText);";
 
 	string table = "tmp";
 

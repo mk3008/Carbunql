@@ -1,17 +1,13 @@
 ﻿using Carbunql;
 using Carbunql.Building;
 
-var tmp = new SelectQuery("select * from table_a as a");
+var builder = new DatePivotQueryBuilder() { Month = new DateTime(2020, 1, 1) };
 
-//Convert select query to Common table
-//Return value is SelectQuery class and Common table class
-var (sq, ct) = tmp.ToCTE("alias");
-
-//Set common table to From clause
-var t = sq.From(ct);
-
-//Select all columns of the Common table
-sq.Select(t);
+var sq = builder.Execute(
+	"select ymd, shop_id, sales_amount from sales",
+	"ymd",
+	new[] { "shop_id" },
+	"sales_amount");
 
 Console.WriteLine(sq.ToCommand().CommandText);
 

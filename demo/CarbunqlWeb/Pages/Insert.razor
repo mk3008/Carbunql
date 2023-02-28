@@ -71,7 +71,7 @@ FROM
 	string sourcecode = @"using Carbunql;
 using Carbunql.Building;
 
-var sq = new SelectQuery(""select * from table_a as a"");
+var sq = new SelectQuery(""select id, val from table_a as a"");
 var q = sq.ToInsertQuery(""destinations"");
 Console.WriteLine(q.ToCommand().CommandText);";
 
