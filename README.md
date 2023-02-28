@@ -270,6 +270,7 @@ FROM
 ## Referenced Libraries
 ### ZString / MIT License
 https://github.com/Cysharp/ZString
+
 https://github.com/Cysharp/ZString/blob/master/LICENSE
 
 Copyright (c) 2020 Cysharp, Inc.
@@ -294,6 +295,7 @@ SOFTWARE.
 
 ### Dapper / Apache License 2.0
 https://github.com/DapperLib/Dapper
+
 https://github.com/DapperLib/Dapper/blob/main/License.txt
 
 The Dapper library and tools are licenced under Apache 2.0: http://www.apache.org/licenses/LICENSE-2.0
@@ -305,6 +307,7 @@ without written permission. If in doubt: ask.
 
 ### Radzen Blazor / MIT License
 https://github.com/radzenhq/radzen-blazor
+
 https://github.com/radzenhq/radzen-blazor/blob/master/LICENSE
 
 Copyright (c) 2018-2023 Radzen Ltd
