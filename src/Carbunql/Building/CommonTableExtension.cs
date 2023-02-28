@@ -1,4 +1,5 @@
 ﻿using Carbunql.Clauses;
+using Carbunql.Tables;
 
 namespace Carbunql.Building;
 
@@ -8,5 +9,13 @@ public static class CommonTableExtension
 	{
 		source.SetAlias(alias);
 		return source;
+	}
+
+	public static PhysicalTable ToPhysicalTable(this CommonTable source)
+	{
+		var t = new PhysicalTable(source.Alias);
+		t.ColumnNames ??= new();
+		foreach (var item in source.GetColumnNames()) t.ColumnNames.Add(item);
+		return t;
 	}
 }
