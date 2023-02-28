@@ -269,6 +269,7 @@ FROM
 
 ## Referenced Libraries
 ### ZString / MIT License
+https://github.com/Cysharp/ZString
 https://github.com/Cysharp/ZString/blob/master/LICENSE
 
 Copyright (c) 2020 Cysharp, Inc.
@@ -292,6 +293,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ### Dapper / Apache License 2.0
+https://github.com/DapperLib/Dapper
 https://github.com/DapperLib/Dapper/blob/main/License.txt
 
 The Dapper library and tools are licenced under Apache 2.0: http://www.apache.org/licenses/LICENSE-2.0
@@ -301,7 +303,8 @@ the Dapper logo (including derivatives) must not be used in a way that misrepres
 with Dapper. For example, you must not use the Dapper logo as the package icon on your own external tool (even if it uses Dapper internally),
 without written permission. If in doubt: ask.
 
-### radzen-blazor / MIT License
+### Radzen Blazo / MIT License
+https://github.com/radzenhq/radzen-blazor
 https://github.com/radzenhq/radzen-blazor/blob/master/LICENSE
 
 Copyright (c) 2018-2023 Radzen Ltd
