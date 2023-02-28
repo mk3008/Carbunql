@@ -1,10 +1,12 @@
 ﻿using Carbunql;
+using Carbunql.Analysis;
 using Carbunql.Building;
 
-var tmp = new SelectQuery("select * from table_a as a");
-var sq = tmp.ToCreateTableQuery("destinations", isTemporary: true);
+var tmp = QueryParser.Parse("select * from table_a");
+var sq = new SelectQuery();
+var f = sq.From(tmp);
 
-Console.WriteLine(sq.ToCommand().CommandText);
+sq.Select(f);
 
 Console.WriteLine();
 Console.WriteLine("press enter key");
