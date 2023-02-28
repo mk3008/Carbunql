@@ -75,12 +75,6 @@ public class SelectableTable : IQueryCommandable, ISelectable
 	public IEnumerable<string> GetColumnNames()
 	{
 		if (ColumnAliases != null) return ColumnAliases.GetColumnNames();
-
-		if (Table is VirtualTable vt && vt.Query is IReadQuery q)
-		{
-			return q.GetColumnNames();
-		}
-
-		return Enumerable.Empty<string>();
+		return Table.GetColumnNames();
 	}
 }
