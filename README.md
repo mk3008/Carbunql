@@ -1,4 +1,10 @@
 # Carbunql
+![GitHub](https://img.shields.io/github/license/mk3008/Carbunql)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/mk3008/Carbunql)
+![Github Last commit](https://img.shields.io/github/last-commit/mk3008/Carbunql)  
+[![SqModel](https://img.shields.io/nuget/v/Carbunql.svg)](https://www.nuget.org/packages/Carbunql/) 
+[![SqModel](https://img.shields.io/nuget/dt/Carbunql.svg)](https://www.nuget.org/packages/Carbunql/) 
+
 A lightweight library for parsing and building select queries. SQL can be rebuilt dynamically.
 
 ## Demo
