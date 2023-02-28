@@ -303,7 +303,7 @@ the Dapper logo (including derivatives) must not be used in a way that misrepres
 with Dapper. For example, you must not use the Dapper logo as the package icon on your own external tool (even if it uses Dapper internally),
 without written permission. If in doubt: ask.
 
-### Radzen Blazo / MIT License
+### Radzen Blazor / MIT License
 https://github.com/radzenhq/radzen-blazor
 https://github.com/radzenhq/radzen-blazor/blob/master/LICENSE
 
