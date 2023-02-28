@@ -6,15 +6,23 @@
 <PageTitle>To PivotQuery (month)</PageTitle>
 
 <div class="container-fluid">
-	<div class="row" Style="margin: 0px 0px 16px 0px;">
+@*	<div class="row" Style="margin: 0px 0px 16px 0px;">
 		<RadzenMenu class="rz-shadow-3">
 			<RadzenMenuItem Text="Clear SQL" Icon="clear" Click=@OnClear>
 			</RadzenMenuItem>
 		</RadzenMenu>
-	</div>
+	</div>*@
 	<div class="row">
 		<div class="col-md-12 p-3">
 			<RadzenText TextStyle="TextStyle.H4">To PivotQuery (month)</RadzenText>
+
+
+			<RadzenText>Pivot aggregates the select query.</RadzenText>
+
+			<RadzenCard>
+				<RadzenText TextStyle="TextStyle.Subtitle2">Source code</RadzenText>
+				<RadzenTextArea @bind-Value=@sourcecode TValue="string" Style="width: 100%; min-height: 400px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" />
+			</RadzenCard>
 		</div>
 	</div>
 	<div class="row">
@@ -65,6 +73,19 @@ from
     ) t(ym, shop_id, sales_amount)";
 
 	string fsql = string.Empty;
+
+		string sourcecode = @"using Carbunql;
+using Carbunql.Building;
+
+var builder = new MonthPivotQueryBuilder() { StartDate = new DateTime(2020, 1, 1) };
+
+var sq = builder.Execute(
+	""select ym, shop_id, sales_amount from sales"",
+	""ym"",
+	new[] { ""shop_id"" },
+	""sales_amount"");
+
+Console.WriteLine(sq.ToCommand().CommandText);";
 
 	string datecolumn = "ym";
 

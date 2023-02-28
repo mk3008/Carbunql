@@ -1,11 +1,13 @@
 ﻿using Carbunql;
 using Carbunql.Building;
 
-var builder = new DiffQueryBuilder();
+var builder = new DatePivotQueryBuilder() { Month = new DateTime(2020, 1, 1) };
+
 var sq = builder.Execute(
-	"select id, val from table_a",
-	"select id, val from table_b",
-	new[] { "id" });
+	"select ymd, shop_id, sales_amount from sales",
+	"ymd",
+	new[] { "shop_id" },
+	"sales_amount");
 
 Console.WriteLine(sq.ToCommand().CommandText);
 
