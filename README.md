@@ -6,7 +6,7 @@ You can experience parsing results online on the demo site.
 
 https://mk3008.github.io/Carbunql
 
-<img width="845" alt="demo_screenshot" src="https://user-images.githubusercontent.com/7686540/218080149-27085450-563a-4706-8ae4-5fb365c090f1.png">
+![demosite screenshot](https://user-images.githubusercontent.com/7686540/218080149-27085450-563a-4706-8ae4-5fb365c090f1.png)
 
 ## Features
 - Supports parsing select queries without using a DBMS
