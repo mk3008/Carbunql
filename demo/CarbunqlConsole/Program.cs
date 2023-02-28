@@ -2,7 +2,7 @@
 using Carbunql.Building;
 
 var tmp = new SelectQuery("select * from table_a as a");
-var sq = tmp.ToCountQuery();
+var sq = tmp.ToCreateTableQuery("destinations", isTemporary: true);
 
 Console.WriteLine(sq.ToCommand().CommandText);
 

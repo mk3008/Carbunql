@@ -52,10 +52,10 @@
 	string sourcecode = @"using Carbunql;
 using Carbunql.Building;
 
-var tmp = new SelectQuery(""select * from table_a as a"");
-var sq = tmp.ToCountQuery();
+var sq = new SelectQuery(""select * from table_a as a"");
+var q = tmp.ToCountQuery();
 
-Console.WriteLine(sq.ToCommand().CommandText);";
+Console.WriteLine(q.ToCommand().CommandText);";
 
 	string sql = @"select a.id, a.value as v from table as a";
 
