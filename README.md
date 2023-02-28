@@ -18,7 +18,11 @@ https://mk3008.github.io/Carbunql
 - Only select queries can be parsed
 - Comment is removed
 
-# Sample
+
+# Getting started
+
+> PM> Install-Package [Carbunql](https://www.nuget.org/packages/Carbunql/)
+
 ## Parse
 Just pass the select query string to the constructor of the SelectQuery class.
 ```cs
