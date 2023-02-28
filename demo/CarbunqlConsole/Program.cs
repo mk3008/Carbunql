@@ -1,12 +1,13 @@
 ﻿using Carbunql;
-using Carbunql.Analysis;
 using Carbunql.Building;
 
-var tmp = QueryParser.Parse("select * from table_a");
-var sq = new SelectQuery();
-var f = sq.From(tmp);
+var builder = new DiffQueryBuilder();
+var sq = builder.Execute(
+	"select id, val from table_a",
+	"select id, val from table_b",
+	new[] { "id" });
 
-sq.Select(f);
+Console.WriteLine(sq.ToCommand().CommandText);
 
 Console.WriteLine();
 Console.WriteLine("press enter key");
