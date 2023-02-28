@@ -12,7 +12,7 @@
     <PackageProjectUrl>https://github.com/mk3008/Carbunql</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/mk3008/Carbunql.git</RepositoryUrl>
-    <PackageTags>SQL;SQL Builder;SQL Parser;SQL Rebuilder</PackageTags>
+    <PackageTags>SQL;SQLBuilder;SQLParser;SQLRebuilder</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
