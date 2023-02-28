@@ -51,7 +51,7 @@
 
     string sourcecode = @"using Carbunql;
 
-var sq = new SelectQuery(""select * from table_a as a"");
+var sq = new SelectQuery(""select id, val from table_a as a"");
 Console.WriteLine(sq.ToCommand().CommandText);";
 
     protected override void OnInitialized()

@@ -73,7 +73,7 @@ FROM
 using Carbunql.Analysis;
 using Carbunql.Building;
 
-var tmp = QueryParser.Parse(""select * from table_a"");
+var tmp = QueryParser.Parse(""select id, val from table_a"");
 var sq = new SelectQuery();
 
 //Convert select query to Common table
