@@ -37,4 +37,8 @@ public abstract class TableBase : IQueryCommandable
 	{
 		return ImmutableList<string>.Empty;
 	}
+
+	public virtual bool IsSelectQuery => false;
+
+	public virtual SelectQuery GetSelectQuery() => throw new NotSupportedException();
 }

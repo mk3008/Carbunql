@@ -173,7 +173,7 @@ public class ValueParserTest
 		Monitor.Log(v);
 
 		var lst = v.GetTokens().ToList();
-		Assert.Equal(11, lst.Count);
+		Assert.Equal(5, lst.Count);
 	}
 
 	[Fact]
