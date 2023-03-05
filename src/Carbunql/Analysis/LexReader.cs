@@ -27,7 +27,7 @@ public class LexReader : CharReader
 
 	private IEnumerable<char> SingleSymbols => ForceBreakSymbols.Union(BitwiseOperatorSymbols);
 
-	private IEnumerable<char> MultipleSymbols => ArithmeticOperatorSymbols.Union(ComparisonOperatorSymbols).Union(RegexOperatorSymbols).Union(TypeConvertSymbols);
+	private IEnumerable<char> MultipleSymbols => ArithmeticOperatorSymbols.Union(ComparisonOperatorSymbols).Union(RegexOperatorSymbols);
 
 	private IEnumerable<char> AllSymbols => SingleSymbols.Union(MultipleSymbols).Union(PrefixSymbols).Union(SpaceChars).Union(RegexOperatorSymbols).Union(TypeConvertSymbols);
 
@@ -86,6 +86,13 @@ public class LexReader : CharReader
 
 		// ex. . or , or (
 		if (SingleSymbols.Contains(fc)) return sb.ToString();
+
+		// ::
+		if (fc == ':' && PeekOrDefaultChar() == ':')
+		{
+			sb.Append(ReadCharOrDefault(':'));
+			return sb.ToString();
+		}
 
 		// ex. + or != 
 		// ignore ::
