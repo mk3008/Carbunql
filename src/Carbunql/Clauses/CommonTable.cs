@@ -1,4 +1,5 @@
 ﻿using Carbunql.Extensions;
+using Carbunql.Tables;
 using Carbunql.Values;
 
 namespace Carbunql.Clauses;
@@ -27,4 +28,8 @@ public class CommonTable : SelectableTable
 
 		foreach (var item in Table.GetTokens(parent)) yield return item;
 	}
+
+	public bool IsSelectQuery => Table.IsSelectQuery;
+
+	public SelectQuery GetSelectQuery() => Table.GetSelectQuery();
 }

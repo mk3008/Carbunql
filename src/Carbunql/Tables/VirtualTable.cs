@@ -4,6 +4,12 @@ namespace Carbunql.Tables;
 
 public class VirtualTable : TableBase
 {
+	public VirtualTable(SelectQuery query)
+	{
+		isSelectQuery = true;
+		Query = query;
+
+	}
 	public VirtualTable(IQueryCommandable query)
 	{
 		Query = query;
@@ -36,5 +42,15 @@ public class VirtualTable : TableBase
 		{
 			return base.GetColumnNames();
 		}
+	}
+
+	private bool isSelectQuery = false;
+
+	public override bool IsSelectQuery => isSelectQuery;
+
+	public override SelectQuery GetSelectQuery()
+	{
+		if (isSelectQuery) return (SelectQuery)Query;
+		return base.GetSelectQuery();
 	}
 }
