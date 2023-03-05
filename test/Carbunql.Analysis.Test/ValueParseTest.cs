@@ -166,6 +166,17 @@ public class ValueParserTest
 	}
 
 	[Fact]
+	public void Expression5()
+	{
+		var text = "a.val=:parameter";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(11, lst.Count);
+	}
+
+	[Fact]
 	public void Regex()
 	{
 		var text = "'a' !~* 'a'";
