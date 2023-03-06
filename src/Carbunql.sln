@@ -15,7 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carbunql.Building.Test", ".
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carbunql.Dapper", "Carbunql.Dapper\Carbunql.Dapper.csproj", "{FE6938B8-3DB2-4622-8DAF-2EC20F26B62F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarbunqlConsole", "..\demo\CarbunqlConsole\CarbunqlConsole.csproj", "{5191094F-99FC-4A25-89EA-85C34AA86556}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CarbunqlConsole", "..\demo\CarbunqlConsole\CarbunqlConsole.csproj", "{5191094F-99FC-4A25-89EA-85C34AA86556}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carbunql.DynamicQuery.Test", "..\test\Carbunql.DynamicQuery.Test\Carbunql.DynamicQuery.Test.csproj", "{E0F59B0B-1486-4829-BD60-C5B0B6BC6DB3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{5191094F-99FC-4A25-89EA-85C34AA86556}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5191094F-99FC-4A25-89EA-85C34AA86556}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5191094F-99FC-4A25-89EA-85C34AA86556}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0F59B0B-1486-4829-BD60-C5B0B6BC6DB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0F59B0B-1486-4829-BD60-C5B0B6BC6DB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0F59B0B-1486-4829-BD60-C5B0B6BC6DB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0F59B0B-1486-4829-BD60-C5B0B6BC6DB3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
