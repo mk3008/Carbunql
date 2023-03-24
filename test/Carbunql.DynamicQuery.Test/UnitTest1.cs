@@ -186,6 +186,29 @@ FROM
 		Assert.Equal(expect, actual);
 	}
 
+	[Theory]
+	[InlineData("a_id", "val3")]
+	public void SelectColumnFilter_Remove(params string[] columns)
+	{
+		//sql parse
+		var sq = new SelectQuery(@"select a.a_id, a.val1, a.val2, a.val2 as val3 from table as a");
+
+		//filter in
+		sq.SelectClause!.FilterInColumns(columns);
+
+		var printer = new DebugPrinter(Output);
+		var actual = printer.Write(sq);
+		var expect =
+@"SELECT
+    a.a_id,
+    a.val2 AS val3
+FROM
+    table AS a
+".Replace("\r\n", "\n");
+
+		Assert.Equal(expect, actual);
+	}
+
 	[Fact()]
 	public void AddOutJoinFilter()
 	{
