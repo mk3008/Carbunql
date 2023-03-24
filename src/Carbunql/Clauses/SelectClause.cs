@@ -41,4 +41,10 @@ public class SelectClause : QueryCommandCollection<SelectableItem>, IQueryComman
 		}
 		return Token.Reserved(this, parent, "select");
 	}
+
+	public void FilterInColumns(IEnumerable<string> columns)
+	{
+		var lst = this.Where(x => !columns.Contains(x.Alias)).ToList();
+		foreach (var item in lst) Remove(item);
+	}
 }
