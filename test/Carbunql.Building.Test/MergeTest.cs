@@ -21,6 +21,10 @@ public class MergeTest
 		var q = QueryParser.Parse(sql);
 
 		var uq = q.ToMergeQuery("destination_table", new[] { "id", "sub_id" });
+		uq.AddMatchedUpdate();
+		uq.AddNotMathcedInsertAsAutoNumber();
+		uq.AddNotMatchedInsert();
+
 		Monitor.Log(uq);
 
 		var lst = uq.GetTokens().ToList();

@@ -4,15 +4,18 @@ namespace Carbunql.Clauses;
 
 public class UsingClause : IQueryCommandable
 {
-	public UsingClause(SelectableTable root, ValueBase condition)
+	public UsingClause(SelectableTable root, ValueBase condition, IEnumerable<string> keys)
 	{
 		Root = root;
 		Condition = condition;
+		Keys = keys;
 	}
 
 	public SelectableTable Root { get; init; }
 
 	public ValueBase Condition { get; init; }
+
+	public IEnumerable<string> Keys { get; init; }
 
 	public IDictionary<string, object?> GetParameters()
 	{
