@@ -89,7 +89,12 @@ Console.WriteLine(q.ToCommand().CommandText);";
 		{
 			var groupkeys = keys.Split(",").ToList().Select(x => x.Trim()).ToList();
 			var sq = QueryParser.Parse(sql);
-			fsql = sq.ToMergeQuery(table, groupkeys).ToCommand().CommandText;
+			var mq = sq.ToMergeQuery(table, groupkeys);
+			mq.AddMatchedUpdate();
+			mq.AddNotMathcedInsertAsAutoNumber();
+			mq.AddNotMatchedInsert();
+
+			fsql = mq.ToCommand().CommandText;
 		}
 		catch (Exception ex)
 		{
