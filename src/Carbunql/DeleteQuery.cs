@@ -3,13 +3,15 @@ using Carbunql.Extensions;
 
 namespace Carbunql;
 
-public class DeleteQuery : IQueryCommandable
+public class DeleteQuery : IQueryCommandable, IReturning
 {
 	public DeleteClause? DeleteClause { get; set; }
 
 	public WithClause? WithClause { get; set; }
 
 	public WhereClause? WhereClause { get; set; }
+
+	public ReturningClause? ReturningClause { get; set; }
 
 	public IDictionary<string, object?>? Parameters { get; set; }
 
@@ -27,5 +29,8 @@ public class DeleteQuery : IQueryCommandable
 		if (WithClause != null) foreach (var item in WithClause.GetTokens(parent)) yield return item;
 		foreach (var item in DeleteClause.GetTokens(parent)) yield return item;
 		if (WhereClause != null) foreach (var item in WhereClause.GetTokens(parent)) yield return item;
+
+		if (ReturningClause == null) yield break;
+		foreach (var item in ReturningClause.GetTokens(parent)) yield return item;
 	}
 }

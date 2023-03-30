@@ -1,11 +1,14 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Extensions;
+using Carbunql.Values;
 
 namespace Carbunql;
 
-public class InsertQuery : IQueryCommandable
+public class InsertQuery : IQueryCommandable, IReturning
 {
 	public InsertClause? InsertClause { get; set; }
+
+	public ReturningClause? ReturningClause { get; set; }
 
 	public IReadQuery? Query { get; set; }
 
@@ -25,5 +28,8 @@ public class InsertQuery : IQueryCommandable
 
 		foreach (var item in InsertClause.GetTokens(parent)) yield return item;
 		foreach (var item in Query.GetTokens(parent)) yield return item;
+
+		if (ReturningClause == null) yield break;
+		foreach (var item in ReturningClause.GetTokens(parent)) yield return item;
 	}
 }
