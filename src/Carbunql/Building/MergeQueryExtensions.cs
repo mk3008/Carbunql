@@ -6,18 +6,13 @@ namespace Carbunql.Building;
 
 public static class MergeQueryExtensions
 {
-	private static MergeWhenInsert ToMergeWhenInsert(this MergeQuery source, IEnumerable<string> ignoreColumns)
+	public static void AddNotMatchedInsert(this MergeQuery source, Func<ValueBase>? conditionBuilder = null)
 	{
-		var s = source.Datasource.GetSelectClause();
-		if (s == null) throw new NotSupportedException("select clause is not found.");
+		var m = source.ToMergeWhenInsert(Enumerable.Empty<string>());
+		m.Condition = conditionBuilder?.Invoke();
 
-		var vals = s.Select(x => x.Alias).Where(x => !x.IsEqualNoCase(ignoreColumns)).ToList();
-		var q = new MergeInsertQuery()
-		{
-			Destination = vals.ToValueCollection(),
-			Datasource = vals.ToValueCollection(source.DatasourceAlias)
-		};
-		return new MergeWhenInsert(q);
+		source.WhenClause ??= new();
+		source.WhenClause.Add(m);
 	}
 
 	public static void AddNotMathcedInsertAsAutoNumber(this MergeQuery source)
@@ -46,12 +41,36 @@ public static class MergeQueryExtensions
 		source.WhenClause.Add(m);
 	}
 
-	public static void AddNotMatchedInsert(this MergeQuery source)
+	public static void AddMatchedUpdate(this MergeQuery source, Func<ValueBase>? conditionBuilder = null)
 	{
-		var m = source.ToMergeWhenInsert(Enumerable.Empty<string>());
+		var m = source.ToMergeWhenUpdate();
+		m.Condition = conditionBuilder?.Invoke();
 
 		source.WhenClause ??= new();
 		source.WhenClause.Add(m);
+	}
+
+	public static void AddMatchedDelete(this MergeQuery source, Func<ValueBase>? conditionBuilder = null)
+	{
+		var m = new MergeWhenDelete();
+		m.Condition = conditionBuilder?.Invoke();
+
+		source.WhenClause ??= new();
+		source.WhenClause.Add(m);
+	}
+
+	private static MergeWhenInsert ToMergeWhenInsert(this MergeQuery source, IEnumerable<string> ignoreColumns)
+	{
+		var s = source.Datasource.GetSelectClause();
+		if (s == null) throw new NotSupportedException("select clause is not found.");
+
+		var vals = s.Select(x => x.Alias).Where(x => !x.IsEqualNoCase(ignoreColumns)).ToList();
+		var q = new MergeInsertQuery()
+		{
+			Destination = vals.ToValueCollection(),
+			Datasource = vals.ToValueCollection(source.DatasourceAlias)
+		};
+		return new MergeWhenInsert(q);
 	}
 
 	private static MergeWhenUpdate ToMergeWhenUpdate(this MergeQuery source)
@@ -70,13 +89,5 @@ public static class MergeQueryExtensions
 
 		var q = new MergeUpdateQuery() { SetClause = clause };
 		return new MergeWhenUpdate(q);
-	}
-
-	public static void AddMatchedUpdate(this MergeQuery source)
-	{
-		var m = source.ToMergeWhenUpdate();
-
-		source.WhenClause ??= new();
-		source.WhenClause.Add(m);
 	}
 }

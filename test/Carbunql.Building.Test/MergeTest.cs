@@ -1,5 +1,5 @@
 using Carbunql.Analysis;
-using Carbunql.Extensions;
+using Carbunql.Values;
 using Xunit.Abstractions;
 
 
@@ -30,5 +30,24 @@ public class MergeTest
 		var lst = uq.GetTokens().ToList();
 
 		Assert.Equal(119, lst.Count());
+	}
+
+	[Fact]
+	public void MergeDeleteQuery()
+	{
+		var sql = "select a.tid, a.balance, a.deleted from (values (123, 10, true)) as a(tid, balance, deleted)";
+		var q = QueryParser.Parse(sql);
+
+		var uq = q.ToMergeQuery("target", new[] { "tid" });
+		uq.AddMatchedDelete(() =>
+		{
+			return new ColumnValue(uq.DatasourceAlias, "deleted").True();
+		});
+
+		Monitor.Log(uq);
+
+		var lst = uq.GetTokens().ToList();
+
+		Assert.Equal(58, lst.Count());
 	}
 }
