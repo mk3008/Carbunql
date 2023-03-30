@@ -63,7 +63,7 @@ public static class MergeQueryExtensions
 		var clause = new MergeSetClause();
 		foreach (var item in cols)
 		{
-			var c = new ColumnValue(source.MergeClause.Table.Alias, item);
+			var c = new ColumnValue(item);
 			c.Equal(new ColumnValue(source.DatasourceAlias, item));
 			clause.Add(c);
 		};
