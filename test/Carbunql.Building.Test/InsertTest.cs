@@ -1,5 +1,6 @@
 using Carbunql.Analysis;
 using Carbunql.Extensions;
+using Carbunql.Values;
 using Xunit.Abstractions;
 
 
@@ -58,5 +59,24 @@ public class InsertTest
 		var lst = iq.GetTokens().ToList();
 
 		Assert.Equal(28, lst.Count());
+	}
+
+	[Fact]
+	public void InsertQuery_Returning()
+	{
+		var sql = "select a.id, a.value as v from table as a";
+		var tmp = QueryParser.Parse(sql);
+
+		var sq = new SelectQuery();
+		var (f, q) = sq.From(tmp).As("q");
+		q.GetColumnNames().Where(x => x.IsEqualNoCase("id")).ToList().ForEach(x => sq.Select(q, x));
+
+		var iq = sq.ToInsertQuery("new_table");
+		iq.Returning("seq");
+		Monitor.Log(iq);
+
+		var lst = iq.GetTokens().ToList();
+
+		Assert.Equal(30, lst.Count());
 	}
 }

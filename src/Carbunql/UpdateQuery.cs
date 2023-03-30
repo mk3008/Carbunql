@@ -3,7 +3,7 @@ using Carbunql.Extensions;
 
 namespace Carbunql;
 
-public class UpdateQuery : IQueryCommandable
+public class UpdateQuery : IQueryCommandable, IReturning
 {
 	public UpdateClause? UpdateClause { get; set; }
 
@@ -12,6 +12,8 @@ public class UpdateQuery : IQueryCommandable
 	public FromClause? FromClause { get; set; }
 
 	public WhereClause? WhereClause { get; set; }
+
+	public ReturningClause? ReturningClause { get; set; }
 
 	public IDictionary<string, object?>? Parameters { get; set; }
 
@@ -34,5 +36,8 @@ public class UpdateQuery : IQueryCommandable
 		foreach (var item in SetClause.GetTokens(parent)) yield return item;
 		if (FromClause != null) foreach (var item in FromClause.GetTokens(parent)) yield return item;
 		if (WhereClause != null) foreach (var item in WhereClause.GetTokens(parent)) yield return item;
+
+		if (ReturningClause == null) yield break;
+		foreach (var item in ReturningClause.GetTokens(parent)) yield return item;
 	}
 }
