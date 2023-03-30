@@ -71,8 +71,7 @@ public class MergeQuery : IQueryCommandable
 	{
 		var s = datasource.GetSelectClause();
 		if (s == null) throw new NotSupportedException("select clause is not found.");
-		var columnAliases = s.Select(x => x.Alias).ToList().ToValueCollection();
-		return new SelectableTable(new PhysicalTable(destinationTable), destinationAlias, columnAliases);
+		return new SelectableTable(new PhysicalTable(destinationTable), destinationAlias);
 	}
 
 	private UsingClause CreateUsingClause(IReadQuery datasource, IEnumerable<string> keys, string destinationName, string sourceName)
