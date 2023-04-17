@@ -224,4 +224,26 @@ public class SelectItemTest
 		Assert.Equal(".", lst[14].Text);
 		Assert.Equal("table_a_id", lst[15].Text);
 	}
+
+	[Fact]
+	public void Parameter()
+	{
+		var sq = new SelectQuery();
+		sq.Select(sq.AddParameter(":val", 1)).As("val");
+
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+
+		Assert.Equal(4, lst.Count());
+		Assert.Equal("select", lst[0].Text);
+		Assert.Equal(":val", lst[1].Text);
+		Assert.Equal("as", lst[2].Text);
+		Assert.Equal("val", lst[3].Text);
+
+		Assert.Single(sq.Parameters);
+		var val = sq.Parameters[":val"];
+		if (val == null) throw new NullReferenceException();
+		Assert.Equal("1", val.ToString());
+	}
 }

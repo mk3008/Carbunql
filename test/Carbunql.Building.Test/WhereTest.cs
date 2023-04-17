@@ -87,4 +87,26 @@ public class WhereTest
 
 		Assert.Equal(")", lst[21].Text);
 	}
+
+	[Fact]
+	public void Parameter()
+	{
+		var sq = new SelectQuery();
+		var (f, a) = sq.From("table_a").As("a");
+		sq.SelectAll();
+
+		sq.Where(a, "id").Equal(sq.AddParameter(":val", 1));
+
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+
+		Assert.Equal(12, lst.Count());
+		Assert.Equal(":val", lst[11].Text);
+
+		Assert.Single(sq.Parameters);
+		var val = sq.Parameters[":val"];
+		if (val == null) throw new NullReferenceException();
+		Assert.Equal("1", val.ToString());
+	}
 }
