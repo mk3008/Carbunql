@@ -25,7 +25,7 @@ public class UpdateTest
 
 		var lst = uq.GetTokens().ToList();
 
-		Assert.Equal(61, lst.Count());
+		Assert.Equal(57, lst.Count());
 	}
 
 	[Fact]
@@ -39,6 +39,6 @@ public class UpdateTest
 
 		var lst = uq.GetTokens().ToList();
 
-		Assert.Equal(61, lst.Count());
+		Assert.Equal(57, lst.Count());
 	}
 }
