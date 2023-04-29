@@ -194,7 +194,7 @@ public static class ReadQueryExtension
 		var clause = new SetClause();
 		foreach (var item in cols)
 		{
-			var c = new ColumnValue(alias, item);
+			var c = new ColumnValue(item);
 			c.Equal(new ColumnValue(queryAlias, item));
 			clause.Add(c);
 		};
