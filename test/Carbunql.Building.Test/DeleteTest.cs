@@ -40,4 +40,18 @@ public class DeleteTest
 
 		Assert.Equal(50, lst.Count());
 	}
+
+	[Fact]
+	public void DeleteQueryArgumentOmitted()
+	{
+		var sql = "select a.id, a.sub_id, a.v1, a.v2 from table as a";
+		var q = QueryParser.Parse(sql);
+
+		var uq = q.ToDeleteQuery("new_table");
+		Monitor.Log(uq);
+
+		var lst = uq.GetTokens().ToList();
+
+		Assert.Equal(45, lst.Count());
+	}
 }
