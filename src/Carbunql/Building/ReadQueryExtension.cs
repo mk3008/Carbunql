@@ -207,24 +207,13 @@ public static class ReadQueryExtension
 		return source.ToDeleteQuery(t, keys, source.GetWithClause());
 	}
 
-	private static WhereClause ToWhereClauseAsDelete(this IReadQuery source, IEnumerable<string> keys, string alias, string queryAlias)
+	public static DeleteQuery ToDeleteQuery(this IReadQuery source, string table)
 	{
-		var ks = keys.ToList();
+		var s = source.GetSelectClause();
+		if (s == null) throw new NullReferenceException("Missing select clause in query.");
 
-		var cnd = new ValueCollection();
-		ks.ForEach(x => cnd.Add(new ColumnValue(alias, x)));
-		if (cnd == null) throw new Exception();
-
-		var sq = new SelectQuery();
-		var (f, a) = sq.From(source).As(queryAlias);
-		foreach (var item in a.Table.GetColumnNames())
-		{
-			if (!ks.Where(k => k.IsEqualNoCase(item)).Any()) continue;
-			sq.Select(a, item);
-		}
-
-		var exp = new InExpression(cnd.ToBracket(), sq.ToValue());
-		return exp.ToWhereClause();
+		var t = table.ToPhysicalTable().ToSelectable("d");
+		return source.ToDeleteQuery(t, source.GetWithClause());
 	}
 
 	public static DeleteQuery ToDeleteQuery(this IReadQuery source, SelectableTable table, IEnumerable<string> keys, WithClause? wclause = null)
@@ -238,6 +227,49 @@ public static class ReadQueryExtension
 			WithClause = wclause,
 			WhereClause = source.ToWhereClauseAsDelete(keys, table.Alias, queryAlias),
 		};
+	}
+
+	public static DeleteQuery ToDeleteQuery(this IReadQuery source, SelectableTable table, WithClause? wclause = null)
+	{
+		var queryAlias = "q";
+
+		return new DeleteQuery()
+		{
+			DeleteClause = new DeleteClause(table),
+			Parameters = source.GetParameters(),
+			WithClause = wclause,
+			WhereClause = source.ToWhereClauseAsDelete(table.Alias, queryAlias),
+		};
+	}
+
+	private static WhereClause ToWhereClauseAsDelete(this IReadQuery source, IEnumerable<string> keys, string alias, string queryAlias)
+	{
+		var ks = keys.ToList();
+
+		var cnd = new ValueCollection(alias, keys);
+
+		var sq = new SelectQuery();
+		var (f, a) = sq.From(source).As(queryAlias);
+		foreach (var item in a.Table.GetColumnNames())
+		{
+			if (!ks.Where(k => k.IsEqualNoCase(item)).Any()) continue;
+			sq.Select(a, item);
+		}
+
+		var exp = new InExpression(cnd.ToBracket(), sq.ToValue());
+		return exp.ToWhereClause();
+	}
+
+	private static WhereClause ToWhereClauseAsDelete(this IReadQuery source, string alias, string queryAlias)
+	{
+		var select = source.GetSelectClause();
+		var selectColumns = select!.Items!.Select(x => x.Alias);
+
+		if (selectColumns == null || !selectColumns.Any()) throw new ArgumentException();
+
+		var cnd = new ValueCollection(alias, selectColumns);
+		var exp = new InExpression(cnd.ToBracket(), source.ToValue());
+		return exp.ToWhereClause();
 	}
 
 	public static void UnionAll(this IReadQuery source, IReadQuery query)

@@ -2,6 +2,7 @@
 using Carbunql.Clauses;
 using Carbunql.Extensions;
 using System.Collections;
+using System.Security.Cryptography;
 
 namespace Carbunql.Values;
 
@@ -24,6 +25,15 @@ public class ValueCollection : ValueBase, IList<ValueBase>, IQueryCommand
 	public ValueCollection(List<ValueBase> collection)
 	{
 		Collection.AddRange(collection);
+	}
+
+	public ValueCollection(string tableAlias, IEnumerable<string> columns)
+	{
+		if (!columns.Any()) throw new ArgumentException(nameof(columns));
+		foreach (var column in columns)
+		{
+			Collection.Add(new ColumnValue(tableAlias, column));
+		}
 	}
 
 	private List<ValueBase> Collection { get; init; } = new();
