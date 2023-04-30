@@ -1,4 +1,5 @@
 ﻿using Carbunql.Clauses;
+using Carbunql.Values;
 using System.Diagnostics.Tracing;
 
 namespace Carbunql.Building;
@@ -36,9 +37,14 @@ public static class QueryBaseExtension
 		return ct;
 	}
 
+	public static CommonTable With(this SelectQuery source, ValuesQuery q, IEnumerable<string> columnAliases)
+	{
+		source.ImportCommonTable(q);
+		return source.With(q.ToCommonTable("cte", columnAliases));
+	}
+
 	public static CommonTable With(this SelectQuery source, Func<CommonTable> builder)
 	{
 		return source.With(builder());
 	}
-
 }

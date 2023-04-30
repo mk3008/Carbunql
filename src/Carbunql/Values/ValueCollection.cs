@@ -3,6 +3,7 @@ using Carbunql.Clauses;
 using Carbunql.Extensions;
 using System.Collections;
 using System.Security.Cryptography;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Carbunql.Values;
 
@@ -25,6 +26,14 @@ public class ValueCollection : ValueBase, IList<ValueBase>, IQueryCommand
 	public ValueCollection(List<ValueBase> collection)
 	{
 		Collection.AddRange(collection);
+	}
+
+	public ValueCollection(IEnumerable<string> values)
+	{
+		foreach (var item in values)
+		{
+			Collection.Add(new LiteralValue(item));
+		}
 	}
 
 	public ValueCollection(string tableAlias, IEnumerable<string> columns)
