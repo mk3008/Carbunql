@@ -61,7 +61,7 @@ public abstract class ReadQuery : IReadQuery
 
 	public abstract SelectableTable ToSelectableTable(IEnumerable<string>? columnAliases);
 
-	public string AddParameter(string name, object Value)
+	public string AddParameter(string name, object? Value)
 	{
 		Parameters.Add(name, Value);
 		return name;

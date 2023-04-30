@@ -1,9 +1,12 @@
 ﻿using Carbunql.Analysis;
+using Carbunql.Analysis.Parser;
 using Carbunql.Building;
 using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
+using System.Collections.Generic;
+using System.Data.Common;
 
 namespace Carbunql;
 
@@ -21,6 +24,115 @@ public class ValuesQuery : ReadQuery
 		OperatableQuery = q.OperatableQuery;
 		OrderClause = q.OrderClause;
 		LimitClause = q.LimitClause;
+	}
+
+	public ValuesQuery(IEnumerable<object> matrix)
+	{
+		foreach (var row in matrix)
+		{
+			var lst = new List<ValueBase>();
+
+			foreach (var column in row.GetType().GetProperties().Where(x => x.CanRead && x.CanWrite).Select(x => x.GetValue(row)))
+			{
+				if (column == null)
+				{
+					lst.Add(new LiteralValue("null"));
+				}
+				else
+				{
+					var v = $"\"{column}\"";
+					lst.Add(ValueParser.Parse(v));
+				}
+			}
+			Rows.Add(new ValueCollection(lst));
+		}
+	}
+
+	public ValuesQuery(IEnumerable<object> matrix, string placeholderIndentifer)
+	{
+		var r = 0;
+
+		foreach (var row in matrix)
+		{
+			var lst = new List<ValueBase>();
+			var c = 0;
+			foreach (var column in row.GetType().GetProperties().Where(x => x.CanRead && x.CanWrite).Select(x => x.GetValue(row)))
+			{
+				var name = $"r{r}c{c}";
+				var v = placeholderIndentifer + name;
+				lst.Add(ValueParser.Parse(v));
+				AddParameter(name, column);
+				c++;
+			}
+			Rows.Add(new ValueCollection(lst));
+			r++;
+		}
+	}
+
+	public ValuesQuery(string[,] matrix)
+	{
+		for (int row = 0; row < matrix.GetLength(0); row++)
+		{
+			var lst = new List<ValueBase>();
+
+			for (int column = 0; column < matrix.GetLength(1); column++)
+			{
+				var v = $"\"{matrix[row, column]}\"";
+				lst.Add(ValueParser.Parse(v));
+			}
+			Rows.Add(new ValueCollection(lst));
+		}
+	}
+
+	public ValuesQuery(IEnumerable<IEnumerable<string>> matrix)
+	{
+		foreach (var row in matrix)
+		{
+			var lst = new List<ValueBase>();
+			foreach (var column in row)
+			{
+				var v = $"\"{column}\"";
+				lst.Add(ValueParser.Parse(v));
+			}
+			Rows.Add(new ValueCollection(lst));
+		}
+	}
+
+	public ValuesQuery(string[,] matrix, string placeholderIndentifer)
+	{
+		for (int row = 0; row < matrix.GetLength(0); row++)
+		{
+			var lst = new List<ValueBase>();
+
+			for (int column = 0; column < matrix.GetLength(1); column++)
+			{
+				var name = $"r{row}c{column}";
+				var v = placeholderIndentifer + name;
+				lst.Add(ValueParser.Parse(v));
+				AddParameter(name, matrix[row, column]);
+			}
+			Rows.Add(new ValueCollection(lst));
+		}
+	}
+
+	public ValuesQuery(IEnumerable<IEnumerable<string>> matrix, string placeholderIndentifer)
+	{
+		var r = 0;
+		foreach (var row in matrix)
+		{
+			var c = 0;
+			var lst = new List<ValueBase>();
+			foreach (var column in row)
+			{
+				var name = $"r{r}c{c}";
+				var v = placeholderIndentifer + name;
+				lst.Add(ValueParser.Parse(v));
+				AddParameter(name, column);
+				c++;
+			}
+			Rows.Add(new ValueCollection(lst));
+			r++;
+		}
 	}
 
 	public List<ValueCollection> Rows { get; init; } = new();

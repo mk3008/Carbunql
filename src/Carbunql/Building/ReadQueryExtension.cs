@@ -31,7 +31,7 @@ public static class ReadQueryExtension
 		return new CommonTable(new VirtualTable(source), alias);
 	}
 
-	public static CommonTable ToCommonTable(this IReadQuery source, string alias, IList<string> columnAliases)
+	public static CommonTable ToCommonTable(this IReadQuery source, string alias, IEnumerable<string> columnAliases)
 	{
 		return new CommonTable(new VirtualTable(source), alias, columnAliases.ToValueCollection());
 	}
