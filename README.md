@@ -5,7 +5,9 @@
 [![SqModel](https://img.shields.io/nuget/v/Carbunql.svg)](https://www.nuget.org/packages/Carbunql/) 
 [![SqModel](https://img.shields.io/nuget/dt/Carbunql.svg)](https://www.nuget.org/packages/Carbunql/) 
 
-A lightweight library for parsing and building select queries. SQL can be rebuilt dynamically.
+This C# library provides a feature to convert a selection query into an object. By objectifying, it becomes easier to modify the selection query and perform more complex manipulations such as adding join expressions. 
+
+Using this library allows for a more versatile use of existing selection queries.
 
 ## Demo
 
