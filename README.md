@@ -11,6 +11,8 @@ A lightweight library for parsing and building select queries. SQL can be rebuil
 
 This code adds an inner join expression to an existing select query and also adds a where condition.
 
+Note that no DBMS is required to run this demo.
+
 ```cs
 using Carbunql;
 using Carbunql.Building;
