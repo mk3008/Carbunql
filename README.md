@@ -8,9 +8,83 @@
 A lightweight library for parsing and building select queries. SQL can be rebuilt dynamically.
 
 ## Demo
-You can experience parsing results online on the demo site.
 
-https://mk3008.github.io/Carbunql
+This code adds an inner join expression to an existing select query and also adds a where condition.
+
+```cs
+using Carbunql;
+using Carbunql.Building;
+using Carbunql.Clauses;
+
+// Convert select query to SelectQuery class.
+SelectQuery sq = new SelectQuery("select s.sale_id, s.shop_id, s.sale_price from sales s");
+
+/*
+ Use the "ToCommand" method to convert the SelectQuery class to a SQL statement.
+
+    SELECT
+        s.sale_id,
+        s.sale_price
+    FROM
+        sales AS s
+ */
+Console.WriteLine(sq.ToCommand().CommandText);
+
+//Getting the From clause.
+FromClause from = sq.FromClause!;
+
+//Get the root table defined in the From clause.
+SelectableTable s = from.Root;
+
+//Inner join with "shops" master.
+//The column used in the join expression is "shop_id".
+SelectableTable sh = from.InnerJoin("shops").As("sh").On(s, "shop_id");
+
+//Add column "shop_name" in "shops" master to select columns.
+sq.Select(sh, "shop_name");
+
+//Added extraction condition to where clause.
+string parameterName = sq.AddParameter(":shop_id", 1);
+sq.Where(sh, "shop_id").Equal(parameterName);
+
+/*
+ The result written back to the select query.
+
+	SELECT
+	    s.sale_id,
+	    s.shop_id,
+	    s.sale_price,
+	    sh.shop_name
+	FROM
+	    sales AS s
+	    INNER JOIN shops AS sh ON s.shop_id = sh.shop_id
+	WHERE
+	    sh.shop_id = :shop_id
+*/
+Console.WriteLine(sq.ToCommand().CommandText);
+
+/*
+ You can also get parameters from the ToCommand method.
+ 
+ 　　:shop_id = 1
+ */
+foreach (KeyValuePair<string, object?> prm in sq.ToCommand().Parameters)
+{
+	Console.WriteLine($"{prm.Key} = {prm.Value}");
+}
+
+/*
+ If you use "Carbunql.Dapper", you can execute SQL as SelectQuery class.
+ https://www.nuget.org/packages/Carbunql.Dapper
+ */
+//var cn = IDbConnection;
+//cn.Execute(sq);
+```
+
+It is also possible to convert existing queries into subqueries and CTEs.
+Additionally, you can convert them to add, update, delete, and merge queries.
+
+[Please refer to the online site for the above conversion demo](https://mk3008.github.io/Carbunql).
 
 ![demosite screenshot](https://user-images.githubusercontent.com/7686540/218080149-27085450-563a-4706-8ae4-5fb365c090f1.png)
 
@@ -24,6 +98,7 @@ https://mk3008.github.io/Carbunql
 - Only select queries can be parsed
 - Comment is removed
 
+If you want to execute modified queries, please use the [Dapper](https://github.com/DapperLib/Dapper) library "[Carbunql.Dapper](https://www.nuget.org/packages/Carbunql.Dapper)".
 
 # Getting started
 
