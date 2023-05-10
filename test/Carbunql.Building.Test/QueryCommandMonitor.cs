@@ -1,4 +1,5 @@
 ﻿using Xunit.Abstractions;
+using Carbunql;
 
 namespace Carbunql.Building.Test;
 
@@ -11,14 +12,14 @@ public class QueryCommandMonitor
 		Output = output;
 	}
 
-	public void Log(IQueryCommand arg)
+	public void Log(IQueryCommandable arg)
 	{
-		var frm = new TokenFormatLogic();
-		var bld = new CommandTextBuilder(frm);
-		bld.Logger = (x) => Output.WriteLine(x);
+		//var frm = new TokenFormatLogic();
+		//var bld = new CommandTextBuilder(frm);
+		//bld.Logger = (x) => Output.WriteLine(x);
 
-		var sql = bld.Execute(arg.GetTokens(null));
-		Output.WriteLine(sql);
+		//var sql = bld.Execute(arg.GetTokens(null));
+		Output.WriteLine(arg.ToText());
 		Output.WriteLine("--------------------");
 		var len = 20;
 		var indent = string.Empty;
