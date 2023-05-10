@@ -1,4 +1,5 @@
 ﻿using Carbunql.Extensions;
+using Cysharp.Text;
 using System.Data;
 
 namespace Carbunql;
@@ -39,5 +40,33 @@ public static class IQueryCommandableExtension
 			cmd.Parameters.Add(p);
 		}
 		return cmd;
+	}
+
+	public static string ToText(this IQueryCommandable source)
+	{
+		var sb = ZString.CreateStringBuilder();
+		if (source.GetParameters().Any())
+		{
+			sb.AppendLine("/*");
+			foreach (var item in source.GetParameters())
+			{
+				if (item.Value == null)
+				{
+					sb.AppendLine($"  {item.Key} is NULL");
+				}
+				else if (item.Value.GetType() == typeof(string))
+				{
+					sb.AppendLine($"  {item.Key} = '{item.Value}'");
+				}
+				else
+				{
+					sb.AppendLine($"  {item.Key} = {item.Value}");
+				}
+			}
+			sb.AppendLine("*/");
+		}
+		sb.AppendLine(source.ToCommand().CommandText);
+
+		return sb.ToString();
 	}
 }
