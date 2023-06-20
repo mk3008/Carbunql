@@ -1,4 +1,6 @@
-﻿namespace Carbunql;
+﻿using Carbunql.Clauses;
+
+namespace Carbunql;
 
 /// <summary>
 /// query with operator
@@ -28,5 +30,10 @@ public class OperatableQuery : IQueryCommandable
 		var current = Token.Reserved(this, parent, Operator);
 		yield return current;
 		foreach (var item in Query.GetTokens(current)) yield return item;
+	}
+
+	public IEnumerable<SelectableTable> GetSelectableTables(bool cascade = false)
+	{
+		foreach (var item in Query.GetSelectableTables(cascade)) yield return item;
 	}
 }

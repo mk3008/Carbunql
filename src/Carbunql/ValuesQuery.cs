@@ -5,8 +5,6 @@ using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
-using System.Collections.Generic;
-using System.Data.Common;
 
 namespace Carbunql;
 
@@ -225,5 +223,15 @@ public class ValuesQuery : ReadQuery
 	public override IEnumerable<string> GetColumnNames()
 	{
 		return Enumerable.Empty<string>();
+	}
+
+	public override IEnumerable<SelectableTable> GetSelectableTables(bool cascade = false)
+	{
+		yield break;
+	}
+
+	public override IEnumerable<string> GetPhysicalTables()
+	{
+		yield break;
 	}
 }

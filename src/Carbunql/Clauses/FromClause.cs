@@ -13,6 +13,21 @@ public class FromClause : IQueryCommandable
 
 	public List<Relation>? Relations { get; set; }
 
+	public IEnumerable<SelectableTable> GetSelectableTables(bool cascade = false)
+	{
+		foreach (var item in Root.GetSelectableTables(cascade)) yield return item;
+
+		if (Relations == null) yield break;
+
+		foreach (var relation in Relations)
+		{
+			foreach (var item in relation.Table.GetSelectableTables(cascade))
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public IDictionary<string, object?> GetParameters()
 	{
 		var prm = EmptyParameters.Get();

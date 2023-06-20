@@ -25,6 +25,9 @@ limit 1";
 		Monitor.Log(sq);
 
 		Assert.Equal(17, sq.GetTokens().ToList().Count);
+
+		var tables = sq.GetSelectableTables().ToList();
+		Assert.Empty(tables);
 	}
 
 	[Fact]
@@ -42,10 +45,18 @@ order by 1 desc
 limit 1";
 
 		var q = QueryParser.Parse(text);
+
+		var tables = q.GetSelectableTables().ToList();
+		Assert.Empty(tables);
+
 		var sq = q.GetOrNewSelectQuery();
 
 		Monitor.Log(sq);
 
 		Assert.Equal(48, sq.GetTokens().ToList().Count);
+
+		var tables2 = sq.GetSelectableTables().ToList();
+		Assert.Single(tables2);
+		Assert.Equal("", tables2[0].Table.GetTableFullName());
 	}
 }

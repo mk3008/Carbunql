@@ -1,5 +1,4 @@
 ﻿using Carbunql.Extensions;
-using Carbunql.Tables;
 using Carbunql.Values;
 
 namespace Carbunql.Clauses;
@@ -76,5 +75,21 @@ public class SelectableTable : IQueryCommandable, ISelectable
 	{
 		if (ColumnAliases != null) return ColumnAliases.GetColumnNames();
 		return Table.GetColumnNames();
+	}
+
+	public IEnumerable<SelectableTable> GetSelectableTables(bool cascade = false)
+	{
+		if (cascade && Table.IsSelectQuery)
+		{
+			var sq = Table.GetSelectQuery();
+			if (sq.FromClause != null)
+			{
+				foreach (var item in sq.FromClause.GetSelectableTables(cascade))
+				{
+					yield return item;
+				}
+			}
+		}
+		yield return this;
 	}
 }
