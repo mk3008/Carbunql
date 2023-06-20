@@ -145,6 +145,13 @@ from
 		Assert.NotNull(item.SelectClause);
 		Assert.Equal(5, item.SelectClause!.Count);
 		Assert.Equal(3, item.FromClause!.Relations!.Count());
+
+		var tablenames = item.GetPhysicalTables().ToList();
+		Assert.Equal(4, tablenames.Count);
+		Assert.Equal("table_a", tablenames[0]);
+		Assert.Equal("table_b", tablenames[1]);
+		Assert.Equal("table_c", tablenames[2]);
+		Assert.Equal("table_d", tablenames[3]);
 	}
 
 	[Fact]
@@ -239,6 +246,18 @@ from
 
 		var lst = item.GetTokens().ToList();
 		Assert.Equal(26, lst.Count);
+
+		var tables = item.GetSelectableTables().ToList();
+		Assert.Equal(3, tables.Count);
+		Assert.Equal("table_a", tables[0].Table.GetTableFullName());
+		Assert.Equal("table_b", tables[1].Table.GetTableFullName());
+		Assert.Equal("table_c", tables[2].Table.GetTableFullName());
+
+		var tablenames = item.GetPhysicalTables().ToList();
+		Assert.Equal(3, tablenames.Count());
+		Assert.Equal("table_a", tablenames[0]);
+		Assert.Equal("table_b", tablenames[1]);
+		Assert.Equal("table_c", tablenames[2]);
 	}
 
 	[Fact]
@@ -270,6 +289,24 @@ from
 		Assert.Equal(28, lst.Count);
 
 		Assert.NotNull(item.GetWithClause());
+
+		var tables = item.GetSelectableTables().ToList();
+		Assert.Equal(3, tables.Count);
+		Assert.Equal("", tables[0].Table.GetTableFullName());
+		Assert.Equal("", tables[1].Table.GetTableFullName());
+		Assert.Equal("b", tables[2].Table.GetTableFullName());
+
+		var tables2 = item.GetSelectableTables(cascade: true).ToList();
+		Assert.Equal(5, tables2.Count);
+		Assert.Equal("table_a", tables2[0].Table.GetTableFullName());
+		Assert.Equal("", tables2[1].Table.GetTableFullName());
+		Assert.Equal("a", tables2[2].Table.GetTableFullName());
+		Assert.Equal("", tables2[3].Table.GetTableFullName());
+		Assert.Equal("b", tables2[4].Table.GetTableFullName());
+
+		var tablenames = item.GetPhysicalTables().ToList();
+		Assert.Single(tablenames);
+		Assert.Equal("table_a", tablenames[0]);
 	}
 
 	[Fact]

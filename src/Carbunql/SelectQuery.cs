@@ -78,4 +78,36 @@ public class SelectQuery : ReadQuery, IQueryCommandable
 		if (SelectClause == null) return Enumerable.Empty<string>();
 		return SelectClause.Select(x => x.Alias);
 	}
+
+	public override IEnumerable<SelectableTable> GetSelectableTables(bool cascade = false)
+	{
+		if (WithClause != null)
+		{
+			foreach (var item in WithClause.GetSelectableTables(cascade))
+			{
+				yield return item;
+			}
+		}
+		if (FromClause != null)
+		{
+			foreach (var item in FromClause.GetSelectableTables(cascade))
+			{
+				yield return item;
+			}
+		}
+		if (OperatableQuery != null)
+		{
+			foreach (var item in OperatableQuery.GetSelectableTables(cascade))
+			{
+				yield return item;
+			}
+		}
+	}
+
+	public override IEnumerable<string> GetPhysicalTables()
+	{
+		var commontables = ((WithClause != null) ? WithClause.Select(x => x.Alias) : Enumerable.Empty<string>()).ToList();
+		var tables = GetSelectableTables(true).Select(x => x.Table.GetTableFullName()).Distinct().Where(x => !string.IsNullOrEmpty(x));
+		return tables.Where(x => !commontables.Contains(x));
+	}
 }

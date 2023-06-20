@@ -1,6 +1,5 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Extensions;
-using Carbunql.Values;
 
 namespace Carbunql;
 
@@ -66,4 +65,8 @@ public abstract class ReadQuery : IReadQuery
 		Parameters.Add(name, Value);
 		return name;
 	}
+
+	public abstract IEnumerable<SelectableTable> GetSelectableTables(bool cascade = false);
+
+	public abstract IEnumerable<string> GetPhysicalTables();
 }

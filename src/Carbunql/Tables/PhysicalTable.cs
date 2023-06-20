@@ -34,6 +34,8 @@ public class PhysicalTable : TableBase
 
 	public override string GetDefaultName() => Table;
 
+	public override string GetTableFullName() => !string.IsNullOrEmpty(Schame) ? Schame + "." + Table : Table;
+
 	public override IList<string> GetColumnNames()
 	{
 		if (ColumnNames == null) return ImmutableList<string>.Empty;
