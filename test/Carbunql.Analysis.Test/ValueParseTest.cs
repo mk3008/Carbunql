@@ -210,6 +210,28 @@ public class ValueParserTest
 	}
 
 	[Fact]
+	public void In()
+	{
+		var text = "1 in (1)";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(5, lst.Count);
+	}
+
+	[Fact]
+	public void NotIn()
+	{
+		var text = "1 not in (1)";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(6, lst.Count);
+	}
+
+	[Fact]
 	public void Function()
 	{
 		var text = "sum(tbl.col+    tbl.col2)";
@@ -419,6 +441,17 @@ public class ValueParserTest
 	}
 
 	[Fact]
+	public void NotBetween()
+	{
+		var text = "a.id not between 1 and 2";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(8, lst.Count);
+	}
+
+	[Fact]
 	public void Like()
 	{
 		var text = "a.name like 'test%'";
@@ -427,6 +460,17 @@ public class ValueParserTest
 
 		var lst = v.GetTokens().ToList();
 		Assert.Equal(5, lst.Count);
+	}
+
+	[Fact]
+	public void NotLike()
+	{
+		var text = "a.name not like 'test%'";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(6, lst.Count);
 	}
 
 	[Fact]

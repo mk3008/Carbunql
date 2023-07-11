@@ -9,10 +9,10 @@ public static class InExpressionParser
 	public static InExpression Parse(ValueBase value, string argument)
 	{
 		using var r = new TokenReader(argument);
-		return Parse(value, r);
+		return Parse(value, r, false);
 	}
 
-	public static InExpression Parse(ValueBase value, ITokenReader r)
+	public static InExpression Parse(ValueBase value, ITokenReader r, bool isNegative)
 	{
 		r.Read("(");
 		using var ir = new BracketInnerTokenReader(r);
@@ -23,13 +23,13 @@ public static class InExpressionParser
 		{
 			//sub query
 			var iq = new InlineQuery(SelectQueryParser.Parse(ir));
-			return new InExpression(value, iq);
+			return new InExpression(value, iq, isNegative);
 		}
 		else
 		{
 			//value collection
 			var bv = new BracketValue(ValueCollectionParser.Parse(ir));
-			return new InExpression(value, bv);
+			return new InExpression(value, bv, isNegative);
 		}
 	}
 }
