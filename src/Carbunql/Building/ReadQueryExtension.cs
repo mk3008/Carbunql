@@ -169,7 +169,7 @@ public static class ReadQueryExtension
 		return new UpdateQuery()
 		{
 			UpdateClause = new UpdateClause(table),
-			SetClause = source.ToSetClause(keys, table.Alias, queryAlias),
+			SetClause = source.ToSetClause(keys, queryAlias),
 			Parameters = source.GetParameters(),
 			FromClause = source.ToFromClause(queryAlias),
 			WhereClause = ToWhereClauseAsUpdate(keys, table.Alias, queryAlias),
@@ -181,14 +181,12 @@ public static class ReadQueryExtension
 	/// </summary>
 	/// <param name="source"></param>
 	/// <param name="keys"></param>
-	/// <param name="alias"></param>
 	/// <param name="queryAlias"></param>
 	/// <returns></returns>
 	/// <exception cref="NotSupportedException"></exception>
-	private static SetClause ToSetClause(this IReadQuery source, IEnumerable<string> keys, string alias, string queryAlias)
+	private static SetClause ToSetClause(this IReadQuery source, IEnumerable<string> keys, string queryAlias)
 	{
-		var s = source.GetSelectClause();
-		if (s == null) throw new NotSupportedException("select clause is not found.");
+		var s = source.GetSelectClause() ?? throw new NotSupportedException("select clause is not found.");
 		var cols = s.Items.Where(x => !keys.Contains(x.Alias)).Select(x => x.Alias).ToList();
 
 		var clause = new SetClause();
@@ -209,9 +207,7 @@ public static class ReadQueryExtension
 
 	public static DeleteQuery ToDeleteQuery(this IReadQuery source, string table)
 	{
-		var s = source.GetSelectClause();
-		if (s == null) throw new NullReferenceException("Missing select clause in query.");
-
+		var _ = source.GetSelectClause() ?? throw new NullReferenceException("Missing select clause in query.");
 		var t = table.ToPhysicalTable().ToSelectable("d");
 		return source.ToDeleteQuery(t, source.GetWithClause());
 	}
@@ -238,7 +234,7 @@ public static class ReadQueryExtension
 			DeleteClause = new DeleteClause(table),
 			Parameters = source.GetParameters(),
 			WithClause = wclause,
-			WhereClause = source.ToWhereClauseAsDelete(table.Alias, queryAlias),
+			WhereClause = source.ToWhereClauseAsDelete(table.Alias),
 		};
 	}
 
@@ -260,12 +256,12 @@ public static class ReadQueryExtension
 		return exp.ToWhereClause();
 	}
 
-	private static WhereClause ToWhereClauseAsDelete(this IReadQuery source, string alias, string queryAlias)
+	private static WhereClause ToWhereClauseAsDelete(this IReadQuery source, string alias)
 	{
 		var select = source.GetSelectClause();
 		var selectColumns = select!.Items!.Select(x => x.Alias);
 
-		if (selectColumns == null || !selectColumns.Any()) throw new ArgumentException();
+		if (selectColumns == null || !selectColumns.Any()) throw new InvalidOperationException("Missing select clause.");
 
 		var cnd = new ValueCollection(alias, selectColumns);
 		var exp = new InExpression(cnd.ToBracket(), source.ToValue());
@@ -297,7 +293,7 @@ public static class ReadQueryExtension
 	public static SelectQuery ToCountQuery(this IReadQuery source, string alias = "row_count")
 	{
 		var sq = new SelectQuery();
-		var (f, q) = sq.From(source).As("q");
+		sq.From(source).As("q");
 		sq.Select("count(*)").As(alias);
 		return sq;
 	}
