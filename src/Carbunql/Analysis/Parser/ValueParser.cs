@@ -30,22 +30,35 @@ public static class ValueParser
 	private static ValueBase ParseMain(ITokenReader r)
 	{
 		var v = ParseCore(r);
+
+		var isNegative = false;
+		if (r.ReadOrDefault("not") != null)
+		{
+			isNegative = true;
+		}
+
 		if (r.ReadOrDefault("between") != null)
 		{
-			return BetweenExpressionParser.Parse(v, r);
+			return BetweenExpressionParser.Parse(v, r, isNegative);
 		}
 		else if (r.ReadOrDefault("like") != null)
 		{
-			return LikeExpressionParser.Parse(v, r);
+			return LikeExpressionParser.Parse(v, r, isNegative);
 		}
 		else if (r.ReadOrDefault("in") != null)
 		{
-			return InExpressionParser.Parse(v, r);
+			return InExpressionParser.Parse(v, r, isNegative);
 		}
-		else if (r.ReadOrDefault("::") != null)
+		else if (!isNegative && r.ReadOrDefault("::") != null)
 		{
 			return CastValueParser.Parse(v, "::", r);
 		}
+
+		if (isNegative)
+		{
+			throw new SyntaxException("A 'not' token that negates a value has the syntax 'not between', 'not like', or 'not in'.");
+		}
+
 		return v;
 	}
 
@@ -113,8 +126,8 @@ public static class ValueParser
 			return new ColumnValue(table, r.Read());
 		}
 
-		if (item.StartsWith(new String[] { ":", "@", "?"}))
-        {
+		if (item.StartsWith(new String[] { ":", "@", "?" }))
+		{
 			return new ParameterValue(item);
 		}
 
