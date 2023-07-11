@@ -16,9 +16,7 @@ public static class InExpressionParser
 	{
 		r.Read("(");
 		using var ir = new BracketInnerTokenReader(r);
-		var first = ir.Peek();
-		if (first == null) throw new NotSupportedException();
-
+		var first = ir.Peek() ?? throw new NotSupportedException();
 		if (first.IsEqualNoCase("select"))
 		{
 			//sub query
