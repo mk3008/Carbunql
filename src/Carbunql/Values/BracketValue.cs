@@ -11,6 +11,14 @@ public class BracketValue : ValueBase
 
 	public ValueBase Inner { get; init; }
 
+	internal override IEnumerable<SelectQuery> GetSelectQueriesCore()
+	{
+		foreach (var item in Inner.GetSelectQueries())
+		{
+			yield return item;
+		}
+	}
+
 	public override IEnumerable<Token> GetCurrentTokens(Token? parent)
 	{
 		if (Inner == null) yield break;

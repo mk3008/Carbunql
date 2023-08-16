@@ -7,6 +7,17 @@ public class WhenClause : IList<MergeCondition>, IQueryCommandable
 {
 	public List<MergeCondition> Conditions { get; set; } = new();
 
+	public IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		foreach (var condition in Conditions)
+		{
+			foreach (var item in condition.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public IDictionary<string, object?> GetParameters()
 	{
 		var prm = EmptyParameters.Get();

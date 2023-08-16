@@ -43,4 +43,6 @@ public abstract class TableBase : IQueryCommandable
 	public virtual string GetTableFullName() => "";
 
 	public virtual SelectQuery GetSelectQuery() => throw new NotSupportedException();
+
+	public abstract IEnumerable<SelectQuery> GetSelectQueries();
 }

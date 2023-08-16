@@ -17,6 +17,25 @@ public class SelectClause : QueryCommandCollection<SelectableItem>, IQueryComman
 
 	public ValueBase? Top { get; set; }
 
+	public IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		if (Top != null)
+		{
+			foreach (var item in Top.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+
+		foreach (var value in Items)
+		{
+			foreach (var item in value.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public override IEnumerable<Token> GetTokens(Token? parent)
 	{
 		Token clause = GetClauseToken(parent);

@@ -69,6 +69,17 @@ public class WithClause : IList<CommonTable>, IQueryCommandable
 		}
 	}
 
+	public IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		foreach (var commonTable in CommonTables)
+		{
+			foreach (var item in commonTable.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	#region implements IList<CommonTable>
 	public CommonTable this[int index] { get => ((IList<CommonTable>)CommonTables)[index]; set => ((IList<CommonTable>)CommonTables)[index] = value; }
 

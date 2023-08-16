@@ -17,6 +17,24 @@ public class CaseExpression : ValueBase
 
 	public List<WhenExpression> WhenExpressions { get; init; } = new();
 
+	internal override IEnumerable<SelectQuery> GetSelectQueriesCore()
+	{
+		if (CaseCondition != null)
+		{
+			foreach (var item in CaseCondition.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+		foreach (var exp in WhenExpressions)
+		{
+			foreach (var item in exp.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public override IEnumerable<Token> GetCurrentTokens(Token? parent)
 	{
 		var current = Token.Reserved(this, parent, "case");

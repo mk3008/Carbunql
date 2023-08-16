@@ -26,6 +26,21 @@ public class LimitClause : IQueryCommandable
 
 	public ValueBase? Offset { get; set; }
 
+	public IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		foreach (var item in Condition.GetSelectQueries())
+		{
+			yield return item;
+		}
+		if (Offset != null)
+		{
+			foreach (var item in Offset.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public IDictionary<string, object?> GetParameters()
 	{
 		var prm = Condition.GetParameters();

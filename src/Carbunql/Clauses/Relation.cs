@@ -23,6 +23,21 @@ public class Relation : IQueryCommandable
 
 	public SelectableTable Table { get; init; }
 
+	public IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		foreach (var item in Table.GetSelectQueries())
+		{
+			yield return item;
+		}
+		if (Condition != null)
+		{
+			foreach (var item in Condition.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public IDictionary<string, object?> GetParameters()
 	{
 		var prm = EmptyParameters.Get();

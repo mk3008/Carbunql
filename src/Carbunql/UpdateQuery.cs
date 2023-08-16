@@ -15,6 +15,24 @@ public class UpdateQuery : IQueryCommandable, IReturning
 
 	public ReturningClause? ReturningClause { get; set; }
 
+	public IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		if (FromClause != null)
+		{
+			foreach (var item in FromClause.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+		if (WhereClause != null)
+		{
+			foreach (var item in WhereClause.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public IDictionary<string, object?>? Parameters { get; set; }
 
 	public virtual IDictionary<string, object?> GetParameters()

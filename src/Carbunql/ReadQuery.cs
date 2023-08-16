@@ -20,6 +20,8 @@ public abstract class ReadQuery : IReadQuery
 		return query;
 	}
 
+	public abstract IEnumerable<SelectQuery> GetSelectQueries();
+
 	public IDictionary<string, object?> Parameters { get; set; } = new Dictionary<string, object?>();
 
 	public virtual IDictionary<string, object?> GetInnerParameters() => EmptyParameters.Get();

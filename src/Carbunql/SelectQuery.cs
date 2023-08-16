@@ -110,4 +110,74 @@ public class SelectQuery : ReadQuery, IQueryCommandable
 		var tables = GetSelectableTables(true).Select(x => x.Table.GetTableFullName()).Distinct().Where(x => !string.IsNullOrEmpty(x));
 		return tables.Where(x => !commontables.Contains(x));
 	}
+
+	public override IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		if (WithClause != null)
+		{
+			foreach (var item in WithClause.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+
+		yield return this;
+
+		if (SelectClause != null)
+		{
+			foreach (var item in SelectClause.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+		if (FromClause != null)
+		{
+			foreach (var item in FromClause.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+		if (WhereClause != null)
+		{
+			foreach (var item in WhereClause.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+		if (GroupClause != null)
+		{
+			foreach (var item in GroupClause.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+		if (HavingClause != null)
+		{
+			foreach (var item in HavingClause.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+		if (OperatableQuery != null)
+		{
+			foreach (var item in OperatableQuery.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+		if (OrderClause != null)
+		{
+			foreach (var item in OrderClause.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+		if (LimitClause != null)
+		{
+			foreach (var item in LimitClause.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+	}
 }

@@ -41,4 +41,9 @@ public class PhysicalTable : TableBase
 		if (ColumnNames == null) return ImmutableList<string>.Empty;
 		return ColumnNames;
 	}
+
+	public override IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		yield break;
+	}
 }

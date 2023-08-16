@@ -162,6 +162,17 @@ public class ValuesQuery : ReadQuery
 
 	public override SelectClause? GetSelectClause() => null;
 
+	public override IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		foreach (var row in Rows)
+		{
+			foreach (var item in row.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public override SelectQuery GetOrNewSelectQuery()
 	{
 		return ToSelectQuery();

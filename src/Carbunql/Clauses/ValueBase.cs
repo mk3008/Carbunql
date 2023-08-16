@@ -16,6 +16,27 @@ public abstract class ValueBase : IQueryCommandable
 		return value;
 	}
 
+	public IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		foreach (var item in GetSelectQueriesCore())
+		{
+			yield return item;
+		}
+		if (OperatableValue != null)
+		{
+			foreach (var item in OperatableValue.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	internal virtual IEnumerable<SelectQuery> GetSelectQueriesCore()
+	{
+		yield break;
+	}
+
+
 	public abstract IEnumerable<Token> GetCurrentTokens(Token? parent);
 
 	public IEnumerable<Token> GetTokens(Token? parent)

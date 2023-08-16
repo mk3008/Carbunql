@@ -20,4 +20,12 @@ public class WhereClause : IQueryCommandable
 		yield return clause;
 		foreach (var item in Condition.GetTokens(clause)) yield return item;
 	}
+
+	public IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		foreach (var item in Condition.GetSelectQueries())
+		{
+			yield return item;
+		}
+	}
 }

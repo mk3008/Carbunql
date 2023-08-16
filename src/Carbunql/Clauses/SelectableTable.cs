@@ -92,4 +92,12 @@ public class SelectableTable : IQueryCommandable, ISelectable
 		}
 		yield return this;
 	}
+
+	public IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		foreach (var item in Table.GetSelectQueries())
+		{
+			yield return item;
+		}
+	}
 }

@@ -17,6 +17,18 @@ public class UsingClause : IQueryCommandable
 
 	public IEnumerable<string> Keys { get; init; }
 
+	public IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		foreach (var item in Root.GetSelectQueries())
+		{
+			yield return item;
+		}
+		foreach (var item in Condition.GetSelectQueries())
+		{
+			yield return item;
+		}
+	}
+
 	public IDictionary<string, object?> GetParameters()
 	{
 		var prm = EmptyParameters.Get();

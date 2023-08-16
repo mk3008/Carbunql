@@ -18,6 +18,17 @@ public class GroupClause : IList<ValueBase>, IQueryCommandable
 
 	private List<ValueBase> Items { get; init; }
 
+	public IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		foreach (var value in Items)
+		{
+			foreach (var item in value.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public IEnumerable<Token> GetTokens(Token? parent)
 	{
 		var clause = Token.Reserved(this, parent, "group by");

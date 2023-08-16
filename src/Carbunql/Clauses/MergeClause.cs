@@ -14,6 +14,14 @@ public class MergeClause : IQueryCommandable
 		return Table.GetParameters();
 	}
 
+	public IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		foreach (var item in Table.GetSelectQueries())
+		{
+			yield return item;
+		}
+	}
+
 	public IEnumerable<Token> GetTokens(Token? parent)
 	{
 		var t = Token.Reserved(this, parent, "merge into");

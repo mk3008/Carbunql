@@ -17,6 +17,14 @@ public class SelectableItem : IQueryCommandable, ISelectable
 		Alias = alias;
 	}
 
+	public IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		foreach (var item in Value.GetSelectQueries())
+		{
+			yield return item;
+		}
+	}
+
 	public IEnumerable<Token> GetTokens(Token? parent)
 	{
 		foreach (var item in Value.GetTokens(parent)) yield return item;

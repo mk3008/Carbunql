@@ -1,6 +1,4 @@
-﻿using Carbunql.Extensions;
-
-namespace Carbunql.Clauses;
+﻿namespace Carbunql.Clauses;
 
 public class HavingClause : IQueryCommandable
 {
@@ -10,6 +8,14 @@ public class HavingClause : IQueryCommandable
 	}
 
 	public ValueBase Condition { get; init; }
+
+	public IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		foreach (var item in Condition.GetSelectQueries())
+		{
+			yield return item;
+		}
+	}
 
 	public IDictionary<string, object?> GetParameters()
 	{

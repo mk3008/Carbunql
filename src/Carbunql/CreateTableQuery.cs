@@ -16,6 +16,17 @@ public class CreateTableQuery : IQueryCommandable
 
 	public IDictionary<string, object?>? Parameters { get; set; }
 
+	public IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		if (Query != null)
+		{
+			foreach (var item in Query.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public virtual IDictionary<string, object?> GetParameters()
 	{
 		var prm = EmptyParameters.Get();

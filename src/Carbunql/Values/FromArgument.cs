@@ -14,6 +14,18 @@ public class FromArgument : ValueBase
 
 	public ValueBase Value { get; init; }
 
+	internal override IEnumerable<SelectQuery> GetSelectQueriesCore()
+	{
+		foreach (var item in Unit.GetSelectQueries())
+		{
+			yield return item;
+		}
+		foreach (var item in Value.GetSelectQueries())
+		{
+			yield return item;
+		}
+	}
+
 	public override IEnumerable<Token> GetCurrentTokens(Token? parent)
 	{
 		foreach (var item in Unit.GetTokens(parent)) yield return item;

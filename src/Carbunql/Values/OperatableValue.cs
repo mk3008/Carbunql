@@ -14,6 +14,14 @@ public class OperatableValue : IQueryCommand
 
 	public ValueBase Value { get; init; }
 
+	public IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		foreach (var item in Value.GetSelectQueries())
+		{
+			yield return item;
+		}
+	}
+
 	public IEnumerable<Token> GetTokens(Token? parent)
 	{
 		if (!string.IsNullOrEmpty(Operator))

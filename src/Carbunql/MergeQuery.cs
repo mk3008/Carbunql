@@ -46,6 +46,32 @@ public class MergeQuery : IQueryCommandable
 
 	public string DatasourceAlias { get; set; }
 
+	public IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		if (WithClause != null)
+		{
+			foreach (var item in WithClause.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+		foreach (var item in MergeClause.GetSelectQueries())
+		{
+			yield return item;
+		}
+		foreach (var item in UsingClause.GetSelectQueries())
+		{
+			yield return item;
+		}
+		if (WhenClause != null)
+		{
+			foreach (var item in WhenClause.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public virtual IDictionary<string, object?> GetParameters()
 	{
 		var prm = EmptyParameters.Get();

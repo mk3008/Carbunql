@@ -40,4 +40,12 @@ public class FunctionTable : TableBase
 	{
 		return Parameters;
 	}
+
+	public override IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		foreach (var item in Argument.GetSelectQueries())
+		{
+			yield return item;
+		}
+	}
 }

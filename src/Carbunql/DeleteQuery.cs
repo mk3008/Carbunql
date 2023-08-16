@@ -15,6 +15,24 @@ public class DeleteQuery : IQueryCommandable, IReturning
 
 	public IDictionary<string, object?>? Parameters { get; set; }
 
+	public IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		if (WithClause != null)
+		{
+			foreach (var item in WithClause.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+		if (WhereClause != null)
+		{
+			foreach (var item in WhereClause.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public virtual IDictionary<string, object?> GetParameters()
 	{
 		var prm = EmptyParameters.Get();

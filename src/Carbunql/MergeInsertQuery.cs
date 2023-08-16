@@ -1,5 +1,4 @@
-﻿using Carbunql.Clauses;
-using Carbunql.Extensions;
+﻿using Carbunql.Extensions;
 using Carbunql.Values;
 
 namespace Carbunql;
@@ -16,6 +15,24 @@ public class MergeInsertQuery : IQueryCommandable
 		prm = prm.Merge(Destination?.GetParameters());
 		prm = prm.Merge(Datasource?.GetParameters());
 		return prm;
+	}
+
+	public IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		if (Datasource != null)
+		{
+			foreach (var item in Datasource.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+		if (Destination != null)
+		{
+			foreach (var item in Destination.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
 	}
 
 	public IEnumerable<Token> GetTokens(Token? parent)

@@ -7,6 +7,17 @@ public class MergeUpdateQuery : IQueryCommandable
 {
 	public MergeSetClause? SetClause { get; set; }
 
+	public IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		if (SetClause != null)
+		{
+			foreach (var item in SetClause.GetSelectQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public virtual IDictionary<string, object?> GetParameters()
 	{
 		var prm = EmptyParameters.Get();

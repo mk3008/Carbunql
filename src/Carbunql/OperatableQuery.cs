@@ -36,4 +36,12 @@ public class OperatableQuery : IQueryCommandable
 	{
 		foreach (var item in Query.GetSelectableTables(cascade)) yield return item;
 	}
+
+	public IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		foreach (var item in Query.GetSelectQueries())
+		{
+			yield return item;
+		}
+	}
 }

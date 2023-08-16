@@ -15,7 +15,10 @@ public class FromClause : IQueryCommandable
 
 	public IEnumerable<SelectableTable> GetSelectableTables(bool cascade = false)
 	{
-		foreach (var item in Root.GetSelectableTables(cascade)) yield return item;
+		foreach (var item in Root.GetSelectableTables(cascade))
+		{
+			yield return item;
+		}
 
 		if (Relations == null) yield break;
 
@@ -24,6 +27,25 @@ public class FromClause : IQueryCommandable
 			foreach (var item in relation.Table.GetSelectableTables(cascade))
 			{
 				yield return item;
+			}
+		}
+	}
+
+	public IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		foreach (var item in Root.GetSelectQueries())
+		{
+			yield return item;
+		}
+
+		if (Relations != null)
+		{
+			foreach (var relation in Relations)
+			{
+				foreach (var item in relation.GetSelectQueries())
+				{
+					yield return item;
+				}
 			}
 		}
 	}

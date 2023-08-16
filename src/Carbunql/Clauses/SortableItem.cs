@@ -17,6 +17,14 @@ public class SortableItem : IQueryCommandable
 
 	public NullSort NullSort { get; set; } = NullSort.Undefined;
 
+	public IEnumerable<SelectQuery> GetSelectQueries()
+	{
+		foreach (var item in Value.GetSelectQueries())
+		{
+			yield return item;
+		}
+	}
+
 	public IDictionary<string, object?> GetParameters()
 	{
 		return Value.GetParameters();
