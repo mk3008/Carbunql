@@ -1,4 +1,5 @@
 ﻿using Carbunql.Extensions;
+using Carbunql.Tables;
 using System.Collections;
 
 namespace Carbunql.Clauses;
@@ -22,7 +23,7 @@ public class WithClause : IList<CommonTable>, IQueryCommandable
 	{
 		if (!CommonTables.Any()) yield break;
 
-		Token? clause = null;
+		Token? clause;
 		if (HasRecursiveKeyword)
 		{
 			clause = Token.Reserved(this, parent, "with recursive");
@@ -58,22 +59,22 @@ public class WithClause : IList<CommonTable>, IQueryCommandable
 		return prm;
 	}
 
-	public IEnumerable<SelectableTable> GetSelectableTables(bool cascade = false)
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
 		foreach (var commonTable in CommonTables)
 		{
-			foreach (var item in commonTable.GetSelectableTables(cascade))
+			foreach (var item in commonTable.GetInternalQueries())
 			{
 				yield return item;
 			}
 		}
 	}
 
-	public IEnumerable<SelectQuery> GetInternalQueries()
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
 	{
 		foreach (var commonTable in CommonTables)
 		{
-			foreach (var item in commonTable.GetInternalQueries())
+			foreach (var item in commonTable.GetPhysicalTables())
 			{
 				yield return item;
 			}
