@@ -2,21 +2,32 @@
 
 public class PartitionClause : QueryCommandCollection<ValueBase>, IQueryCommand
 {
-    public PartitionClause() : base()
-    {
-    }
+	public PartitionClause() : base()
+	{
+	}
 
-    public PartitionClause(List<ValueBase> collection) : base(collection)
-    {
-    }
+	public PartitionClause(List<ValueBase> collection) : base(collection)
+	{
+	}
 
-    public override IEnumerable<Token> GetTokens(Token? parent)
-    {
-        if (!Items.Any()) yield break;
+	public IEnumerable<SelectQuery> GetInternalQueries()
+	{
+		foreach (var value in Items)
+		{
+			foreach (var item in value.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+	}
 
-        var clause = Token.Reserved(this, parent, "partition by");
-        yield return clause;
+	public override IEnumerable<Token> GetTokens(Token? parent)
+	{
+		if (!Items.Any()) yield break;
 
-        foreach (var item in base.GetTokens(clause)) yield return item;
-    }
+		var clause = Token.Reserved(this, parent, "partition by");
+		yield return clause;
+
+		foreach (var item in base.GetTokens(clause)) yield return item;
+	}
 }

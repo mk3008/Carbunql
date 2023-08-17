@@ -1,5 +1,6 @@
 ﻿using Carbunql.Building;
 using Carbunql.Extensions;
+using Carbunql.Tables;
 using Carbunql.Values;
 using System.Collections.Immutable;
 
@@ -43,4 +44,8 @@ public abstract class TableBase : IQueryCommandable
 	public virtual string GetTableFullName() => "";
 
 	public virtual SelectQuery GetSelectQuery() => throw new NotSupportedException();
+
+	public abstract IEnumerable<SelectQuery> GetInternalQueries();
+
+	public abstract IEnumerable<PhysicalTable> GetPhysicalTables();
 }

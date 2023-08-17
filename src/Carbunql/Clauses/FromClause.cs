@@ -1,4 +1,5 @@
 ﻿using Carbunql.Extensions;
+using Carbunql.Tables;
 
 namespace Carbunql.Clauses;
 
@@ -13,17 +14,40 @@ public class FromClause : IQueryCommandable
 
 	public List<Relation>? Relations { get; set; }
 
-	public IEnumerable<SelectableTable> GetSelectableTables(bool cascade = false)
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
-		foreach (var item in Root.GetSelectableTables(cascade)) yield return item;
-
-		if (Relations == null) yield break;
-
-		foreach (var relation in Relations)
+		foreach (var item in Root.GetInternalQueries())
 		{
-			foreach (var item in relation.Table.GetSelectableTables(cascade))
+			yield return item;
+		}
+
+		if (Relations != null)
+		{
+			foreach (var relation in Relations)
 			{
-				yield return item;
+				foreach (var item in relation.GetInternalQueries())
+				{
+					yield return item;
+				}
+			}
+		}
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		foreach (var item in Root.GetPhysicalTables())
+		{
+			yield return item;
+		}
+
+		if (Relations != null)
+		{
+			foreach (var relation in Relations)
+			{
+				foreach (var item in relation.GetPhysicalTables())
+				{
+					yield return item;
+				}
 			}
 		}
 	}

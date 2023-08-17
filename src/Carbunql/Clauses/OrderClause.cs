@@ -1,4 +1,4 @@
-﻿using Carbunql.Extensions;
+﻿using Carbunql.Tables;
 
 namespace Carbunql.Clauses;
 
@@ -10,6 +10,28 @@ public class OrderClause : QueryCommandCollection<IQueryCommandable>, IQueryComm
 
 	public OrderClause(List<IQueryCommandable> collection) : base(collection)
 	{
+	}
+
+	public IEnumerable<SelectQuery> GetInternalQueries()
+	{
+		foreach (var value in Items)
+		{
+			foreach (var item in value.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		foreach (var value in Items)
+		{
+			foreach (var item in value.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
 	}
 
 	public override IEnumerable<Token> GetTokens(Token? parent)

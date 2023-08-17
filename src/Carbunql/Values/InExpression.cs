@@ -22,6 +22,18 @@ public class InExpression : ValueBase
 
 	public ValueBase Argument { get; init; }
 
+	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()
+	{
+		foreach (var item in Value.GetInternalQueries())
+		{
+			yield return item;
+		}
+		foreach (var item in Argument.GetInternalQueries())
+		{
+			yield return item;
+		}
+	}
+
 	public bool IsNegative { get; init; }
 
 	public override IEnumerable<Token> GetCurrentTokens(Token? parent)

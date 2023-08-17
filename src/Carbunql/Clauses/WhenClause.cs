@@ -1,4 +1,5 @@
 ﻿using Carbunql.Extensions;
+using Carbunql.Tables;
 using System.Collections;
 
 namespace Carbunql.Clauses;
@@ -6,6 +7,28 @@ namespace Carbunql.Clauses;
 public class WhenClause : IList<MergeCondition>, IQueryCommandable
 {
 	public List<MergeCondition> Conditions { get; set; } = new();
+
+	public IEnumerable<SelectQuery> GetInternalQueries()
+	{
+		foreach (var condition in Conditions)
+		{
+			foreach (var item in condition.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		foreach (var condition in Conditions)
+		{
+			foreach (var item in condition.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+	}
 
 	public IDictionary<string, object?> GetParameters()
 	{

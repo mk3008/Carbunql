@@ -53,4 +53,20 @@ public class VirtualTable : TableBase
 		if (isSelectQuery) return (SelectQuery)Query;
 		return base.GetSelectQuery();
 	}
+
+	public override IEnumerable<SelectQuery> GetInternalQueries()
+	{
+		if (isSelectQuery)
+		{
+			yield return (SelectQuery)Query;
+		}
+	}
+
+	public override IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		foreach (var item in Query.GetPhysicalTables())
+		{
+			yield return item;
+		}
+	}
 }

@@ -40,4 +40,20 @@ public class FunctionTable : TableBase
 	{
 		return Parameters;
 	}
+
+	public override IEnumerable<SelectQuery> GetInternalQueries()
+	{
+		foreach (var item in Argument.GetInternalQueries())
+		{
+			yield return item;
+		}
+	}
+
+	public override IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		foreach (var item in Argument.GetPhysicalTables())
+		{
+			yield return item;
+		}
+	}
 }

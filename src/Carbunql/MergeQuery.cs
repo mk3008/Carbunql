@@ -46,6 +46,58 @@ public class MergeQuery : IQueryCommandable
 
 	public string DatasourceAlias { get; set; }
 
+	public IEnumerable<SelectQuery> GetInternalQueries()
+	{
+		if (WithClause != null)
+		{
+			foreach (var item in WithClause.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+		foreach (var item in MergeClause.GetInternalQueries())
+		{
+			yield return item;
+		}
+		foreach (var item in UsingClause.GetInternalQueries())
+		{
+			yield return item;
+		}
+		if (WhenClause != null)
+		{
+			foreach (var item in WhenClause.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		if (WithClause != null)
+		{
+			foreach (var item in WithClause.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+		foreach (var item in MergeClause.GetPhysicalTables())
+		{
+			yield return item;
+		}
+		foreach (var item in UsingClause.GetPhysicalTables())
+		{
+			yield return item;
+		}
+		if (WhenClause != null)
+		{
+			foreach (var item in WhenClause.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public virtual IDictionary<string, object?> GetParameters()
 	{
 		var prm = EmptyParameters.Get();

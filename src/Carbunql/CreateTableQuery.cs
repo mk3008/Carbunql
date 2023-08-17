@@ -1,5 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Extensions;
+using Carbunql.Tables;
 
 namespace Carbunql;
 
@@ -15,6 +16,28 @@ public class CreateTableQuery : IQueryCommandable
 	public IReadQuery? Query { get; set; }
 
 	public IDictionary<string, object?>? Parameters { get; set; }
+
+	public IEnumerable<SelectQuery> GetInternalQueries()
+	{
+		if (Query != null)
+		{
+			foreach (var item in Query.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		if (Query != null)
+		{
+			foreach (var item in Query.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+	}
 
 	public virtual IDictionary<string, object?> GetParameters()
 	{

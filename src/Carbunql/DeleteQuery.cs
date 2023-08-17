@@ -1,5 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Extensions;
+using Carbunql.Tables;
 
 namespace Carbunql;
 
@@ -14,6 +15,70 @@ public class DeleteQuery : IQueryCommandable, IReturning
 	public ReturningClause? ReturningClause { get; set; }
 
 	public IDictionary<string, object?>? Parameters { get; set; }
+
+	public IEnumerable<SelectQuery> GetInternalQueries()
+	{
+		if (DeleteClause != null)
+		{
+			foreach (var item in DeleteClause.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+		if (WithClause != null)
+		{
+			foreach (var item in WithClause.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+		if (WhereClause != null)
+		{
+			foreach (var item in WhereClause.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+		if (ReturningClause != null)
+		{
+			foreach (var item in ReturningClause.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		if (DeleteClause != null)
+		{
+			foreach (var item in DeleteClause.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+		if (WithClause != null)
+		{
+			foreach (var item in WithClause.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+		if (WhereClause != null)
+		{
+			foreach (var item in WhereClause.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+		if (ReturningClause != null)
+		{
+			foreach (var item in ReturningClause.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+	}
 
 	public virtual IDictionary<string, object?> GetParameters()
 	{

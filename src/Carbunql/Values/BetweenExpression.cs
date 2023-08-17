@@ -20,6 +20,22 @@ public class BetweenExpression : ValueBase
 
 	public bool IsNegative { get; init; }
 
+	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()
+	{
+		foreach (var item in Value.GetInternalQueries())
+		{
+			yield return item;
+		}
+		foreach (var item in Start.GetInternalQueries())
+		{
+			yield return item;
+		}
+		foreach (var item in End.GetInternalQueries())
+		{
+			yield return item;
+		}
+	}
+
 	public override IEnumerable<Token> GetCurrentTokens(Token? parent)
 	{
 		foreach (var item in Value.GetTokens(parent)) yield return item;

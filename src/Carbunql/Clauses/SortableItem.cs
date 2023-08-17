@@ -1,4 +1,5 @@
 ﻿using Carbunql.Extensions;
+using Carbunql.Tables;
 
 namespace Carbunql.Clauses;
 
@@ -16,6 +17,22 @@ public class SortableItem : IQueryCommandable
 	public bool IsAscending { get; set; } = true;
 
 	public NullSort NullSort { get; set; } = NullSort.Undefined;
+
+	public IEnumerable<SelectQuery> GetInternalQueries()
+	{
+		foreach (var item in Value.GetInternalQueries())
+		{
+			yield return item;
+		}
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		foreach (var item in Value.GetPhysicalTables())
+		{
+			yield return item;
+		}
+	}
 
 	public IDictionary<string, object?> GetParameters()
 	{

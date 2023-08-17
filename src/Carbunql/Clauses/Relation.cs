@@ -1,4 +1,5 @@
 ﻿using Carbunql.Extensions;
+using Carbunql.Tables;
 
 namespace Carbunql.Clauses;
 
@@ -22,6 +23,36 @@ public class Relation : IQueryCommandable
 	public ValueBase? Condition { get; set; }
 
 	public SelectableTable Table { get; init; }
+
+	public IEnumerable<SelectQuery> GetInternalQueries()
+	{
+		foreach (var item in Table.GetInternalQueries())
+		{
+			yield return item;
+		}
+		if (Condition != null)
+		{
+			foreach (var item in Condition.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		foreach (var item in Table.GetPhysicalTables())
+		{
+			yield return item;
+		}
+		if (Condition != null)
+		{
+			foreach (var item in Condition.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+	}
 
 	public IDictionary<string, object?> GetParameters()
 	{

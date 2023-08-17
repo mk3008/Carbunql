@@ -1,4 +1,5 @@
 ﻿using Carbunql.Extensions;
+using Carbunql.Tables;
 using Cysharp.Text;
 using System.Data;
 
@@ -7,6 +8,10 @@ namespace Carbunql;
 public interface IQueryCommandable : IQueryCommand
 {
 	IDictionary<string, object?> GetParameters();
+
+	IEnumerable<SelectQuery> GetInternalQueries();
+
+	IEnumerable<PhysicalTable> GetPhysicalTables();
 }
 
 public static class IQueryCommandableExtension

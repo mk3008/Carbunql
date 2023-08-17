@@ -1,9 +1,8 @@
 ﻿using Carbunql.Analysis.Parser;
 using Carbunql.Clauses;
 using Carbunql.Extensions;
+using Carbunql.Tables;
 using System.Collections;
-using System.Security.Cryptography;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Carbunql.Values;
 
@@ -50,6 +49,28 @@ public class ValueCollection : ValueBase, IList<ValueBase>, IQueryCommand
 	public IEnumerable<string> GetColumnNames()
 	{
 		foreach (var item in Collection) yield return item.GetDefaultName();
+	}
+
+	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()
+	{
+		foreach (var value in Collection)
+		{
+			foreach (var item in value.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	internal override IEnumerable<PhysicalTable> GetPhysicalTablesCore()
+	{
+		foreach (var value in Collection)
+		{
+			foreach (var item in value.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
 	}
 
 	public override IEnumerable<Token> GetCurrentTokens(Token? parent)

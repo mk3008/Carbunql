@@ -79,35 +79,157 @@ public class SelectQuery : ReadQuery, IQueryCommandable
 		return SelectClause.Select(x => x.Alias);
 	}
 
-	public override IEnumerable<SelectableTable> GetSelectableTables(bool cascade = false)
+	public override IEnumerable<PhysicalTable> GetPhysicalTables()
 	{
 		if (WithClause != null)
 		{
-			foreach (var item in WithClause.GetSelectableTables(cascade))
+			foreach (var item in WithClause.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+
+		if (SelectClause != null)
+		{
+			foreach (var item in SelectClause.GetPhysicalTables())
 			{
 				yield return item;
 			}
 		}
 		if (FromClause != null)
 		{
-			foreach (var item in FromClause.GetSelectableTables(cascade))
+			foreach (var item in FromClause.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+		if (WhereClause != null)
+		{
+			foreach (var item in WhereClause.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+		if (GroupClause != null)
+		{
+			foreach (var item in GroupClause.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+		if (HavingClause != null)
+		{
+			foreach (var item in HavingClause.GetPhysicalTables())
 			{
 				yield return item;
 			}
 		}
 		if (OperatableQuery != null)
 		{
-			foreach (var item in OperatableQuery.GetSelectableTables(cascade))
+			foreach (var item in OperatableQuery.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+		if (OrderClause != null)
+		{
+			foreach (var item in OrderClause.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+		if (LimitClause != null)
+		{
+			foreach (var item in LimitClause.GetPhysicalTables())
 			{
 				yield return item;
 			}
 		}
 	}
 
-	public override IEnumerable<string> GetPhysicalTables()
+	public override IEnumerable<SelectQuery> GetInternalQueries()
 	{
-		var commontables = ((WithClause != null) ? WithClause.Select(x => x.Alias) : Enumerable.Empty<string>()).ToList();
-		var tables = GetSelectableTables(true).Select(x => x.Table.GetTableFullName()).Distinct().Where(x => !string.IsNullOrEmpty(x));
-		return tables.Where(x => !commontables.Contains(x));
+		if (WithClause != null)
+		{
+			foreach (var item in WithClause.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+
+		yield return this;
+
+		if (SelectClause != null)
+		{
+			foreach (var item in SelectClause.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+		if (FromClause != null)
+		{
+			foreach (var item in FromClause.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+		if (WhereClause != null)
+		{
+			foreach (var item in WhereClause.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+		if (GroupClause != null)
+		{
+			foreach (var item in GroupClause.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+		if (HavingClause != null)
+		{
+			foreach (var item in HavingClause.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+		if (OperatableQuery != null)
+		{
+			foreach (var item in OperatableQuery.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+		if (OrderClause != null)
+		{
+			foreach (var item in OrderClause.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+		if (LimitClause != null)
+		{
+			foreach (var item in LimitClause.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	public IEnumerable<SelectableTable> GetSelectableTables()
+	{
+		if (FromClause != null)
+		{
+			yield return FromClause.Root;
+
+			if (FromClause.Relations != null)
+			{
+				foreach (var item in FromClause.Relations)
+				{
+					yield return item.Table;
+				}
+			}
+		}
 	}
 }

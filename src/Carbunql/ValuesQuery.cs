@@ -162,6 +162,28 @@ public class ValuesQuery : ReadQuery
 
 	public override SelectClause? GetSelectClause() => null;
 
+	public override IEnumerable<SelectQuery> GetInternalQueries()
+	{
+		foreach (var row in Rows)
+		{
+			foreach (var item in row.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	public override IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		foreach (var row in Rows)
+		{
+			foreach (var item in row.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public override SelectQuery GetOrNewSelectQuery()
 	{
 		return ToSelectQuery();
@@ -223,15 +245,5 @@ public class ValuesQuery : ReadQuery
 	public override IEnumerable<string> GetColumnNames()
 	{
 		return Enumerable.Empty<string>();
-	}
-
-	public override IEnumerable<SelectableTable> GetSelectableTables(bool cascade = false)
-	{
-		yield break;
-	}
-
-	public override IEnumerable<string> GetPhysicalTables()
-	{
-		yield break;
 	}
 }

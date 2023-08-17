@@ -1,4 +1,5 @@
 ﻿using Carbunql.Extensions;
+using Carbunql.Tables;
 using Carbunql.Values;
 
 namespace Carbunql.Clauses;
@@ -25,6 +26,36 @@ public class LimitClause : IQueryCommandable
 	public ValueBase Condition { get; init; }
 
 	public ValueBase? Offset { get; set; }
+
+	public IEnumerable<SelectQuery> GetInternalQueries()
+	{
+		foreach (var item in Condition.GetInternalQueries())
+		{
+			yield return item;
+		}
+		if (Offset != null)
+		{
+			foreach (var item in Offset.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		foreach (var item in Condition.GetPhysicalTables())
+		{
+			yield return item;
+		}
+		if (Offset != null)
+		{
+			foreach (var item in Offset.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+	}
 
 	public IDictionary<string, object?> GetParameters()
 	{

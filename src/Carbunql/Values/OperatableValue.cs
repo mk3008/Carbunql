@@ -1,4 +1,5 @@
 ﻿using Carbunql.Clauses;
+using Carbunql.Tables;
 
 namespace Carbunql.Values;
 
@@ -13,6 +14,22 @@ public class OperatableValue : IQueryCommand
 	public string Operator { get; init; }
 
 	public ValueBase Value { get; init; }
+
+	public IEnumerable<SelectQuery> GetInternalQueries()
+	{
+		foreach (var item in Value.GetInternalQueries())
+		{
+			yield return item;
+		}
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		foreach (var item in Value.GetPhysicalTables())
+		{
+			yield return item;
+		}
+	}
 
 	public IEnumerable<Token> GetTokens(Token? parent)
 	{

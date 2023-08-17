@@ -227,8 +227,6 @@ public static class ReadQueryExtension
 
 	public static DeleteQuery ToDeleteQuery(this IReadQuery source, SelectableTable table, WithClause? wclause = null)
 	{
-		var queryAlias = "q";
-
 		return new DeleteQuery()
 		{
 			DeleteClause = new DeleteClause(table),

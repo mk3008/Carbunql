@@ -1,6 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Extensions;
-using Carbunql.Values;
+using Carbunql.Tables;
 
 namespace Carbunql;
 
@@ -11,6 +11,28 @@ public class InsertQuery : IQueryCommandable, IReturning
 	public ReturningClause? ReturningClause { get; set; }
 
 	public IReadQuery? Query { get; set; }
+
+	public IEnumerable<SelectQuery> GetInternalQueries()
+	{
+		if (Query != null)
+		{
+			foreach (var item in Query.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		if (Query != null)
+		{
+			foreach (var item in Query.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+	}
 
 	public IDictionary<string, object?>? Parameters { get; set; }
 

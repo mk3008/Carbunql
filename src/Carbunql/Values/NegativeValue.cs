@@ -11,6 +11,14 @@ public class NegativeValue : ValueBase
 
 	public ValueBase Inner { get; init; }
 
+	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()
+	{
+		foreach (var item in Inner.GetInternalQueries())
+		{
+			yield return item;
+		}
+	}
+
 	public override IEnumerable<Token> GetCurrentTokens(Token? parent)
 	{
 		yield return Token.Reserved(this, parent, "not");

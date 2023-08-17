@@ -4,27 +4,45 @@ namespace Carbunql.Values;
 
 public class WindowFunction : IQueryCommand
 {
-    public PartitionClause? PartitionBy { get; set; }
+	public PartitionClause? PartitionBy { get; set; }
 
-    public OrderClause? OrderBy { get; set; }
+	public OrderClause? OrderBy { get; set; }
 
-    public IEnumerable<Token> GetTokens(Token? parent)
-    {
-        if (PartitionBy == null && OrderBy == null) yield break;
+	public IEnumerable<SelectQuery> GetInternalQueries()
+	{
+		if (PartitionBy != null)
+		{
+			foreach (var item in PartitionBy.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+		if (OrderBy != null)
+		{
+			foreach (var item in OrderBy.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+	}
 
-        var overToken = Token.Reserved(this, parent, "over");
-        yield return overToken;
+	public IEnumerable<Token> GetTokens(Token? parent)
+	{
+		if (PartitionBy == null && OrderBy == null) yield break;
 
-        var bracket = Token.ReservedBracketStart(this, overToken);
-        yield return bracket;
-        if (PartitionBy != null)
-        {
-            foreach (var item in PartitionBy.GetTokens(bracket)) yield return item;
-        }
-        if (OrderBy != null)
-        {
-            foreach (var item in OrderBy.GetTokens(bracket)) yield return item;
-        }
-        yield return Token.ReservedBracketEnd(this, overToken);
-    }
+		var overToken = Token.Reserved(this, parent, "over");
+		yield return overToken;
+
+		var bracket = Token.ReservedBracketStart(this, overToken);
+		yield return bracket;
+		if (PartitionBy != null)
+		{
+			foreach (var item in PartitionBy.GetTokens(bracket)) yield return item;
+		}
+		if (OrderBy != null)
+		{
+			foreach (var item in OrderBy.GetTokens(bracket)) yield return item;
+		}
+		yield return Token.ReservedBracketEnd(this, overToken);
+	}
 }

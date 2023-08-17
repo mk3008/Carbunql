@@ -1,4 +1,5 @@
 ﻿using Carbunql.Extensions;
+using Carbunql.Tables;
 using Carbunql.Values;
 
 namespace Carbunql.Clauses;
@@ -77,19 +78,19 @@ public class SelectableTable : IQueryCommandable, ISelectable
 		return Table.GetColumnNames();
 	}
 
-	public IEnumerable<SelectableTable> GetSelectableTables(bool cascade = false)
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
-		if (cascade && Table.IsSelectQuery)
+		foreach (var item in Table.GetInternalQueries())
 		{
-			var sq = Table.GetSelectQuery();
-			if (sq.FromClause != null)
-			{
-				foreach (var item in sq.FromClause.GetSelectableTables(cascade))
-				{
-					yield return item;
-				}
-			}
+			yield return item;
 		}
-		yield return this;
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		foreach (var item in Table.GetPhysicalTables())
+		{
+			yield return item;
+		}
 	}
 }

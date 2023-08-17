@@ -12,10 +12,6 @@ public interface IReadQuery : IQueryCommandable
 	SelectQuery GetOrNewSelectQuery();
 
 	IEnumerable<string> GetColumnNames();
-
-	IEnumerable<SelectableTable> GetSelectableTables(bool cascade = false);
-
-	IEnumerable<string> GetPhysicalTables();
 }
 
 public static class IReadQueryExtension
