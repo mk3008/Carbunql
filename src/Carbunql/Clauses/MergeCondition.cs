@@ -1,4 +1,6 @@
-﻿namespace Carbunql.Clauses;
+﻿using Carbunql.Tables;
+
+namespace Carbunql.Clauses;
 
 public abstract class MergeCondition : IQueryCommandable
 {
@@ -16,6 +18,17 @@ public abstract class MergeCondition : IQueryCommandable
 		if (Condition != null)
 		{
 			foreach (var item in Condition.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		if (Condition != null)
+		{
+			foreach (var item in Condition.GetPhysicalTables())
 			{
 				yield return item;
 			}

@@ -1,5 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Extensions;
+using Carbunql.Tables;
 
 namespace Carbunql;
 
@@ -17,6 +18,23 @@ public class UpdateQuery : IQueryCommandable, IReturning
 
 	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
+		if (UpdateClause != null)
+		{
+			foreach (var item in UpdateClause.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+		if (SetClause != null)
+		{
+			foreach (var value in SetClause.Items)
+			{
+				foreach (var item in value.GetInternalQueries())
+				{
+					yield return item;
+				}
+			}
+		}
 		if (FromClause != null)
 		{
 			foreach (var item in FromClause.GetInternalQueries())
@@ -27,6 +45,48 @@ public class UpdateQuery : IQueryCommandable, IReturning
 		if (WhereClause != null)
 		{
 			foreach (var item in WhereClause.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+		if (ReturningClause != null)
+		{
+			foreach (var item in ReturningClause.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		if (UpdateClause != null)
+		{
+			foreach (var item in UpdateClause.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+		if (SetClause != null)
+		{
+			foreach (var value in SetClause.Items)
+			{
+				foreach (var item in value.GetPhysicalTables())
+				{
+					yield return item;
+				}
+			}
+		}
+		if (FromClause != null)
+		{
+			foreach (var item in FromClause.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+		if (WhereClause != null)
+		{
+			foreach (var item in WhereClause.GetPhysicalTables())
 			{
 				yield return item;
 			}

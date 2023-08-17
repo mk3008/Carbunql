@@ -1,4 +1,5 @@
 ﻿using Carbunql.Extensions;
+using Carbunql.Tables;
 
 namespace Carbunql.Clauses;
 
@@ -30,6 +31,25 @@ public class SelectClause : QueryCommandCollection<SelectableItem>, IQueryComman
 		foreach (var value in Items)
 		{
 			foreach (var item in value.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		if (Top != null)
+		{
+			foreach (var item in Top.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+
+		foreach (var value in Items)
+		{
+			foreach (var item in value.GetPhysicalTables())
 			{
 				yield return item;
 			}

@@ -1,4 +1,5 @@
 ﻿using Carbunql.Extensions;
+using Carbunql.Tables;
 using System.Collections;
 
 namespace Carbunql.Clauses;
@@ -23,6 +24,17 @@ public class GroupClause : IList<ValueBase>, IQueryCommandable
 		foreach (var value in Items)
 		{
 			foreach (var item in value.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		foreach (var value in Items)
+		{
+			foreach (var item in value.GetPhysicalTables())
 			{
 				yield return item;
 			}

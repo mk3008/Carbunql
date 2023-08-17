@@ -1,4 +1,5 @@
 ﻿using Carbunql.Clauses;
+using Carbunql.Tables;
 
 namespace Carbunql;
 
@@ -32,14 +33,17 @@ public class OperatableQuery : IQueryCommandable
 		foreach (var item in Query.GetTokens(current)) yield return item;
 	}
 
-	public IEnumerable<SelectableTable> GetSelectableTables(bool cascade = false)
-	{
-		foreach (var item in Query.GetSelectableTables(cascade)) yield return item;
-	}
-
 	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
 		foreach (var item in Query.GetInternalQueries())
+		{
+			yield return item;
+		}
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		foreach (var item in Query.GetPhysicalTables())
 		{
 			yield return item;
 		}

@@ -46,4 +46,9 @@ public class PhysicalTable : TableBase
 	{
 		yield break;
 	}
+
+	public override IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		yield return this;
+	}
 }

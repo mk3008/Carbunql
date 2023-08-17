@@ -1,5 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Extensions;
+using Carbunql.Tables;
 
 namespace Carbunql;
 
@@ -21,6 +22,17 @@ public class CreateTableQuery : IQueryCommandable
 		if (Query != null)
 		{
 			foreach (var item in Query.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		if (Query != null)
+		{
+			foreach (var item in Query.GetPhysicalTables())
 			{
 				yield return item;
 			}

@@ -72,6 +72,32 @@ public class MergeQuery : IQueryCommandable
 		}
 	}
 
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		if (WithClause != null)
+		{
+			foreach (var item in WithClause.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+		foreach (var item in MergeClause.GetPhysicalTables())
+		{
+			yield return item;
+		}
+		foreach (var item in UsingClause.GetPhysicalTables())
+		{
+			yield return item;
+		}
+		if (WhenClause != null)
+		{
+			foreach (var item in WhenClause.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public virtual IDictionary<string, object?> GetParameters()
 	{
 		var prm = EmptyParameters.Get();

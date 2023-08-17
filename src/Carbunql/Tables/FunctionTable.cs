@@ -48,4 +48,12 @@ public class FunctionTable : TableBase
 			yield return item;
 		}
 	}
+
+	public override IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		foreach (var item in Argument.GetPhysicalTables())
+		{
+			yield return item;
+		}
+	}
 }

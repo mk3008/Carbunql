@@ -1,4 +1,5 @@
 ﻿using Carbunql.Extensions;
+using Carbunql.Tables;
 using Carbunql.Values;
 
 namespace Carbunql;
@@ -29,6 +30,24 @@ public class MergeInsertQuery : IQueryCommandable
 		if (Destination != null)
 		{
 			foreach (var item in Destination.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		if (Datasource != null)
+		{
+			foreach (var item in Datasource.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+		if (Destination != null)
+		{
+			foreach (var item in Destination.GetPhysicalTables())
 			{
 				yield return item;
 			}

@@ -1,4 +1,6 @@
-﻿namespace Carbunql.Clauses;
+﻿using Carbunql.Tables;
+
+namespace Carbunql.Clauses;
 
 public class WhereClause : IQueryCommandable
 {
@@ -24,6 +26,14 @@ public class WhereClause : IQueryCommandable
 	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
 		foreach (var item in Condition.GetInternalQueries())
+		{
+			yield return item;
+		}
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		foreach (var item in Condition.GetPhysicalTables())
 		{
 			yield return item;
 		}

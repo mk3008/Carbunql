@@ -1,4 +1,6 @@
-﻿namespace Carbunql.Clauses;
+﻿using Carbunql.Tables;
+
+namespace Carbunql.Clauses;
 
 public class MergeClause : IQueryCommandable
 {
@@ -17,6 +19,14 @@ public class MergeClause : IQueryCommandable
 	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
 		foreach (var item in Table.GetInternalQueries())
+		{
+			yield return item;
+		}
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		foreach (var item in Table.GetPhysicalTables())
 		{
 			yield return item;
 		}

@@ -22,11 +22,11 @@ public class FromClauseParserTest
 
 		Assert.Equal(2, item.Relations?.Count);
 
-		var lst = item.GetSelectableTables().ToList();
+		var lst = item.GetPhysicalTables().ToList();
 		Assert.Equal(3, lst.Count());
-		Assert.Equal("public.table_a", lst[0].Table.GetTableFullName());
-		Assert.Equal("table_b", lst[1].Table.GetTableFullName());
-		Assert.Equal("table_c", lst[2].Table.GetTableFullName());
+		Assert.Equal("public.table_a", lst[0].GetTableFullName());
+		Assert.Equal("table_b", lst[1].GetTableFullName());
+		Assert.Equal("table_c", lst[2].GetTableFullName());
 	}
 
 	[Fact]
@@ -39,15 +39,14 @@ public class FromClauseParserTest
 		Assert.IsType<VirtualTable>(item.Root.Table);
 		Assert.IsType<SelectQuery>(((VirtualTable)item.Root.Table).Query);
 
-		var lst = item.GetSelectableTables().ToList();
+		var lst = item.GetPhysicalTables().ToList();
 		Assert.Single(lst);
-		Assert.Equal("", lst[0].Table.GetTableFullName());
-		Assert.True(lst[0].Table.IsSelectQuery);
+		Assert.Equal("table_a", lst[0].GetTableFullName());
 
-		var lst2 = item.GetSelectableTables(cascade: true).ToList();
-		Assert.Equal(2, lst2.Count());
+		var lst2 = item.GetInternalQueries().SelectMany(x => x.GetSelectableTables()).ToList();
+
+		Assert.Single(lst2);
 		Assert.Equal("table_a", lst2[0].Table.GetTableFullName());
-		Assert.Equal("", lst2[1].Table.GetTableFullName());
 	}
 
 	[Fact]
@@ -60,9 +59,8 @@ public class FromClauseParserTest
 		Assert.IsType<VirtualTable>(item.Root.Table);
 		Assert.IsType<ValuesQuery>(((VirtualTable)item.Root.Table).Query);
 
-		var lst = item.GetSelectableTables().ToList();
-		Assert.Single(lst);
-		Assert.Equal("", lst[0].Table.GetTableFullName());
+		var lst = item.GetPhysicalTables().ToList();
+		Assert.Empty(lst);
 	}
 
 	[Fact]
@@ -85,8 +83,7 @@ public class FromClauseParserTest
 		Assert.Equal("4", lst[4].Text);
 		Assert.Equal(")", lst[5].Text);
 
-		var tables = item.GetSelectableTables().ToList();
-		Assert.Single(tables);
-		Assert.Equal("", tables[0].Table.GetTableFullName());
+		var tables = item.GetPhysicalTables().ToList();
+		Assert.Empty(tables);
 	}
 }

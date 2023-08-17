@@ -1,4 +1,5 @@
 ﻿using Carbunql.Extensions;
+using Carbunql.Tables;
 
 namespace Carbunql.Clauses;
 
@@ -24,6 +25,18 @@ public class UsingClause : IQueryCommandable
 			yield return item;
 		}
 		foreach (var item in Condition.GetInternalQueries())
+		{
+			yield return item;
+		}
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		foreach (var item in Root.GetPhysicalTables())
+		{
+			yield return item;
+		}
+		foreach (var item in Condition.GetPhysicalTables())
 		{
 			yield return item;
 		}

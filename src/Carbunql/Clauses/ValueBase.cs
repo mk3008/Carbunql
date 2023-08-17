@@ -1,4 +1,5 @@
 ﻿using Carbunql.Extensions;
+using Carbunql.Tables;
 using Carbunql.Values;
 
 namespace Carbunql.Clauses;
@@ -31,11 +32,30 @@ public abstract class ValueBase : IQueryCommandable
 		}
 	}
 
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		foreach (var item in GetPhysicalTablesCore())
+		{
+			yield return item;
+		}
+		if (OperatableValue != null)
+		{
+			foreach (var item in OperatableValue.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	internal virtual IEnumerable<SelectQuery> GetInternalQueriesCore()
 	{
 		yield break;
 	}
 
+	internal virtual IEnumerable<PhysicalTable> GetPhysicalTablesCore()
+	{
+		yield break;
+	}
 
 	public abstract IEnumerable<Token> GetCurrentTokens(Token? parent);
 

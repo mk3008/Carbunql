@@ -1,5 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Extensions;
+using Carbunql.Tables;
 
 namespace Carbunql;
 
@@ -12,6 +13,17 @@ public class MergeUpdateQuery : IQueryCommandable
 		if (SetClause != null)
 		{
 			foreach (var item in SetClause.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		if (SetClause != null)
+		{
+			foreach (var item in SetClause.GetPhysicalTables())
 			{
 				yield return item;
 			}

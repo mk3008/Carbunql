@@ -1,4 +1,5 @@
-﻿using Xunit.Abstractions;
+﻿using Carbunql.Tables;
+using Xunit.Abstractions;
 
 namespace Carbunql.Analysis.Test;
 
@@ -148,10 +149,10 @@ from
 
 		var tablenames = item.GetPhysicalTables().ToList();
 		Assert.Equal(4, tablenames.Count);
-		Assert.Equal("table_a", tablenames[0]);
-		Assert.Equal("table_b", tablenames[1]);
-		Assert.Equal("table_c", tablenames[2]);
-		Assert.Equal("table_d", tablenames[3]);
+		Assert.Equal("table_a", tablenames[0].GetTableFullName());
+		Assert.Equal("table_b", tablenames[1].GetTableFullName());
+		Assert.Equal("table_c", tablenames[2].GetTableFullName());
+		Assert.Equal("table_d", tablenames[3].GetTableFullName());
 	}
 
 	[Fact]
@@ -247,13 +248,18 @@ from
 		var lst = item.GetTokens().ToList();
 		Assert.Equal(26, lst.Count);
 
-		var tables = item.GetSelectableTables().ToList();
+		/*
+		Function 'GetSelectableTables' is obsolete.
+		Use the functions 'GetInternalQueries' and 'GetTables'.
+		*/
+		var tables = item.GetInternalQueries().SelectMany(x => x.GetSelectableTables()).ToList();
+
 		Assert.Equal(3, tables.Count);
 		Assert.Equal("table_a", tables[0].Table.GetTableFullName());
 		Assert.Equal("table_b", tables[1].Table.GetTableFullName());
 		Assert.Equal("table_c", tables[2].Table.GetTableFullName());
 
-		var tablenames = item.GetPhysicalTables().ToList();
+		var tablenames = tables.Where(x => x.Table is PhysicalTable).Select(x => ((PhysicalTable)x.Table).Table).ToList();
 		Assert.Equal(3, tablenames.Count());
 		Assert.Equal("table_a", tablenames[0]);
 		Assert.Equal("table_b", tablenames[1]);
@@ -282,7 +288,7 @@ select
 from
     b";
 
-		var item = QueryParser.Parse(text);
+		var item = new SelectQuery(text);
 		Monitor.Log(item);
 
 		var lst = item.GetTokens().ToList();
@@ -290,23 +296,22 @@ from
 
 		Assert.NotNull(item.GetWithClause());
 
-		var tables = item.GetSelectableTables().ToList();
+		/*
+		Function 'GetSelectableTables' is obsolete.
+		Use the functions 'GetInternalQueries' and 'GetTables'.
+		*/
+		var tables = item.GetInternalQueries().SelectMany(x => x.GetSelectableTables()).ToList();
+
 		Assert.Equal(3, tables.Count);
-		Assert.Equal("", tables[0].Table.GetTableFullName());
-		Assert.Equal("", tables[1].Table.GetTableFullName());
+		Assert.Equal("table_a", tables[0].Table.GetTableFullName());
+		Assert.Equal("a", tables[1].Table.GetTableFullName());
 		Assert.Equal("b", tables[2].Table.GetTableFullName());
 
-		var tables2 = item.GetSelectableTables(cascade: true).ToList();
-		Assert.Equal(5, tables2.Count);
-		Assert.Equal("table_a", tables2[0].Table.GetTableFullName());
-		Assert.Equal("", tables2[1].Table.GetTableFullName());
-		Assert.Equal("a", tables2[2].Table.GetTableFullName());
-		Assert.Equal("", tables2[3].Table.GetTableFullName());
-		Assert.Equal("b", tables2[4].Table.GetTableFullName());
-
-		var tablenames = item.GetPhysicalTables().ToList();
-		Assert.Single(tablenames);
-		Assert.Equal("table_a", tablenames[0]);
+		var tables2 = item.GetPhysicalTables().ToList();
+		Assert.Equal(3, tables2.Count);
+		Assert.Equal("table_a", tables2[0].GetTableFullName());
+		Assert.Equal("a", tables2[1].GetTableFullName());
+		Assert.Equal("b", tables2[2].GetTableFullName());
 	}
 
 	[Fact]

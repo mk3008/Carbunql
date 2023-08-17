@@ -61,4 +61,12 @@ public class VirtualTable : TableBase
 			yield return (SelectQuery)Query;
 		}
 	}
+
+	public override IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		foreach (var item in Query.GetPhysicalTables())
+		{
+			yield return item;
+		}
+	}
 }

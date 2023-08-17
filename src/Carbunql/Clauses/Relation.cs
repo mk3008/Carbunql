@@ -1,4 +1,5 @@
 ﻿using Carbunql.Extensions;
+using Carbunql.Tables;
 
 namespace Carbunql.Clauses;
 
@@ -32,6 +33,21 @@ public class Relation : IQueryCommandable
 		if (Condition != null)
 		{
 			foreach (var item in Condition.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		foreach (var item in Table.GetPhysicalTables())
+		{
+			yield return item;
+		}
+		if (Condition != null)
+		{
+			foreach (var item in Condition.GetPhysicalTables())
 			{
 				yield return item;
 			}
