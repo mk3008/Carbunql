@@ -11,9 +11,9 @@ public class NegativeValue : ValueBase
 
 	public ValueBase Inner { get; init; }
 
-	internal override IEnumerable<SelectQuery> GetSelectQueriesCore()
+	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()
 	{
-		foreach (var item in Inner.GetSelectQueries())
+		foreach (var item in Inner.GetInternalQueries())
 		{
 			yield return item;
 		}

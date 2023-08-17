@@ -84,15 +84,15 @@ public class FunctionValue : ValueBase
 
 	public WindowFunction? WindowFunction { get; init; }
 
-	internal override IEnumerable<SelectQuery> GetSelectQueriesCore()
+	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()
 	{
-		foreach (var item in Argument.GetSelectQueries())
+		foreach (var item in Argument.GetInternalQueries())
 		{
 			yield return item;
 		}
 		if (WindowFunction != null)
 		{
-			foreach (var item in WindowFunction.GetSelectQueries())
+			foreach (var item in WindowFunction.GetInternalQueries())
 			{
 				yield return item;
 			}

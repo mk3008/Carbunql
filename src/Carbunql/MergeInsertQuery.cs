@@ -17,18 +17,18 @@ public class MergeInsertQuery : IQueryCommandable
 		return prm;
 	}
 
-	public IEnumerable<SelectQuery> GetSelectQueries()
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
 		if (Datasource != null)
 		{
-			foreach (var item in Datasource.GetSelectQueries())
+			foreach (var item in Datasource.GetInternalQueries())
 			{
 				yield return item;
 			}
 		}
 		if (Destination != null)
 		{
-			foreach (var item in Destination.GetSelectQueries())
+			foreach (var item in Destination.GetInternalQueries())
 			{
 				yield return item;
 			}

@@ -15,18 +15,18 @@ public class UpdateQuery : IQueryCommandable, IReturning
 
 	public ReturningClause? ReturningClause { get; set; }
 
-	public IEnumerable<SelectQuery> GetSelectQueries()
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
 		if (FromClause != null)
 		{
-			foreach (var item in FromClause.GetSelectQueries())
+			foreach (var item in FromClause.GetInternalQueries())
 			{
 				yield return item;
 			}
 		}
 		if (WhereClause != null)
 		{
-			foreach (var item in WhereClause.GetSelectQueries())
+			foreach (var item in WhereClause.GetInternalQueries())
 			{
 				yield return item;
 			}

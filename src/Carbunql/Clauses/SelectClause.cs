@@ -17,11 +17,11 @@ public class SelectClause : QueryCommandCollection<SelectableItem>, IQueryComman
 
 	public ValueBase? Top { get; set; }
 
-	public IEnumerable<SelectQuery> GetSelectQueries()
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
 		if (Top != null)
 		{
-			foreach (var item in Top.GetSelectQueries())
+			foreach (var item in Top.GetInternalQueries())
 			{
 				yield return item;
 			}
@@ -29,7 +29,7 @@ public class SelectClause : QueryCommandCollection<SelectableItem>, IQueryComman
 
 		foreach (var value in Items)
 		{
-			foreach (var item in value.GetSelectQueries())
+			foreach (var item in value.GetInternalQueries())
 			{
 				yield return item;
 			}

@@ -54,7 +54,7 @@ public class VirtualTable : TableBase
 		return base.GetSelectQuery();
 	}
 
-	public override IEnumerable<SelectQuery> GetSelectQueries()
+	public override IEnumerable<SelectQuery> GetInternalQueries()
 	{
 		if (isSelectQuery)
 		{

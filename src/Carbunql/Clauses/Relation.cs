@@ -23,15 +23,15 @@ public class Relation : IQueryCommandable
 
 	public SelectableTable Table { get; init; }
 
-	public IEnumerable<SelectQuery> GetSelectQueries()
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
-		foreach (var item in Table.GetSelectQueries())
+		foreach (var item in Table.GetInternalQueries())
 		{
 			yield return item;
 		}
 		if (Condition != null)
 		{
-			foreach (var item in Condition.GetSelectQueries())
+			foreach (var item in Condition.GetInternalQueries())
 			{
 				yield return item;
 			}

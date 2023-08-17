@@ -8,18 +8,18 @@ public class WindowFunction : IQueryCommand
 
 	public OrderClause? OrderBy { get; set; }
 
-	public IEnumerable<SelectQuery> GetSelectQueries()
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
 		if (PartitionBy != null)
 		{
-			foreach (var item in PartitionBy.GetSelectQueries())
+			foreach (var item in PartitionBy.GetInternalQueries())
 			{
 				yield return item;
 			}
 		}
 		if (OrderBy != null)
 		{
-			foreach (var item in OrderBy.GetSelectQueries())
+			foreach (var item in OrderBy.GetInternalQueries())
 			{
 				yield return item;
 			}

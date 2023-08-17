@@ -10,11 +10,11 @@ public class OrderClause : QueryCommandCollection<IQueryCommandable>, IQueryComm
 	{
 	}
 
-	public IEnumerable<SelectQuery> GetSelectQueries()
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
 		foreach (var value in Items)
 		{
-			foreach (var item in value.GetSelectQueries())
+			foreach (var item in value.GetInternalQueries())
 			{
 				yield return item;
 			}

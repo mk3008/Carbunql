@@ -22,13 +22,13 @@ public class InExpression : ValueBase
 
 	public ValueBase Argument { get; init; }
 
-	internal override IEnumerable<SelectQuery> GetSelectQueriesCore()
+	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()
 	{
-		foreach (var item in Value.GetSelectQueries())
+		foreach (var item in Value.GetInternalQueries())
 		{
 			yield return item;
 		}
-		foreach (var item in Argument.GetSelectQueries())
+		foreach (var item in Argument.GetInternalQueries())
 		{
 			yield return item;
 		}

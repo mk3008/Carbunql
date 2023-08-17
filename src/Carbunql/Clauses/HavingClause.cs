@@ -9,9 +9,9 @@ public class HavingClause : IQueryCommandable
 
 	public ValueBase Condition { get; init; }
 
-	public IEnumerable<SelectQuery> GetSelectQueries()
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
-		foreach (var item in Condition.GetSelectQueries())
+		foreach (var item in Condition.GetInternalQueries())
 		{
 			yield return item;
 		}

@@ -24,16 +24,16 @@ public class WhenExpression : IQueryCommand
 		Value = value;
 	}
 
-	public IEnumerable<SelectQuery> GetSelectQueries()
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
 		if (Condition != null)
 		{
-			foreach (var item in Condition.GetSelectQueries())
+			foreach (var item in Condition.GetInternalQueries())
 			{
 				yield return item;
 			}
 		}
-		foreach (var item in Value.GetSelectQueries())
+		foreach (var item in Value.GetInternalQueries())
 		{
 			yield return item;
 		}

@@ -17,9 +17,9 @@ public class SelectableItem : IQueryCommandable, ISelectable
 		Alias = alias;
 	}
 
-	public IEnumerable<SelectQuery> GetSelectQueries()
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
-		foreach (var item in Value.GetSelectQueries())
+		foreach (var item in Value.GetInternalQueries())
 		{
 			yield return item;
 		}

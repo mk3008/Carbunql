@@ -21,9 +21,9 @@ public class WhereClause : IQueryCommandable
 		foreach (var item in Condition.GetTokens(clause)) yield return item;
 	}
 
-	public IEnumerable<SelectQuery> GetSelectQueries()
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
-		foreach (var item in Condition.GetSelectQueries())
+		foreach (var item in Condition.GetInternalQueries())
 		{
 			yield return item;
 		}

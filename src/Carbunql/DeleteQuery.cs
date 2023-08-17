@@ -15,18 +15,18 @@ public class DeleteQuery : IQueryCommandable, IReturning
 
 	public IDictionary<string, object?>? Parameters { get; set; }
 
-	public IEnumerable<SelectQuery> GetSelectQueries()
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
 		if (WithClause != null)
 		{
-			foreach (var item in WithClause.GetSelectQueries())
+			foreach (var item in WithClause.GetInternalQueries())
 			{
 				yield return item;
 			}
 		}
 		if (WhereClause != null)
 		{
-			foreach (var item in WhereClause.GetSelectQueries())
+			foreach (var item in WhereClause.GetInternalQueries())
 			{
 				yield return item;
 			}

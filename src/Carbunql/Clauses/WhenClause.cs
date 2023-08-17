@@ -7,11 +7,11 @@ public class WhenClause : IList<MergeCondition>, IQueryCommandable
 {
 	public List<MergeCondition> Conditions { get; set; } = new();
 
-	public IEnumerable<SelectQuery> GetSelectQueries()
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
 		foreach (var condition in Conditions)
 		{
-			foreach (var item in condition.GetSelectQueries())
+			foreach (var item in condition.GetInternalQueries())
 			{
 				yield return item;
 			}

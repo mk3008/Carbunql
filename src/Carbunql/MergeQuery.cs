@@ -46,26 +46,26 @@ public class MergeQuery : IQueryCommandable
 
 	public string DatasourceAlias { get; set; }
 
-	public IEnumerable<SelectQuery> GetSelectQueries()
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
 		if (WithClause != null)
 		{
-			foreach (var item in WithClause.GetSelectQueries())
+			foreach (var item in WithClause.GetInternalQueries())
 			{
 				yield return item;
 			}
 		}
-		foreach (var item in MergeClause.GetSelectQueries())
+		foreach (var item in MergeClause.GetInternalQueries())
 		{
 			yield return item;
 		}
-		foreach (var item in UsingClause.GetSelectQueries())
+		foreach (var item in UsingClause.GetInternalQueries())
 		{
 			yield return item;
 		}
 		if (WhenClause != null)
 		{
-			foreach (var item in WhenClause.GetSelectQueries())
+			foreach (var item in WhenClause.GetInternalQueries())
 			{
 				yield return item;
 			}

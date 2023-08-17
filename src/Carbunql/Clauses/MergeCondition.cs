@@ -11,11 +11,11 @@ public abstract class MergeCondition : IQueryCommandable
 		foreach (var item in Condition.GetTokens(parent)) yield return item;
 	}
 
-	public IEnumerable<SelectQuery> GetSelectQueries()
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
 		if (Condition != null)
 		{
-			foreach (var item in Condition.GetSelectQueries())
+			foreach (var item in Condition.GetInternalQueries())
 			{
 				yield return item;
 			}

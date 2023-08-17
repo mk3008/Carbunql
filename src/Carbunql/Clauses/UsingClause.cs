@@ -17,13 +17,13 @@ public class UsingClause : IQueryCommandable
 
 	public IEnumerable<string> Keys { get; init; }
 
-	public IEnumerable<SelectQuery> GetSelectQueries()
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
-		foreach (var item in Root.GetSelectQueries())
+		foreach (var item in Root.GetInternalQueries())
 		{
 			yield return item;
 		}
-		foreach (var item in Condition.GetSelectQueries())
+		foreach (var item in Condition.GetInternalQueries())
 		{
 			yield return item;
 		}

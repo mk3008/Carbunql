@@ -162,11 +162,11 @@ public class ValuesQuery : ReadQuery
 
 	public override SelectClause? GetSelectClause() => null;
 
-	public override IEnumerable<SelectQuery> GetSelectQueries()
+	public override IEnumerable<SelectQuery> GetInternalQueries()
 	{
 		foreach (var row in Rows)
 		{
-			foreach (var item in row.GetSelectQueries())
+			foreach (var item in row.GetInternalQueries())
 			{
 				yield return item;
 			}

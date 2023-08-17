@@ -14,9 +14,9 @@ public class OperatableValue : IQueryCommand
 
 	public ValueBase Value { get; init; }
 
-	public IEnumerable<SelectQuery> GetSelectQueries()
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
-		foreach (var item in Value.GetSelectQueries())
+		foreach (var item in Value.GetInternalQueries())
 		{
 			yield return item;
 		}

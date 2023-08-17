@@ -11,11 +11,11 @@ public class InsertQuery : IQueryCommandable, IReturning
 
 	public IReadQuery? Query { get; set; }
 
-	public IEnumerable<SelectQuery> GetSelectQueries()
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
 		if (Query != null)
 		{
-			foreach (var item in Query.GetSelectQueries())
+			foreach (var item in Query.GetInternalQueries())
 			{
 				yield return item;
 			}

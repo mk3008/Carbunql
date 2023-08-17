@@ -42,7 +42,7 @@ public class PhysicalTable : TableBase
 		return ColumnNames;
 	}
 
-	public override IEnumerable<SelectQuery> GetSelectQueries()
+	public override IEnumerable<SelectQuery> GetInternalQueries()
 	{
 		yield break;
 	}

@@ -111,11 +111,11 @@ public class SelectQuery : ReadQuery, IQueryCommandable
 		return tables.Where(x => !commontables.Contains(x));
 	}
 
-	public override IEnumerable<SelectQuery> GetSelectQueries()
+	public override IEnumerable<SelectQuery> GetInternalQueries()
 	{
 		if (WithClause != null)
 		{
-			foreach (var item in WithClause.GetSelectQueries())
+			foreach (var item in WithClause.GetInternalQueries())
 			{
 				yield return item;
 			}
@@ -125,56 +125,56 @@ public class SelectQuery : ReadQuery, IQueryCommandable
 
 		if (SelectClause != null)
 		{
-			foreach (var item in SelectClause.GetSelectQueries())
+			foreach (var item in SelectClause.GetInternalQueries())
 			{
 				yield return item;
 			}
 		}
 		if (FromClause != null)
 		{
-			foreach (var item in FromClause.GetSelectQueries())
+			foreach (var item in FromClause.GetInternalQueries())
 			{
 				yield return item;
 			}
 		}
 		if (WhereClause != null)
 		{
-			foreach (var item in WhereClause.GetSelectQueries())
+			foreach (var item in WhereClause.GetInternalQueries())
 			{
 				yield return item;
 			}
 		}
 		if (GroupClause != null)
 		{
-			foreach (var item in GroupClause.GetSelectQueries())
+			foreach (var item in GroupClause.GetInternalQueries())
 			{
 				yield return item;
 			}
 		}
 		if (HavingClause != null)
 		{
-			foreach (var item in HavingClause.GetSelectQueries())
+			foreach (var item in HavingClause.GetInternalQueries())
 			{
 				yield return item;
 			}
 		}
 		if (OperatableQuery != null)
 		{
-			foreach (var item in OperatableQuery.GetSelectQueries())
+			foreach (var item in OperatableQuery.GetInternalQueries())
 			{
 				yield return item;
 			}
 		}
 		if (OrderClause != null)
 		{
-			foreach (var item in OrderClause.GetSelectQueries())
+			foreach (var item in OrderClause.GetInternalQueries())
 			{
 				yield return item;
 			}
 		}
 		if (LimitClause != null)
 		{
-			foreach (var item in LimitClause.GetSelectQueries())
+			foreach (var item in LimitClause.GetInternalQueries())
 			{
 				yield return item;
 			}

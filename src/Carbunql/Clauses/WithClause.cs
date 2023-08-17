@@ -69,11 +69,11 @@ public class WithClause : IList<CommonTable>, IQueryCommandable
 		}
 	}
 
-	public IEnumerable<SelectQuery> GetSelectQueries()
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
 		foreach (var commonTable in CommonTables)
 		{
-			foreach (var item in commonTable.GetSelectQueries())
+			foreach (var item in commonTable.GetInternalQueries())
 			{
 				yield return item;
 			}

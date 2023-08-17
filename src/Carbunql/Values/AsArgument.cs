@@ -14,13 +14,13 @@ public class AsArgument : ValueBase
 
 	public ValueBase Type { get; init; }
 
-	internal override IEnumerable<SelectQuery> GetSelectQueriesCore()
+	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()
 	{
-		foreach (var item in Value.GetSelectQueries())
+		foreach (var item in Value.GetInternalQueries())
 		{
 			yield return item;
 		}
-		foreach (var item in Type.GetSelectQueries())
+		foreach (var item in Type.GetInternalQueries())
 		{
 			yield return item;
 		}

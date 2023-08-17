@@ -20,17 +20,17 @@ public class BetweenExpression : ValueBase
 
 	public bool IsNegative { get; init; }
 
-	internal override IEnumerable<SelectQuery> GetSelectQueriesCore()
+	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()
 	{
-		foreach (var item in Value.GetSelectQueries())
+		foreach (var item in Value.GetInternalQueries())
 		{
 			yield return item;
 		}
-		foreach (var item in Start.GetSelectQueries())
+		foreach (var item in Start.GetInternalQueries())
 		{
 			yield return item;
 		}
-		foreach (var item in End.GetSelectQueries())
+		foreach (var item in End.GetInternalQueries())
 		{
 			yield return item;
 		}

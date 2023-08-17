@@ -31,9 +31,9 @@ public class FromClause : IQueryCommandable
 		}
 	}
 
-	public IEnumerable<SelectQuery> GetSelectQueries()
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
-		foreach (var item in Root.GetSelectQueries())
+		foreach (var item in Root.GetInternalQueries())
 		{
 			yield return item;
 		}
@@ -42,7 +42,7 @@ public class FromClause : IQueryCommandable
 		{
 			foreach (var relation in Relations)
 			{
-				foreach (var item in relation.GetSelectQueries())
+				foreach (var item in relation.GetInternalQueries())
 				{
 					yield return item;
 				}

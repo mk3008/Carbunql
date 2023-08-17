@@ -11,11 +11,11 @@ public class QueryContainer : ValueBase
 
 	public IQueryCommandable Query { get; init; }
 
-	internal override IEnumerable<SelectQuery> GetSelectQueriesCore()
+	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()
 	{
 		if (Query is SelectQuery sq)
 		{
-			foreach (var item in sq.GetSelectQueries())
+			foreach (var item in sq.GetInternalQueries())
 			{
 				yield return item;
 			}

@@ -16,22 +16,22 @@ public abstract class ValueBase : IQueryCommandable
 		return value;
 	}
 
-	public IEnumerable<SelectQuery> GetSelectQueries()
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
-		foreach (var item in GetSelectQueriesCore())
+		foreach (var item in GetInternalQueriesCore())
 		{
 			yield return item;
 		}
 		if (OperatableValue != null)
 		{
-			foreach (var item in OperatableValue.GetSelectQueries())
+			foreach (var item in OperatableValue.GetInternalQueries())
 			{
 				yield return item;
 			}
 		}
 	}
 
-	internal virtual IEnumerable<SelectQuery> GetSelectQueriesCore()
+	internal virtual IEnumerable<SelectQuery> GetInternalQueriesCore()
 	{
 		yield break;
 	}

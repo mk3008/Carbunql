@@ -26,15 +26,15 @@ public class LimitClause : IQueryCommandable
 
 	public ValueBase? Offset { get; set; }
 
-	public IEnumerable<SelectQuery> GetSelectQueries()
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
-		foreach (var item in Condition.GetSelectQueries())
+		foreach (var item in Condition.GetInternalQueries())
 		{
 			yield return item;
 		}
 		if (Offset != null)
 		{
-			foreach (var item in Offset.GetSelectQueries())
+			foreach (var item in Offset.GetInternalQueries())
 			{
 				yield return item;
 			}

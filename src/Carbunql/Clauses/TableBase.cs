@@ -44,5 +44,5 @@ public abstract class TableBase : IQueryCommandable
 
 	public virtual SelectQuery GetSelectQuery() => throw new NotSupportedException();
 
-	public abstract IEnumerable<SelectQuery> GetSelectQueries();
+	public abstract IEnumerable<SelectQuery> GetInternalQueries();
 }

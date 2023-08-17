@@ -41,9 +41,9 @@ public class FunctionTable : TableBase
 		return Parameters;
 	}
 
-	public override IEnumerable<SelectQuery> GetSelectQueries()
+	public override IEnumerable<SelectQuery> GetInternalQueries()
 	{
-		foreach (var item in Argument.GetSelectQueries())
+		foreach (var item in Argument.GetInternalQueries())
 		{
 			yield return item;
 		}

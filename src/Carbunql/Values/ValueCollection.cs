@@ -50,11 +50,11 @@ public class ValueCollection : ValueBase, IList<ValueBase>, IQueryCommand
 		foreach (var item in Collection) yield return item.GetDefaultName();
 	}
 
-	internal override IEnumerable<SelectQuery> GetSelectQueriesCore()
+	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()
 	{
 		foreach (var value in Collection)
 		{
-			foreach (var item in value.GetSelectQueries())
+			foreach (var item in value.GetInternalQueries())
 			{
 				yield return item;
 			}

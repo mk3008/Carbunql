@@ -7,11 +7,11 @@ public class MergeUpdateQuery : IQueryCommandable
 {
 	public MergeSetClause? SetClause { get; set; }
 
-	public IEnumerable<SelectQuery> GetSelectQueries()
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
 		if (SetClause != null)
 		{
-			foreach (var item in SetClause.GetSelectQueries())
+			foreach (var item in SetClause.GetInternalQueries())
 			{
 				yield return item;
 			}

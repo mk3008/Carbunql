@@ -93,9 +93,9 @@ public class SelectableTable : IQueryCommandable, ISelectable
 		yield return this;
 	}
 
-	public IEnumerable<SelectQuery> GetSelectQueries()
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
-		foreach (var item in Table.GetSelectQueries())
+		foreach (var item in Table.GetInternalQueries())
 		{
 			yield return item;
 		}

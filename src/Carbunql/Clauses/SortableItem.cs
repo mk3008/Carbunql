@@ -17,9 +17,9 @@ public class SortableItem : IQueryCommandable
 
 	public NullSort NullSort { get; set; } = NullSort.Undefined;
 
-	public IEnumerable<SelectQuery> GetSelectQueries()
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
-		foreach (var item in Value.GetSelectQueries())
+		foreach (var item in Value.GetInternalQueries())
 		{
 			yield return item;
 		}

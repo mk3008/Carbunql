@@ -8,7 +8,7 @@ public interface IQueryCommandable : IQueryCommand
 {
 	IDictionary<string, object?> GetParameters();
 
-	IEnumerable<SelectQuery> GetSelectQueries();
+	IEnumerable<SelectQuery> GetInternalQueries();
 }
 
 public static class IQueryCommandableExtension

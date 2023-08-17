@@ -14,9 +14,9 @@ public class MergeClause : IQueryCommandable
 		return Table.GetParameters();
 	}
 
-	public IEnumerable<SelectQuery> GetSelectQueries()
+	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
-		foreach (var item in Table.GetSelectQueries())
+		foreach (var item in Table.GetInternalQueries())
 		{
 			yield return item;
 		}
