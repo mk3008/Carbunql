@@ -1,8 +1,9 @@
 ﻿using Carbunql.Clauses;
+using MessagePack;
 
 namespace Carbunql.Values;
 
-[MessagePack.MessagePackObject]
+[MessagePackObject]
 public class LiteralValue : ValueBase
 {
 	public LiteralValue()
@@ -46,7 +47,7 @@ public class LiteralValue : ValueBase
 		}
 	}
 
-	[MessagePack.Key(1)]
+	[Key(1)]
 	public string CommandText { get; set; }
 
 	public override IEnumerable<Token> GetCurrentTokens(Token? parent)

@@ -10,7 +10,7 @@ public class FunctionTable : TableBase
 	public FunctionTable()
 	{
 		Name = string.Empty;
-		Argument = new ValueCollection();
+		Argument = null!;
 	}
 
 	public FunctionTable(string name)

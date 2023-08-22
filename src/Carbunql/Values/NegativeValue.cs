@@ -1,14 +1,22 @@
 ﻿using Carbunql.Clauses;
+using MessagePack;
 
 namespace Carbunql.Values;
 
+[MessagePackObject]
 public class NegativeValue : ValueBase
 {
+	public NegativeValue()
+	{
+		Inner = null!;
+	}
+
 	public NegativeValue(ValueBase inner)
 	{
 		Inner = inner;
 	}
 
+	[Key(1)]
 	public ValueBase Inner { get; init; }
 
 	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()

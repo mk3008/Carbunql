@@ -1,14 +1,22 @@
 ﻿using Carbunql.Clauses;
+using MessagePack;
 
 namespace Carbunql.Values;
 
+[MessagePackObject]
 public class QueryContainer : ValueBase
 {
+	public QueryContainer()
+	{
+		Query = null!;
+	}
+
 	public QueryContainer(IQueryCommandable query)
 	{
 		Query = query;
 	}
 
+	[Key(1)]
 	public IQueryCommandable Query { get; init; }
 
 	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()

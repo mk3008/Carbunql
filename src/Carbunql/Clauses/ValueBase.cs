@@ -1,18 +1,31 @@
 ﻿using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
-using System.Formats.Asn1;
+using MessagePack;
 
 namespace Carbunql.Clauses;
 
-[MessagePack.MessagePackObject]
-[MessagePack.Union(0, typeof(LiteralValue))]
+[MessagePackObject()]
+[Union(0, typeof(LiteralValue))]
+[Union(1, typeof(AsArgument))]
+[Union(2, typeof(BetweenExpression))]
+[Union(3, typeof(BracketValue))]
+[Union(4, typeof(CaseExpression))]
+[Union(5, typeof(CastValue))]
+[Union(6, typeof(ColumnValue))]
+[Union(7, typeof(FromArgument))]
+[Union(8, typeof(FunctionValue))]
+[Union(9, typeof(InExpression))]
+[Union(10, typeof(NegativeValue))]
+[Union(11, typeof(ParameterValue))]
+[Union(12, typeof(QueryContainer))]
+[Union(13, typeof(ValueCollection))]
 public abstract class ValueBase : IQueryCommandable
 {
 	public virtual string GetDefaultName() => string.Empty;
 
-	[MessagePack.Key(0)]
-	public OperatableValue? OperatableValue { get; private set; }
+	[Key(0)]
+	public OperatableValue? OperatableValue { get; set; }
 
 	public ValueBase AddOperatableValue(string @operator, ValueBase value)
 	{

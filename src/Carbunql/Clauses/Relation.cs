@@ -1,11 +1,19 @@
 ﻿using Carbunql.Extensions;
 using Carbunql.Tables;
+using MessagePack;
 
 namespace Carbunql.Clauses;
 
-[MessagePack.MessagePackObject]
+[MessagePackObject]
 public class Relation : IQueryCommandable
 {
+	public Relation()
+	{
+		TableJoin = string.Empty;
+		Condition = null;
+		Table = null!;
+	}
+
 	public Relation(SelectableTable query, string types)
 	{
 		Table = query;
@@ -19,13 +27,13 @@ public class Relation : IQueryCommandable
 		Condition = condition;
 	}
 
-	[MessagePack.Key(0)]
+	[Key(0)]
 	public string TableJoin { get; init; }
 
-	[MessagePack.Key(1)]
+	[Key(1)]
 	public ValueBase? Condition { get; set; }
 
-	[MessagePack.Key(2)]
+	[Key(2)]
 	public SelectableTable Table { get; init; }
 
 	public IEnumerable<SelectQuery> GetInternalQueries()
