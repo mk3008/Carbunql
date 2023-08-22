@@ -4,6 +4,7 @@ using System.Collections;
 
 namespace Carbunql.Clauses;
 
+[MessagePack.MessagePackObject]
 public class WithClause : IList<CommonTable>, IQueryCommandable
 {
 	public WithClause()
@@ -15,8 +16,10 @@ public class WithClause : IList<CommonTable>, IQueryCommandable
 		CommonTables.AddRange(commons);
 	}
 
+	[MessagePack.Key(0)]
 	public List<CommonTable> CommonTables { get; private set; } = new();
 
+	[MessagePack.Key(1)]
 	public bool HasRecursiveKeyword { get; set; } = false;
 
 	public IEnumerable<Token> GetTokens(Token? parent)
@@ -82,10 +85,13 @@ public class WithClause : IList<CommonTable>, IQueryCommandable
 	}
 
 	#region implements IList<CommonTable>
+	[MessagePack.Key(2)]
 	public CommonTable this[int index] { get => ((IList<CommonTable>)CommonTables)[index]; set => ((IList<CommonTable>)CommonTables)[index] = value; }
 
+	[MessagePack.Key(3)]
 	public int Count => ((ICollection<CommonTable>)CommonTables).Count;
 
+	[MessagePack.Key(4)]
 	public bool IsReadOnly => ((ICollection<CommonTable>)CommonTables).IsReadOnly;
 
 	public void Add(CommonTable item)

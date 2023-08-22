@@ -3,6 +3,7 @@ using Carbunql.Tables;
 
 namespace Carbunql.Clauses;
 
+[MessagePack.MessagePackObject]
 public class Relation : IQueryCommandable
 {
 	public Relation(SelectableTable query, string types)
@@ -18,10 +19,13 @@ public class Relation : IQueryCommandable
 		Condition = condition;
 	}
 
+	[MessagePack.Key(0)]
 	public string TableJoin { get; init; }
 
+	[MessagePack.Key(1)]
 	public ValueBase? Condition { get; set; }
 
+	[MessagePack.Key(2)]
 	public SelectableTable Table { get; init; }
 
 	public IEnumerable<SelectQuery> GetInternalQueries()

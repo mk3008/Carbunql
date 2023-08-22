@@ -1,13 +1,17 @@
 ﻿using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
+using System.Formats.Asn1;
 
 namespace Carbunql.Clauses;
 
+[MessagePack.MessagePackObject]
+[MessagePack.Union(0, typeof(LiteralValue))]
 public abstract class ValueBase : IQueryCommandable
 {
 	public virtual string GetDefaultName() => string.Empty;
 
+	[MessagePack.Key(0)]
 	public OperatableValue? OperatableValue { get; private set; }
 
 	public ValueBase AddOperatableValue(string @operator, ValueBase value)

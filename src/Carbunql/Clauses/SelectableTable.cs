@@ -4,6 +4,7 @@ using Carbunql.Values;
 
 namespace Carbunql.Clauses;
 
+[MessagePack.MessagePackObject]
 public class SelectableTable : IQueryCommandable, ISelectable
 {
 	public SelectableTable(TableBase table, string alias)
@@ -19,8 +20,10 @@ public class SelectableTable : IQueryCommandable, ISelectable
 		ColumnAliases = columnAliases;
 	}
 
+	[MessagePack.Key(0)]
 	public TableBase Table { get; init; }
 
+	[MessagePack.Key(1)]
 	public string Alias { get; private set; }
 
 	public void SetAlias(string alias)
@@ -28,6 +31,7 @@ public class SelectableTable : IQueryCommandable, ISelectable
 		this.Alias = alias;
 	}
 
+	[MessagePack.Key(2)]
 	public ValueCollection? ColumnAliases { get; init; }
 
 	public IEnumerable<Token> GetAliasTokens(Token? parent)

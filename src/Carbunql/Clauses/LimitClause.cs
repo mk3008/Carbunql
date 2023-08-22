@@ -1,9 +1,11 @@
 ﻿using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
+using MessagePack;
 
 namespace Carbunql.Clauses;
 
+[MessagePackObject]
 public class LimitClause : IQueryCommandable
 {
 	public LimitClause(string text)
@@ -23,8 +25,10 @@ public class LimitClause : IQueryCommandable
 		Condition = lst;
 	}
 
+	[Key(0)]
 	public ValueBase Condition { get; init; }
 
+	[Key(1)]
 	public ValueBase? Offset { get; set; }
 
 	public IEnumerable<SelectQuery> GetInternalQueries()

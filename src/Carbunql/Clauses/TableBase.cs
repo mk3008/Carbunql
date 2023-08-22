@@ -6,6 +6,7 @@ using System.Collections.Immutable;
 
 namespace Carbunql.Clauses;
 
+[MessagePack.MessagePackObject]
 public abstract class TableBase : IQueryCommandable
 {
 	public abstract IEnumerable<Token> GetTokens(Token? parent);
@@ -39,6 +40,7 @@ public abstract class TableBase : IQueryCommandable
 		return ImmutableList<string>.Empty;
 	}
 
+	[MessagePack.Key(0)]
 	public virtual bool IsSelectQuery => false;
 
 	public virtual string GetTableFullName() => "";

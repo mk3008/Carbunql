@@ -2,6 +2,7 @@
 
 namespace Carbunql.Clauses;
 
+[MessagePack.MessagePackObject]
 public class WhereClause : IQueryCommandable
 {
 	public WhereClause(ValueBase condition)
@@ -9,6 +10,7 @@ public class WhereClause : IQueryCommandable
 		Condition = condition;
 	}
 
+	[MessagePack.Key(0)]
 	public ValueBase Condition { get; init; }
 
 	public IDictionary<string, object?> GetParameters()

@@ -3,6 +3,7 @@ using Carbunql.Tables;
 
 namespace Carbunql.Values;
 
+[MessagePack.MessagePackObject]
 public class OperatableValue : IQueryCommand
 {
 	public OperatableValue(string @operator, ValueBase value)
@@ -11,8 +12,10 @@ public class OperatableValue : IQueryCommand
 		Value = value;
 	}
 
+	[MessagePack.Key(0)]
 	public string Operator { get; init; }
 
+	[MessagePack.Key(1)]
 	public ValueBase Value { get; init; }
 
 	public IEnumerable<SelectQuery> GetInternalQueries()

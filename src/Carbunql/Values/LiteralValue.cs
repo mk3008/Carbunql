@@ -2,8 +2,14 @@
 
 namespace Carbunql.Values;
 
+[MessagePack.MessagePackObject]
 public class LiteralValue : ValueBase
 {
+	public LiteralValue()
+	{
+		CommandText = "null";
+	}
+
 	public LiteralValue(string? commandText)
 	{
 		if (commandText != null)
@@ -40,6 +46,7 @@ public class LiteralValue : ValueBase
 		}
 	}
 
+	[MessagePack.Key(1)]
 	public string CommandText { get; set; }
 
 	public override IEnumerable<Token> GetCurrentTokens(Token? parent)
