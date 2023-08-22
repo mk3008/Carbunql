@@ -7,6 +7,9 @@ using System.Collections.Immutable;
 namespace Carbunql.Clauses;
 
 [MessagePack.MessagePackObject]
+[MessagePack.Union(0, typeof(FunctionTable))]
+[MessagePack.Union(1, typeof(PhysicalTable))]
+[MessagePack.Union(2, typeof(VirtualTable))]
 public abstract class TableBase : IQueryCommandable
 {
 	public abstract IEnumerable<Token> GetTokens(Token? parent);

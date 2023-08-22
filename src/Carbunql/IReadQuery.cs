@@ -3,6 +3,7 @@ using Carbunql.Values;
 
 namespace Carbunql;
 
+[MessagePack.Union(0, typeof(ReadQuery))]
 public interface IReadQuery : IQueryCommandable
 {
 	SelectClause? GetSelectClause();

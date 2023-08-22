@@ -1,9 +1,12 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Tables;
+using MessagePack;
 
 namespace Carbunql;
 
+[Union(0, typeof(SelectQuery))]
+[Union(1, typeof(ValuesQuery))]
 public abstract class ReadQuery : IReadQuery
 {
 	public abstract SelectClause? GetSelectClause();

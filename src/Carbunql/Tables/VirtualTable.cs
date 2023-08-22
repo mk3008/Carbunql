@@ -1,9 +1,17 @@
 ﻿using Carbunql.Clauses;
+using MessagePack;
 
 namespace Carbunql.Tables;
 
+[MessagePackObject]
 public class VirtualTable : TableBase
 {
+	public VirtualTable()
+	{
+		isSelectQuery = false;
+		Query = null!;
+	}
+
 	public VirtualTable(SelectQuery query)
 	{
 		isSelectQuery = true;
@@ -15,6 +23,7 @@ public class VirtualTable : TableBase
 		Query = query;
 	}
 
+	[Key(1)]
 	public IQueryCommandable Query { get; init; }
 
 	public override IEnumerable<Token> GetTokens(Token? parent)
@@ -44,8 +53,10 @@ public class VirtualTable : TableBase
 		}
 	}
 
+	[Key(2)]
 	private bool isSelectQuery = false;
 
+	[Key(3)]
 	public override bool IsSelectQuery => isSelectQuery;
 
 	public override SelectQuery GetSelectQuery()
