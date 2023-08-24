@@ -84,8 +84,9 @@ from
 order by 
     line_id";
 
-
 	private SqModel.SelectQuery sqmodel = SqModel.Analysis.SqlParser.Parse(Sql);
+
+	private IReadQuery carbunql = QueryParser.Parse(Sql);
 
 	[Benchmark]
 	public string SqModelParse()
@@ -100,7 +101,12 @@ order by
 		return sqmodel.ToQuery().CommandText;
 	}
 
-	private IReadQuery carbunql = QueryParser.Parse(Sql);
+	[Benchmark]
+	public string CarbunqlDeepCopy()
+	{
+		var sq = carbunql.DeepCopy();
+		return "success";// sq.GetTokens().ToString(" ");
+	}
 
 	[Benchmark]
 	public string CarbunqlParse()

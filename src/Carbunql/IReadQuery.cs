@@ -23,4 +23,10 @@ public static class IReadQueryExtension
 	{
 		return new QueryContainer(source);
 	}
+
+	public static IReadQuery DeepCopy(this IReadQuery source)
+	{
+		var json = MessagePackSerializer.Serialize(source);
+		return MessagePackSerializer.Deserialize<IReadQuery>(json);
+	}
 }
