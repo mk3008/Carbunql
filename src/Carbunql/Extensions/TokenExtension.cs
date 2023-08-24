@@ -1,5 +1,4 @@
-﻿using Carbunql.Values;
-using Cysharp.Text;
+﻿using Cysharp.Text;
 
 namespace Carbunql.Extensions;
 
