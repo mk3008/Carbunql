@@ -1,9 +1,10 @@
 ﻿using Carbunql.Extensions;
 using Carbunql.Tables;
+using MessagePack;
 
 namespace Carbunql.Clauses;
 
-[MessagePack.MessagePackObject]
+[MessagePackObject]
 public class SelectClause : QueryCommandCollection<SelectableItem>, IQueryCommandable
 {
 	public SelectClause()
@@ -15,10 +16,10 @@ public class SelectClause : QueryCommandCollection<SelectableItem>, IQueryComman
 		Items.AddRange(collection);
 	}
 
-	[MessagePack.Key(0)]
+	[Key(1)]
 	public bool HasDistinctKeyword { get; set; } = false;
 
-	[MessagePack.Key(1)]
+	[Key(2)]
 	public ValueBase? Top { get; set; }
 
 	public IEnumerable<SelectQuery> GetInternalQueries()

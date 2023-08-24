@@ -1,4 +1,5 @@
 ﻿using Carbunql.Extensions;
+using MessagePack;
 using System.Collections;
 
 namespace Carbunql.Clauses;
@@ -40,13 +41,17 @@ public abstract class QueryCommandCollection<T> : IList<T> where T : IQueryComma
 		return prm;
 	}
 
+	[Key(0)]
 	public List<T> Items { get; set; } = new();
 
 	#region implements IList<T>
+	[IgnoreMember]
 	public T this[int index] { get => ((IList<T>)Items)[index]; set => ((IList<T>)Items)[index] = value; }
 
+	[IgnoreMember]
 	public int Count => ((ICollection<T>)Items).Count;
 
+	[IgnoreMember]
 	public bool IsReadOnly => ((ICollection<T>)Items).IsReadOnly;
 
 	public void Add(T item)
