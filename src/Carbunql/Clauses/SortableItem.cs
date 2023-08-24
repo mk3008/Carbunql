@@ -7,11 +7,11 @@ namespace Carbunql.Clauses;
 [MessagePackObject]
 public class SortableItem : IQueryCommandable
 {
-	public SortableItem(ValueBase value, bool isAscending = true, NullSort tp = NullSort.Undefined)
+	public SortableItem(ValueBase value, bool isAscending = true, NullSort nullSort = NullSort.Undefined)
 	{
 		Value = value;
 		IsAscending = isAscending;
-		NullSort = tp;
+		NullSort = nullSort;
 	}
 
 	[Key(0)]

@@ -40,17 +40,13 @@ public abstract class QueryCommandCollection<T> : IList<T> where T : IQueryComma
 		return prm;
 	}
 
-	[MessagePack.Key(2)]
 	public List<T> Items { get; set; } = new();
 
 	#region implements IList<T>
-	[MessagePack.Key(3)]
 	public T this[int index] { get => ((IList<T>)Items)[index]; set => ((IList<T>)Items)[index] = value; }
 
-	[MessagePack.Key(4)]
 	public int Count => ((ICollection<T>)Items).Count;
 
-	[MessagePack.Key(5)]
 	public bool IsReadOnly => ((ICollection<T>)Items).IsReadOnly;
 
 	public void Add(T item)

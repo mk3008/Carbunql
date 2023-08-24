@@ -9,26 +9,26 @@ public class Relation : IQueryCommandable
 {
 	public Relation()
 	{
-		TableJoin = string.Empty;
+		JoinCommand = string.Empty;
 		Condition = null;
 		Table = null!;
 	}
 
-	public Relation(SelectableTable query, string types)
+	public Relation(SelectableTable query, string joinCommand)
 	{
 		Table = query;
-		TableJoin = types;
+		JoinCommand = joinCommand;
 	}
 
-	public Relation(SelectableTable query, string types, ValueBase condition)
+	public Relation(SelectableTable query, string joinCommand, ValueBase condition)
 	{
 		Table = query;
-		TableJoin = types;
+		JoinCommand = joinCommand;
 		Condition = condition;
 	}
 
 	[Key(0)]
-	public string TableJoin { get; init; }
+	public string JoinCommand { get; init; }
 
 	[Key(1)]
 	public ValueBase? Condition { get; set; }
@@ -75,7 +75,7 @@ public class Relation : IQueryCommandable
 
 	public IEnumerable<Token> GetTokens(Token? parent)
 	{
-		yield return Token.Reserved(this, parent, TableJoin);
+		yield return Token.Reserved(this, parent, JoinCommand);
 		foreach (var item in Table.GetTokens(parent)) yield return item;
 
 		if (Condition != null)

@@ -243,4 +243,18 @@ public partial class SerializeTest
 
 		Assert.Equal(TruncateControlString(sq.ToText()), TruncateControlString(actual!.ToText()));
 	}
+
+	[Fact]
+	public void ValueCollection()
+	{
+		var sq = new ValueCollection(new[] { "a", "b", "c" });
+
+		var json = MessagePackSerializer.Serialize(sq);
+		Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
+
+		var actual = MessagePackSerializer.Deserialize<ValueCollection>(json);
+		Output.WriteLine(actual.ToText());
+
+		Assert.Equal(TruncateControlString(sq.ToText()), TruncateControlString(actual!.ToText()));
+	}
 }
