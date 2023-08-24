@@ -116,15 +116,14 @@ order by
 	}
 
 	[Benchmark]
-	public string CarbunqlString()
+	public string CarbunqlToOneLineText()
 	{
-		return carbunql.GetTokens(null).ToText();
+		return carbunql.ToOneLineText();
 	}
 
 	[Benchmark]
-	public string CarbunqlFormatString()
+	public string CarbunqlToText()
 	{
-		var cmd = new CommandTextBuilder();
-		return cmd.Execute(carbunql);
+		return carbunql.ToText();
 	}
 }

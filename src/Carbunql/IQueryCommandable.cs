@@ -123,4 +123,32 @@ public static class IQueryCommandableExtension
 
 		return sb.ToString();
 	}
+
+	public static string ToOneLineText(this IQueryCommandable source)
+	{
+		var sb = ZString.CreateStringBuilder();
+		if (source.GetParameters().Any())
+		{
+			sb.AppendLine("/*");
+			foreach (var item in source.GetParameters())
+			{
+				if (item.Value == null)
+				{
+					sb.AppendLine($"  {item.Key} is NULL");
+				}
+				else if (item.Value.GetType() == typeof(string))
+				{
+					sb.AppendLine($"  {item.Key} = '{item.Value}'");
+				}
+				else
+				{
+					sb.AppendLine($"  {item.Key} = {item.Value}");
+				}
+			}
+			sb.AppendLine("*/");
+		}
+		sb.AppendLine(source.ToOneLineCommand().CommandText);
+
+		return sb.ToString();
+	}
 }
