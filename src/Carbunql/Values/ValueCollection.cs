@@ -3,7 +3,6 @@ using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Tables;
 using System.Collections;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Carbunql.Values;
 
