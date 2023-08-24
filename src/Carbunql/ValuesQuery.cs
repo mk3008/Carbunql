@@ -5,11 +5,17 @@ using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
+using MessagePack;
 
 namespace Carbunql;
 
+[MessagePackObject()]
 public class ValuesQuery : ReadQuery
 {
+	public ValuesQuery()
+	{
+	}
+
 	public ValuesQuery(List<ValueCollection> rows)
 	{
 		Rows = rows;
@@ -133,6 +139,7 @@ public class ValuesQuery : ReadQuery
 		}
 	}
 
+	[Key(10)]
 	public List<ValueCollection> Rows { get; init; } = new();
 
 	public override IEnumerable<Token> GetCurrentTokens(Token? parent)

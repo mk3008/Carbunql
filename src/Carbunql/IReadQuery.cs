@@ -1,8 +1,11 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Values;
+using MessagePack;
 
 namespace Carbunql;
 
+[Union(0, typeof(SelectQuery))]
+[Union(1, typeof(ValuesQuery))]
 public interface IReadQuery : IQueryCommandable
 {
 	SelectClause? GetSelectClause();

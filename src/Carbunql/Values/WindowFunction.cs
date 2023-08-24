@@ -2,10 +2,13 @@
 
 namespace Carbunql.Values;
 
+[MessagePack.MessagePackObject]
 public class WindowFunction : IQueryCommand
 {
+	[MessagePack.Key(0)]
 	public PartitionClause? PartitionBy { get; set; }
 
+	[MessagePack.Key(1)]
 	public OrderClause? OrderBy { get; set; }
 
 	public IEnumerable<SelectQuery> GetInternalQueries()

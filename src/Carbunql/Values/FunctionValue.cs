@@ -1,9 +1,17 @@
 ﻿using Carbunql.Clauses;
+using MessagePack;
 
 namespace Carbunql.Values;
 
+[MessagePackObject]
 public class FunctionValue : ValueBase
 {
+	public FunctionValue()
+	{
+		Name = null!;
+		Argument = null!;
+	}
+
 	public FunctionValue(string name)
 	{
 		Name = name;
@@ -78,10 +86,13 @@ public class FunctionValue : ValueBase
 		WindowFunction = wfbuiilder();
 	}
 
+	[Key(1)]
 	public string Name { get; init; }
 
+	[Key(2)]
 	public ValueCollection Argument { get; init; }
 
+	[Key(3)]
 	public WindowFunction? WindowFunction { get; init; }
 
 	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()

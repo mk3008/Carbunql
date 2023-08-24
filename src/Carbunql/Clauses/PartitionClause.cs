@@ -1,5 +1,6 @@
 ﻿namespace Carbunql.Clauses;
 
+[MessagePack.MessagePackObject]
 public class PartitionClause : QueryCommandCollection<ValueBase>, IQueryCommand
 {
 	public PartitionClause() : base()

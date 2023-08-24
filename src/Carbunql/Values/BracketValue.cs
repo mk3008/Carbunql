@@ -1,14 +1,22 @@
 ﻿using Carbunql.Clauses;
+using MessagePack;
 
 namespace Carbunql.Values;
 
+[MessagePackObject]
 public class BracketValue : ValueBase
 {
+	public BracketValue()
+	{
+		Inner = null!;
+	}
+
 	public BracketValue(ValueBase inner)
 	{
 		Inner = inner;
 	}
 
+	[Key(1)]
 	public ValueBase Inner { get; init; }
 
 	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()

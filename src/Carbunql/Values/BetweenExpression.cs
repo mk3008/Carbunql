@@ -1,9 +1,19 @@
 ﻿using Carbunql.Clauses;
+using MessagePack;
 
 namespace Carbunql.Values;
 
+[MessagePackObject]
 public class BetweenExpression : ValueBase
 {
+	public BetweenExpression()
+	{
+		Value = null!;
+		Start = null!;
+		End = null!;
+		IsNegative = false;
+	}
+
 	public BetweenExpression(ValueBase value, ValueBase start, ValueBase end, bool isNegative)
 	{
 		Value = value;
@@ -12,12 +22,16 @@ public class BetweenExpression : ValueBase
 		IsNegative = isNegative;
 	}
 
+	[Key(1)]
 	public ValueBase Value { get; init; }
 
+	[Key(2)]
 	public ValueBase Start { get; init; }
 
+	[Key(3)]
 	public ValueBase End { get; init; }
 
+	[Key(4)]
 	public bool IsNegative { get; init; }
 
 	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()

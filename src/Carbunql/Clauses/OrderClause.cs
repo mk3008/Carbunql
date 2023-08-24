@@ -2,6 +2,7 @@
 
 namespace Carbunql.Clauses;
 
+[MessagePack.MessagePackObject]
 public class OrderClause : QueryCommandCollection<IQueryCommandable>, IQueryCommandable
 {
 	public OrderClause() : base()

@@ -1,15 +1,22 @@
 ﻿using Carbunql.Clauses;
+using MessagePack;
 
 namespace Carbunql.Values;
 
+[MessagePackObject]
 public class ColumnValue : ValueBase
 {
-    public ColumnValue(string column)
+	public ColumnValue()
+	{
+		Column = string.Empty;
+	}
+
+	public ColumnValue(string column)
     {
         Column = column;
     }
 
-    public ColumnValue(string table, string column)
+	public ColumnValue(string table, string column)
     {
         TableAlias = table;
         Column = column;
@@ -27,9 +34,11 @@ public class ColumnValue : ValueBase
         Column = column;
     }
 
-    public string TableAlias { get; set; } = string.Empty;
+	[Key(1)]
+	public string TableAlias { get; set; } = string.Empty;
 
-    public string Column { get; init; }
+	[Key(2)]
+	public string Column { get; init; }
 
     public override IEnumerable<Token> GetCurrentTokens(Token? parent)
     {

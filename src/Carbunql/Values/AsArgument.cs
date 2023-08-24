@@ -1,17 +1,27 @@
 ﻿using Carbunql.Clauses;
+using MessagePack;
 
 namespace Carbunql.Values;
 
+[MessagePackObject]
 public class AsArgument : ValueBase
 {
+	public AsArgument()
+	{
+		Value = null!;
+		Type = null!;
+	}
+
 	public AsArgument(ValueBase value, ValueBase type)
 	{
 		Value = value;
 		Type = type;
 	}
 
+	[Key(1)]
 	public ValueBase Value { get; init; }
 
+	[Key(2)]
 	public ValueBase Type { get; init; }
 
 	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()

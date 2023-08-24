@@ -1,9 +1,16 @@
 ﻿using Carbunql.Clauses;
+using MessagePack;
 
 namespace Carbunql.Values;
 
+[MessagePackObject]
 public class LiteralValue : ValueBase
 {
+	public LiteralValue()
+	{
+		CommandText = "null";
+	}
+
 	public LiteralValue(string? commandText)
 	{
 		if (commandText != null)
@@ -40,6 +47,7 @@ public class LiteralValue : ValueBase
 		}
 	}
 
+	[Key(1)]
 	public string CommandText { get; set; }
 
 	public override IEnumerable<Token> GetCurrentTokens(Token? parent)

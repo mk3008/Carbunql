@@ -2,6 +2,7 @@
 
 namespace Carbunql.Clauses;
 
+[MessagePack.MessagePackObject]
 public class HavingClause : IQueryCommandable
 {
 	public HavingClause(ValueBase condition)
@@ -9,6 +10,7 @@ public class HavingClause : IQueryCommandable
 		Condition = condition;
 	}
 
+	[MessagePack.Key(0)]
 	public ValueBase Condition { get; init; }
 
 	public IEnumerable<SelectQuery> GetInternalQueries()

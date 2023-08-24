@@ -4,6 +4,7 @@ using System.Collections;
 
 namespace Carbunql.Clauses;
 
+[MessagePack.MessagePackObject]
 public class GroupClause : IList<ValueBase>, IQueryCommandable
 {
 	public GroupClause()
@@ -17,6 +18,7 @@ public class GroupClause : IList<ValueBase>, IQueryCommandable
 		Items.AddRange(items);
 	}
 
+	[MessagePack.Key(0)]
 	private List<ValueBase> Items { get; init; }
 
 	public IEnumerable<SelectQuery> GetInternalQueries()
@@ -69,10 +71,13 @@ public class GroupClause : IList<ValueBase>, IQueryCommandable
 	}
 
 	#region implements IList<ValueBase>
+	[MessagePack.Key(1)]
 	public ValueBase this[int index] { get => ((IList<ValueBase>)Items)[index]; set => ((IList<ValueBase>)Items)[index] = value; }
 
+	[MessagePack.Key(2)]
 	public int Count => ((ICollection<ValueBase>)Items).Count;
 
+	[MessagePack.Key(3)]
 	public bool IsReadOnly => ((ICollection<ValueBase>)Items).IsReadOnly;
 
 	public void Add(ValueBase item)

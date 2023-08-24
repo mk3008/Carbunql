@@ -2,9 +2,11 @@
 using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Tables;
+using MessagePack;
 
 namespace Carbunql;
 
+[MessagePackObject()]
 public class SelectQuery : ReadQuery, IQueryCommandable
 {
 	public SelectQuery() { }
@@ -23,16 +25,22 @@ public class SelectQuery : ReadQuery, IQueryCommandable
 		LimitClause = q.LimitClause;
 	}
 
+	[Key(0)]
 	public WithClause? WithClause { get; set; } = new();
 
+	[Key(1)]
 	public SelectClause? SelectClause { get; set; }
 
+	[Key(2)]
 	public FromClause? FromClause { get; set; }
 
+	[Key(3)]
 	public WhereClause? WhereClause { get; set; }
 
+	[Key(4)]
 	public GroupClause? GroupClause { get; set; }
 
+	[Key(5)]
 	public HavingClause? HavingClause { get; set; }
 
 	public override IEnumerable<Token> GetCurrentTokens(Token? parent)
