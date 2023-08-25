@@ -11,6 +11,12 @@ class Program
 
 public class Test
 {
+	public Test()
+	{
+		SqModelQuery = GetSqModelQuery();
+		CarbunqlQuery = GetCarbunqlQuery();
+	}
+
 	public static string Sql = @"with
 dat(line_id, name, unit_price, amount, tax_rate) as ( 
     values
@@ -84,9 +90,30 @@ from
 order by 
     line_id";
 
-	private SqModel.SelectQuery sqmodel = SqModel.Analysis.SqlParser.Parse(Sql);
+	private SqModel.SelectQuery SqModelQuery { get; init; }
 
-	private IReadQuery carbunql = QueryParser.Parse(Sql);
+	private SqModel.SelectQuery GetSqModelQuery()
+	{
+		var sq = SqModel.Analysis.SqlParser.Parse(Sql);
+		sq.Parameters = new();
+		for (int i = 0; i < 100; i++)
+		{
+			sq.Parameters.Add(":" + i, i);
+		}
+		return sq;
+	}
+
+	private SelectQuery CarbunqlQuery { get; init; }
+
+	private SelectQuery GetCarbunqlQuery()
+	{
+		var sq = new SelectQuery(Sql);
+		for (int i = 0; i < 100; i++)
+		{
+			sq.AddParameter(":" + i, i);
+		}
+		return sq;
+	}
 
 	[Benchmark]
 	public string SqModelParse()
@@ -96,15 +123,15 @@ order by
 	}
 
 	[Benchmark]
-	public string SqModelString()
+	public string SqModelCommandText()
 	{
-		return sqmodel.ToQuery().CommandText;
+		return SqModelQuery.ToQuery().CommandText;
 	}
 
 	[Benchmark]
 	public string CarbunqlDeepCopy()
 	{
-		var sq = carbunql.DeepCopy();
+		var sq = CarbunqlQuery.DeepCopy();
 		return "success";// sq.GetTokens().ToString(" ");
 	}
 
@@ -118,12 +145,12 @@ order by
 	[Benchmark]
 	public string CarbunqlToOneLineText()
 	{
-		return carbunql.ToOneLineText();
+		return CarbunqlQuery.ToOneLineText();
 	}
 
 	[Benchmark]
 	public string CarbunqlToText()
 	{
-		return carbunql.ToText();
+		return CarbunqlQuery.ToText();
 	}
 }
