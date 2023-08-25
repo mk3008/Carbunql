@@ -5,6 +5,7 @@ using Carbunql.Values;
 using Cysharp.Text;
 using MessagePack;
 using System.Data;
+using System.Text;
 
 namespace Carbunql;
 
@@ -98,56 +99,96 @@ public static class IQueryCommandableExtension
 
 	public static string ToText(this IQueryCommandable source)
 	{
-		var sb = ZString.CreateStringBuilder();
-		if (source.GetParameters().Any())
-		{
-			sb.AppendLine("/*");
-			foreach (var item in source.GetParameters())
-			{
-				if (item.Value == null)
-				{
-					sb.AppendLine($"  {item.Key} is NULL");
-				}
-				else if (item.Value.GetType() == typeof(string))
-				{
-					sb.AppendLine($"  {item.Key} = '{item.Value}'");
-				}
-				else
-				{
-					sb.AppendLine($"  {item.Key} = {item.Value}");
-				}
-			}
-			sb.AppendLine("*/");
-		}
-		sb.AppendLine(source.ToCommand().CommandText);
+		var cmd = source.ToCommand();
+		var text = cmd.CommandText;
 
-		return sb.ToString();
+		if (!cmd.Parameters.Any()) return text;
+
+		var head = GetParameterText(cmd);
+		if (string.IsNullOrEmpty(head)) return text;
+		return head + text;
 	}
 
 	public static string ToOneLineText(this IQueryCommandable source)
 	{
+		var cmd = source.ToOneLineCommand();
+		var text = cmd.CommandText;
+
+		if (!cmd.Parameters.Any()) return text;
+
+		var head = GetParameterText(cmd);
+		if (string.IsNullOrEmpty(head)) return text;
+		return head + text;
+	}
+
+	/*
+		Even though it was parallelized,
+		the processing was too light,
+		so the performance deteriorated.
+		Since parallelization is not expected to improve speed,
+		comment out and leave a record so as not to do it again.
+	*/
+	//public async static Task<string> ToOneLineTextAsync(this IQueryCommandable source)
+	//{
+	//	var head = Task.Run(() => GetParameterText(source));
+	//	var body = Task.Run(() => source.GetTokens().ToText());
+
+	//	var results = await Task.WhenAll(new[] { head, body });
+
+	//	if (string.IsNullOrEmpty(results[0])) return results[1];
+	//	return results[0] + results[1];
+	//}
+
+	private static string GetParameterText(this IQueryCommandable source)
+	{
+		var prms = source.GetParameters().ToList();
+		if (!prms.Any()) return string.Empty;
+
 		var sb = ZString.CreateStringBuilder();
-		if (source.GetParameters().Any())
+		sb.AppendLine("/*");
+		foreach (var item in prms)
 		{
-			sb.AppendLine("/*");
-			foreach (var item in source.GetParameters())
+			if (item.Value == null)
 			{
-				if (item.Value == null)
-				{
-					sb.AppendLine($"  {item.Key} is NULL");
-				}
-				else if (item.Value.GetType() == typeof(string))
-				{
-					sb.AppendLine($"  {item.Key} = '{item.Value}'");
-				}
-				else
-				{
-					sb.AppendLine($"  {item.Key} = {item.Value}");
-				}
+				sb.AppendLine($"  {item.Key} is NULL");
 			}
-			sb.AppendLine("*/");
+			else if (item.Value.GetType() == typeof(string))
+			{
+				sb.AppendLine($"  {item.Key} = '{item.Value}'");
+			}
+			else
+			{
+				sb.AppendLine($"  {item.Key} = {item.Value}");
+			}
 		}
-		sb.AppendLine(source.ToOneLineCommand().CommandText);
+		sb.AppendLine("*/");
+
+		return sb.ToString();
+	}
+
+	private static string GetParameterText(this QueryCommand source)
+	{
+		var prms = source.Parameters;
+		if (!prms.Any()) return string.Empty;
+
+		var sb = ZString.CreateStringBuilder();
+		sb.AppendLine("/*");
+		foreach (var item in prms)
+		{
+			if (item.Value == null)
+			{
+				sb.AppendLine($"  {item.Key} is NULL");
+			}
+			else if (item.Value.GetType() == typeof(string))
+			{
+				sb.AppendLine($"  {item.Key} = '{item.Value}'");
+			}
+			else
+			{
+				sb.AppendLine($"  {item.Key} = {item.Value}");
+			}
+		}
+		sb.AppendLine("*/");
 
 		return sb.ToString();
 	}
