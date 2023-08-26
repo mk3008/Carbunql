@@ -43,8 +43,13 @@ public class SelectQuery : ReadQuery, IQueryCommandable
 	[Key(5)]
 	public HavingClause? HavingClause { get; set; }
 
-	public override IEnumerable<Token> GetCurrentTokens(Token? parent)
+	[IgnoreMember]
+	public CommentClause? CommentClause { get; set; }
+
+    public override IEnumerable<Token> GetCurrentTokens(Token? parent)
 	{
+		if (CommentClause != null) foreach (var item in CommentClause.GetTokens(parent)) yield return item;
+		
 		if (SelectClause == null) yield break;
 
 		if (parent == null && WithClause != null) foreach (var item in WithClause.GetTokens()) yield return item;

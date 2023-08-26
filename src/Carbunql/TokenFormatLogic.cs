@@ -13,6 +13,8 @@ public class TokenFormatLogic
 	{
 		if (token.Text.IsEqualNoCase("with")) return true;
 
+		if (token.Text.Equals("/*")) return true;
+
 		if (token.Text.Equals(",") && token.Sender is Relation) return false;
 
 		if (!token.Text.IsEqualNoCase("on") && token.Sender is Relation) return true;
@@ -31,6 +33,8 @@ public class TokenFormatLogic
 	public virtual bool IsLineBreakOnAfterWriteToken(Token token)
 	{
 		if (token.Sender is OperatableQuery) return true;
+
+		if (token.Text.Equals("*/")) return true;
 
 		if (token.Text.Equals(","))
 		{
