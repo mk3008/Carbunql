@@ -105,6 +105,7 @@ where
 			var t = q.GetSelectableTables().Where(x => x.Table is PhysicalTable pt && pt.Table.IsEqualNoCase(filteredTable)).FirstOrDefault();
 			if (t == null) continue;
 
+			q.AddComment("user filter injected");
 			var cnd = new InExpression(new ColumnValue(t, "CreatedBy"), new QueryContainer(filterQuery));
 			q.Where(cnd);
 			q.AddParameter("@currentUser", 1);
@@ -128,6 +129,7 @@ select a.* from articles as a order by CreatedOn desc
 		var expect = @"/*
   @currentUser = 1
 */
+/* user filter injected */
 SELECT
     a.*
 FROM
@@ -176,6 +178,7 @@ order by
 		var expect = @"/*
   @currentUser = 1
 */
+/* user filter injected */
 SELECT
     c.categoryname,
     a.*
@@ -230,6 +233,7 @@ SELECT
     a2.*
 FROM
     (
+        /* user filter injected */
         SELECT
             a1.*
         FROM
@@ -283,6 +287,7 @@ order by
 */
 WITH
     a2 AS (
+        /* user filter injected */
         SELECT
             a1.*
         FROM
