@@ -507,4 +507,61 @@ limit 10";
 		var lst = item.GetTokens().ToList();
 		Assert.Equal(6, lst.Count);
 	}
+
+	[Fact]
+	public void WindowFunction_Filter()
+	{
+		var text = @"
+with
+v (id, name, value) as (
+    values
+    (1, 'a', 10)
+    , (2, 'a', 20)
+    , (3, 'b', 50)
+    , (4, 'c', 70)
+)
+select  
+    sum(value) filter (where v.name = 'a') as value_a
+    , sum(value) filter (where v.name = 'b') as value_b
+    , sum(value) filter (where v.name = 'c') as value_b
+from
+    v
+";
+
+		var item = QueryParser.Parse(text) as SelectQuery;
+		if (item == null) throw new Exception();
+		Monitor.Log(item);
+
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(94, lst.Count);
+	}
+
+	[Fact]
+	public void WindowFunction_Filter_Over()
+	{
+		var text = @"
+with
+v (id, name, value) as (
+    values
+    (1, 'a', 10)
+    , (2, 'a', 20)
+    , (3, 'b', 50)
+    , (4, 'c', 70)
+)
+select  
+    id
+    , name
+    , value
+    , string_agg(id::text, ',') filter (where v.name = 'a') over (partition by name order by value) as text
+from
+    v
+";
+
+		var item = QueryParser.Parse(text) as SelectQuery;
+		if (item == null) throw new Exception();
+		Monitor.Log(item);
+
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(79, lst.Count);
+	}
 }

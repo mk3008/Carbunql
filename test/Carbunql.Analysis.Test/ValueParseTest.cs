@@ -319,6 +319,17 @@ public class ValueParserTest
 	}
 
 	[Fact]
+	public void WindowFunction_Filter()
+	{
+		var text = "sum(value) filter (where v.name = 'a')";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(13, lst.Count);
+	}
+
+	[Fact]
 	public void CaseExpression()
 	{
 		var text = "case tbl.col when 1 then 10 when 2 then 20 else 30 end";

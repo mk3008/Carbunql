@@ -198,4 +198,33 @@ ORDER BY
 
 		Assert.Equal(TruncateControlString(sq.ToText()), TruncateControlString(actual!.ToText()));
 	}
+
+	[Fact]
+	public void SampleQuery_WindowFunction()
+	{
+		var sq = new SelectQuery(@"
+with
+v (id, name, value) as (
+    values
+    (1, 'a', 10)
+    , (2, 'a', 20)
+    , (3, 'b', 50)
+    , (4, 'c', 70)
+)
+select  
+    id
+    , name
+    , value
+    , string_agg(id::text, ',') filter (where v.name = 'a') over (partition by name order by value) as text
+from
+    v");
+
+		var json = MessagePackSerializer.Serialize(sq);
+		Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
+
+		var actual = MessagePackSerializer.Deserialize<SelectQuery>(json);
+		Output.WriteLine(actual.ToText());
+
+		Assert.Equal(TruncateControlString(sq.ToText()), TruncateControlString(actual!.ToText()));
+	}
 }

@@ -15,13 +15,25 @@ public static class FunctionValueParser
 	{
 		var arg = ValueCollectionParser.ParseAsInner(r);
 
-		if (!r.Peek().IsEqualNoCase("over"))
+		Filter? filter = null;
+		Over? over = null;
+
+		if (r.Peek().IsEqualNoCase("filter"))
 		{
-			return new FunctionValue(functionName, arg);
+			r.Read("filter");
+			filter = FilterParser.Parse(r);
 		}
 
-		r.Read("over");
-		var winfn = WindowFunctionParser.Parse(r);
-		return new FunctionValue(functionName, arg, winfn);
+		if (r.Peek().IsEqualNoCase("over"))
+		{
+			r.Read("over");
+			over = OverParser.Parse(r);
+		}
+
+		var fnc = new FunctionValue(functionName, arg);
+		fnc.Filter = filter;
+		fnc.Over = over;
+
+		return fnc;
 	}
 }

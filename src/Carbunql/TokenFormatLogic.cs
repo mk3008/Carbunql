@@ -59,6 +59,7 @@ public class TokenFormatLogic
 		if (token.Parent != null && token.Parent.Sender is ValuesQuery) return false;
 		if (token.Sender is FunctionValue) return false;
 		if (token.Sender is FunctionTable) return false;
+		if (token.Text.Equals("filter")) return false;
 		if (token.Text.Equals("over")) return false;
 
 		return true;
@@ -73,6 +74,7 @@ public class TokenFormatLogic
 		if (token.Parent.Sender is ValuesQuery) return false;
 		if (token.Sender is FunctionValue) return false;
 		if (token.Sender is FunctionTable) return false;
+		if (token.Text.Equals(")") && token.Parent.Text.IsEqualNoCase("filter")) return true;
 		if (token.Text.Equals(")") && token.Parent.Text.IsEqualNoCase("over")) return true;
 
 		return true;
