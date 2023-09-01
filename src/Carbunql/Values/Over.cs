@@ -3,7 +3,7 @@
 namespace Carbunql.Values;
 
 [MessagePack.MessagePackObject]
-public class WindowFunction : IQueryCommand
+public class Over : IQueryCommand
 {
 	[MessagePack.Key(0)]
 	public PartitionClause? PartitionBy { get; set; }

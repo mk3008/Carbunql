@@ -1,18 +1,17 @@
 ﻿using Carbunql.Extensions;
 using Carbunql.Values;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Carbunql.Analysis.Parser;
 
-public static class WindowFunctionParser
+public static class OverParser
 {
-	public static WindowFunction Parse(string text)
+	public static Over Parse(string text)
 	{
 		using var r = new TokenReader(text);
 		return Parse(r);
 	}
 
-	public static WindowFunction ParseAsInner(ITokenReader r)
+	public static Over ParseAsInner(ITokenReader r)
 	{
 		r.Read("(");
 		using var ir = new BracketInnerTokenReader(r);
@@ -20,12 +19,12 @@ public static class WindowFunctionParser
 		return v;
 	}
 
-	public static WindowFunction Parse(ITokenReader r)
+	public static Over Parse(ITokenReader r)
 	{
 		r.ReadOrDefault("(");
 		var token = r.Read();
 
-		var winfn = new WindowFunction();
+		var winfn = new Over();
 		do
 		{
 			if (token.IsEqualNoCase("partition by"))

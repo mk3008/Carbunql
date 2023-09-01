@@ -229,7 +229,7 @@ public partial class SerializeTest
 	[Fact]
 	public void WindowFunction()
 	{
-		var win = new WindowFunction();
+		var win = new Over();
 		win.AddPartition(new ColumnValue("shop_id"));
 		win.AddOrder(new Clauses.SortableItem(new ColumnValue("order_id")));
 

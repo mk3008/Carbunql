@@ -18,11 +18,11 @@ public class FunctionValue : ValueBase
 		Argument = new ValueCollection();
 	}
 
-	public FunctionValue(string name, WindowFunction winfn)
+	public FunctionValue(string name, Over winfn)
 	{
 		Name = name;
 		Argument = new ValueCollection();
-		WindowFunction = winfn;
+		Over = winfn;
 	}
 
 	public FunctionValue(string name, string arg)
@@ -49,51 +49,54 @@ public class FunctionValue : ValueBase
 		};
 	}
 
-	public FunctionValue(string name, Func<WindowFunction> wfbuiilder)
+	public FunctionValue(string name, Func<Over> wfbuiilder)
 	{
 		Name = name;
 		Argument = new ValueCollection();
-		WindowFunction = wfbuiilder();
+		Over = wfbuiilder();
 	}
 
-	public FunctionValue(string name, ValueBase args, WindowFunction winfn)
+	public FunctionValue(string name, ValueBase args, Over winfn)
 	{
 		Name = name;
 		Argument = new ValueCollection
 		{
 			args
 		};
-		WindowFunction = winfn;
+		Over = winfn;
 	}
 
-	public FunctionValue(string name, ValueBase args, Func<WindowFunction> wfbuiilder)
+	public FunctionValue(string name, ValueBase args, Func<Over> wfbuiilder)
 	{
 		Name = name;
 		Argument = new ValueCollection
 		{
 			args
 		};
-		WindowFunction = wfbuiilder();
+		Over = wfbuiilder();
 	}
 
-	public FunctionValue(string name, Func<ValueBase> builder, Func<WindowFunction> wfbuiilder)
+	public FunctionValue(string name, Func<ValueBase> builder, Func<Over> wfbuiilder)
 	{
 		Name = name;
 		Argument = new ValueCollection
 		{
 			builder()
 		};
-		WindowFunction = wfbuiilder();
+		Over = wfbuiilder();
 	}
 
 	[Key(1)]
 	public string Name { get; init; }
 
 	[Key(2)]
-	public ValueCollection Argument { get; init; }
+	public ValueCollection Argument { get; set; }
 
 	[Key(3)]
-	public WindowFunction? WindowFunction { get; init; }
+	public Over? Over { get; set; }
+
+	[Key(4)]
+	public Filter? Filter { get; set; }
 
 	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()
 	{
@@ -101,9 +104,16 @@ public class FunctionValue : ValueBase
 		{
 			yield return item;
 		}
-		if (WindowFunction != null)
+		if (Filter != null)
 		{
-			foreach (var item in WindowFunction.GetInternalQueries())
+			foreach (var item in Filter.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+		if (Over != null)
+		{
+			foreach (var item in Over.GetInternalQueries())
 			{
 				yield return item;
 			}
@@ -119,9 +129,14 @@ public class FunctionValue : ValueBase
 		foreach (var item in Argument.GetTokens(bracket)) yield return item;
 		yield return Token.ReservedBracketEnd(this, parent);
 
-		if (WindowFunction != null)
+		if (Filter != null)
 		{
-			foreach (var item in WindowFunction.GetTokens(parent)) yield return item;
+			foreach (var item in Filter.GetTokens(parent)) yield return item;
+		}
+
+		if (Over != null)
+		{
+			foreach (var item in Over.GetTokens(parent)) yield return item;
 		}
 	}
 }

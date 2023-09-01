@@ -46,7 +46,7 @@ public class FunctionTest
 		var (f, a) = sq.From("table_a").As("a");
 		sq.Select(() =>
 		{
-			var wf = new WindowFunction();
+			var wf = new Over();
 			wf.AddPartition(new ColumnValue(a, "parent_id"));
 			wf.AddOrder(new ColumnValue(a, "id").ToSortable());
 			return new FunctionValue("row_number", wf);
