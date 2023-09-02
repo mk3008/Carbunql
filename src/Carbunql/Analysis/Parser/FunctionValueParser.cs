@@ -1,4 +1,5 @@
-﻿using Carbunql.Extensions;
+﻿using Carbunql.Clauses;
+using Carbunql.Extensions;
 using Carbunql.Values;
 
 namespace Carbunql.Analysis.Parser;
@@ -16,7 +17,7 @@ public static class FunctionValueParser
 		var arg = ValueCollectionParser.ParseAsInner(r);
 
 		Filter? filter = null;
-		Over? over = null;
+		OverClause? over = null;
 
 		if (r.Peek().IsEqualNoCase("filter"))
 		{
@@ -27,7 +28,7 @@ public static class FunctionValueParser
 		if (r.Peek().IsEqualNoCase("over"))
 		{
 			r.Read("over");
-			over = OverParser.Parse(r);
+			over = OverClauseParser.Parse(r);
 		}
 
 		var fnc = new FunctionValue(functionName, arg);

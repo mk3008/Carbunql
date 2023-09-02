@@ -1,31 +1,34 @@
 ﻿using Carbunql.Clauses;
-using Carbunql.Values;
 
 namespace Carbunql.Building;
 
 public static class WindowFunctionExtension
 {
-    public static void AddPartition(this Over source, ValueBase partition)
+    public static void AddPartition(this OverClause source, ValueBase partition)
     {
-        source.PartitionBy ??= new();
-        source.PartitionBy.Add(partition);
+        source.WindowDefinition ??= new();
+		source.WindowDefinition.PartitionBy ??= new();
+        source.WindowDefinition.PartitionBy.Add(partition);
     }
 
-    public static void AddPartition(this Over source, Func<ValueBase> partitionbuilder)
+    public static void AddPartition(this OverClause source, Func<ValueBase> partitionbuilder)
     {
-        source.PartitionBy ??= new();
-        source.PartitionBy.Add(partitionbuilder());
+		source.WindowDefinition ??= new();
+		source.WindowDefinition.PartitionBy ??= new();
+        source.WindowDefinition.PartitionBy.Add(partitionbuilder());
     }
 
-    public static void AddOrder(this Over source, SortableItem order)
+    public static void AddOrder(this OverClause source, SortableItem order)
     {
-        source.OrderBy ??= new();
-        source.OrderBy.Add(order);
+		source.WindowDefinition ??= new();
+		source.WindowDefinition.OrderBy ??= new();
+        source.WindowDefinition.OrderBy.Add(order);
     }
 
-    public static void AddOrder(this Over source, Func<SortableItem> orderbuilder)
+    public static void AddOrder(this OverClause source, Func<SortableItem> orderbuilder)
     {
-        source.OrderBy ??= new();
-        source.OrderBy.Add(orderbuilder());
+		source.WindowDefinition ??= new();
+		source.WindowDefinition.OrderBy ??= new();
+        source.WindowDefinition.OrderBy.Add(orderbuilder());
     }
 }

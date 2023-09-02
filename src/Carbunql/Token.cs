@@ -1,4 +1,5 @@
-﻿using Carbunql.Tables;
+﻿using Carbunql.Clauses;
+using Carbunql.Tables;
 using Carbunql.Values;
 
 namespace Carbunql;
@@ -73,7 +74,7 @@ public class Token
 			if (Sender is FunctionTable) return false;
 			if (Sender is FunctionValue) return false;
 			if (Sender is Filter) return false;
-			if (Sender is Over) return false;
+			if (Sender is OverClause) return false;
 			return true;
 		}
 		if (Text.Equals("::")) return false;
