@@ -21,7 +21,7 @@ public class TokenFormatLogic
 		if (token.Text.IsEqualNoCase("else") || token.Text.IsEqualNoCase("when")) return true;
 		if (token.Text.IsEqualNoCase("and"))
 		{
-			if (token.Sender is BetweenExpression) return false;
+			if (token.Sender is BetweenClause) return false;
 			if (token.Parent != null && token.Parent.Sender is WhereClause) return true;
 			if (token.Parent != null && token.Parent.Sender is HavingClause) return true;
 			return false;

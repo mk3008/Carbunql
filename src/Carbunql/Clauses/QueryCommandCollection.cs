@@ -4,6 +4,7 @@ using System.Collections;
 
 namespace Carbunql.Clauses;
 
+[MessagePackObject(keyAsPropertyName: true)]
 public abstract class QueryCommandCollection<T> : IList<T> where T : IQueryCommandable
 {
 	public QueryCommandCollection()

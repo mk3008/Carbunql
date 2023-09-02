@@ -1,9 +1,10 @@
 ﻿using Carbunql.Extensions;
 using Carbunql.Tables;
+using MessagePack;
 
 namespace Carbunql.Clauses;
 
-[MessagePack.MessagePackObject]
+[MessagePackObject(keyAsPropertyName: true)]
 public class FromClause : IQueryCommandable
 {
 	public FromClause(SelectableTable root)
@@ -11,10 +12,8 @@ public class FromClause : IQueryCommandable
 		Root = root;
 	}
 
-	[MessagePack.Key(0)]
 	public SelectableTable Root { get; init; }
 
-	[MessagePack.Key(1)]
 	public List<Relation>? Relations { get; set; }
 
 	public IEnumerable<SelectQuery> GetInternalQueries()

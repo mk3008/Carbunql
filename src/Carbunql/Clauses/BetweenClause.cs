@@ -1,12 +1,11 @@
-﻿using Carbunql.Clauses;
-using MessagePack;
+﻿using MessagePack;
 
-namespace Carbunql.Values;
+namespace Carbunql.Clauses;
 
 [MessagePackObject(keyAsPropertyName: true)]
-public class BetweenExpression : ValueBase
+public class BetweenClause : ValueBase
 {
-	public BetweenExpression()
+	public BetweenClause()
 	{
 		Value = null!;
 		Start = null!;
@@ -14,7 +13,7 @@ public class BetweenExpression : ValueBase
 		IsNegative = false;
 	}
 
-	public BetweenExpression(ValueBase value, ValueBase start, ValueBase end, bool isNegative)
+	public BetweenClause(ValueBase value, ValueBase start, ValueBase end, bool isNegative)
 	{
 		Value = value;
 		Start = start;

@@ -1,4 +1,5 @@
-﻿using Carbunql.Values;
+﻿using Carbunql.Clauses;
+using Carbunql.Values;
 using MessagePack;
 
 namespace Carbunql.Building.Test;
@@ -51,12 +52,12 @@ public partial class SerializeTest
 	[Fact]
 	public void BetweenExpression()
 	{
-		var sq = new BetweenExpression(new LiteralValue(5), new LiteralValue(1), new LiteralValue(10), false);
+		var sq = new BetweenClause(new LiteralValue(5), new LiteralValue(1), new LiteralValue(10), false);
 
 		var json = MessagePackSerializer.Serialize(sq);
 		Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
 
-		var actual = MessagePackSerializer.Deserialize<BetweenExpression>(json);
+		var actual = MessagePackSerializer.Deserialize<BetweenClause>(json);
 		Output.WriteLine(actual.ToText());
 
 		Assert.Equal(TruncateControlString(sq.ToText()), TruncateControlString(actual!.ToText()));
@@ -173,12 +174,12 @@ public partial class SerializeTest
 			new LiteralValue(3)
 		};
 
-		var sq = new InExpression(new LiteralValue(1), lst);
+		var sq = new InClause(new LiteralValue(1), lst);
 
 		var json = MessagePackSerializer.Serialize(sq);
 		Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
 
-		var actual = MessagePackSerializer.Deserialize<InExpression>(json);
+		var actual = MessagePackSerializer.Deserialize<InClause>(json);
 		Output.WriteLine(actual.ToText());
 
 		Assert.Equal(TruncateControlString(sq.ToText()), TruncateControlString(actual!.ToText()));

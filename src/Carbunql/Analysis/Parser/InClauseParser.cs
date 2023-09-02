@@ -4,15 +4,15 @@ using Carbunql.Values;
 
 namespace Carbunql.Analysis.Parser;
 
-public static class InExpressionParser
+public static class InClauseParser
 {
-	public static InExpression Parse(ValueBase value, string argument)
+	public static InClause Parse(ValueBase value, string argument)
 	{
 		using var r = new TokenReader(argument);
 		return Parse(value, r, false);
 	}
 
-	public static InExpression Parse(ValueBase value, ITokenReader r, bool isNegative)
+	public static InClause Parse(ValueBase value, ITokenReader r, bool isNegative)
 	{
 		r.Read("(");
 		using var ir = new BracketInnerTokenReader(r);
@@ -21,13 +21,13 @@ public static class InExpressionParser
 		{
 			//sub query
 			var iq = new InlineQuery(SelectQueryParser.Parse(ir));
-			return new InExpression(value, iq, isNegative);
+			return new InClause(value, iq, isNegative);
 		}
 		else
 		{
 			//value collection
 			var bv = new BracketValue(ValueCollectionParser.Parse(ir));
-			return new InExpression(value, bv, isNegative);
+			return new InClause(value, bv, isNegative);
 		}
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using Carbunql.Analysis.Parser;
+using Carbunql.Clauses;
 using Carbunql.Values;
 using Xunit.Abstractions;
 
@@ -408,7 +409,7 @@ public class ValueParserTest
 		var v = ValueParser.Parse(text);
 		Monitor.Log(v);
 
-		Assert.IsType<InExpression>(v);
+		Assert.IsType<InClause>(v);
 
 		var lst = v.GetTokens().ToList();
 		Assert.Equal(10, lst.Count);

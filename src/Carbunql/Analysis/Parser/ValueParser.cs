@@ -39,7 +39,7 @@ public static class ValueParser
 
 		if (r.ReadOrDefault("between") != null)
 		{
-			return BetweenExpressionParser.Parse(v, r, isNegative);
+			return BetweenClauseParser.Parse(v, r, isNegative);
 		}
 		else if (r.ReadOrDefault("like") != null)
 		{
@@ -47,7 +47,7 @@ public static class ValueParser
 		}
 		else if (r.ReadOrDefault("in") != null)
 		{
-			return InExpressionParser.Parse(v, r, isNegative);
+			return InClauseParser.Parse(v, r, isNegative);
 		}
 		else if (!isNegative && r.ReadOrDefault("::") != null)
 		{

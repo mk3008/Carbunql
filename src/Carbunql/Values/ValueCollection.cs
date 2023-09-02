@@ -2,11 +2,12 @@
 using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Tables;
+using MessagePack;
 using System.Collections;
 
 namespace Carbunql.Values;
 
-[MessagePack.MessagePackObject]
+[MessagePackObject(keyAsPropertyName: true)]
 public class ValueCollection : ValueBase, IList<ValueBase>, IQueryCommand
 {
 	public ValueCollection()
@@ -45,7 +46,6 @@ public class ValueCollection : ValueBase, IList<ValueBase>, IQueryCommand
 		}
 	}
 
-	[MessagePack.Key(1)]
 	private List<ValueBase> Collection { get; init; } = new();
 
 	public IEnumerable<string> GetColumnNames()
@@ -105,14 +105,11 @@ public class ValueCollection : ValueBase, IList<ValueBase>, IQueryCommand
 	}
 
 	#region implements IList<ValueBase>
-	[MessagePack.Key(2)]
 	public ValueBase this[int index]
 	{ get => ((IList<ValueBase>)Collection)[index]; set => ((IList<ValueBase>)Collection)[index] = value; }
 
-	[MessagePack.Key(3)]
 	public int Count => ((ICollection<ValueBase>)Collection).Count;
 
-	[MessagePack.Key(4)]
 	public bool IsReadOnly => ((ICollection<ValueBase>)Collection).IsReadOnly;
 
 	public void Add(ValueBase item)

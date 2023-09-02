@@ -1,11 +1,11 @@
 ﻿using Carbunql.Clauses;
+using MessagePack;
 
 namespace Carbunql.Values;
 
-[MessagePack.MessagePackObject]
+[MessagePackObject(keyAsPropertyName: true)]
 public class Filter : IQueryCommand
 {
-	[MessagePack.Key(0)]
 	public WhereClause? WhereClause { get; set; }
 
 	public IEnumerable<SelectQuery> GetInternalQueries()

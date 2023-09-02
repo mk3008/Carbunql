@@ -1,4 +1,5 @@
-﻿using Carbunql.Extensions;
+﻿using Carbunql.Clauses;
+using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
 using Xunit.Abstractions;
@@ -106,7 +107,7 @@ where
 			if (t == null) continue;
 
 			q.AddComment("user filter injected");
-			var cnd = new InExpression(new ColumnValue(t, "CreatedBy"), new QueryContainer(filterQuery));
+			var cnd = new InClause(new ColumnValue(t, "CreatedBy"), new QueryContainer(filterQuery));
 			q.Where(cnd);
 			q.AddParameter("@currentUser", 1);
 			isSuccess = true;
