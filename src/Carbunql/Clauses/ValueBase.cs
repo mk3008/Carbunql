@@ -5,7 +5,7 @@ using MessagePack;
 
 namespace Carbunql.Clauses;
 
-[MessagePackObject()]
+[MessagePackObject(keyAsPropertyName: true)]
 [Union(0, typeof(LiteralValue))]
 [Union(1, typeof(AsArgument))]
 [Union(2, typeof(BetweenExpression))]
@@ -24,7 +24,6 @@ public abstract class ValueBase : IQueryCommandable
 {
 	public virtual string GetDefaultName() => string.Empty;
 
-	[Key(0)]
 	public OperatableValue? OperatableValue { get; set; }
 
 	public ValueBase AddOperatableValue(string @operator, ValueBase value)

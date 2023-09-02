@@ -3,7 +3,7 @@ using MessagePack;
 
 namespace Carbunql.Values;
 
-[MessagePackObject]
+[MessagePackObject(keyAsPropertyName: true)]
 public class LiteralValue : ValueBase
 {
 	public LiteralValue()
@@ -47,7 +47,6 @@ public class LiteralValue : ValueBase
 		}
 	}
 
-	[Key(1)]
 	public string CommandText { get; set; }
 
 	public override IEnumerable<Token> GetCurrentTokens(Token? parent)

@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 
 namespace Carbunql.Tables;
 
-[MessagePackObject]
+[MessagePackObject(keyAsPropertyName: true)]
 public class PhysicalTable : TableBase
 {
 	public PhysicalTable()
@@ -23,13 +23,10 @@ public class PhysicalTable : TableBase
 		Table = table;
 	}
 
-	[Key(1)]
 	public string? Schame { get; init; }
 
-	[Key(2)]
 	public string Table { get; init; }
 
-	[Key(3)]
 	public List<string>? ColumnNames { get; set; }
 
 	public override IEnumerable<Token> GetTokens(Token? parent)

@@ -4,7 +4,7 @@ using MessagePack;
 
 namespace Carbunql.Clauses;
 
-[MessagePackObject]
+[MessagePackObject(keyAsPropertyName: true)]
 public class Relation : IQueryCommandable
 {
 	public Relation()
@@ -27,13 +27,10 @@ public class Relation : IQueryCommandable
 		Condition = condition;
 	}
 
-	[Key(0)]
 	public string JoinCommand { get; init; }
 
-	[Key(1)]
 	public ValueBase? Condition { get; set; }
 
-	[Key(2)]
 	public SelectableTable Table { get; init; }
 
 	public IEnumerable<SelectQuery> GetInternalQueries()

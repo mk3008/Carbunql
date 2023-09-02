@@ -3,7 +3,7 @@ using MessagePack;
 
 namespace Carbunql.Values;
 
-[MessagePackObject]
+[MessagePackObject(keyAsPropertyName: true)]
 public class CaseExpression : ValueBase
 {
 	public CaseExpression()
@@ -15,10 +15,8 @@ public class CaseExpression : ValueBase
 		CaseCondition = condition;
 	}
 
-	[Key(1)]
 	public ValueBase? CaseCondition { get; init; }
 
-	[Key(2)]
 	public List<WhenExpression> WhenExpressions { get; init; } = new();
 
 	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()

@@ -11,13 +11,10 @@ public abstract class ReadQuery : IReadQuery
 {
 	public abstract SelectClause? GetSelectClause();
 
-	[Key(6)]
 	public OperatableQuery? OperatableQuery { get; set; }
 
-	[Key(7)]
 	public OrderClause? OrderClause { get; set; }
 
-	[Key(8)]
 	public LimitClause? LimitClause { get; set; }
 
 	public IReadQuery AddOperatableValue(string @operator, IReadQuery query)
@@ -31,7 +28,6 @@ public abstract class ReadQuery : IReadQuery
 
 	public abstract IEnumerable<PhysicalTable> GetPhysicalTables();
 
-	[Key(9)]
 	public IDictionary<string, object?> Parameters { get; set; } = new Dictionary<string, object?>();
 
 	public virtual IDictionary<string, object?> GetInnerParameters() => EmptyParameters.Get();

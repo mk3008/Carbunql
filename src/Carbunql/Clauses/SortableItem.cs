@@ -4,7 +4,7 @@ using MessagePack;
 
 namespace Carbunql.Clauses;
 
-[MessagePackObject]
+[MessagePackObject(keyAsPropertyName: true)]
 public class SortableItem : IQueryCommandable
 {
 	public SortableItem(ValueBase value, bool isAscending = true, NullSort nullSort = NullSort.Undefined)
@@ -14,13 +14,10 @@ public class SortableItem : IQueryCommandable
 		NullSort = nullSort;
 	}
 
-	[Key(0)]
 	public ValueBase Value { get; init; }
 
-	[Key(1)]
 	public bool IsAscending { get; set; } = true;
 
-	[Key(2)]
 	public NullSort NullSort { get; set; } = NullSort.Undefined;
 
 	public IEnumerable<SelectQuery> GetInternalQueries()

@@ -3,7 +3,7 @@ using MessagePack;
 
 namespace Carbunql.Values;
 
-[MessagePackObject]
+[MessagePackObject(keyAsPropertyName: true)]
 public class BetweenExpression : ValueBase
 {
 	public BetweenExpression()
@@ -22,16 +22,12 @@ public class BetweenExpression : ValueBase
 		IsNegative = isNegative;
 	}
 
-	[Key(1)]
 	public ValueBase Value { get; init; }
 
-	[Key(2)]
 	public ValueBase Start { get; init; }
 
-	[Key(3)]
 	public ValueBase End { get; init; }
 
-	[Key(4)]
 	public bool IsNegative { get; init; }
 
 	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()

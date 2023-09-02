@@ -4,7 +4,7 @@ using MessagePack;
 
 namespace Carbunql.Values;
 
-[MessagePackObject]
+[MessagePackObject(keyAsPropertyName: true)]
 public class OperatableValue : IQueryCommand
 {
 	public OperatableValue(string @operator, ValueBase value)
@@ -13,10 +13,8 @@ public class OperatableValue : IQueryCommand
 		Value = value;
 	}
 
-	[Key(0)]
 	public string Operator { get; init; }
 
-	[Key(1)]
 	public ValueBase Value { get; init; }
 
 	public IEnumerable<SelectQuery> GetInternalQueries()

@@ -7,7 +7,7 @@ namespace Carbunql;
 /// <summary>
 /// query with operator
 /// </summary>
-[MessagePackObject]
+[MessagePackObject(keyAsPropertyName: true)]
 public class OperatableQuery : IQueryCommandable
 {
 	public OperatableQuery(string @operator, IReadQuery query)
@@ -19,10 +19,8 @@ public class OperatableQuery : IQueryCommandable
 	/// <summary>
 	/// "union", "union all", etc.
 	/// </summary>
-	[Key(0)]
 	public string Operator { get; init; }
 
-	[Key(1)]
 	public IReadQuery Query { get; init; }
 
 	public IDictionary<string, object?> GetParameters()

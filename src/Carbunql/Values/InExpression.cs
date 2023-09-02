@@ -3,7 +3,7 @@ using MessagePack;
 
 namespace Carbunql.Values;
 
-[MessagePackObject]
+[MessagePackObject(keyAsPropertyName: true)]
 public class InExpression : ValueBase
 {
 	public InExpression()
@@ -41,10 +41,8 @@ public class InExpression : ValueBase
 		IsNegative = isNegative;
 	}
 
-	[Key(1)]
 	public ValueBase Value { get; init; }
 
-	[Key(2)]
 	public ValueBase Argument { get; init; }
 
 	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()
@@ -59,7 +57,6 @@ public class InExpression : ValueBase
 		}
 	}
 
-	[Key(3)]
 	public bool IsNegative { get; init; }
 
 	public override IEnumerable<Token> GetCurrentTokens(Token? parent)
