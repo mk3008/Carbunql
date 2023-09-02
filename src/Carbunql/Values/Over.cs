@@ -1,14 +1,13 @@
 ﻿using Carbunql.Clauses;
+using MessagePack;
 
 namespace Carbunql.Values;
 
-[MessagePack.MessagePackObject]
+[MessagePackObject(keyAsPropertyName: true)]
 public class Over : IQueryCommand
 {
-	[MessagePack.Key(0)]
 	public PartitionClause? PartitionBy { get; set; }
 
-	[MessagePack.Key(1)]
 	public OrderClause? OrderBy { get; set; }
 
 	public IEnumerable<SelectQuery> GetInternalQueries()

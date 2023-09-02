@@ -1,8 +1,9 @@
 ﻿using Carbunql.Clauses;
+using MessagePack;
 
 namespace Carbunql.Values;
 
-[MessagePack.MessagePackObject]
+[MessagePackObject(keyAsPropertyName: true)]
 public class WhenExpression : IQueryCommand
 {
 	public WhenExpression(ValueBase condition, ValueBase value)
@@ -16,10 +17,8 @@ public class WhenExpression : IQueryCommand
 		Value = value;
 	}
 
-	[MessagePack.Key(0)]
 	public ValueBase? Condition { get; init; }
 
-	[MessagePack.Key(1)]
 	public ValueBase Value { get; private set; }
 
 	public void SetValue(ValueBase value)

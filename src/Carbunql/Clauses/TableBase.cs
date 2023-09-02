@@ -2,14 +2,15 @@
 using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
+using MessagePack;
 using System.Collections.Immutable;
 
 namespace Carbunql.Clauses;
 
-[MessagePack.MessagePackObject]
-[MessagePack.Union(0, typeof(FunctionTable))]
-[MessagePack.Union(1, typeof(PhysicalTable))]
-[MessagePack.Union(2, typeof(VirtualTable))]
+[MessagePackObject(keyAsPropertyName: true)]
+[Union(0, typeof(FunctionTable))]
+[Union(1, typeof(PhysicalTable))]
+[Union(2, typeof(VirtualTable))]
 public abstract class TableBase : IQueryCommandable
 {
 	public abstract IEnumerable<Token> GetTokens(Token? parent);
@@ -43,7 +44,6 @@ public abstract class TableBase : IQueryCommandable
 		return ImmutableList<string>.Empty;
 	}
 
-	[MessagePack.Key(0)]
 	public virtual bool IsSelectQuery => false;
 
 	public virtual string GetTableFullName() => "";

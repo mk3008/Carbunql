@@ -1,8 +1,9 @@
 ﻿using Carbunql.Tables;
+using MessagePack;
 
 namespace Carbunql.Clauses;
 
-[MessagePack.MessagePackObject]
+[MessagePackObject(keyAsPropertyName: true)]
 public class SelectableItem : IQueryCommandable, ISelectable
 {
 	public SelectableItem(ValueBase value, string alias)
@@ -11,10 +12,8 @@ public class SelectableItem : IQueryCommandable, ISelectable
 		Alias = alias;
 	}
 
-	[MessagePack.Key(0)]
 	public ValueBase Value { get; init; }
 
-	[MessagePack.Key(1)]
 	public string Alias { get; private set; }
 
 	public void SetAlias(string alias)
