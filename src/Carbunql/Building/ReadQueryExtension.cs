@@ -250,7 +250,7 @@ public static class ReadQueryExtension
 			sq.Select(a, item);
 		}
 
-		var exp = new InExpression(cnd.ToBracket(), sq.ToValue());
+		var exp = new InClause(cnd.ToBracket(), sq.ToValue());
 		return exp.ToWhereClause();
 	}
 
@@ -262,7 +262,7 @@ public static class ReadQueryExtension
 		if (selectColumns == null || !selectColumns.Any()) throw new InvalidOperationException("Missing select clause.");
 
 		var cnd = new ValueCollection(alias, selectColumns);
-		var exp = new InExpression(cnd.ToBracket(), source.ToValue());
+		var exp = new InClause(cnd.ToBracket(), source.ToValue());
 		return exp.ToWhereClause();
 	}
 

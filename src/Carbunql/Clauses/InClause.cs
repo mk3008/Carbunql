@@ -1,19 +1,19 @@
-﻿using Carbunql.Clauses;
+﻿using Carbunql.Values;
 using MessagePack;
 
-namespace Carbunql.Values;
+namespace Carbunql.Clauses;
 
 [MessagePackObject(keyAsPropertyName: true)]
-public class InExpression : ValueBase
+public class InClause : ValueBase
 {
-	public InExpression()
+	public InClause()
 	{
 		Value = null!;
 		Argument = null!;
 		IsNegative = false;
 	}
 
-	public InExpression(ValueBase value, ValueBase argument)
+	public InClause(ValueBase value, ValueBase argument)
 	{
 		Value = value;
 		if (argument is BracketValue || argument is QueryContainer)
@@ -27,7 +27,7 @@ public class InExpression : ValueBase
 		IsNegative = false;
 	}
 
-	public InExpression(ValueBase value, ValueBase argument, bool isNegative)
+	public InClause(ValueBase value, ValueBase argument, bool isNegative)
 	{
 		Value = value;
 		if (argument is BracketValue || argument is QueryContainer)
