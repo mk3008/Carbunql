@@ -18,7 +18,7 @@ public class FunctionValue : ValueBase
 		Argument = new ValueCollection();
 	}
 
-	public FunctionValue(string name, Over winfn)
+	public FunctionValue(string name, OverClause winfn)
 	{
 		Name = name;
 		Argument = new ValueCollection();
@@ -49,14 +49,14 @@ public class FunctionValue : ValueBase
 		};
 	}
 
-	public FunctionValue(string name, Func<Over> wfbuiilder)
+	public FunctionValue(string name, Func<OverClause> wfbuiilder)
 	{
 		Name = name;
 		Argument = new ValueCollection();
 		Over = wfbuiilder();
 	}
 
-	public FunctionValue(string name, ValueBase args, Over winfn)
+	public FunctionValue(string name, ValueBase args, OverClause winfn)
 	{
 		Name = name;
 		Argument = new ValueCollection
@@ -66,7 +66,7 @@ public class FunctionValue : ValueBase
 		Over = winfn;
 	}
 
-	public FunctionValue(string name, ValueBase args, Func<Over> wfbuiilder)
+	public FunctionValue(string name, ValueBase args, Func<OverClause> wfbuiilder)
 	{
 		Name = name;
 		Argument = new ValueCollection
@@ -76,7 +76,7 @@ public class FunctionValue : ValueBase
 		Over = wfbuiilder();
 	}
 
-	public FunctionValue(string name, Func<ValueBase> builder, Func<Over> wfbuiilder)
+	public FunctionValue(string name, Func<ValueBase> builder, Func<OverClause> wfbuiilder)
 	{
 		Name = name;
 		Argument = new ValueCollection
@@ -90,7 +90,7 @@ public class FunctionValue : ValueBase
 
 	public ValueCollection Argument { get; set; }
 
-	public Over? Over { get; set; }
+	public OverClause? Over { get; set; }
 
 	public Filter? Filter { get; set; }
 
