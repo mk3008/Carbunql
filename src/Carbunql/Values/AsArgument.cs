@@ -3,7 +3,7 @@ using MessagePack;
 
 namespace Carbunql.Values;
 
-[MessagePackObject]
+[MessagePackObject(keyAsPropertyName: true)]
 public class AsArgument : ValueBase
 {
 	public AsArgument()
@@ -18,10 +18,8 @@ public class AsArgument : ValueBase
 		Type = type;
 	}
 
-	[Key(1)]
 	public ValueBase Value { get; init; }
 
-	[Key(2)]
 	public ValueBase Type { get; init; }
 
 	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()

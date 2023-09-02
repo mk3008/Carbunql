@@ -5,9 +5,14 @@ using MessagePack;
 
 namespace Carbunql.Clauses;
 
-[MessagePackObject]
+[MessagePackObject(keyAsPropertyName: true)]
 public class LimitClause : IQueryCommandable
 {
+	public LimitClause()
+	{
+		Condition = null!;
+	}
+
 	public LimitClause(string text)
 	{
 		Condition = new LiteralValue(text);
@@ -25,10 +30,8 @@ public class LimitClause : IQueryCommandable
 		Condition = lst;
 	}
 
-	[Key(0)]
 	public ValueBase Condition { get; init; }
 
-	[Key(1)]
 	public ValueBase? Offset { get; set; }
 
 	public IEnumerable<SelectQuery> GetInternalQueries()

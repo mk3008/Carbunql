@@ -4,7 +4,7 @@ using MessagePack;
 
 namespace Carbunql.Tables;
 
-[MessagePackObject]
+[MessagePackObject(keyAsPropertyName: true)]
 public class FunctionTable : TableBase
 {
 	public FunctionTable()
@@ -28,10 +28,8 @@ public class FunctionTable : TableBase
 		};
 	}
 
-	[Key(1)]
 	public string Name { get; init; }
 
-	[Key(2)]
 	public ValueCollection Argument { get; init; }
 
 	public override IEnumerable<Token> GetTokens(Token? parent)
@@ -44,7 +42,6 @@ public class FunctionTable : TableBase
 		yield return Token.ReservedBracketEnd(this, parent);
 	}
 
-	[Key(3)]
 	public Dictionary<string, object?> Parameters { get; set; } = new();
 
 	public override IDictionary<string, object?> GetParameters()

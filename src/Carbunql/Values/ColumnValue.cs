@@ -3,7 +3,7 @@ using MessagePack;
 
 namespace Carbunql.Values;
 
-[MessagePackObject]
+[MessagePackObject(keyAsPropertyName: true)]
 public class ColumnValue : ValueBase
 {
 	public ColumnValue()
@@ -12,47 +12,45 @@ public class ColumnValue : ValueBase
 	}
 
 	public ColumnValue(string column)
-    {
-        Column = column;
-    }
+	{
+		Column = column;
+	}
 
 	public ColumnValue(string table, string column)
-    {
-        TableAlias = table;
-        Column = column;
-    }
+	{
+		TableAlias = table;
+		Column = column;
+	}
 
-    public ColumnValue(FromClause from, string column)
-    {
-        TableAlias = from.Root.Alias;
-        Column = column;
-    }
+	public ColumnValue(FromClause from, string column)
+	{
+		TableAlias = from.Root.Alias;
+		Column = column;
+	}
 
-    public ColumnValue(SelectableTable table, string column)
-    {
-        TableAlias = table.Alias;
-        Column = column;
-    }
+	public ColumnValue(SelectableTable table, string column)
+	{
+		TableAlias = table.Alias;
+		Column = column;
+	}
 
-	[Key(1)]
 	public string TableAlias { get; set; } = string.Empty;
 
-	[Key(2)]
 	public string Column { get; init; }
 
-    public override IEnumerable<Token> GetCurrentTokens(Token? parent)
-    {
-        if (!string.IsNullOrEmpty(TableAlias))
-        {
-            yield return new Token(this, parent, TableAlias);
-            yield return Token.Dot(this, parent);
-        }
-        yield return new Token(this, parent, Column);
-    }
+	public override IEnumerable<Token> GetCurrentTokens(Token? parent)
+	{
+		if (!string.IsNullOrEmpty(TableAlias))
+		{
+			yield return new Token(this, parent, TableAlias);
+			yield return Token.Dot(this, parent);
+		}
+		yield return new Token(this, parent, Column);
+	}
 
-    public override string GetDefaultName()
-    {
-        if (OperatableValue == null) return Column;
-        return string.Empty;
-    }
+	public override string GetDefaultName()
+	{
+		if (OperatableValue == null) return Column;
+		return string.Empty;
+	}
 }

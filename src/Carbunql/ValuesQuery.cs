@@ -9,7 +9,7 @@ using MessagePack;
 
 namespace Carbunql;
 
-[MessagePackObject()]
+[MessagePackObject(keyAsPropertyName: true)]
 public class ValuesQuery : ReadQuery
 {
 	public ValuesQuery()
@@ -139,7 +139,6 @@ public class ValuesQuery : ReadQuery
 		}
 	}
 
-	[Key(10)]
 	public List<ValueCollection> Rows { get; init; } = new();
 
 	public override IEnumerable<Token> GetCurrentTokens(Token? parent)

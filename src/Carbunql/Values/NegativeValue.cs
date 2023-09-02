@@ -3,7 +3,7 @@ using MessagePack;
 
 namespace Carbunql.Values;
 
-[MessagePackObject]
+[MessagePackObject(keyAsPropertyName: true)]
 public class NegativeValue : ValueBase
 {
 	public NegativeValue()
@@ -16,7 +16,6 @@ public class NegativeValue : ValueBase
 		Inner = inner;
 	}
 
-	[Key(1)]
 	public ValueBase Inner { get; init; }
 
 	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()

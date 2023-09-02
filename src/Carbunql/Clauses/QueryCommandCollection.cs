@@ -41,7 +41,6 @@ public abstract class QueryCommandCollection<T> : IList<T> where T : IQueryComma
 		return prm;
 	}
 
-	[Key(0)]
 	public List<T> Items { get; set; } = new();
 
 	#region implements IList<T>

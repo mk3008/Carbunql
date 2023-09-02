@@ -3,7 +3,7 @@ using MessagePack;
 
 namespace Carbunql.Values;
 
-[MessagePackObject]
+[MessagePackObject(keyAsPropertyName: true)]
 public class FunctionValue : ValueBase
 {
 	public FunctionValue()
@@ -86,16 +86,12 @@ public class FunctionValue : ValueBase
 		Over = wfbuiilder();
 	}
 
-	[Key(1)]
 	public string Name { get; init; }
 
-	[Key(2)]
 	public ValueCollection Argument { get; set; }
 
-	[Key(3)]
 	public Over? Over { get; set; }
 
-	[Key(4)]
 	public Filter? Filter { get; set; }
 
 	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()

@@ -3,7 +3,7 @@ using MessagePack;
 
 namespace Carbunql.Values;
 
-[MessagePackObject]
+[MessagePackObject(keyAsPropertyName: true)]
 public class CastValue : ValueBase
 {
 	public CastValue()
@@ -20,13 +20,10 @@ public class CastValue : ValueBase
 		Type = type;
 	}
 
-	[Key(1)]
 	public ValueBase Inner { get; init; }
 
-	[Key(2)]
 	public string Symbol { get; init; }
 
-	[Key(3)]
 	public ValueBase Type { get; init; }
 
 	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()
