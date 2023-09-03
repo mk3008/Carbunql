@@ -1,9 +1,11 @@
-﻿using MessagePack;
+﻿using Carbunql.Extensions;
+using Carbunql.Tables;
+using MessagePack;
 
 namespace Carbunql.Clauses;
 
-[MessagePackObject(keyAsPropertyName:true)]
-public class WindowDefinition: IQueryCommand
+[MessagePackObject(keyAsPropertyName: true)]
+public class WindowDefinition : IQueryCommandable
 {
 	public WindowDefinition()
 	{
@@ -44,6 +46,36 @@ public class WindowDefinition: IQueryCommand
 			{
 				yield return item;
 			}
+		}
+	}
+
+	public IDictionary<string, object?> GetParameters()
+	{
+		var prm = EmptyParameters.Get();
+		if (PartitionBy == null && OrderBy == null) return prm;
+
+		if (PartitionBy != null)
+		{
+			prm = prm.Merge(PartitionBy.GetParameters());
+		}
+		if (OrderBy != null)
+		{
+			prm = prm.Merge(OrderBy.GetParameters());
+		}
+		return prm;
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		if (PartitionBy == null && OrderBy == null) yield break;
+
+		if (PartitionBy != null)
+		{
+			foreach (var item in PartitionBy.GetPhysicalTables()) yield return item;
+		}
+		if (OrderBy != null)
+		{
+			foreach (var item in OrderBy.GetPhysicalTables()) yield return item;
 		}
 	}
 

@@ -12,6 +12,7 @@ public class TokenFormatLogic
 	public virtual bool IsLineBreakOnBeforeWriteToken(Token token)
 	{
 		if (token.Text.IsEqualNoCase("with")) return true;
+		if (token.Text.IsEqualNoCase("window")) return true;
 
 		if (token.Text.Equals("/*")) return true;
 
@@ -39,6 +40,7 @@ public class TokenFormatLogic
 		if (token.Text.Equals(","))
 		{
 			if (token.Sender is WithClause) return true;
+			if (token.Sender is WindowClause) return true;
 			if (token.Sender is SelectClause) return true;
 			if (token.Sender is Relation) return true;
 			if (token.Sender is GroupClause) return true;

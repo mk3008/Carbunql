@@ -33,6 +33,7 @@ public static class SelectQueryParser
 		sq.WhereClause = ParseWhereOrDefault(r);
 		sq.GroupClause = ParseGroupOrDefault(r);
 		sq.HavingClause = ParseHavingOrDefault(r);
+		sq.WindowClause = ParseWindowOrDefault(r);
 		sq.OrderClause = ParseOrderOrDefault(r);
 
 		var tokens = new string[] { "union", "union all", "except", "minus", "intersect" };
@@ -69,7 +70,11 @@ public static class SelectQueryParser
 		if (r.ReadOrDefault("having") == null) return null;
 		return HavingClauseParser.Parse(r);
 	}
-
+	private static WindowClause? ParseWindowOrDefault(ITokenReader r)
+	{
+		if (r.ReadOrDefault("window") == null) return null;
+		return WindowClauseParser.Parse(r);
+	}
 	private static OrderClause? ParseOrderOrDefault(ITokenReader r)
 	{
 		if (r.ReadOrDefault("order by") == null) return null;

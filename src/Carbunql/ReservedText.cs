@@ -11,6 +11,7 @@ public static class ReservedText
 	public static string Where => "where";
 	public static string Group => "group by";
 	public static string Having => "having";
+	public static string Window => "window";
 	public static string Order => "order by";
 	public static string Union => "union";
 	public static string Minus => "minus";
@@ -40,6 +41,7 @@ public static class ReservedText
 		yield return Where;
 		yield return Group;
 		yield return Having;
+		yield return Window;
 		yield return Order;
 		yield return Union;
 		yield return Minus;

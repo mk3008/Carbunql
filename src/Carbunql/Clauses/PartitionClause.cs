@@ -1,7 +1,10 @@
-﻿namespace Carbunql.Clauses;
+﻿using Carbunql.Tables;
+using MessagePack;
 
-[MessagePack.MessagePackObject]
-public class PartitionClause : QueryCommandCollection<ValueBase>, IQueryCommand
+namespace Carbunql.Clauses;
+
+[MessagePackObject(keyAsPropertyName: true)]
+public class PartitionClause : QueryCommandCollection<ValueBase>, IQueryCommandable
 {
 	public PartitionClause() : base()
 	{
@@ -16,6 +19,17 @@ public class PartitionClause : QueryCommandCollection<ValueBase>, IQueryCommand
 		foreach (var value in Items)
 		{
 			foreach (var item in value.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		foreach (var value in Items)
+		{
+			foreach (var item in value.GetPhysicalTables())
 			{
 				yield return item;
 			}
