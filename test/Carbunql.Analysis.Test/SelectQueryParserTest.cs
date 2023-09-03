@@ -564,4 +564,21 @@ from
 		var lst = item.GetTokens().ToList();
 		Assert.Equal(79, lst.Count);
 	}
+
+	[Fact]
+	public void WindowClause()
+	{
+		var text = @"
+SELECT sum(salary) OVER w, avg(salary) OVER w
+  FROM empsalary
+  WINDOW w AS (PARTITION BY depname ORDER BY salary DESC)
+";
+
+		var item = QueryParser.Parse(text) as SelectQuery;
+		if (item == null) throw new Exception();
+		Monitor.Log(item);
+
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(32, lst.Count);
+	}
 }

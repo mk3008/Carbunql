@@ -1,8 +1,9 @@
 ﻿using Carbunql.Tables;
+using MessagePack;
 
 namespace Carbunql.Clauses;
 
-[MessagePack.MessagePackObject]
+[MessagePackObject(keyAsPropertyName: true)]
 public class OrderClause : QueryCommandCollection<IQueryCommandable>, IQueryCommandable
 {
 	public OrderClause() : base()

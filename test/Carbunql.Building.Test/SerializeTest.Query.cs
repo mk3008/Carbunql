@@ -67,8 +67,8 @@ public partial class SerializeTest
 		var sq = new List<ValueCollection>
 		{
 			new ValueCollection()
-            {
-			    new LiteralValue(1),
+			{
+				new LiteralValue(1),
 				new LiteralValue(2),
 			},
 			new ValueCollection()
@@ -89,7 +89,7 @@ public partial class SerializeTest
 	public void ValuesQuery()
 	{
 		var sq = new ValuesQuery(new[,] { { "a1", "b1", "c1" }, { "a2", "b2", "c2" } });
-		
+
 		var json = MessagePackSerializer.Serialize(sq);
 		Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
 
@@ -218,6 +218,24 @@ select
     , string_agg(id::text, ',') filter (where v.name = 'a') over (partition by name order by value) as text
 from
     v");
+
+		var json = MessagePackSerializer.Serialize(sq);
+		Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
+
+		var actual = MessagePackSerializer.Deserialize<SelectQuery>(json);
+		Output.WriteLine(actual.ToText());
+
+		Assert.Equal(TruncateControlString(sq.ToText()), TruncateControlString(actual!.ToText()));
+	}
+
+	[Fact]
+	public void WindowClause()
+	{
+		var sq = new SelectQuery(@"
+SELECT sum(salary) OVER w, avg(salary) OVER w
+  FROM empsalary
+  WINDOW w AS (PARTITION BY depname ORDER BY salary DESC)
+");
 
 		var json = MessagePackSerializer.Serialize(sq);
 		Output.WriteLine(MessagePackSerializer.ConvertToJson(json));

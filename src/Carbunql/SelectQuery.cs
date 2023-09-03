@@ -20,6 +20,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable
 		WhereClause = q.WhereClause;
 		GroupClause = q.GroupClause;
 		HavingClause = q.HavingClause;
+		WindowClause = q.WindowClause;
 		OperatableQuery = q.OperatableQuery;
 		OrderClause = q.OrderClause;
 		LimitClause = q.LimitClause;
@@ -37,6 +38,8 @@ public class SelectQuery : ReadQuery, IQueryCommandable
 
 	public HavingClause? HavingClause { get; set; }
 
+	public WindowClause? WindowClause { get; set; }
+
 	[IgnoreMember]
 	public CommentClause? CommentClause { get; set; }
 
@@ -52,6 +55,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable
 		if (WhereClause != null) foreach (var item in WhereClause.GetTokens(parent)) yield return item;
 		if (GroupClause != null) foreach (var item in GroupClause.GetTokens(parent)) yield return item;
 		if (HavingClause != null) foreach (var item in HavingClause.GetTokens(parent)) yield return item;
+		if (WindowClause != null) foreach (var item in WindowClause.GetTokens(parent)) yield return item;
 	}
 
 	public override WithClause? GetWithClause() => WithClause;
@@ -67,6 +71,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable
 		prm = prm.Merge(WhereClause?.GetParameters());
 		prm = prm.Merge(GroupClause?.GetParameters());
 		prm = prm.Merge(HavingClause?.GetParameters());
+		prm = prm.Merge(WindowClause?.GetParameters());
 		return prm;
 	}
 
@@ -127,6 +132,13 @@ public class SelectQuery : ReadQuery, IQueryCommandable
 		if (HavingClause != null)
 		{
 			foreach (var item in HavingClause.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+		if (WindowClause != null)
+		{
+			foreach (var item in WindowClause.GetPhysicalTables())
 			{
 				yield return item;
 			}
@@ -197,6 +209,13 @@ public class SelectQuery : ReadQuery, IQueryCommandable
 		if (HavingClause != null)
 		{
 			foreach (var item in HavingClause.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+		if (WindowClause != null)
+		{
+			foreach (var item in WindowClause.GetInternalQueries())
 			{
 				yield return item;
 			}

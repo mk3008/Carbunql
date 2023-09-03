@@ -5,7 +5,6 @@ using Carbunql.Values;
 using Cysharp.Text;
 using MessagePack;
 using System.Data;
-using System.Text;
 
 namespace Carbunql;
 
@@ -139,32 +138,32 @@ public static class IQueryCommandableExtension
 	//	return results[0] + results[1];
 	//}
 
-	private static string GetParameterText(this IQueryCommandable source)
-	{
-		var prms = source.GetParameters().ToList();
-		if (!prms.Any()) return string.Empty;
+	//private static string GetParameterText(this IQueryCommandable source)
+	//{
+	//	var prms = source.GetParameters().ToList();
+	//	if (!prms.Any()) return string.Empty;
 
-		var sb = ZString.CreateStringBuilder();
-		sb.AppendLine("/*");
-		foreach (var item in prms)
-		{
-			if (item.Value == null)
-			{
-				sb.AppendLine($"  {item.Key} is NULL");
-			}
-			else if (item.Value.GetType() == typeof(string))
-			{
-				sb.AppendLine($"  {item.Key} = '{item.Value}'");
-			}
-			else
-			{
-				sb.AppendLine($"  {item.Key} = {item.Value}");
-			}
-		}
-		sb.AppendLine("*/");
+	//	var sb = ZString.CreateStringBuilder();
+	//	sb.AppendLine("/*");
+	//	foreach (var item in prms)
+	//	{
+	//		if (item.Value == null)
+	//		{
+	//			sb.AppendLine($"  {item.Key} is NULL");
+	//		}
+	//		else if (item.Value.GetType() == typeof(string))
+	//		{
+	//			sb.AppendLine($"  {item.Key} = '{item.Value}'");
+	//		}
+	//		else
+	//		{
+	//			sb.AppendLine($"  {item.Key} = {item.Value}");
+	//		}
+	//	}
+	//	sb.AppendLine("*/");
 
-		return sb.ToString();
-	}
+	//	return sb.ToString();
+	//}
 
 	private static string GetParameterText(this QueryCommand source)
 	{
