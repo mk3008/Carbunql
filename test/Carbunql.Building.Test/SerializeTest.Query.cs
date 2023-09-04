@@ -231,11 +231,12 @@ from
 	[Fact]
 	public void WindowClause()
 	{
-		var sq = new SelectQuery(@"
+		var sql = @"
 SELECT sum(salary) OVER w, avg(salary) OVER w
   FROM empsalary
   WINDOW w AS (PARTITION BY depname ORDER BY salary DESC)
-");
+";
+		var sq = new SelectQuery(sql);
 
 		var json = MessagePackSerializer.Serialize(sq);
 		Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
@@ -243,6 +244,6 @@ SELECT sum(salary) OVER w, avg(salary) OVER w
 		var actual = MessagePackSerializer.Deserialize<SelectQuery>(json);
 		Output.WriteLine(actual.ToText());
 
-		Assert.Equal(TruncateControlString(sq.ToText()), TruncateControlString(actual!.ToText()));
+		Assert.Equal(TruncateControlString(sql), TruncateControlString(actual!.ToText()));
 	}
 }

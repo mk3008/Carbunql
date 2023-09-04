@@ -143,6 +143,7 @@ FROM
 ORDER BY
     line_id";
 		var sq = new SelectQuery(sql);
+		Output.WriteLine(sq.ToText());
 		Output.WriteLine(sq.ToOneLineText());
 
 		var sq2 = new SelectQuery(sq.ToOneLineCommand().CommandText);

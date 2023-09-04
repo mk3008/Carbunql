@@ -14,9 +14,9 @@ public static class NamedWindowDefinitionParser
 	{
 		var alias = r.Read();
 		r.Read("as");
-		r.Read("(");
+
 		var w = WindowDefinitionParser.Parse(r);
-		r.Read(")");
+
 		return new NamedWindowDefinition(alias, w);
 	}
 }

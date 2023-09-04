@@ -64,6 +64,7 @@ public class Token
 		if (prev!.Text.Equals("(")) return false;
 		if (prev!.Text.Equals(".")) return false;
 		if (prev!.Text.Equals("::")) return false;
+		if (prev!.Text.Equals("as")) return true;
 
 		if (Text.Equals(")")) return false;
 		if (Text.Equals(",")) return false;
@@ -74,7 +75,7 @@ public class Token
 			if (Sender is FunctionTable) return false;
 			if (Sender is FunctionValue) return false;
 			if (Sender is Filter) return false;
-			if (Sender is OverClause) return false;
+			if (Sender is WindowDefinition) return false;
 			return true;
 		}
 		if (Text.Equals("::")) return false;

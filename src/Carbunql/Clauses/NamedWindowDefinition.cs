@@ -43,11 +43,6 @@ public class NamedWindowDefinition : IQueryCommandable
 
 		yield return Token.Reserved(this, parent, "as");
 
-		var bracket = Token.ReservedBracketStart(this, parent);
-		yield return bracket;
-
-		foreach (var item in WindowDefinition.GetTokens(bracket)) yield return item;
-
-		yield return Token.ReservedBracketEnd(this, parent);
+		foreach (var item in WindowDefinition.GetTokens(parent)) yield return item;
 	}
 }

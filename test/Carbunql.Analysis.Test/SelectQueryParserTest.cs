@@ -569,7 +569,7 @@ from
 	public void WindowClause()
 	{
 		var text = @"
-SELECT sum(salary) OVER w, avg(salary) OVER w
+SELECT sum(salary) OVER w as v1, avg(salary) OVER w as v2
   FROM empsalary
   WINDOW w AS (PARTITION BY depname ORDER BY salary DESC)
 ";
@@ -579,6 +579,6 @@ SELECT sum(salary) OVER w, avg(salary) OVER w
 		Monitor.Log(item);
 
 		var lst = item.GetTokens().ToList();
-		Assert.Equal(32, lst.Count);
+		Assert.Equal(30, lst.Count);
 	}
 }

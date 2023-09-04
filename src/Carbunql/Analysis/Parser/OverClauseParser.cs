@@ -21,14 +21,8 @@ public static class OverClauseParser
 
 	public static OverClause Parse(ITokenReader r)
 	{
-		r.ReadOrDefault("(");
-		
 		var clause = new OverClause();
-
 		clause.WindowDefinition = WindowDefinitionParser.Parse(r);
-
-		r.ReadOrDefault(")");
-
 		return clause;
 	}
 }
