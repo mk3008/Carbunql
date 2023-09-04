@@ -30,11 +30,6 @@ public class OverClause : IQueryCommand
         var overToken = Token.Reserved(this, parent, "over");
         yield return overToken;
 
-        var bracket = Token.ReservedBracketStart(this, overToken);
-        yield return bracket;
-		
-        foreach (var item in WindowDefinition.GetTokens(bracket)) yield return item;
-		
-        yield return Token.ReservedBracketEnd(this, overToken);
+        foreach (var item in WindowDefinition.GetTokens(overToken)) yield return item;
     }
 }

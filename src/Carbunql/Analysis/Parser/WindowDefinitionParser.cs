@@ -13,10 +13,13 @@ public static class WindowDefinitionParser
 
 	public static WindowDefinition Parse(ITokenReader r)
 	{
-		r.ReadOrDefault("(");
+		if (r.Peek() != "(")
+		{
+			return new WindowDefinition(r.Read());
+		}
 
+		r.Read("(");
 		var definition = new WindowDefinition();
-
 		if (r.Peek().IsEqualNoCase("partition by"))
 		{
 			r.Read(("partition by"));
@@ -28,6 +31,8 @@ public static class WindowDefinitionParser
 			r.Read(("order by"));
 			definition.OrderBy = OrderClauseParser.Parse(r);
 		}
+
+		r.Read(")");
 
 		return definition;
 	}
