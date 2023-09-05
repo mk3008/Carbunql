@@ -164,7 +164,10 @@ public class VanillaTokenReader : LexReader
 		// Explore possible two-word tokens
 		if (token.IsEqualNoCase("is"))
 		{
-			return ReadAndJoinOrDefault(token, "not");
+			var isToken = ReadAndJoinOrDefault(token, "not");
+			var isDistinctToken = ReadAndJoinOrDefault(isToken, "distinct");
+			if (isToken == isDistinctToken) return isToken;
+			return ReadAndJoin(isDistinctToken, "from");
 		}
 
 		if (token.IsEqualNoCase(JoinTokens))
