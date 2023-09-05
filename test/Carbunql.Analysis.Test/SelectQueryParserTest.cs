@@ -602,6 +602,6 @@ select
 		Monitor.Log(item);
 
 		var lst = item.GetTokens().ToList();
-		Assert.Equal(30, lst.Count);
+		Assert.Equal(32, lst.Count);
 	}
 }
