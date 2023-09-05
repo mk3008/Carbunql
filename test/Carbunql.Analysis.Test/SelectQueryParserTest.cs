@@ -581,4 +581,27 @@ SELECT sum(salary) OVER w as v1, avg(salary) OVER w as v2
 		var lst = item.GetTokens().ToList();
 		Assert.Equal(30, lst.Count);
 	}
+
+	[Fact]
+	public void IsDistinctFrom()
+	{
+		var text = @"
+select 
+    null is not distinct from null
+    , 1 is not distinct from null
+    , null is not distinct from 1
+    , 1 is not distinct from 1
+    , null is distinct from null
+    , 1 is distinct from null
+    , null is distinct from 1
+    , 1 is distinct from 1
+";
+
+		var item = QueryParser.Parse(text) as SelectQuery;
+		if (item == null) throw new Exception();
+		Monitor.Log(item);
+
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(32, lst.Count);
+	}
 }
