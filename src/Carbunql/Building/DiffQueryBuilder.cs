@@ -1,126 +1,97 @@
 ﻿using Carbunql.Analysis;
 using Carbunql.Clauses;
 using Carbunql.Values;
-using Carbunql.Extensions;
-using System.Linq;
 
 namespace Carbunql.Building;
 
 public class DiffQueryBuilder
 {
-	public string LeftCteName { get; init; } = "lf_ds";
-	public string RightCteName { get; init; } = "rt_ds";
-
-	public string LeftValueColumnPrefix { get; init; } = "lf_";
-	public string RightValueColumnPrefix { get; init; } = "rt_";
-
-	public string DetailAlias { get; init; } = "detail";
-	public string SummaryAlias { get; init; } = "summary";
-
-	public IReadQuery Execute(string leftSql, string rightSql, IEnumerable<string> keyColumns)
+	public static SelectQuery Execute(string expectsql, string actualsql, string[] keys)
 	{
-		var leftSq = QueryParser.Parse(leftSql);
-		var rightSq = QueryParser.Parse(rightSql);
+		return Execute(SelectQueryParser.Parse(expectsql), SelectQueryParser.Parse(actualsql), keys);
+	}
 
-		var commons = GetCommonColumns(leftSq, rightSq);
-
-		var keycols = keyColumns.ToList().Select(x => x.Trim());
-		var keys = commons.Where(x => x.IsEqualNoCase(keycols)).ToList();
-		var vals = commons.Where(x => !x.IsEqualNoCase(keycols)).ToList();
-
-		if (!keys.Any()) throw new ArgumentException("key columns are not found.");
-		if (!vals.Any()) throw new ArgumentException("value columns are not found.");
-
-		var sq = new SelectQuery();
-		var leftTable = sq.With(leftSq).As(LeftCteName);
-		var rightTable = sq.With(rightSq).As(RightCteName);
-
-		var detail = sq.With(BuildSelectDetailQuery(leftTable, rightTable, keys, vals)).As(DetailAlias);
-		var summary = sq.With(BuildSelectSummaryQuery(detail, keys, vals)).As(SummaryAlias);
-
-		var (f, d) = sq.From(summary).As("d");
-
-		keys.ForEach(x => sq.Select(d, x));
-		vals.Select(x => LeftValueColumnPrefix + x).ToList().ForEach(x =>
-		{
-			sq.Select(d, x);
-		});
-		vals.Select(x => RightValueColumnPrefix + x).ToList().ForEach(x =>
-		{
-			sq.Select(d, x);
-		});
-
-		sq.Where(vals.Select(x => new ColumnValue(d, LeftValueColumnPrefix + x).NotEqual(d, RightValueColumnPrefix + x).ToGroup()).MergeOr().ToGroup());
-
-		keys.ForEach(x => sq.Order(d, x));
-
+	public static SelectQuery Execute(SelectQuery expectsql, SelectQuery actualsql, string[] keys)
+	{
+		var sq = GenerateQueryAsChanged(expectsql, actualsql, keys);
+		sq.UnionAll(GenerateQueryAsDeleted(expectsql, actualsql, keys));
+		sq.UnionAll(GenerateQueryAsAdded(expectsql, actualsql, keys));
 		return sq;
 	}
 
-	private List<string> GetCommonColumns(IReadQuery sq1, IReadQuery sq2)
-	{
-		var cols1 = sq1.GetColumnNames();
-		var cols2 = sq2.GetColumnNames();
-
-		if (cols1 == null || cols2 == null) throw new NotSupportedException();
-
-		return cols1.Where(x => cols2.Contains(x)).ToList();
-	}
-
-	private SelectQuery BuildSelectSummaryQuery(CommonTable detail, List<string> keys, List<string> vals)
+	private static SelectQuery GenerateQueryAsChanged(SelectQuery expectsq, SelectQuery actualsq, string[] keys)
 	{
 		var sq = new SelectQuery();
-		var (f, d) = sq.From(detail).As("d");
-		keys.ForEach(x => sq.Select(d, x));
+		var (from, e) = sq.From(expectsq).As("expect");
 
-		vals.Select(x => LeftValueColumnPrefix + x).ToList().ForEach(x =>
+		var a = from.InnerJoin(actualsq).As("actual").On(e, keys);
+
+		var expectColumns = expectsq.SelectClause!.Select(x => x.Alias).Where(x => !keys.Contains(x));
+		var acutalColumns = actualsq.SelectClause!.Select(x => x.Alias).Where(x => !keys.Contains(x));
+		var commonColumns = expectColumns.Where(x => acutalColumns.Contains(x));
+
+		foreach (var item in keys) sq.Select(e, item);
+		sq.Select("'update'").As("diff_type");
+		CaseExpression? exp = null;
+
+		ValueBase? tmp = null;
+		foreach (var item in commonColumns)
 		{
-			sq.Select(new FunctionValue("sum", new ColumnValue(d, x))).As(x);
-		});
-		vals.Select(x => RightValueColumnPrefix + x).ToList().ForEach(x =>
-		{
-			sq.Select(new FunctionValue("sum", new ColumnValue(d, x))).As(x);
-		});
+			var changecase = new CaseExpression();
+			changecase.When($"{e.Alias}.{item} is null and {a.Alias}.{item} is null").Then($"''");
+			changecase.When($"{e.Alias}.{item} is null and {a.Alias}.{item} is not null").Then($"'{item},'");
+			changecase.When($"{e.Alias}.{item} is not null and {a.Alias}.{item} is null").Then($"'{item},'");
+			changecase.When($"{e.Alias}.{item} <> {a.Alias}.{item}").Then($"'{item},'");
+			changecase.Else("''");
 
-		keys.ForEach(x => sq.Group(d, x));
-		return sq;
-	}
-
-	private SelectQuery BuildSelectDetailQuery(CommonTable leftTable, CommonTable rightTable, List<string> keys, List<string> vals)
-	{
-		var sq = BuildSelectDetailQuery(leftTable, keys, vals, true);
-		sq.UnionAll(BuildSelectDetailQuery(rightTable, keys, vals, false));
-		return sq;
-	}
-
-	private SelectQuery BuildSelectDetailQuery(CommonTable table, List<string> keys, List<string> vals, bool isLeft)
-	{
-		var sq = new SelectQuery();
-		var (f, d) = sq.From(table).As("d");
-		keys.ForEach(x => sq.Select(d, x));
-
-		if (isLeft)
-		{
-			vals.ForEach(x =>
+			if (tmp == null)
 			{
-				sq.Select(d, x).As(LeftValueColumnPrefix + x);
-			});
-			vals.ForEach(x =>
+				exp = changecase;
+				tmp = changecase;
+			}
+			else
 			{
-				sq.Select(0).As(RightValueColumnPrefix + x);
-			});
+				tmp = tmp.AddOperatableValue("||", changecase);
+			}
 		}
-		else
-		{
-			vals.ForEach(x =>
-			{
-				sq.Select(0).As(LeftValueColumnPrefix + x);
-			});
-			vals.ForEach(x =>
-			{
-				sq.Select(d, x).As(RightValueColumnPrefix + x);
-			});
-		}
+
+		if (exp != null) sq.Select(exp).As("remarks");
+
+		var q = new SelectQuery();
+		var (_, t) = q.From(sq).As("t");
+		q.Select(t);
+		q.Where(t, "remarks").NotEqual("''");
+
+		return q;
+	}
+
+	private static SelectQuery GenerateQueryAsDeleted(SelectQuery expectsq, SelectQuery actualsq, string[] keys)
+	{
+		var sq = new SelectQuery();
+		var (from, e) = sq.From(expectsq).As("expect");
+
+		var a = from.LeftJoin(actualsq).As("actual").On(e, keys);
+
+		foreach (var item in keys) sq.Select(e, item);
+		sq.Select("'delete'").As("diff_type");
+		sq.Select("'*deleted'").As("remarks");
+		sq.Where(a, keys[0]).IsNull();
+
+		return sq;
+	}
+
+	private static SelectQuery GenerateQueryAsAdded(SelectQuery expectsq, SelectQuery actualsq, string[] keys)
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.From(actualsq).As("actual");
+
+		var e = from.LeftJoin(expectsq).As("expect").On(a, keys);
+
+		foreach (var item in keys) sq.Select(a, item);
+		sq.Select("'insert'").As("diff_type");
+		sq.Select("'*added'").As("remarks");
+		sq.Where(e, keys[0]).IsNull();
+
 		return sq;
 	}
 }

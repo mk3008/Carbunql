@@ -76,8 +76,7 @@ from system_b.table";
 	string sourcecode = @"using Carbunql;
 using Carbunql.Building;
 
-var builder = new DiffQueryBuilder();
-var sq = builder.Execute(
+var sq = DiffQueryBuilder.Execute(
 	""select id, val from table_a"",
 	""select id, val from table_b"",
 	new[] { ""id"" });
@@ -108,8 +107,7 @@ Console.WriteLine(sq.ToCommand().CommandText);";
 
 		try
 		{
-			var builder = new DiffQueryBuilder();
-			var sq = builder.Execute(sql1, sql2, keys.Split(","));
+			var sq = DiffQueryBuilder.Execute(sql1, sql2, keys.Split(","));
 			fsql = sq.ToCommand().CommandText;
 		}
 		catch (Exception ex)
