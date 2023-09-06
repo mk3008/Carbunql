@@ -37,6 +37,14 @@ public class SelectableItem : IQueryCommandable, ISelectable
 		}
 	}
 
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		foreach (var item in Value.GetCommonTables())
+		{
+			yield return item;
+		}
+	}
+
 	public IEnumerable<Token> GetTokens(Token? parent)
 	{
 		foreach (var item in Value.GetTokens(parent)) yield return item;

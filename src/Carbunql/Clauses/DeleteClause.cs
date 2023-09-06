@@ -2,7 +2,7 @@
 
 namespace Carbunql.Clauses;
 
-public class DeleteClause : IQueryCommand
+public class DeleteClause : IQueryCommandable
 {
 	public DeleteClause(SelectableTable table)
 	{
@@ -29,6 +29,19 @@ public class DeleteClause : IQueryCommand
 	public IEnumerable<PhysicalTable> GetPhysicalTables()
 	{
 		foreach (var item in Table.GetPhysicalTables())
+		{
+			yield return item;
+		}
+	}
+
+	public IDictionary<string, object?> GetParameters()
+	{
+		return Table.GetParameters();
+	}
+
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		foreach (var item in Table.GetCommonTables())
 		{
 			yield return item;
 		}

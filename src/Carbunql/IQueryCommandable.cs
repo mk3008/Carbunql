@@ -54,17 +54,26 @@ namespace Carbunql;
 [Union(43, typeof(MergeWhenInsert))]
 [Union(44, typeof(MergeWhenNothing))]
 [Union(45, typeof(MergeWhenUpdate))]
-public interface IQueryCommandable : IQueryCommand
+public interface IQueryCommandable
 {
+	IEnumerable<Token> GetTokens(Token? parent);
+
 	IDictionary<string, object?> GetParameters();
 
 	IEnumerable<SelectQuery> GetInternalQueries();
 
 	IEnumerable<PhysicalTable> GetPhysicalTables();
+
+	IEnumerable<CommonTable> GetCommonTables();
 }
 
 public static class IQueryCommandableExtension
 {
+	public static IEnumerable<Token> GetTokens(this IQueryCommandable source)
+	{
+		return source.GetTokens(null);
+	}
+
 	public static QueryCommand ToCommand(this IQueryCommandable source)
 	{
 		var builder = new CommandTextBuilder();

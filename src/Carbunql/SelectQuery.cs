@@ -49,7 +49,11 @@ public class SelectQuery : ReadQuery, IQueryCommandable
 
 		if (SelectClause == null) yield break;
 
-		if (parent == null && WithClause != null) foreach (var item in WithClause.GetTokens()) yield return item;
+		if (parent == null && WithClause != null)
+		{
+			var lst = GetCommonTables().ToList();
+			foreach (var item in WithClause.GetTokens(parent, lst)) yield return item;
+		}
 		foreach (var item in SelectClause.GetTokens(parent)) yield return item;
 		if (FromClause != null) foreach (var item in FromClause.GetTokens(parent)) yield return item;
 		if (WhereClause != null) foreach (var item in WhereClause.GetTokens(parent)) yield return item;
@@ -255,6 +259,80 @@ public class SelectQuery : ReadQuery, IQueryCommandable
 				{
 					yield return item.Table;
 				}
+			}
+		}
+	}
+
+	public override IEnumerable<CommonTable> GetCommonTables()
+	{
+		if (WithClause != null)
+		{
+			foreach (var item in WithClause.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+		if (SelectClause != null)
+		{
+			foreach (var item in SelectClause.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+		if (FromClause != null)
+		{
+			foreach (var item in FromClause.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+		if (WhereClause != null)
+		{
+			foreach (var item in WhereClause.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+		if (GroupClause != null)
+		{
+			foreach (var item in GroupClause.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+		if (HavingClause != null)
+		{
+			foreach (var item in HavingClause.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+		if (WindowClause != null)
+		{
+			foreach (var item in WindowClause.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+		if (OperatableQuery != null)
+		{
+			foreach (var item in OperatableQuery.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+		if (OrderClause != null)
+		{
+			foreach (var item in OrderClause.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+		if (LimitClause != null)
+		{
+			foreach (var item in LimitClause.GetCommonTables())
+			{
+				yield return item;
 			}
 		}
 	}

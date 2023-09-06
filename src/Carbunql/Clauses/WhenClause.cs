@@ -30,6 +30,17 @@ public class WhenClause : IList<MergeCondition>, IQueryCommandable
 		}
 	}
 
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		foreach (var condition in Conditions)
+		{
+			foreach (var item in condition.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public IDictionary<string, object?> GetParameters()
 	{
 		var prm = EmptyParameters.Get();

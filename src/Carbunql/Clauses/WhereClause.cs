@@ -40,4 +40,12 @@ public class WhereClause : IQueryCommandable
 			yield return item;
 		}
 	}
+
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		foreach (var item in Condition.GetCommonTables())
+		{
+			yield return item;
+		}
+	}
 }

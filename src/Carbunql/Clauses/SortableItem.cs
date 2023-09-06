@@ -36,6 +36,14 @@ public class SortableItem : IQueryCommandable
 		}
 	}
 
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		foreach (var item in Value.GetCommonTables())
+		{
+			yield return item;
+		}
+	}
+
 	public IDictionary<string, object?> GetParameters()
 	{
 		return Value.GetParameters();

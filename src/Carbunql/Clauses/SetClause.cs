@@ -1,7 +1,42 @@
-﻿namespace Carbunql.Clauses;
+﻿using Carbunql.Tables;
 
-public class SetClause : QueryCommandCollection<ValueBase>, IQueryCommand
+namespace Carbunql.Clauses;
+
+public class SetClause : QueryCommandCollection<ValueBase>, IQueryCommandable
 {
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		foreach (var x in Items)
+		{
+			foreach (var item in x.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	public IEnumerable<SelectQuery> GetInternalQueries()
+	{
+		foreach (var x in Items)
+		{
+			foreach (var item in x.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		foreach (var x in Items)
+		{
+			foreach (var item in x.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public override IEnumerable<Token> GetTokens(Token? parent)
 	{
 		Token clause = GetClauseToken(parent);

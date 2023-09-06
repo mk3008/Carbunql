@@ -1,11 +1,12 @@
 ﻿using Carbunql.Clauses;
+using Carbunql.Extensions;
 using Carbunql.Tables;
 using MessagePack;
 
 namespace Carbunql.Values;
 
 [MessagePackObject(keyAsPropertyName: true)]
-public class OperatableValue : IQueryCommand
+public class OperatableValue : IQueryCommandable
 {
 	public OperatableValue(string @operator, ValueBase value)
 	{
@@ -17,12 +18,25 @@ public class OperatableValue : IQueryCommand
 
 	public ValueBase Value { get; init; }
 
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		foreach (var item in Value.GetCommonTables())
+		{
+			yield return item;
+		}
+	}
+
 	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
 		foreach (var item in Value.GetInternalQueries())
 		{
 			yield return item;
 		}
+	}
+
+	public IDictionary<string, object?> GetParameters()
+	{
+		return Value.GetParameters();
 	}
 
 	public IEnumerable<PhysicalTable> GetPhysicalTables()

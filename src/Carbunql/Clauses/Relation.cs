@@ -63,6 +63,22 @@ public class Relation : IQueryCommandable
 		}
 	}
 
+
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		foreach (var item in Table.GetCommonTables())
+		{
+			yield return item;
+		}
+		if (Condition != null)
+		{
+			foreach (var item in Condition.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public IDictionary<string, object?> GetParameters()
 	{
 		var prm = EmptyParameters.Get();

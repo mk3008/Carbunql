@@ -1,4 +1,5 @@
-﻿using Carbunql.Extensions;
+﻿using Carbunql.Clauses;
+using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
 
@@ -53,6 +54,23 @@ public class MergeInsertQuery : IQueryCommandable
 			}
 		}
 	}
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		if (Datasource != null)
+		{
+			foreach (var item in Datasource.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+		if (Destination != null)
+		{
+			foreach (var item in Destination.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+	}
 
 	public IEnumerable<Token> GetTokens(Token? parent)
 	{
@@ -86,5 +104,4 @@ public class MergeInsertQuery : IQueryCommandable
 		foreach (var item in Datasource.GetTokens(bracket)) yield return item;
 		yield return Token.ReservedBracketEnd(this, parent);
 	}
-
 }

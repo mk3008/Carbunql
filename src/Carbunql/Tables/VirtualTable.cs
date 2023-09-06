@@ -77,4 +77,12 @@ public class VirtualTable : TableBase
 			yield return item;
 		}
 	}
+
+	public override IEnumerable<CommonTable> GetCommonTables()
+	{
+		foreach (var item in Query.GetCommonTables())
+		{
+			yield return item;
+		}
+	}
 }

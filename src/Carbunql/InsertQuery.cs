@@ -34,6 +34,17 @@ public class InsertQuery : IQueryCommandable, IReturning
 		}
 	}
 
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		if (Query != null)
+		{
+			foreach (var item in Query.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public IDictionary<string, object?>? Parameters { get; set; }
 
 	public virtual IDictionary<string, object?> GetParameters()

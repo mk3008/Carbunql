@@ -1,4 +1,6 @@
 ﻿using Carbunql.Clauses;
+using Carbunql.Extensions;
+using Carbunql.Tables;
 using MessagePack;
 
 namespace Carbunql.Values;
@@ -26,7 +28,7 @@ public class CastValue : ValueBase
 
 	public ValueBase Type { get; init; }
 
-	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()
+	protected override IEnumerable<SelectQuery> GetInternalQueriesCore()
 	{
 		foreach (var item in Inner.GetInternalQueries())
 		{
@@ -43,5 +45,36 @@ public class CastValue : ValueBase
 		foreach (var item in Inner.GetTokens(parent)) yield return item;
 		yield return Token.Reserved(this, parent, Symbol);
 		foreach (var item in Type.GetTokens(parent)) yield return item;
+	}
+
+	protected override IDictionary<string, object?> GetParametersCore()
+	{
+		var prm = Inner.GetParameters();
+		prm = prm.Merge(Type.GetParameters());
+		return prm;
+	}
+
+	protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()
+	{
+		foreach (var item in Inner.GetPhysicalTables())
+		{
+			yield return item;
+		}
+		foreach (var item in Type.GetPhysicalTables())
+		{
+			yield return item;
+		}
+	}
+
+	protected override IEnumerable<CommonTable> GetCommonTablesCore()
+	{
+		foreach (var item in Inner.GetCommonTables())
+		{
+			yield return item;
+		}
+		foreach (var item in Type.GetCommonTables())
+		{
+			yield return item;
+		}
 	}
 }

@@ -33,4 +33,9 @@ public class CommonTable : SelectableTable
 	public bool IsSelectQuery => Table.IsSelectQuery;
 
 	public SelectQuery GetSelectQuery() => Table.GetSelectQuery();
+
+	public override IEnumerable<CommonTable> GetCommonTables()
+	{
+		yield return this;
+	}
 }

@@ -30,6 +30,17 @@ public class MergeUpdateQuery : IQueryCommandable
 		}
 	}
 
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		if (SetClause != null)
+		{
+			foreach (var item in SetClause.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public virtual IDictionary<string, object?> GetParameters()
 	{
 		var prm = EmptyParameters.Get();

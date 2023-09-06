@@ -29,6 +29,14 @@ public class HavingClause : IQueryCommandable
 		}
 	}
 
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		foreach (var item in Condition.GetCommonTables())
+		{
+			yield return item;
+		}
+	}
+
 	public IDictionary<string, object?> GetParameters()
 	{
 		return Condition.GetParameters();

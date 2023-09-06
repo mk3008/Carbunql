@@ -1,11 +1,10 @@
 ﻿using Carbunql.Clauses;
-using Carbunql.Values;
-using System.Diagnostics.Tracing;
 
 namespace Carbunql.Building;
 
 public static class QueryBaseExtension
 {
+	[Obsolete("With clauses do not need to be manually imported.")]
 	public static SelectQuery ImportCommonTable(this SelectQuery source, IReadQuery tagert)
 	{
 		var w = tagert.GetWithClause();
@@ -21,7 +20,6 @@ public static class QueryBaseExtension
 
 	public static CommonTable With(this SelectQuery source, IReadQuery q)
 	{
-		source.ImportCommonTable(q);
 		return source.With(q.ToCommonTable("cte"));
 	}
 
@@ -39,7 +37,6 @@ public static class QueryBaseExtension
 
 	public static CommonTable With(this SelectQuery source, ValuesQuery q, IEnumerable<string> columnAliases)
 	{
-		source.ImportCommonTable(q);
 		return source.With(q.ToCommonTable("cte", columnAliases));
 	}
 

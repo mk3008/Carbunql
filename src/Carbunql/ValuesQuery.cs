@@ -190,6 +190,17 @@ public class ValuesQuery : ReadQuery
 		}
 	}
 
+	public override IEnumerable<CommonTable> GetCommonTables()
+	{
+		foreach (var row in Rows)
+		{
+			foreach (var item in row.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public override SelectQuery GetOrNewSelectQuery()
 	{
 		return ToSelectQuery();

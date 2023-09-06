@@ -64,4 +64,12 @@ public class FunctionTable : TableBase
 			yield return item;
 		}
 	}
+
+	public override IEnumerable<CommonTable> GetCommonTables()
+	{
+		foreach (var item in Argument.GetCommonTables())
+		{
+			yield return item;
+		}
+	}
 }

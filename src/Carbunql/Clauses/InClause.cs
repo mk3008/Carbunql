@@ -1,4 +1,6 @@
-﻿using Carbunql.Values;
+﻿using Carbunql.Extensions;
+using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 
 namespace Carbunql.Clauses;
@@ -45,7 +47,7 @@ public class InClause : ValueBase
 
 	public ValueBase Argument { get; init; }
 
-	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()
+	protected override IEnumerable<SelectQuery> GetInternalQueriesCore()
 	{
 		foreach (var item in Value.GetInternalQueries())
 		{
@@ -67,5 +69,36 @@ public class InClause : ValueBase
 
 		yield return Token.Reserved(this, parent, "in");
 		foreach (var item in Argument.GetTokens(parent)) yield return item;
+	}
+
+	protected override IDictionary<string, object?> GetParametersCore()
+	{
+		var prm = Value.GetParameters();
+		prm = prm.Merge(Argument.GetParameters());
+		return prm;
+	}
+
+	protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()
+	{
+		foreach (var item in Value.GetPhysicalTables())
+		{
+			yield return item;
+		}
+		foreach (var item in Argument.GetPhysicalTables())
+		{
+			yield return item;
+		}
+	}
+
+	protected override IEnumerable<CommonTable> GetCommonTablesCore()
+	{
+		foreach (var item in Value.GetCommonTables())
+		{
+			yield return item;
+		}
+		foreach (var item in Argument.GetCommonTables())
+		{
+			yield return item;
+		}
 	}
 }

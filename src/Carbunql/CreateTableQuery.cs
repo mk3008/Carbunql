@@ -19,23 +19,19 @@ public class CreateTableQuery : IQueryCommandable
 
 	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
-		if (Query != null)
+		if (Query == null) yield break;
+		foreach (var item in Query.GetInternalQueries())
 		{
-			foreach (var item in Query.GetInternalQueries())
-			{
-				yield return item;
-			}
+			yield return item;
 		}
 	}
 
 	public IEnumerable<PhysicalTable> GetPhysicalTables()
 	{
-		if (Query != null)
+		if (Query == null) yield break;
+		foreach (var item in Query.GetPhysicalTables())
 		{
-			foreach (var item in Query.GetPhysicalTables())
-			{
-				yield return item;
-			}
+			yield return item;
 		}
 	}
 
@@ -55,5 +51,11 @@ public class CreateTableQuery : IQueryCommandable
 		yield return t;
 
 		foreach (var item in Query.GetTokens()) yield return item;
+	}
+
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		if (Query == null) yield break;
+		foreach (var item in Query.GetCommonTables()) yield return item;
 	}
 }

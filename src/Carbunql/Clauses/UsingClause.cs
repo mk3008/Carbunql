@@ -42,6 +42,19 @@ public class UsingClause : IQueryCommandable
 		}
 	}
 
+
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		foreach (var item in Root.GetCommonTables())
+		{
+			yield return item;
+		}
+		foreach (var item in Condition.GetCommonTables())
+		{
+			yield return item;
+		}
+	}
+
 	public IDictionary<string, object?> GetParameters()
 	{
 		var prm = EmptyParameters.Get();

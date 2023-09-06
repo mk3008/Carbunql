@@ -11,7 +11,7 @@ public class QueryCommandMonitor
         Output = output;
     }
 
-    public void Log(IQueryCommand arg)
+    public void Log(IQueryCommandable arg)
     {
         var frm = new TokenFormatLogic();
         var bld = new CommandTextBuilder(frm);

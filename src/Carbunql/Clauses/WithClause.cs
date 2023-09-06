@@ -21,24 +21,29 @@ public class WithClause : IList<CommonTable>, IQueryCommandable
 
 	public bool HasRecursiveKeyword { get; set; } = false;
 
-	public IEnumerable<Token> GetTokens(Token? parent)
+	public IEnumerable<Token> GetTokens(Token? parent, IList<CommonTable> commons)
 	{
-		if (!CommonTables.Any()) yield break;
+		if (!commons.Any() || parent != null) yield break;
 
 		Token? clause;
 		if (HasRecursiveKeyword)
 		{
-			clause = Token.Reserved(this, parent, "with recursive");
+			clause = Token.Reserved(this, null, "with recursive");
 		}
 		else
 		{
-			clause = Token.Reserved(this, parent, "with");
+			clause = Token.Reserved(this, null, "with");
 		}
 		yield return clause;
 
+
+		var dic = new Dictionary<string, CommonTable>();
 		var isFisrt = true;
-		foreach (var item in CommonTables)
+		foreach (var item in commons)
 		{
+			if (dic.ContainsKey(item.Alias)) continue;
+			dic.Add(item.Alias, item);
+
 			if (isFisrt)
 			{
 				isFisrt = false;
@@ -48,6 +53,14 @@ public class WithClause : IList<CommonTable>, IQueryCommandable
 				yield return Token.Comma(this, clause);
 			}
 			foreach (var token in item.GetTokens(clause)) yield return token;
+		}
+	}
+
+	public IEnumerable<Token> GetTokens(Token? parent)
+	{
+		foreach (var item in GetTokens(parent, CommonTables))
+		{
+			yield return item;
 		}
 	}
 
@@ -81,6 +94,11 @@ public class WithClause : IList<CommonTable>, IQueryCommandable
 				yield return item;
 			}
 		}
+	}
+
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		foreach (var commonTable in CommonTables) yield return commonTable;
 	}
 
 	#region implements IList<CommonTable>

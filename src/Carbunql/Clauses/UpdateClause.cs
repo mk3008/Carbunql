@@ -2,7 +2,7 @@
 
 namespace Carbunql.Clauses;
 
-public class UpdateClause : IQueryCommand
+public class UpdateClause : IQueryCommandable
 {
 	public UpdateClause(SelectableTable table)
 	{
@@ -32,5 +32,18 @@ public class UpdateClause : IQueryCommand
 		{
 			yield return item;
 		}
+	}
+
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		foreach (var item in Table.GetCommonTables())
+		{
+			yield return item;
+		}
+	}
+
+	public IDictionary<string, object?> GetParameters()
+	{
+		throw new NotImplementedException();
 	}
 }

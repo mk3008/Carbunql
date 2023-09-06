@@ -95,4 +95,12 @@ public class SelectableTable : IQueryCommandable, ISelectable
 			yield return item;
 		}
 	}
+
+	public virtual IEnumerable<CommonTable> GetCommonTables()
+	{
+		foreach (var item in Table.GetCommonTables())
+		{
+			yield return item;
+		}
+	}
 }

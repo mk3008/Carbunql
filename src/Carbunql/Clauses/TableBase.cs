@@ -53,4 +53,6 @@ public abstract class TableBase : IQueryCommandable
 	public abstract IEnumerable<SelectQuery> GetInternalQueries();
 
 	public abstract IEnumerable<PhysicalTable> GetPhysicalTables();
+
+	public abstract IEnumerable<CommonTable> GetCommonTables();
 }

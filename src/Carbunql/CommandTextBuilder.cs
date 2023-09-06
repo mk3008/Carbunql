@@ -32,7 +32,7 @@ public class CommandTextBuilder
         PrevToken = null;
     }
 
-    public string Execute(IQueryCommand cmd)
+    public string Execute(IQueryCommandable cmd)
     {
         return Execute(cmd.GetTokens());
     }

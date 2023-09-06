@@ -1,4 +1,5 @@
 ﻿using Carbunql.Clauses;
+using Carbunql.Tables;
 using MessagePack;
 
 namespace Carbunql.Values;
@@ -52,5 +53,25 @@ public class LiteralValue : ValueBase
 	public override IEnumerable<Token> GetCurrentTokens(Token? parent)
 	{
 		yield return new Token(this, parent, CommandText);
+	}
+
+	protected override IEnumerable<CommonTable> GetCommonTablesCore()
+	{
+		yield break;
+	}
+
+	protected override IEnumerable<SelectQuery> GetInternalQueriesCore()
+	{
+		yield break;
+	}
+
+	protected override IDictionary<string, object?> GetParametersCore()
+	{
+		return EmptyParameters.Get();
+	}
+
+	protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()
+	{
+		yield break;
 	}
 }

@@ -58,6 +58,25 @@ public class SelectClause : QueryCommandCollection<SelectableItem>, IQueryComman
 		}
 	}
 
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		if (Top != null)
+		{
+			foreach (var item in Top.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+
+		foreach (var value in Items)
+		{
+			foreach (var item in value.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public override IEnumerable<Token> GetTokens(Token? parent)
 	{
 		Token clause = GetClauseToken(parent);

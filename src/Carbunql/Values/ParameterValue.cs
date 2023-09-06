@@ -1,4 +1,5 @@
 ﻿using Carbunql.Clauses;
+using Carbunql.Tables;
 using MessagePack;
 
 namespace Carbunql.Values;
@@ -29,13 +30,28 @@ public class ParameterValue : ValueBase
 
 	public Dictionary<string, object?> Parameters { get; set; } = new();
 
-	public override IDictionary<string, object?> GetParameters()
+	public override IEnumerable<Token> GetCurrentTokens(Token? parent)
+	{
+		yield return new Token(this, parent, Key);
+	}
+
+	protected override IDictionary<string, object?> GetParametersCore()
 	{
 		return Parameters;
 	}
 
-	public override IEnumerable<Token> GetCurrentTokens(Token? parent)
+	protected override IEnumerable<SelectQuery> GetInternalQueriesCore()
 	{
-		yield return new Token(this, parent, Key);
+		yield break;
+	}
+
+	protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()
+	{
+		yield break;
+	}
+
+	protected override IEnumerable<CommonTable> GetCommonTablesCore()
+	{
+		yield break;
 	}
 }
