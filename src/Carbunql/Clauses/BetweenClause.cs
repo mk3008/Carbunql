@@ -1,4 +1,6 @@
-﻿using MessagePack;
+﻿using Carbunql.Extensions;
+using Carbunql.Tables;
+using MessagePack;
 
 namespace Carbunql.Clauses;
 
@@ -29,7 +31,7 @@ public class BetweenClause : ValueBase
 
 	public bool IsNegative { get; init; }
 
-	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()
+	protected override IEnumerable<SelectQuery> GetInternalQueriesCore()
 	{
 		foreach (var item in Value.GetInternalQueries())
 		{
@@ -40,6 +42,46 @@ public class BetweenClause : ValueBase
 			yield return item;
 		}
 		foreach (var item in End.GetInternalQueries())
+		{
+			yield return item;
+		}
+	}
+
+	protected override IDictionary<string, object?> GetParametersCore()
+	{
+		var prm = Value.GetParameters();
+		prm = prm.Merge(Start.GetParameters());
+		prm = prm.Merge(End.GetParameters());
+		return prm;
+	}
+
+	protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()
+	{
+		foreach (var item in Value.GetPhysicalTables())
+		{
+			yield return item;
+		}
+		foreach (var item in Start.GetPhysicalTables())
+		{
+			yield return item;
+		}
+		foreach (var item in End.GetPhysicalTables())
+		{
+			yield return item;
+		}
+	}
+
+	protected override IEnumerable<CommonTable> GetCommonTablesCore()
+	{
+		foreach (var item in Value.GetCommonTables())
+		{
+			yield return item;
+		}
+		foreach (var item in Start.GetCommonTables())
+		{
+			yield return item;
+		}
+		foreach (var item in End.GetCommonTables())
 		{
 			yield return item;
 		}

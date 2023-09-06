@@ -33,6 +33,14 @@ public abstract class ValueBase : IQueryCommandable
 		return value;
 	}
 
+
+	public virtual IDictionary<string, object?> GetParameters()
+	{
+		var prm = GetParametersCore();
+		prm = prm.Merge(OperatableValue?.GetParameters());
+		return prm;
+	}
+
 	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
 		foreach (var item in GetInternalQueriesCore())
@@ -63,15 +71,28 @@ public abstract class ValueBase : IQueryCommandable
 		}
 	}
 
-	internal virtual IEnumerable<SelectQuery> GetInternalQueriesCore()
+	public IEnumerable<CommonTable> GetCommonTables()
 	{
-		yield break;
+		foreach (var item in GetCommonTablesCore())
+		{
+			yield return item;
+		}
+		if (OperatableValue != null)
+		{
+			foreach (var item in OperatableValue.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
 	}
 
-	internal virtual IEnumerable<PhysicalTable> GetPhysicalTablesCore()
-	{
-		yield break;
-	}
+	protected abstract IDictionary<string, object?> GetParametersCore();
+
+	protected abstract IEnumerable<SelectQuery> GetInternalQueriesCore();
+
+	protected abstract IEnumerable<PhysicalTable> GetPhysicalTablesCore();
+
+	protected abstract IEnumerable<CommonTable> GetCommonTablesCore();
 
 	public abstract IEnumerable<Token> GetCurrentTokens(Token? parent);
 
@@ -98,10 +119,5 @@ public abstract class ValueBase : IQueryCommandable
 	public string ToText()
 	{
 		return GetTokens(null).ToText();
-	}
-
-	public virtual IDictionary<string, object?> GetParameters()
-	{
-		return EmptyParameters.Get();
 	}
 }

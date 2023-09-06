@@ -91,6 +91,55 @@ public class UpdateQuery : IQueryCommandable, IReturning
 				yield return item;
 			}
 		}
+		if (ReturningClause != null)
+		{
+			foreach (var item in ReturningClause.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		if (UpdateClause != null)
+		{
+			foreach (var item in UpdateClause.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+		if (SetClause != null)
+		{
+			foreach (var value in SetClause.Items)
+			{
+				foreach (var item in value.GetCommonTables())
+				{
+					yield return item;
+				}
+			}
+		}
+		if (FromClause != null)
+		{
+			foreach (var item in FromClause.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+		if (WhereClause != null)
+		{
+			foreach (var item in WhereClause.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+		if (ReturningClause != null)
+		{
+			foreach (var item in ReturningClause.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
 	}
 
 	public IDictionary<string, object?>? Parameters { get; set; }
@@ -102,6 +151,7 @@ public class UpdateQuery : IQueryCommandable, IReturning
 		prm = prm.Merge(FromClause?.GetParameters());
 		prm = prm.Merge(WhereClause?.GetParameters());
 		prm = prm.Merge(Parameters);
+		prm = prm.Merge(ReturningClause?.GetParameters());
 		return prm;
 	}
 

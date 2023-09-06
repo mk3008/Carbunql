@@ -1,4 +1,6 @@
 ﻿using Carbunql.Clauses;
+using Carbunql.Extensions;
+using Carbunql.Tables;
 using MessagePack;
 
 namespace Carbunql.Values;
@@ -19,7 +21,7 @@ public class CaseExpression : ValueBase
 
 	public List<WhenExpression> WhenExpressions { get; init; } = new();
 
-	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()
+	protected override IEnumerable<SelectQuery> GetInternalQueriesCore()
 	{
 		if (CaseCondition != null)
 		{
@@ -31,6 +33,41 @@ public class CaseExpression : ValueBase
 		foreach (var exp in WhenExpressions)
 		{
 			foreach (var item in exp.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+	}
+	protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()
+	{
+		if (CaseCondition != null)
+		{
+			foreach (var item in CaseCondition.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+		foreach (var exp in WhenExpressions)
+		{
+			foreach (var item in exp.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	protected override IEnumerable<CommonTable> GetCommonTablesCore()
+	{
+		if (CaseCondition != null)
+		{
+			foreach (var item in CaseCondition.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+		foreach (var exp in WhenExpressions)
+		{
+			foreach (var item in exp.GetCommonTables())
 			{
 				yield return item;
 			}
@@ -50,5 +87,13 @@ public class CaseExpression : ValueBase
 		}
 
 		yield return Token.Reserved(this, parent, "end");
+	}
+
+	protected override IDictionary<string, object?> GetParametersCore()
+	{
+		var prm = EmptyParameters.Get();
+		prm = prm.Merge(CaseCondition?.GetParameters());
+		foreach (var exp in WhenExpressions) prm = prm.Merge(exp.GetParameters());
+		return prm;
 	}
 }

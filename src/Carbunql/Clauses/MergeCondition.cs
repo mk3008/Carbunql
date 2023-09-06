@@ -35,6 +35,17 @@ public abstract class MergeCondition : IQueryCommandable
 		}
 	}
 
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		if (Condition != null)
+		{
+			foreach (var item in Condition.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public abstract IDictionary<string, object?> GetParameters();
 
 	public abstract IEnumerable<Token> GetTokens(Token? parent);

@@ -1,4 +1,5 @@
 ﻿using Carbunql.Clauses;
+using Carbunql.Tables;
 using MessagePack;
 
 namespace Carbunql.Values;
@@ -18,14 +19,11 @@ public class QueryContainer : ValueBase
 
 	public IQueryCommandable Query { get; init; }
 
-	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()
+	protected override IEnumerable<SelectQuery> GetInternalQueriesCore()
 	{
-		if (Query is SelectQuery sq)
+		foreach (var item in Query.GetInternalQueries())
 		{
-			foreach (var item in sq.GetInternalQueries())
-			{
-				yield return item;
-			}
+			yield return item;
 		}
 	}
 
@@ -35,5 +33,26 @@ public class QueryContainer : ValueBase
 		yield return bracket;
 		foreach (var item in Query.GetTokens(bracket)) yield return item;
 		yield return Token.ReservedBracketEnd(this, parent);
+	}
+
+	protected override IDictionary<string, object?> GetParametersCore()
+	{
+		return Query.GetParameters();
+	}
+
+	protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()
+	{
+		foreach (var item in Query.GetPhysicalTables())
+		{
+			yield return item;
+		}
+	}
+
+	protected override IEnumerable<CommonTable> GetCommonTablesCore()
+	{
+		foreach (var item in Query.GetCommonTables())
+		{
+			yield return item;
+		}
 	}
 }

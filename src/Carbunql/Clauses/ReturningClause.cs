@@ -2,7 +2,7 @@
 
 namespace Carbunql.Clauses;
 
-public class ReturningClause : IQueryCommand
+public class ReturningClause : IQueryCommandable
 {
 	public ReturningClause(ValueBase value)
 	{
@@ -29,6 +29,19 @@ public class ReturningClause : IQueryCommand
 	public IEnumerable<PhysicalTable> GetPhysicalTables()
 	{
 		foreach (var item in Value.GetPhysicalTables())
+		{
+			yield return item;
+		}
+	}
+
+	public IDictionary<string, object?> GetParameters()
+	{
+		return Value.GetParameters();
+	}
+
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		foreach (var item in Value.GetCommonTables())
 		{
 			yield return item;
 		}

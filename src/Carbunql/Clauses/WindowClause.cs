@@ -51,6 +51,17 @@ public class WindowClause : IList<NamedWindowDefinition>, IQueryCommandable
 		}
 	}
 
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		foreach (var definition in NamedWindowDefinitions)
+		{
+			foreach (var item in definition.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public IEnumerable<Token> GetTokens(Token? parent)
 	{
 		if (!NamedWindowDefinitions.Any()) yield break;
@@ -130,6 +141,5 @@ public class WindowClause : IList<NamedWindowDefinition>, IQueryCommandable
 	{
 		return ((IEnumerable)NamedWindowDefinitions).GetEnumerator();
 	}
-
 	#endregion
 }

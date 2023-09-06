@@ -64,6 +64,22 @@ public class LimitClause : IQueryCommandable
 		}
 	}
 
+
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		foreach (var item in Condition.GetCommonTables())
+		{
+			yield return item;
+		}
+		if (Offset != null)
+		{
+			foreach (var item in Offset.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public IDictionary<string, object?> GetParameters()
 	{
 		var prm = Condition.GetParameters();

@@ -98,6 +98,32 @@ public class MergeQuery : IQueryCommandable
 		}
 	}
 
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		if (WithClause != null)
+		{
+			foreach (var item in WithClause.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+		foreach (var item in MergeClause.GetCommonTables())
+		{
+			yield return item;
+		}
+		foreach (var item in UsingClause.GetCommonTables())
+		{
+			yield return item;
+		}
+		if (WhenClause != null)
+		{
+			foreach (var item in WhenClause.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public virtual IDictionary<string, object?> GetParameters()
 	{
 		var prm = EmptyParameters.Get();

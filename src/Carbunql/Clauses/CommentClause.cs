@@ -1,5 +1,4 @@
 ﻿using Carbunql.Tables;
-using MessagePack;
 using System.Collections;
 
 namespace Carbunql.Clauses;
@@ -32,6 +31,11 @@ public class CommentClause : IList<string>, IQueryCommandable
 	public void CopyTo(string[] array, int arrayIndex)
 	{
 		((ICollection<string>)Collection).CopyTo(array, arrayIndex);
+	}
+
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		yield break;
 	}
 
 	public IEnumerator<string> GetEnumerator()

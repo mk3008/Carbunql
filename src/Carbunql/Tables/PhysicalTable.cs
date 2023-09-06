@@ -58,4 +58,9 @@ public class PhysicalTable : TableBase
 	{
 		yield return this;
 	}
+
+	public override IEnumerable<CommonTable> GetCommonTables()
+	{
+		yield break;
+	}
 }

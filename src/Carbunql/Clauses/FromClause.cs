@@ -53,6 +53,24 @@ public class FromClause : IQueryCommandable
 			}
 		}
 	}
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		foreach (var item in Root.GetCommonTables())
+		{
+			yield return item;
+		}
+
+		if (Relations != null)
+		{
+			foreach (var relation in Relations)
+			{
+				foreach (var item in relation.GetCommonTables())
+				{
+					yield return item;
+				}
+			}
+		}
+	}
 
 	public IDictionary<string, object?> GetParameters()
 	{

@@ -17,7 +17,6 @@ public static class ReadQueryExtension
 	public static (SelectQuery, CommonTable) ToCTE(this IReadQuery source, string alias)
 	{
 		var sq = new SelectQuery();
-		sq.ImportCommonTable(source);
 
 		sq.WithClause ??= new WithClause();
 		var ct = source.ToCommonTable(alias);

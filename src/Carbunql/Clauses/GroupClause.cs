@@ -43,6 +43,17 @@ public class GroupClause : IList<ValueBase>, IQueryCommandable
 		}
 	}
 
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		foreach (var value in Items)
+		{
+			foreach (var item in value.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public IEnumerable<Token> GetTokens(Token? parent)
 	{
 		var clause = Token.Reserved(this, parent, "group by");

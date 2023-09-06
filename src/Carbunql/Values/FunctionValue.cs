@@ -1,4 +1,6 @@
 ﻿using Carbunql.Clauses;
+using Carbunql.Extensions;
+using Carbunql.Tables;
 using MessagePack;
 
 namespace Carbunql.Values;
@@ -94,7 +96,7 @@ public class FunctionValue : ValueBase
 
 	public Filter? Filter { get; set; }
 
-	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()
+	protected override IEnumerable<SelectQuery> GetInternalQueriesCore()
 	{
 		foreach (var item in Argument.GetInternalQueries())
 		{
@@ -133,6 +135,58 @@ public class FunctionValue : ValueBase
 		if (Over != null)
 		{
 			foreach (var item in Over.GetTokens(parent)) yield return item;
+		}
+	}
+
+	protected override IDictionary<string, object?> GetParametersCore()
+	{
+		var prm = Argument.GetParameters();
+		prm = prm.Merge(Filter?.GetParameters());
+		prm = prm.Merge(Over?.GetParameters());
+		return prm;
+	}
+
+	protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()
+	{
+		foreach (var item in Argument.GetPhysicalTables())
+		{
+			yield return item;
+		}
+		if (Filter != null)
+		{
+			foreach (var item in Filter.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+		if (Over != null)
+		{
+			foreach (var item in Over.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	protected override IEnumerable<CommonTable> GetCommonTablesCore()
+	{
+		foreach (var item in Argument.GetCommonTables())
+		{
+			yield return item;
+		}
+		if (Filter != null)
+		{
+			foreach (var item in Filter.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+		if (Over != null)
+		{
+			foreach (var item in Over.GetCommonTables())
+			{
+				yield return item;
+			}
 		}
 	}
 }

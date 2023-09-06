@@ -98,4 +98,36 @@ public class DeleteQuery : IQueryCommandable, IReturning
 		if (ReturningClause == null) yield break;
 		foreach (var item in ReturningClause.GetTokens(parent)) yield return item;
 	}
+
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		if (DeleteClause != null)
+		{
+			foreach (var item in DeleteClause.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+		if (WithClause != null)
+		{
+			foreach (var item in WithClause.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+		if (WhereClause != null)
+		{
+			foreach (var item in WhereClause.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+		if (ReturningClause != null)
+		{
+			foreach (var item in ReturningClause.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+	}
 }

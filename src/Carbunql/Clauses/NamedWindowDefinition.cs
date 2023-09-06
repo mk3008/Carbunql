@@ -37,6 +37,11 @@ public class NamedWindowDefinition : IQueryCommandable
 		foreach (var item in WindowDefinition.GetPhysicalTables()) yield return item;
 	}
 
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		foreach (var item in WindowDefinition.GetCommonTables()) yield return item;
+	}
+
 	public IEnumerable<Token> GetTokens(Token? parent)
 	{
 		yield return new Token(this, parent, Alias); ;

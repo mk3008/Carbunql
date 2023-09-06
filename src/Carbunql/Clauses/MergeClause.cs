@@ -32,6 +32,14 @@ public class MergeClause : IQueryCommandable
 		}
 	}
 
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		foreach (var item in Table.GetCommonTables())
+		{
+			yield return item;
+		}
+	}
+
 	public IEnumerable<Token> GetTokens(Token? parent)
 	{
 		var t = Token.Reserved(this, parent, "merge into");

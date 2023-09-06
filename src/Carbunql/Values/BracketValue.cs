@@ -1,4 +1,5 @@
 ﻿using Carbunql.Clauses;
+using Carbunql.Tables;
 using MessagePack;
 
 namespace Carbunql.Values;
@@ -18,9 +19,30 @@ public class BracketValue : ValueBase
 
 	public ValueBase Inner { get; init; }
 
-	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()
+	protected override IEnumerable<SelectQuery> GetInternalQueriesCore()
 	{
 		foreach (var item in Inner.GetInternalQueries())
+		{
+			yield return item;
+		}
+	}
+
+	protected override IDictionary<string, object?> GetParametersCore()
+	{
+		return Inner.GetParameters();
+	}
+
+	protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()
+	{
+		foreach (var item in Inner.GetPhysicalTables())
+		{
+			yield return item;
+		}
+	}
+
+	protected override IEnumerable<CommonTable> GetCommonTablesCore()
+	{
+		foreach (var item in Inner.GetCommonTables())
 		{
 			yield return item;
 		}

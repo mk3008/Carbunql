@@ -34,7 +34,7 @@ public class WindowDefinition : IQueryCommandable
 
 	public string Name { get; set; } = string.Empty;
 
-    public PartitionClause? PartitionBy { get; set; }
+	public PartitionClause? PartitionBy { get; set; }
 
 	public OrderClause? OrderBy { get; set; }
 
@@ -88,6 +88,21 @@ public class WindowDefinition : IQueryCommandable
 		if (OrderBy != null)
 		{
 			foreach (var item in OrderBy.GetPhysicalTables()) yield return item;
+		}
+	}
+
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		if (!string.IsNullOrEmpty(Name)) yield break;
+		if (PartitionBy == null && OrderBy == null) yield break;
+
+		if (PartitionBy != null)
+		{
+			foreach (var item in PartitionBy.GetCommonTables()) yield return item;
+		}
+		if (OrderBy != null)
+		{
+			foreach (var item in OrderBy.GetCommonTables()) yield return item;
 		}
 	}
 

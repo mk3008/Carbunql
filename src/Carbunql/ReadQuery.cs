@@ -28,6 +28,8 @@ public abstract class ReadQuery : IReadQuery
 
 	public abstract IEnumerable<PhysicalTable> GetPhysicalTables();
 
+	public abstract IEnumerable<CommonTable> GetCommonTables();
+
 	public IDictionary<string, object?> Parameters { get; set; } = new Dictionary<string, object?>();
 
 	public virtual IDictionary<string, object?> GetInnerParameters() => EmptyParameters.Get();

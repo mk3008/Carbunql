@@ -36,6 +36,17 @@ public class PartitionClause : QueryCommandCollection<ValueBase>, IQueryCommanda
 		}
 	}
 
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		foreach (var value in Items)
+		{
+			foreach (var item in value.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	public override IEnumerable<Token> GetTokens(Token? parent)
 	{
 		if (!Items.Any()) yield break;

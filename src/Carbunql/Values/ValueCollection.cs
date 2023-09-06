@@ -8,7 +8,7 @@ using System.Collections;
 namespace Carbunql.Values;
 
 [MessagePackObject(keyAsPropertyName: true)]
-public class ValueCollection : ValueBase, IList<ValueBase>, IQueryCommand
+public class ValueCollection : ValueBase, IList<ValueBase>, IQueryCommandable
 {
 	public ValueCollection()
 	{
@@ -39,7 +39,7 @@ public class ValueCollection : ValueBase, IList<ValueBase>, IQueryCommand
 
 	public ValueCollection(string tableAlias, IEnumerable<string> columns)
 	{
-		if (!columns.Any()) throw new ArgumentException(nameof(columns));
+		if (!columns.Any()) throw new ArgumentException(null, nameof(columns));
 		foreach (var column in columns)
 		{
 			Collection.Add(new ColumnValue(tableAlias, column));
@@ -53,7 +53,7 @@ public class ValueCollection : ValueBase, IList<ValueBase>, IQueryCommand
 		foreach (var item in Collection) yield return item.GetDefaultName();
 	}
 
-	internal override IEnumerable<SelectQuery> GetInternalQueriesCore()
+	protected override IEnumerable<SelectQuery> GetInternalQueriesCore()
 	{
 		foreach (var value in Collection)
 		{
@@ -64,11 +64,22 @@ public class ValueCollection : ValueBase, IList<ValueBase>, IQueryCommand
 		}
 	}
 
-	internal override IEnumerable<PhysicalTable> GetPhysicalTablesCore()
+	protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()
 	{
 		foreach (var value in Collection)
 		{
 			foreach (var item in value.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	protected override IEnumerable<CommonTable> GetCommonTablesCore()
+	{
+		foreach (var value in Collection)
+		{
+			foreach (var item in value.GetCommonTables())
 			{
 				yield return item;
 			}
@@ -92,7 +103,7 @@ public class ValueCollection : ValueBase, IList<ValueBase>, IQueryCommand
 		}
 	}
 
-	public override IDictionary<string, object?> GetParameters()
+	protected override IDictionary<string, object?> GetParametersCore()
 	{
 		var prm = EmptyParameters.Get();
 		Collection.ForEach(x => prm = prm.Merge(x.GetParameters()));

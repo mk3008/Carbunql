@@ -1,10 +1,12 @@
 ﻿using Carbunql.Clauses;
+using Carbunql.Extensions;
+using Carbunql.Tables;
 using MessagePack;
 
 namespace Carbunql.Values;
 
 [MessagePackObject(keyAsPropertyName: true)]
-public class WhenExpression : IQueryCommand
+public class WhenExpression : IQueryCommandable
 {
 	public WhenExpression(ValueBase condition, ValueBase value)
 	{
@@ -54,6 +56,44 @@ public class WhenExpression : IQueryCommand
 		{
 			yield return Token.Reserved(this, parent, "else");
 			foreach (var item in Value.GetTokens(parent)) yield return item;
+		}
+	}
+
+	public IDictionary<string, object?> GetParameters()
+	{
+		var prm = EmptyParameters.Get();
+		prm = prm.Merge(Condition?.GetParameters());
+		prm = prm.Merge(Value.GetParameters());
+		return prm;
+	}
+
+	public IEnumerable<PhysicalTable> GetPhysicalTables()
+	{
+		if (Condition != null)
+		{
+			foreach (var item in Condition.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+		foreach (var item in Value.GetPhysicalTables())
+		{
+			yield return item;
+		}
+	}
+
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		if (Condition != null)
+		{
+			foreach (var item in Condition.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+		foreach (var item in Value.GetCommonTables())
+		{
+			yield return item;
 		}
 	}
 }

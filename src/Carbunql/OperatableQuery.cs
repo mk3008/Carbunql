@@ -50,4 +50,12 @@ public class OperatableQuery : IQueryCommandable
 			yield return item;
 		}
 	}
+
+	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		foreach (var item in Query.GetCommonTables())
+		{
+			yield return item;
+		}
+	}
 }
