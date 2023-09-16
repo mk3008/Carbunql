@@ -1,11 +1,15 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Values;
-using System.Linq.Expressions;
 
 namespace Carbunql.Analysis.Parser;
 
 public static class CastValueParser
 {
+	public static bool IsCastValue(string text)
+	{
+		return text ==  "::";
+	}
+
 	public static CastValue Parse(ValueBase value, string symbol, string argument)
 	{
 		using var r = new TokenReader(argument);

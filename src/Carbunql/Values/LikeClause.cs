@@ -4,9 +4,9 @@ using Carbunql.Tables;
 
 namespace Carbunql.Values;
 
-public class LikeExpression : ValueBase
+public class LikeClause : ValueBase
 {
-	public LikeExpression(ValueBase value, ValueBase argument, bool isNegative = false)
+	public LikeClause(ValueBase value, ValueBase argument, bool isNegative = false)
 	{
 		Value = value;
 		Argument = argument;

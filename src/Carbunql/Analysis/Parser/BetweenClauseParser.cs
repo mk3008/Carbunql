@@ -12,6 +12,8 @@ public static class BetweenClauseParser
 
 	public static BetweenClause Parse(ValueBase value, ITokenReader r, bool isNegative)
 	{
+		r.Read("between");
+
 		var start = ValueParser.ParseCore(r);
 		r.Read("and");
 		var end = ValueParser.ParseCore(r);

@@ -19,16 +19,9 @@ public static class ValueCollectionParser
 
 	public static ValueCollection ParseAsInner(ITokenReader r)
 	{
-		r.ReadOrDefault("(");
-
-		// no argument. '()'
-		if (r.Peek().IsEqualNoCase(")"))
-		{
-			r.Read(")");
-			return new ValueCollection();
-		}
-
 		using var ir = new BracketInnerTokenReader(r);
+		if (ir.Peek() == ")") return new ValueCollection();
+
 		var v = new ValueCollection(ReadValues(ir).ToList());
 
 		return v;

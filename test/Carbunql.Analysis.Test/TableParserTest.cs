@@ -44,4 +44,26 @@ public class TableParserTest
 		var lst = v.GetTokens().ToList();
 		Assert.Equal(18, lst.Count);
 	}
+
+	[Fact]
+	public void ValuesTable_SingleRow()
+	{
+		var text = "(values (1))";
+		var v = TableParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(6, lst.Count);
+	}
+
+	[Fact]
+	public void ValuesTable_ManyRows()
+	{
+		var text = "(values (1), (2))";
+		var v = TableParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(10, lst.Count);
+	}
 }

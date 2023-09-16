@@ -1,11 +1,15 @@
-﻿using Carbunql.Clauses;
-using Carbunql.Extensions;
+﻿using Carbunql.Extensions;
 using Carbunql.Values;
 
 namespace Carbunql.Analysis.Parser;
 
 public static class CaseExpressionParser
 {
+	public static bool IsCaseExpression(string text)
+	{
+		return text.IsEqualNoCase("case");
+	}
+
 	public static CaseExpression Parse(string text)
 	{
 		using var r = new TokenReader(text);
@@ -27,7 +31,7 @@ public static class CaseExpressionParser
 
 	private static CaseExpression ParseCaseExpression(ITokenReader r)
 	{
-		r.ReadOrDefault("case");
+		r.Read("case");
 
 		if (r.Peek().IsEqualNoCase("when"))
 		{

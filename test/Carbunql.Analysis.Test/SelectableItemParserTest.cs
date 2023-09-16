@@ -143,4 +143,26 @@ public class SelectableItemParserTest
 		var lst = item.GetTokens().ToList();
 		Assert.Equal(8, lst.Count);
 	}
+
+	[Fact]
+	public void FunctionIssue198()
+	{
+		var text = "greatest( (1+1)::int + 2 ) as v2";
+		var v = SelectableItemParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(14, lst.Count);
+	}
+
+	//[Fact]
+	//public void FunctionIssue198_Case()
+	//{
+	//	var text = "(1+1)::int";
+	//	var v = CastValueParser.Parse(text);
+	//	Monitor.Log(v);
+
+	//	var lst = v.GetTokens().ToList();
+	//	Assert.Equal(14, lst.Count);
+	//}
 }
