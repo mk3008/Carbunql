@@ -14,6 +14,7 @@ public static class ReservedText
 	public static string Window => "window";
 	public static string Order => "order by";
 	public static string Union => "union";
+	public static string UnionAll => "union all";
 	public static string Minus => "minus";
 	public static string Except => "except";
 	public static string Intersect => "intersect";
@@ -44,6 +45,7 @@ public static class ReservedText
 		yield return Window;
 		yield return Order;
 		yield return Union;
+		yield return UnionAll;
 		yield return Minus;
 		yield return Except;
 		yield return Intersect;

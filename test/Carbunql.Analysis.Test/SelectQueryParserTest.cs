@@ -604,4 +604,20 @@ select
 		var lst = item.GetTokens().ToList();
 		Assert.Equal(32, lst.Count);
 	}
+
+	[Fact]
+	public void UnionIssue197()
+	{
+		var text = @"
+select 1
+union all
+select 1";
+
+		var item = QueryParser.Parse(text) as SelectQuery;
+		if (item == null) throw new Exception();
+		Monitor.Log(item);
+
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(5, lst.Count);
+	}
 }
