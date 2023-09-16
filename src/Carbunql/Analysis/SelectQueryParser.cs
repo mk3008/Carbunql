@@ -16,7 +16,6 @@ public static class SelectQueryParser
 
 	public static SelectQuery ParseAsInner(ITokenReader r)
 	{
-		r.Read("(");
 		using var ir = new BracketInnerTokenReader(r);
 		var v = Parse(ir);
 		return v;

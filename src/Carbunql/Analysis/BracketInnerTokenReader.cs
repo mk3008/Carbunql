@@ -6,6 +6,8 @@ public class BracketInnerTokenReader : ITokenReader, IDisposable
 {
 	public BracketInnerTokenReader(ITokenReader r)
 	{
+		r.Read("(");
+
 		Reader = r;
 		RootBracketLevel = r.CurrentBracketLevel;
 	}
@@ -39,6 +41,6 @@ public class BracketInnerTokenReader : ITokenReader, IDisposable
 
 	public void Dispose()
 	{
-		Reader.ReadOrDefault(")");
+		Reader.Read(")");
 	}
 }

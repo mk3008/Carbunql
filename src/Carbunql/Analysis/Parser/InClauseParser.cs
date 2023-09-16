@@ -14,8 +14,10 @@ public static class InClauseParser
 
 	public static InClause Parse(ValueBase value, ITokenReader r, bool isNegative)
 	{
-		r.Read("(");
+		r.Read("in");
+
 		using var ir = new BracketInnerTokenReader(r);
+
 		var first = ir.Peek() ?? throw new NotSupportedException();
 		if (first.IsEqualNoCase("select"))
 		{

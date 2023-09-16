@@ -31,27 +31,27 @@ public static class ValueParser
 	{
 		var v = ParseCore(r);
 
+		var item = r.Peek();
+
 		var isNegative = false;
-		if (r.ReadOrDefault("not") != null)
+		if (item.IsEqualNoCase("not"))
 		{
+			r.Read("not");
+			item = r.Peek();
 			isNegative = true;
 		}
 
-		if (r.ReadOrDefault("between") != null)
+		if (item.IsEqualNoCase("between"))
 		{
 			return BetweenClauseParser.Parse(v, r, isNegative);
 		}
-		else if (r.ReadOrDefault("like") != null)
+		else if (item.IsEqualNoCase("like"))
 		{
-			return LikeExpressionParser.Parse(v, r, isNegative);
+			return LikeClauseParser.Parse(v, r, isNegative);
 		}
-		else if (r.ReadOrDefault("in") != null)
+		else if (item.IsEqualNoCase("in"))
 		{
 			return InClauseParser.Parse(v, r, isNegative);
-		}
-		else if (!isNegative && r.ReadOrDefault("::") != null)
-		{
-			return CastValueParser.Parse(v, "::", r);
 		}
 
 		if (isNegative)
@@ -59,76 +59,74 @@ public static class ValueParser
 			throw new SyntaxException("A 'not' token that negates a value has the syntax 'not between', 'not like', or 'not in'.");
 		}
 
+		if (CastValueParser.IsCastValue(item))
+		{
+			var symbol = r.Read();
+			return CastValueParser.Parse(v, symbol, r);
+		}
+
 		return v;
 	}
 
 	internal static ValueBase ParseCore(ITokenReader r)
 	{
-		var item = r.Read();
+		var item = r.Peek();
 
 		if (String.IsNullOrEmpty(item)) throw new EndOfStreamException();
 
-		if (item.IsEqualNoCase("not"))
+		if (NegativeValueParser.IsNegativeValue(item))
 		{
-			return new NegativeValue(Parse(r));
+			return NegativeValueParser.Parse(r);
 		}
-		if (item.IsNumeric() || item.StartsWith("'") || item.IsEqualNoCase("true") || item.IsEqualNoCase("false"))
+
+		if (LiteralValueParser.IsLiteralValue(item))
 		{
-			return new LiteralValue(item);
+			return LiteralValueParser.Parse(r);
 		}
 
 		if (item == "+" || item == "-")
 		{
-			var sign = item;
+			//Signs indicating positive and negative are not considered operators.
+			//ex. '+1', '-1' 
+			var sign = r.Read();
 			var v = (LiteralValue)Parse(r);
 			v.CommandText = sign + v.CommandText;
 			return v;
 		}
 
-		if (item == "(")
+		if (BracketValueParser.IsBracketValue(item))
 		{
-			using var ir = new BracketInnerTokenReader(r);
-			var pt = ir.Peek();
-
-			ValueBase? v = null;
-			if (pt.IsEqualNoCase("select"))
-			{
-				v = new InlineQuery(SelectQueryParser.Parse(ir));
-			}
-			else
-			{
-				v = new BracketValue(Parse(ir));
-			}
-			return v;
+			return BracketValueParser.Parse(r);
 		}
 
-		if (item.IsEqualNoCase("case"))
+		if (CaseExpressionParser.IsCaseExpression(item))
 		{
 			return CaseExpressionParser.Parse(r);
 		}
 
-		if (item.IsEqualNoCase("exists"))
+		if (ExistsExpressionParser.IsExistsExpression(item))
 		{
-			return new ExistsExpression(SelectQueryParser.ParseAsInner(r));
+			return ExistsExpressionParser.Parse(r);
 		}
 
-		if (r.Peek().IsEqualNoCase("("))
+		if (ParameterValueParser.IsParameterValue(item))
 		{
-			var t = FunctionValueParser.Parse(r, item);
-			return t;
+			return ParameterValueParser.Parse(r);
 		}
 
-		if (r.Peek().IsEqualNoCase("."))
+		item = r.Read();
+
+		if (r.Peek() == "(")
+		{
+			return FunctionValueParser.Parse(r, functionName: item);
+		}
+
+		if (r.Peek() == ".")
 		{
 			//table.column
 			var table = item;
 			r.Read(".");
 			return new ColumnValue(table, r.Read());
-		}
-
-		if (item.StartsWith(new String[] { ":", "@", "?" }))
-		{
-			return new ParameterValue(item);
 		}
 
 		//omit table column

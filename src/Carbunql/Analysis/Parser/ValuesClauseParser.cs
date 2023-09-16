@@ -17,7 +17,6 @@ internal static class ValuesClauseParser
 		{
 			if (!r.Peek().IsEqualNoCase(",")) return false;
 			r.Read(",");
-			r.Read("(");
 			return true;
 		};
 
