@@ -64,9 +64,9 @@ public class VirtualTable : TableBase
 
 	public override IEnumerable<SelectQuery> GetInternalQueries()
 	{
-		if (isSelectQuery)
+		foreach (var item in Query.GetInternalQueries())
 		{
-			yield return (SelectQuery)Query;
+			yield return item;
 		}
 	}
 
