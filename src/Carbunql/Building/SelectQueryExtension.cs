@@ -18,9 +18,15 @@ public static class QueryBaseExtension
 		return source;
 	}
 
-	public static CommonTable With(this SelectQuery source, IReadQuery q)
+	public static CommonTable With(this SelectQuery source, string query)
 	{
-		return source.With(q.ToCommonTable("cte"));
+		var sq = new SelectQuery(query);
+		return source.With(sq.ToCommonTable("cte"));
+	}
+
+	public static CommonTable With(this SelectQuery source, IReadQuery query)
+	{
+		return source.With(query.ToCommonTable("cte"));
 	}
 
 	public static CommonTable With(this SelectQuery source, Func<SelectQuery> builder)
