@@ -15,6 +15,15 @@
 </RadzenHeader>
 <RadzenSidebar @bind-Expanded="@isExpanded">
 	<RadzenPanelMenu>
+		<RadzenPanelMenuItem Text="Analyze" Icon="code">
+			<RadzenPanelMenuItem Text="GetColumnNames" Path="columnlist" />
+			<RadzenPanelMenuItem Text="GetInternalQueries" Path="internalquerylist" />
+			<RadzenPanelMenuItem Text="GetPhysicalTables" Path="physicaltablelist" />
+			<RadzenPanelMenuItem Text="GetSelectableItems" Path="selectableitemlist" />
+			<RadzenPanelMenuItem Text="GetSelectableTables" Path="selectabletablelist" />
+			<RadzenPanelMenuItem Text="GetTokens" Path="tokenlist" />
+		</RadzenPanelMenuItem>
+
 		<RadzenPanelMenuItem Text="Format" Icon="segment" Path="format" />
 		<RadzenPanelMenuItem Text="ToCount" Icon="functions" Path="count" />
 		<RadzenPanelMenuItem Text="ToSubQuery" Icon="keyboard_double_arrow_right" Path="subquery" />
@@ -26,7 +35,8 @@
 		<RadzenPanelMenuItem Text="ToCreate" Icon="view_list" Path="createtable" />
 		<RadzenPanelMenuItem Text="ToDiff" Icon="difference" Path="diffquery" />
 
-		@* <RadzenPanelMenuItem Text="ToPivot(month)" Icon="pivot_table_chart" Path="pivot_month" /> *@
+
+			@* <RadzenPanelMenuItem Text="ToPivot(month)" Icon="pivot_table_chart" Path="pivot_month" /> *@
 		@* <RadzenPanelMenuItem Text="ToPivot(day)" Icon="pivot_table_chart" Path="pivot_day" /> *@
 	</RadzenPanelMenu>
 </RadzenSidebar>

@@ -1,0 +1,101 @@
+@page "/columnlist"
+@using Carbunql;
+@using System.Text;
+
+<PageTitle>GetColumnNames</PageTitle>
+
+<div class="container-fluid">
+@*    <div class="row" Style="margin: 0px 0px 16px 0px;">
+        <RadzenMenu class="rz-shadow-3">
+            <RadzenMenuItem Text="Clear SQL" Icon="clear" Click=@OnClear>
+            </RadzenMenuItem>
+        </RadzenMenu>
+    </div>*@
+    <div class="row">
+        <div class="col-md-12 p-3">
+			<RadzenText TextStyle="TextStyle.H4">GetColumnNames</RadzenText>
+
+			<RadzenText>Get column names from select query.</RadzenText>
+
+			<RadzenCard>
+				<RadzenText TextStyle="TextStyle.Subtitle2">Source code</RadzenText>
+				<RadzenTextArea @bind-Value=@sourcecode TValue="string" Style="width: 100%; min-height: 300px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" />
+			</RadzenCard>
+        </div>
+    </div>
+    <div class="row">
+		<div class="col-md-12 p-3">
+            <RadzenText TextStyle="TextStyle.H5">Demo</RadzenText>
+        </div>
+
+        <div class="col-md-6 p-3">
+            <RadzenCard>
+                <RadzenText TextStyle="TextStyle.Subtitle2">Input</RadzenText>
+                <RadzenTextArea @bind-Value=@sql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" Placeholder="Enter select query(ex. select * from table)" />
+            </RadzenCard>
+        </div>
+        <div class="col-md-6 p-3">
+            <RadzenCard>
+                <RadzenText TextStyle="TextStyle.Subtitle2">Result</RadzenText>
+                <RadzenTextArea @bind-Value=@fsql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" />
+            </RadzenCard>
+        </div>
+
+    </div>
+</div>
+
+@code {
+
+	string fsql = string.Empty; 
+
+	string sourcecode = @"using Carbunql;
+
+var sq = new SelectQuery(sql);
+foreach (var item in sq.GetColumnNames())
+{
+	Console.WriteLine(item);
+}";
+
+	string sql = @"select
+    a.id, 
+    a.value as val
+from
+    table as a";
+
+	protected override void OnInitialized()
+	{
+		OnChange(sql);
+	}
+
+	void OnClear()
+	{
+		sql = string.Empty;
+		OnChange(sql);
+	}
+
+	void OnChange(string value)
+	{
+		if (string.IsNullOrEmpty(value))
+		{
+			fsql = string.Empty;
+			return;
+		}
+		try
+		{
+			var sq = new SelectQuery(sql);
+			var sb = new StringBuilder();
+
+			fsql = string.Empty;
+			sb.AppendLine($"--count : {sq.GetColumnNames().ToList().Count}");
+			foreach (var item in sq.GetColumnNames())
+			{
+				sb.AppendLine(item);
+			}
+			fsql = sb.ToString();
+		}
+		catch (Exception ex)
+		{
+			fsql = ex.ToString();
+		}
+	}
+}

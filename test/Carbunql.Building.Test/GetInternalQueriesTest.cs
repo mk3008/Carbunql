@@ -319,4 +319,40 @@ ORDER BY
 
 		Assert.Equal(expect, sq.ToText().Replace("\r", "").Replace("\n", ""));
 	}
+
+	[Fact]
+	public void CountTest_SubQuery()
+	{
+		var sq = new SelectQuery(@"
+select
+	*
+from
+	(
+		select
+			*
+		from
+			(
+				select
+					*
+				from
+					(
+						select
+							*
+						from
+							table_a as a
+					) b
+			) c
+	) d
+");
+
+		var cnt = 0;
+		foreach (var q in sq.GetInternalQueries())
+		{
+			Output.WriteLine($"index : {cnt}");
+			Output.WriteLine(q.ToText());
+			cnt++;
+		}
+
+		Assert.Equal(4, cnt);
+	}
 }

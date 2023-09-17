@@ -247,7 +247,19 @@ public class SelectQuery : ReadQuery, IQueryCommandable
 		}
 	}
 
-	public IEnumerable<SelectableTable> GetSelectableTables()
+    public IEnumerable<SelectableItem> GetSelectableItems()
+	{
+		if (SelectClause != null)
+		{
+            foreach (var item in SelectClause)
+            {
+				yield return item;
+            }
+        }
+	}
+
+
+    public IEnumerable<SelectableTable> GetSelectableTables()
 	{
 		if (FromClause != null)
 		{
