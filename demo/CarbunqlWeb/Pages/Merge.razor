@@ -94,8 +94,6 @@ Console.WriteLine(mq.ToCommand().CommandText);";
 		}
 		try
 		{
-			string[] keys = new[] { "id", "sub_id" };
-
 			var groupkeys = keys.Split(",").ToList().Select(x => x.Trim()).ToList();
 			var sq =new SelectQuery(sql);
 			var mq = sq.ToMergeQuery(table, groupkeys);
