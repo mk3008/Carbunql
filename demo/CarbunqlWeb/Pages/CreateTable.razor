@@ -1,5 +1,4 @@
 @page "/createtable"
-@using Carbunql.Analysis;
 @using Carbunql;
 @using Carbunql.Building;
 
@@ -75,8 +74,7 @@ FROM
 using Carbunql.Building;
 
 var sq = new SelectQuery(""select id, val from table_a as a"");
-var q = tmp.ToCreateTableQuery(""destinations"", isTemporary: true);
-
+var q = sq.ToCreateTableQuery(""destinations"", isTemporary: true);
 Console.WriteLine(q.ToCommand().CommandText);";
 
 	string table = "tmp";
@@ -103,7 +101,7 @@ Console.WriteLine(q.ToCommand().CommandText);";
 		}
 		try
 		{
-			var sq = QueryParser.Parse(sql);
+			var sq = new SelectQuery(sql);
 			var q = sq.ToCreateTableQuery(table, istemp);
 			fsql = q.ToCommand().CommandText;
 		}

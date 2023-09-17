@@ -92,7 +92,7 @@ Console.WriteLine(q.ToCommand().CommandText);";
 		try
 		{
 			var groupkeys = keys.Split(",").ToList().Select(x => x.Trim()).ToList();
-			var sq = QueryParser.Parse(sql);
+			var sq =new SelectQuery(sql);
 			fsql = sq.ToUpdateQuery(table, groupkeys).ToCommand().CommandText;
 		}
 		catch (Exception ex)

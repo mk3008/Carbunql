@@ -1,4 +1,5 @@
 ﻿using Carbunql.Extensions;
+using Carbunql.Tables;
 using Carbunql.Values;
 using MessagePack;
 
@@ -36,6 +37,14 @@ public class CommonTable : SelectableTable
 
 	public override IEnumerable<CommonTable> GetCommonTables()
 	{
+		if (Table is VirtualTable v)
+		{
+			foreach (var item in v.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+
 		yield return this;
 	}
 }

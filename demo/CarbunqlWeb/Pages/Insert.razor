@@ -98,7 +98,7 @@ Console.WriteLine(q.ToCommand().CommandText);";
 		try
 		{
 			var sq = QueryParser.Parse(sql);
-			var q = sq.ToInsertQuery(table);
+			var q = sq.ToInsertQuery(table.Trim());
 			fsql = q.ToCommand().CommandText;
 		}
 		catch (Exception ex)

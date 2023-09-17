@@ -98,7 +98,13 @@ public class WithClause : IList<CommonTable>, IQueryCommandable
 
 	public IEnumerable<CommonTable> GetCommonTables()
 	{
-		foreach (var commonTable in CommonTables) yield return commonTable;
+		foreach (var commonTable in CommonTables)
+		{
+			foreach (var item in commonTable.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
 	}
 
 	#region implements IList<CommonTable>

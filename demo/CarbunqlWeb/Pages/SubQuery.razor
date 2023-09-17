@@ -1,5 +1,4 @@
 @page "/subquery"
-@using Carbunql.Analysis;
 @using Carbunql;
 @using Carbunql.Building;
 
@@ -70,17 +69,16 @@ FROM
 	string fsql = string.Empty;
 
 	string sourcecode = @"using Carbunql;
-using Carbunql.Analysis;
 using Carbunql.Building;
 
-var tmp = QueryParser.Parse(""select id, val from table_a"");
-var sq = new SelectQuery();
+var subsq = new SelectQuery(""select id, val from table_a"");
 
+var sq = new SelectQuery();
 //Convert select query to Common table
 //Return value is FromClause class and SelectableTable class
-var (_, t) = sq.From(tmp).As(""alias"");
+var (_, t) = sq.From(subsq).As(""alias"");
 
-////Select all columns of the sub query
+//Select all columns of the sub query
 sq.Select(t);
 
 Console.WriteLine(q.ToCommand().CommandText);";
@@ -107,9 +105,8 @@ Console.WriteLine(q.ToCommand().CommandText);";
 		}
 		try
 		{
-			var tmp = QueryParser.Parse(sql);
 			var sq = new SelectQuery();
-			var (f, q) = sq.From(tmp).As("q");
+			var (f, q) = sq.From(new SelectQuery(sql)).As("q");
 
 			sq.Select(q);
 
