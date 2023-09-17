@@ -59,9 +59,16 @@
 	string sourcecode = @"using Carbunql;
 using Carbunql.Building;
 
-var sq = new SelectQuery(""select id, val from table_a as a"");
-var q = sq.ToUpdateQuery(""destination"", new[] { ""id"" });
-Console.WriteLine(q.ToCommand().CommandText);";
+string table = ""destinations"";
+string[] keys = new[] { ""id"", ""sub_id"" };
+
+var sq = new SelectQuery(sql);
+var mq = sq.ToMergeQuery(table, keys);
+mq.AddMatchedUpdate();
+mq.AddNotMathcedInsertAsAutoNumber();
+mq.AddNotMatchedInsert();
+
+Console.WriteLine(mq.ToCommand().CommandText);";
 
 	string table = "destinations";
 
@@ -87,8 +94,10 @@ Console.WriteLine(q.ToCommand().CommandText);";
 		}
 		try
 		{
+			string[] keys = new[] { "id", "sub_id" };
+
 			var groupkeys = keys.Split(",").ToList().Select(x => x.Trim()).ToList();
-			var sq = QueryParser.Parse(sql);
+			var sq =new SelectQuery(sql);
 			var mq = sq.ToMergeQuery(table, groupkeys);
 			mq.AddMatchedUpdate();
 			mq.AddNotMathcedInsertAsAutoNumber();

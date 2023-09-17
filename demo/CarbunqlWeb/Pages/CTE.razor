@@ -1,5 +1,4 @@
 @page "/cte"
-@using Carbunql.Analysis;
 @using Carbunql;
 @using Carbunql.Building;
 
@@ -72,14 +71,12 @@ FROM
 	string sourcecode = @"using Carbunql;
 using Carbunql.Building;
 
-var tmp = new SelectQuery(""select id, val from table_a as a"");
+var query = new SelectQuery(""select id, val from table_a as a"");
 
-//Convert select query to Common table
-//Return value is SelectQuery class and CommonTable class
-var (sq, ct) = tmp.ToCTE(""alias"");
-
-//Set common table to From clause
-var t = sq.From(ct);
+var sq = new SelectQuery();
+//Add common table
+var alias = sq.With(query).As(""alias"");
+var (_, t) = sq.From(alias).As(""t"");
 
 //Select all columns of the common table
 sq.Select(t);
@@ -108,13 +105,11 @@ Console.WriteLine(sq.ToCommand().CommandText);";
 		}
 		try
 		{
-			var tmp = QueryParser.Parse(sql);
-			var (sq, ct) = tmp.ToCTE(alias);
+			var sq = new SelectQuery();
+			var ct = sq.With(sql).As(alias);
 
-			if (tmp.GetSelectClause() == null) throw new Exception("select clause is not defined.");
-
-			var t = sq.From(ct);
-			sq.Select(t);
+			var from = sq.From(ct);
+			sq.Select(from);
 
 			fsql = sq.ToCommand().CommandText;
 		}

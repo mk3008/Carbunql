@@ -100,12 +100,7 @@ Console.WriteLine(q.ToCommand().CommandText);";
 		try
 		{
 			var sq = QueryParser.Parse(sql);
-
-			var clause =sq.GetSelectClause();
-			if (clause == null) throw new Exception("select clause is not defined.");
-			var cols = clause.Select(x => x.Alias).ToList();
-
-			var q = sq.ToDeleteQuery(table, cols);
+			var q = sq.ToDeleteQuery(table.Trim());
 			fsql = q.ToCommand().CommandText;
 		}
 		catch (Exception ex)
