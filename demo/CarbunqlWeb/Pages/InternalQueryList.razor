@@ -1,0 +1,173 @@
+@page "/internalquerylist"
+@using Carbunql;
+@using System.Text;
+
+<PageTitle>GetInternalQueries</PageTitle>
+
+<div class="container-fluid">
+@*    <div class="row" Style="margin: 0px 0px 16px 0px;">
+        <RadzenMenu class="rz-shadow-3">
+            <RadzenMenuItem Text="Clear SQL" Icon="clear" Click=@OnClear>
+            </RadzenMenuItem>
+        </RadzenMenu>
+    </div>*@
+    <div class="row">
+        <div class="col-md-12 p-3">
+			<RadzenText TextStyle="TextStyle.H4">GetInternalQueries</RadzenText>
+
+			<RadzenText>Get internal queries from select query.</RadzenText>
+
+			<RadzenCard>
+				<RadzenText TextStyle="TextStyle.Subtitle2">Source code</RadzenText>
+				<RadzenTextArea @bind-Value=@sourcecode TValue="string" Style="width: 100%; min-height: 300px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" />
+			</RadzenCard>
+        </div>
+    </div>
+    <div class="row">
+		<div class="col-md-12 p-3">
+            <RadzenText TextStyle="TextStyle.H5">Demo</RadzenText>
+        </div>
+
+        <div class="col-md-6 p-3">
+            <RadzenCard>
+                <RadzenText TextStyle="TextStyle.Subtitle2">Input</RadzenText>
+                <RadzenTextArea @bind-Value=@sql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" Placeholder="Enter select query(ex. select * from table)" />
+            </RadzenCard>
+        </div>
+        <div class="col-md-6 p-3">
+            <RadzenCard>
+                <RadzenText TextStyle="TextStyle.Subtitle2">Result</RadzenText>
+                <RadzenTextArea @bind-Value=@fsql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" />
+            </RadzenCard>
+        </div>
+
+    </div>
+</div>
+
+@code {
+
+    string fsql = string.Empty; 
+
+    string sourcecode = @"using Carbunql;
+
+var sq = new SelectQuery(sql);
+foreach (var item in sq.GetInternalQueries())
+{
+	Console.WriteLine(item.ToCommand().CommandText);
+}";
+
+    string sql = @"with
+dat(line_id, name, unit_price, quantity, tax_rate) as (
+    values
+    (1, 'apple' , 105, 5, 0.07),
+    (2, 'orange', 203, 3, 0.07),
+    (3, 'banana', 233, 9, 0.07),
+    (4, 'tea'   , 309, 7, 0.08),
+    (5, 'coffee', 555, 9, 0.08),
+    (6, 'cola'  , 456, 2, 0.08)
+),
+detail as (
+    select
+        q.*,
+        trunc(q.price * (1 + q.tax_rate)) - q.price as tax,
+        q.price * (1 + q.tax_rate) - q.price as raw_tax
+    from
+        (
+            select
+                dat.*,
+                (dat.unit_price * dat.quantity) as price
+            from
+                dat
+        ) q
+),
+tax_summary as (
+    select
+        d.tax_rate,
+        trunc(sum(raw_tax)) as total_tax
+    from
+        detail d
+    group by
+        d.tax_rate
+)
+select
+   line_id,
+    name,
+    unit_price,
+    quantity,
+    tax_rate,
+    price,
+    price + tax as tax_included_price,
+    tax
+from
+    (
+        select
+            line_id,
+            name,
+            unit_price,
+            quantity,
+            tax_rate,
+            price,
+            tax + adjust_tax as tax
+        from
+            (
+                select
+                    q.*,
+                    case when q.total_tax - q.cumulative >= q.priority then 1 else 0 end as adjust_tax
+                from
+                    (
+                        select
+                            d.*,
+                            s.total_tax,
+                            sum(d.tax) over (partition by d.tax_rate) as cumulative,
+                            row_number() over (partition by d.tax_rate order by d.raw_tax % 1 desc, d.line_id) as priority
+                        from
+                            detail d
+                            inner join tax_summary s on d.tax_rate = s.tax_rate
+                    ) q
+            ) q
+    ) q
+order by
+    line_id";
+
+    protected override void OnInitialized()
+    {
+        OnChange(sql);
+    }
+
+    void OnClear()
+    {
+        sql = string.Empty;
+        OnChange(sql);
+    }
+
+    void OnChange(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            fsql = string.Empty;
+            return;
+        }
+        try
+        {
+            var sq = new SelectQuery(sql);
+            var sb = new StringBuilder();
+
+            fsql = string.Empty;
+            sb.AppendLine($"--count : {sq.GetInternalQueries().ToList().Count}");
+
+            var index = 0;
+            foreach (var item in sq.GetInternalQueries())
+            {
+                sb.AppendLine($"--index : {index}");
+                sb.AppendLine(item.ToCommand().CommandText);
+                sb.AppendLine(";");
+                index++;
+            }
+			fsql = sb.ToString();
+		}
+		catch (Exception ex)
+		{
+			fsql = ex.ToString();
+		}
+	}
+}
