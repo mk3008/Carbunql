@@ -586,4 +586,48 @@ public class ValueParserTest
 		var lst = v.GetTokens().ToList();
 		Assert.Equal(11, lst.Count);
 	}
+
+	[Fact]
+	public void JsonFunction_1()
+	{
+		var text = "'[{\"a\":\"foo\"},{\"b\":\"bar\"},{\"c\":\"baz\"}]'::json->2";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(5, lst.Count);
+	}
+
+	[Fact]
+	public void JsonFunction_2()
+	{
+		var text = "'[1,2,3]'::json->>2";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(5, lst.Count);
+	}
+
+	[Fact]
+	public void JsonFunction_3()
+	{
+		var text = "'{\"a\": {\"b\":{\"c\": \"foo\"}}}'::json#>'{a,b}'";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(5, lst.Count);
+	}
+
+	[Fact]
+	public void JsonFunction_4()
+	{
+		var text = "'{\"a\":[1,2,3],\"b\":[4,5,6]}'::json#>>'{a,2}'";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(5, lst.Count);
+	}
 }

@@ -63,10 +63,46 @@ public class LexReader : CharReader
 			return sb.ToString();
 		}
 
-		// ex. - or --
+		// ex. - or -- or -> or ->>
 		if (fc == '-')
 		{
-			sb.Append(ReadCharOrDefault('-'));
+			// --
+			if (PeekOrDefaultChar() == '-')
+			{
+				sb.Append(ReadChar());
+				return sb.ToString();
+			}
+
+			// -> or ->>
+			if (PeekOrDefaultChar() == '>')
+			{
+				sb.Append(ReadChar());
+				if (PeekOrDefaultChar() == '>')
+				{
+					sb.Append(ReadChar());
+				}
+				return sb.ToString();
+			}
+
+			// -
+			return sb.ToString();
+		}
+
+		// ex. # or #> or #>>
+		if (fc == '#')
+		{
+			// #> or #>>
+			if (PeekOrDefaultChar() == '>')
+			{
+				sb.Append(ReadChar());
+				if (PeekOrDefaultChar() == '>')
+				{
+					sb.Append(ReadChar());
+				}
+				return sb.ToString();
+			}
+
+			// #
 			return sb.ToString();
 		}
 
