@@ -620,4 +620,26 @@ select 1";
 		var lst = item.GetTokens().ToList();
 		Assert.Equal(5, lst.Count);
 	}
+
+	[Fact]
+	public void JsonFunction()
+	{
+		var text = @"
+select
+'[{""a"":""foo""},{""b"":""bar""},{""c"":""baz""}]'::json->2 as test1
+, '{""a"": {""b"":""foo""}}'::json->'a' as test2
+, '[1,2,3]'::json->>2 as test3
+, '{""a"":1,""b"":2}'::json->>'b' as test4
+, '{""a"": {""b"":{""c"": ""foo""}}}'::json#>'{a,b}' as test5
+, '{""a"":[1,2,3],""b"":[4,5,6]}'::json#>>'{a,2}' as test6
+, '{""id"":1, ""value"":""test"", ""nest"":{""id"":2, ""value"":""data""}}'::json->'nest' as test7
+, '{""id"":1, ""value"":""test"", ""nest"":{""id"":2, ""value"":""data""}}'::json->'nest'->'value' as test8";
+
+		var item = QueryParser.Parse(text) as SelectQuery;
+		if (item == null) throw new Exception();
+		Monitor.Log(item);
+
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(66, lst.Count);
+	}
 }
