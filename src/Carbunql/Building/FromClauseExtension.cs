@@ -57,6 +57,14 @@ public static class FromClauseExtension
 		return (source, source.Root);
 	}
 
+	public static (FromClause, T) As<T>(this FromClause source, string alias)
+	{
+		source.As(alias);
+		var r = (T)Activator.CreateInstance(typeof(T))!;
+		//var rs = new RecordSet<T>() { Name = alias, Value = r };
+		return (source, r);
+	}
+
 	public static Relation InnerJoin(this FromClause source, IReadQuery query)
 	{
 		var st = query.ToSelectableTable();
