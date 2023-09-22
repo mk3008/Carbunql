@@ -47,6 +47,13 @@ public static class ExpressionExtension
 				op = "<>";
 				break;
 
+			case ExpressionType.Multiply:
+				op = "*";
+				break;
+			case ExpressionType.Subtract:
+				op = "-";
+				break;
+
 			case ExpressionType.ArrayLength:
 				break;
 			case ExpressionType.ArrayIndex:
@@ -83,8 +90,7 @@ public static class ExpressionExtension
 				break;
 			case ExpressionType.Modulo:
 				break;
-			case ExpressionType.Multiply:
-				break;
+
 			case ExpressionType.MultiplyChecked:
 				break;
 			case ExpressionType.Negate:
@@ -108,8 +114,6 @@ public static class ExpressionExtension
 			case ExpressionType.Quote:
 				break;
 			case ExpressionType.RightShift:
-				break;
-			case ExpressionType.Subtract:
 				break;
 			case ExpressionType.SubtractChecked:
 				break;
@@ -199,7 +203,10 @@ public static class ExpressionExtension
 				break;
 		}
 
-		if (string.IsNullOrEmpty(op)) throw new Exception();
+		if (string.IsNullOrEmpty(op))
+		{
+			throw new NotSupportedException($"NodeType:{exp.NodeType}");
+		}
 
 		var isBracket = exp.ToString().StartsWith("(");
 
@@ -252,6 +259,28 @@ public static class ExpressionExtension
 			{
 				throw new NotSupportedException();
 			}
+		}
+		if (exp.NodeType == ExpressionType.Convert && exp is UnaryExpression unary)
+		{
+			if (unary.Operand is MemberExpression prop)
+			{
+				var column = prop.Member.Name;
+
+				if (prop.Expression is MemberExpression tp)
+				{
+					var table = tp.Member.Name;
+					return new ColumnValue(table, column);
+				}
+				else
+				{
+					throw new NotSupportedException();
+				}
+			}
+			if (unary.Operand is ConstantExpression cons)
+			{
+				return ValueParser.Parse(unary.Operand.ToString());
+			}
+			return ((BinaryExpression)unary.Operand).ToValueExpression();
 		}
 		return ((BinaryExpression)exp).ToValueExpression();
 	}

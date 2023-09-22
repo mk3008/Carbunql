@@ -2,6 +2,7 @@
 using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Values;
+using System.Linq.Expressions;
 
 namespace Carbunql.Building;
 
@@ -80,6 +81,15 @@ public static class SelectClauseExtension
 	public static SelectableItem Select(this SelectQuery source, string table, string column)
 	{
 		var item = new ColumnValue(table, column).ToSelectable();
+		source.SelectClause ??= new();
+		source.SelectClause.Add(item);
+		return item;
+	}
+
+	public static SelectableItem Select(this SelectQuery source, Expression<Func<object>> fnc)
+	{
+		var v = fnc.Body.ToValue();
+		var item = new SelectableItem(v, v.GetDefaultName());
 		source.SelectClause ??= new();
 		source.SelectClause.Add(item);
 		return item;
