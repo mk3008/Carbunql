@@ -34,7 +34,7 @@ public static class WhereClauseExtension
 
 	public static ValueBase Where(this SelectQuery source, Expression<Func<bool>> predicate)
 	{
-		var v = ((BinaryExpression)predicate.Body).ToValue();
+		var v = predicate.Body.ToValue();
 
 		if (v is BracketValue)
 		{

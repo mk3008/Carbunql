@@ -3,6 +3,7 @@ using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Values;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Carbunql.Building;
 
@@ -236,30 +237,17 @@ public static class ExpressionExtension
 
 	public static ValueBase ToValue(this Expression exp)
 	{
+
 		if (exp.NodeType == ExpressionType.Constant)
 		{
 			return ValueParser.Parse(exp.ToString());
 		}
+
 		if (exp.NodeType == ExpressionType.MemberAccess)
 		{
-			var propExpression = (MemberExpression)exp;
-			var column = propExpression.Member.Name;
-
-			if (propExpression.Expression is ParameterExpression prm)
-			{
-				var table = prm.Name!;
-				return new ColumnValue(table, column);
-			}
-			else if (propExpression.Expression is MemberExpression mem)
-			{
-				var table = mem.Member.Name;
-				return new ColumnValue(table, column);
-			}
-			else
-			{
-				throw new NotSupportedException();
-			}
+			return ((MemberExpression)exp).ToValue();
 		}
+
 		if (exp.NodeType == ExpressionType.Convert && exp is UnaryExpression unary)
 		{
 			if (unary.Operand is MemberExpression prop)
@@ -278,10 +266,110 @@ public static class ExpressionExtension
 			}
 			if (unary.Operand is ConstantExpression cons)
 			{
-				return ValueParser.Parse(unary.Operand.ToString());
+				return cons.ExecuteAndConvert(cons.Type);
 			}
+
 			return ((BinaryExpression)unary.Operand).ToValueExpression();
 		}
+
+		if (exp is NewExpression ne)
+		{
+			var args = ne.Arguments.Select(x => x.ToObject()).ToArray();
+
+			var d = ne.Constructor!.Invoke(args);
+
+			if (ne.Type == typeof(DateTime))
+			{
+				return ((DateTime)d).ToValue();
+			}
+
+			return new LiteralValue($"'{d}'");
+		}
+
 		return ((BinaryExpression)exp).ToValueExpression();
+	}
+
+	public static ValueBase ToValue(this MemberExpression exp)
+	{
+		if (exp.ToString() == "DateTime.Now")
+		{
+			return ValueParser.Parse("current_timestamp");
+		}
+
+		if (exp.Expression is null && exp.Member is PropertyInfo prop)
+		{
+			if (prop.GetGetMethod()!.IsStatic)
+			{
+				var d = prop!.GetValue(null);
+				if (exp.Type == typeof(DateTime) && d != null)
+				{
+					return ((DateTime)d).ToValue();
+				}
+			}
+		}
+
+		if (exp.Expression is null)
+		{
+			throw new NotSupportedException($"Expression is null.");
+		}
+
+		if (exp.Expression is ParameterExpression prm)
+		{
+			var table = prm.Name!;
+			var column = exp.Member.Name;
+			return new ColumnValue(table, column);
+		}
+
+		if (exp.Expression is MemberExpression mem)
+		{
+			var table = mem.Member.Name;
+			var column = exp.Member.Name;
+			return new ColumnValue(table, column);
+		}
+
+		if (exp.Expression is ConstantExpression)
+		{
+			return exp.ExecuteAndConvert(exp.Type);
+
+			//if (exp.Type == typeof(DateTime))
+			//{
+			//	var lm = Expression.Lambda<Func<DateTime>>(exp);
+			//	var d = lm.Compile().Invoke();
+			//	return d.ToValue();
+			//}
+
+			//return ValueParser.Parse(unary.Operand.ToString());
+
+			//return cons.ToValue(exp.Type);
+		}
+
+		throw new NotSupportedException($"propExpression.Expression type:{exp.Expression.GetType().Name}");
+	}
+
+	public static ValueBase ExecuteAndConvert(this Expression exp, Type type)
+	{
+		if (type == typeof(DateTime))
+		{
+			var lm = Expression.Lambda<Func<DateTime>>(exp);
+			var d = lm.Compile().Invoke();
+			return d.ToValue();
+		}
+		return ValueParser.Parse(exp.ToString());
+	}
+
+	public static ValueBase ToValue(this DateTime d)
+	{
+		return new FunctionValue("cast", new CastValue(new LiteralValue($"'{d}'"), "as", new LiteralValue("date")));
+	}
+
+	public static object ToObject(this Expression exp)
+	{
+		if (exp.NodeType != ExpressionType.Constant) { throw new NotSupportedException(); }
+
+		if (exp.Type == typeof(string)) return exp.ToString();
+		if (exp.Type == typeof(int)) return int.Parse(exp.ToString());
+
+
+		throw new NotSupportedException();
 	}
 }

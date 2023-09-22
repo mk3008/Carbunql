@@ -99,7 +99,7 @@ public class ExpressionTreeTest
 		var sq = new SelectQuery();
 		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
 
-		sq.Select("a", "a_id");
+		sq.Select(1);
 		sq.Select(() => a.a_id);
 		sq.Select(() => a.a_id).As("id");
 
@@ -137,7 +137,40 @@ public class ExpressionTreeTest
 		Assert.Equal(30, sq.GetTokens().ToList().Count);
 	}
 
-	public record struct RecordA(int a_id, string text, int value);
+	[Fact]
+	public void WhereTest()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
+
+		sq.SelectAll();
+
+		sq.Where(() => true);
+		sq.Where(() => false);
+		sq.Where(() => 1 <= a.a_id);
+		sq.Where(() => a.a_id <= 10);
+		sq.Where(() => 0 < a.a_id);
+		sq.Where(() => a.a_id < 11);
+		sq.Where(() => a.a_id != 5);
+		sq.Where(() => a.text == "a");
+		sq.Where(() => a.text != "b");
+
+		sq.Where(() => a.is_enablesd == true);
+		sq.Where(() => a.is_enablesd != false);
+
+		sq.Where(() => a.timestamp >= new DateTime(2000, 1, 1));
+		sq.Where(() => a.timestamp >= DateTime.Now);
+
+		var dt = DateTime.Now;
+		sq.Where(() => a.timestamp >= dt);
+
+
+		Monitor.Log(sq);
+
+		Assert.Equal(120, sq.GetTokens().ToList().Count);
+	}
+
+	public record struct RecordA(int a_id, string text, int value, bool is_enablesd, DateTime timestamp);
 
 	public record struct RecordB(int a_id, int b_id, string text, int value);
 
