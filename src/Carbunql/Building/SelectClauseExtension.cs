@@ -2,6 +2,7 @@
 using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Values;
+using System.Linq.Expressions;
 
 namespace Carbunql.Building;
 
@@ -84,6 +85,8 @@ public static class SelectClauseExtension
 		source.SelectClause.Add(item);
 		return item;
 	}
+
+
 
 	public static SelectableItem Select(this SelectQuery source, int value)
 	{

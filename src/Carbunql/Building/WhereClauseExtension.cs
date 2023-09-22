@@ -1,6 +1,7 @@
 ﻿using Carbunql.Analysis.Parser;
 using Carbunql.Clauses;
 using Carbunql.Values;
+using System.Linq.Expressions;
 
 namespace Carbunql.Building;
 

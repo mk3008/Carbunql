@@ -27,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Carbunql.Postgres\Carbunql.Postgres.csproj" />
     <ProjectReference Include="..\..\src\Carbunql\Carbunql.csproj" />
   </ItemGroup>
 

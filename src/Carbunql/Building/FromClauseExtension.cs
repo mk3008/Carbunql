@@ -1,6 +1,7 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
 using Carbunql.Values;
+using System.Linq.Expressions;
 
 namespace Carbunql.Building;
 
@@ -188,6 +189,13 @@ public static class FromClauseExtension
 	{
 		source.Table.SetAlias(Alias);
 		return source;
+	}
+
+	public static (Relation, T) As<T>(this Relation source, string Alias)
+	{
+		source.Table.SetAlias(Alias);
+		var r = (T)Activator.CreateInstance(typeof(T))!;
+		return (source, r);
 	}
 
 	public static SelectableTable On(this Relation source, FromClause from, string column)
