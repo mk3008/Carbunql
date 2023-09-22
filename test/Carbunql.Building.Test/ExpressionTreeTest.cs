@@ -134,7 +134,7 @@ public class ExpressionTreeTest
 
 		Monitor.Log(sq);
 
-		Assert.Equal(18, sq.GetTokens().ToList().Count);
+		Assert.Equal(30, sq.GetTokens().ToList().Count);
 	}
 
 	public record struct RecordA(int a_id, string text, int value);
