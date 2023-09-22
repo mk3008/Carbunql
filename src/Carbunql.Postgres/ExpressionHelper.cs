@@ -9,13 +9,32 @@ using System.Text.RegularExpressions;
 
 namespace Carbunql.Postgres;
 
-public static class ExpressionExtension
+public static class ExpressionHelper
 {
 	public static (FromClause, T) As<T>(this FromClause source, string alias)
 	{
 		source.As(alias);
 		var r = (T)Activator.CreateInstance(typeof(T))!;
 		return (source, r);
+	}
+
+	public static string GetMemberName(Expression<Func<object>> fnc)
+	{
+		var exp = (UnaryExpression)fnc.Body;
+		var op = (MemberExpression)exp.Operand;
+		return op.Member.Name;
+	}
+
+	public static void SelectAll(this SelectQuery source, Expression<Func<object>> fnc)
+	{
+		var v = fnc.Compile().Invoke();
+		var exp = (UnaryExpression)fnc.Body;
+		var op = (MemberExpression)exp.Operand;
+
+		foreach (var prop in v.GetType().GetProperties())
+		{
+			source.Select(op.Member.Name, prop.Name);
+		}
 	}
 
 	public static SelectableItem Select(this SelectQuery source, Expression<Func<object>> fnc)

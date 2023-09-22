@@ -1,5 +1,6 @@
 ﻿using Xunit.Abstractions;
 using Carbunql.Postgres;
+using System.Linq.Expressions;
 
 namespace Carbunql.Building.Test;
 
@@ -129,13 +130,30 @@ public class PostgresExpressionTreeTest
 		var sq = new SelectQuery();
 		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
 
-		sq.Select(1);
+		var table = ExpressionHelper.GetMemberName(() => a);
+		var column = ExpressionHelper.GetMemberName(() => a.a_id);
+
+		sq.Select("a", "a_id");
+		sq.Select(table, column);
 		sq.Select(() => a.a_id);
 		sq.Select(() => a.a_id).As("id");
 
 		Monitor.Log(sq);
 
-		Assert.Equal(18, sq.GetTokens().ToList().Count);
+		Assert.Equal(22, sq.GetTokens().ToList().Count);
+	}
+
+	[Fact]
+	public void SelectAll()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
+
+		sq.SelectAll(() => a);
+
+		Monitor.Log(sq);
+
+		Assert.Equal(32, sq.GetTokens().ToList().Count);
 	}
 
 	[Fact]
@@ -199,6 +217,21 @@ public class PostgresExpressionTreeTest
 		Monitor.Log(sq);
 
 		Assert.Equal(107, sq.GetTokens().ToList().Count);
+	}
+
+	[Fact]
+	public void WhereTest_Enum()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
+
+		sq.SelectAll();
+
+		sq.Where(() => a.gender == Gender.Male);
+
+		Monitor.Log(sq);
+
+		Assert.Equal(14, sq.GetTokens().ToList().Count);
 	}
 
 	[Fact]
@@ -352,7 +385,7 @@ public class PostgresExpressionTreeTest
 	}
 
 	[RecordDefinition]
-	public record struct RecordA(int a_id, string text, int value, bool is_enabled, double rate, DateTime timestamp);
+	public record struct RecordA(int a_id, string text, int value, bool is_enabled, double rate, DateTime timestamp, Gender gender);
 
 	[RecordDefinition]
 	public record struct RecordN(int? a_id, string? text, int? value, bool? is_enabled, double? rate, DateTime? timestamp);
@@ -364,4 +397,12 @@ public class PostgresExpressionTreeTest
 	public record struct RecordC(int a_id, int c_id, string text, int value);
 
 	public class Myclass { public int MyProperty { get; set; } }
+
+	public enum Gender
+	{
+		Male,
+		Female,
+		Other,
+		Unknown
+	}
 }
