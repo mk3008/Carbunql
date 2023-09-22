@@ -147,13 +147,19 @@ public class ExpressionTreeTest
 
 		sq.Where(() => true);
 		sq.Where(() => false);
+
 		sq.Where(() => 1 <= a.a_id);
 		sq.Where(() => a.a_id <= 10);
+
 		sq.Where(() => 0 < a.a_id);
 		sq.Where(() => a.a_id < 11);
+
 		sq.Where(() => a.a_id != 5);
+
 		sq.Where(() => a.text == "a");
 		sq.Where(() => a.text != "b");
+
+		sq.Where(() => a.rate == 0.1);
 
 		sq.Where(() => a.is_enablesd == true);
 		sq.Where(() => a.is_enablesd != false);
@@ -162,7 +168,71 @@ public class ExpressionTreeTest
 
 		Monitor.Log(sq);
 
-		Assert.Equal(99, sq.GetTokens().ToList().Count);
+		Assert.Equal(107, sq.GetTokens().ToList().Count);
+	}
+
+	[Fact]
+	public void WhereTest_VariableText()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
+
+		sq.SelectAll();
+
+		var text = "test";
+		sq.Where(() => a.text == text);
+
+		Monitor.Log(sq);
+
+		Assert.Equal(14, sq.GetTokens().ToList().Count);
+	}
+
+	[Fact]
+	public void WhereTest_VariableInt()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
+
+		sq.SelectAll();
+
+		int d = 10;
+		sq.Where(() => a.a_id == d);
+
+		Monitor.Log(sq);
+
+		Assert.Equal(14, sq.GetTokens().ToList().Count);
+	}
+
+	[Fact]
+	public void WhereTest_VariableDouble()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
+
+		sq.SelectAll();
+
+		double d = 0.4;
+		sq.Where(() => a.rate == d);
+
+		Monitor.Log(sq);
+
+		Assert.Equal(14, sq.GetTokens().ToList().Count);
+	}
+
+	[Fact]
+	public void WhereTest_VariableBool()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
+
+		sq.SelectAll();
+
+		bool d = false;
+		sq.Where(() => a.is_enablesd == d);
+
+		Monitor.Log(sq);
+
+		Assert.Equal(14, sq.GetTokens().ToList().Count);
 	}
 
 	[Fact]
@@ -196,7 +266,7 @@ public class ExpressionTreeTest
 		Assert.Equal(14, sq.GetTokens().ToList().Count);
 	}
 
-	public record struct RecordA(int a_id, string text, int value, bool is_enablesd, DateTime timestamp);
+	public record struct RecordA(int a_id, string text, int value, bool is_enablesd, double rate, DateTime timestamp);
 
 	public record struct RecordB(int a_id, int b_id, string text, int value);
 

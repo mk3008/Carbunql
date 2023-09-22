@@ -330,17 +330,6 @@ public static class ExpressionExtension
 		if (exp.Expression is ConstantExpression)
 		{
 			return exp.ExecuteAndConvert(exp.Type);
-
-			//if (exp.Type == typeof(DateTime))
-			//{
-			//	var lm = Expression.Lambda<Func<DateTime>>(exp);
-			//	var d = lm.Compile().Invoke();
-			//	return d.ToValue();
-			//}
-
-			//return ValueParser.Parse(unary.Operand.ToString());
-
-			//return cons.ToValue(exp.Type);
 		}
 
 		throw new NotSupportedException($"propExpression.Expression type:{exp.Expression.GetType().Name}");
@@ -353,6 +342,30 @@ public static class ExpressionExtension
 			var lm = Expression.Lambda<Func<DateTime>>(exp);
 			var d = lm.Compile().Invoke();
 			return d.ToValue();
+		}
+		if (type == typeof(string))
+		{
+			var lm = Expression.Lambda<Func<string>>(exp);
+			var d = lm.Compile().Invoke();
+			return ValueParser.Parse($"'{d}'");
+		}
+		if (type == typeof(int))
+		{
+			var lm = Expression.Lambda<Func<int>>(exp);
+			var d = lm.Compile().Invoke();
+			return ValueParser.Parse(d.ToString());
+		}
+		if (type == typeof(double))
+		{
+			var lm = Expression.Lambda<Func<double>>(exp);
+			var d = lm.Compile().Invoke();
+			return ValueParser.Parse(d.ToString());
+		}
+		if (type == typeof(bool))
+		{
+			var lm = Expression.Lambda<Func<bool>>(exp);
+			var d = lm.Compile().Invoke();
+			return ValueParser.Parse(d.ToString());
 		}
 		return ValueParser.Parse(exp.ToString());
 	}
