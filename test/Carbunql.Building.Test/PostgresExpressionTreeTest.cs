@@ -58,7 +58,7 @@ public class PostgresExpressionTreeTest
 
 		Monitor.Log(sq);
 
-		Assert.Equal(14, sq.GetTokens().ToList().Count);
+		Assert.Equal(17, sq.GetTokens().ToList().Count);
 	}
 
 	[Fact]
@@ -278,7 +278,7 @@ public class PostgresExpressionTreeTest
 
 		Monitor.Log(sq);
 
-		Assert.Equal(19, sq.GetTokens().ToList().Count);
+		Assert.Equal(14, sq.GetTokens().ToList().Count);
 	}
 
 	[Fact]

@@ -5,6 +5,7 @@ using Carbunql.Extensions;
 using Carbunql.Values;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace Carbunql.Postgres;
 
@@ -343,7 +344,7 @@ public static class ExpressionExtension
 		}
 		if (unary.Operand is ConstantExpression cons)
 		{
-			return cons.ExecuteAndConvert();
+			return cons.ToValue();
 		}
 
 		return ((BinaryExpression)unary.Operand).ToValueExpression();
@@ -391,56 +392,77 @@ public static class ExpressionExtension
 				return new ColumnValue(table, column);
 			}
 
-			return exp.ExecuteAndConvert();
+			return exp.ToParameterValue();
 		}
 
 		if (exp.Expression is ConstantExpression)
 		{
-			return exp.ExecuteAndConvert();
+			return exp.ToParameterValue();
 		}
 
 		throw new NotSupportedException($"propExpression.Expression type:{exp.Expression.GetType().Name}");
 	}
 
-	private static ValueBase ExecuteAndConvert(this Expression exp)
+	private static ValueBase ToValue(this ConstantExpression exp)
+	{
+		var value = exp.Execute();
+		if (value is DateTime d) return d.ToValue();
+		if (value is string s) return new LiteralValue($"'value'");
+		return new LiteralValue(value.ToString());
+	}
+
+	private static ParameterValue ToParameterValue(this MemberExpression exp)
+	{
+		var value = exp.Execute();
+		var key = string.Empty;
+
+		if (exp.Expression is MemberExpression m)
+		{
+			key = ":" + (m.Member.Name + '_' + exp.Member.Name).ToSnakeCase();
+		}
+		else
+		{
+			key = ":" + exp.Member.Name.ToSnakeCase();
+		}
+
+		var prm = new ParameterValue(key, value);
+		return prm;
+	}
+
+	private static object Execute(this Expression exp)
 	{
 		if (exp.Type == typeof(DateTime))
 		{
 			var lm = Expression.Lambda<Func<DateTime>>(exp);
-			var d = lm.Compile().Invoke();
-			return d.ToValue();
+			return lm.Compile().Invoke();
 		}
 		if (exp.Type == typeof(string))
 		{
 			var lm = Expression.Lambda<Func<string>>(exp);
-			var d = lm.Compile().Invoke();
-			return ValueParser.Parse($"'{d}'");
+			return lm.Compile().Invoke();
 		}
 		if (exp.Type == typeof(int))
 		{
 			var lm = Expression.Lambda<Func<int>>(exp);
-			var d = lm.Compile().Invoke();
-			return ValueParser.Parse(d.ToString());
+			return lm.Compile().Invoke();
 		}
 		if (exp.Type == typeof(double))
 		{
 			var lm = Expression.Lambda<Func<double>>(exp);
-			var d = lm.Compile().Invoke();
-			return ValueParser.Parse(d.ToString());
+			return lm.Compile().Invoke();
 		}
 		if (exp.Type == typeof(float))
 		{
 			var lm = Expression.Lambda<Func<float>>(exp);
-			var d = lm.Compile().Invoke();
-			return ValueParser.Parse(d.ToString());
+			return lm.Compile().Invoke();
 		}
 		if (exp.Type == typeof(bool))
 		{
 			var lm = Expression.Lambda<Func<bool>>(exp);
-			var d = lm.Compile().Invoke();
-			return ValueParser.Parse(d.ToString());
+			return lm.Compile().Invoke();
 		}
-		return ValueParser.Parse(exp.ToString());
+
+		throw new NotSupportedException($"cannot compile. Type:{exp.Type.FullName}");
 	}
 
 	private static ValueBase ToValue(this DateTime d)
@@ -456,5 +478,12 @@ public static class ExpressionExtension
 		if (exp.Type == typeof(int)) return int.Parse(exp.ToString());
 
 		throw new NotSupportedException();
+	}
+
+	private static string ToSnakeCase(this string input)
+	{
+		if (string.IsNullOrEmpty(input)) return input;
+
+		return Regex.Replace(input, @"([a-z0-9])([A-Z])", "$1_$2").ToLower();
 	}
 }
