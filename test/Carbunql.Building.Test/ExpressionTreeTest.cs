@@ -1,6 +1,5 @@
-﻿using Carbunql.Clauses;
-using Xunit.Abstractions;
-using static Carbunql.Building.Test.ExpressionTreeTest;
+﻿using Xunit.Abstractions;
+//using static Carbunql.Building.Test.ExpressionTreeTest;
 
 namespace Carbunql.Building.Test;
 
@@ -20,7 +19,7 @@ public class ExpressionTreeTest
 	public void Test()
 	{
 		var sq = new SelectQuery();
-		var (from, a) = sq.From("table_a").As<RowA>("a");
+		var (from, a) = sq.From("table_a").As<RecordA>("a");
 
 		sq.SelectAll();
 
@@ -28,50 +27,75 @@ public class ExpressionTreeTest
 		sq.Where(() => a.a_id == 1);
 
 		Monitor.Log(sq);
+
+		Assert.Equal(18, sq.GetTokens().ToList().Count);
 	}
 
 	[Fact]
 	public void AndTest()
 	{
 		var sq = new SelectQuery();
-		var (from, a) = sq.From("table_a").As<RowA>("a");
+		var (from, a) = sq.From("table_a").As<RecordA>("a");
 
 		sq.SelectAll();
 
 		sq.Where(() => a.a_id == 1 && a.value == "test");
 
 		Monitor.Log(sq);
+
+		Assert.Equal(20, sq.GetTokens().ToList().Count);
 	}
 
 	[Fact]
 	public void OrTest()
 	{
 		var sq = new SelectQuery();
-		var (from, a) = sq.From("table_a").As<RowA>("a");
+		var (from, a) = sq.From("table_a").As<RecordA>("a");
 
 		sq.SelectAll();
 
 		sq.Where(() => a.a_id == 1 || a.value == "test" || a.value == "test2");
 
 		Monitor.Log(sq);
+
+		Assert.Equal(26, sq.GetTokens().ToList().Count);
 	}
 
 	[Fact]
 	public void BracketTest()
 	{
 		var sq = new SelectQuery();
-		var (from, a) = sq.From("table_a").As<RowA>("a");
+		var (from, a) = sq.From("table_a").As<RecordA>("a");
 
 		sq.SelectAll();
 
 		sq.Where(() => (a.a_id == 1 || a.a_id == 2 || a.a_id == 3) && (a.a_id == 3 || a.a_id == 4 || a.a_id == 5));
 
 		Monitor.Log(sq);
+
+		Assert.Equal(48, sq.GetTokens().ToList().Count);
 	}
 
-	public struct RowA
+	[Fact]
+	public void JoinTest()
 	{
-		public int a_id { get; }
-		public string value { get; }
+		var sq = new SelectQuery();
+		var (from, a) = sq.From("table_a").As<RecordA>("a");
+		var b = from.InnerJoin("table_b").As<RecordB>("b").On(b => a.a_id == b.a_id && b.value == "test");
+		var c = from.LeftJoin("table_c").As<RecordC>("c").On(c => a.a_id == c.a_id);
+
+		sq.SelectAll();
+
+		sq.Where(() => a.a_id == 1 || b.b_id == 2);
+
+		Monitor.Log(sq);
+
+		Assert.Equal(52, sq.GetTokens().ToList().Count);
 	}
+
+	public record struct RecordA(int a_id, string value);
+
+	public record struct RecordB(int a_id, int b_id, string value);
+
+	public record struct RecordC(int a_id, int c_id, string value);
 }
