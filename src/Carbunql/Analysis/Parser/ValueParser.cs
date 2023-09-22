@@ -79,7 +79,7 @@ public static class ValueParser
 			return NegativeValueParser.Parse(r);
 		}
 
-		if (LiteralValueParser.IsLiteralValue(item))
+		if (item == "null" || LiteralValueParser.IsLiteralValue(item))
 		{
 			return LiteralValueParser.Parse(r);
 		}

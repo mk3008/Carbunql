@@ -1,4 +1,5 @@
 ﻿using Carbunql.Clauses;
+using Carbunql.Extensions;
 using Carbunql.Tables;
 using MessagePack;
 
@@ -49,6 +50,8 @@ public class LiteralValue : ValueBase
 	}
 
 	public string CommandText { get; set; }
+
+	public bool IsNullValue => CommandText.IsEqualNoCase("null");
 
 	public override IEnumerable<Token> GetCurrentTokens(Token? parent)
 	{

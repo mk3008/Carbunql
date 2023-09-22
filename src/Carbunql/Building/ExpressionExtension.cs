@@ -214,6 +214,11 @@ public static class ExpressionExtension
 		var left = exp.Left.ToValue();
 		var right = exp.Right.ToValue();
 
+		if ((left is LiteralValue lv && lv.IsNullValue) || (right is LiteralValue rv && rv.IsNullValue))
+		{
+			op = (op == "=") ? "is" : "is not";
+		}
+
 		if (!op.IsEqualNoCase("or") && !op.IsEqualNoCase("and"))
 		{
 			left.AddOperatableValue(op, right);

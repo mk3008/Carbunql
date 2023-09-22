@@ -161,8 +161,8 @@ public class ExpressionTreeTest
 
 		sq.Where(() => a.rate == 0.1);
 
-		sq.Where(() => a.is_enablesd == true);
-		sq.Where(() => a.is_enablesd != false);
+		sq.Where(() => a.is_enabled == true);
+		sq.Where(() => a.is_enabled != false);
 
 		sq.Where(() => a.timestamp >= new DateTime(2000, 1, 1));
 
@@ -228,7 +228,7 @@ public class ExpressionTreeTest
 		sq.SelectAll();
 
 		bool d = false;
-		sq.Where(() => a.is_enablesd == d);
+		sq.Where(() => a.is_enabled == d);
 
 		Monitor.Log(sq);
 
@@ -266,7 +266,47 @@ public class ExpressionTreeTest
 		Assert.Equal(14, sq.GetTokens().ToList().Count);
 	}
 
-	public record struct RecordA(int a_id, string text, int value, bool is_enablesd, double rate, DateTime timestamp);
+	[Fact]
+	public void WhereTest_Null()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.From("table_a").As<RecordN>("a"); ;
+
+		sq.SelectAll();
+
+		sq.Where(() => a.text == null);
+		sq.Where(() => null == a.text);
+		sq.Where(() => a.text != null);
+		sq.Where(() => null != a.text);
+
+		sq.Where(() => a.value == null);
+		sq.Where(() => null == a.value);
+		sq.Where(() => a.value != null);
+		sq.Where(() => null != a.value);
+
+		sq.Where(() => a.is_enabled == null);
+		sq.Where(() => null == a.is_enabled);
+		sq.Where(() => a.is_enabled != null);
+		sq.Where(() => null != a.is_enabled);
+
+		sq.Where(() => a.rate == null);
+		sq.Where(() => null == a.rate);
+		sq.Where(() => a.rate != null);
+		sq.Where(() => null != a.rate);
+
+		sq.Where(() => a.timestamp == null);
+		sq.Where(() => null == a.timestamp);
+		sq.Where(() => a.timestamp != null);
+		sq.Where(() => null != a.timestamp);
+
+		Monitor.Log(sq);
+
+		Assert.Equal(166, sq.GetTokens().ToList().Count);
+	}
+
+	public record struct RecordA(int a_id, string text, int value, bool is_enabled, double rate, DateTime timestamp);
+
+	public record struct RecordN(int? a_id, string? text, int? value, bool? is_enabled, double? rate, DateTime? timestamp);
 
 	public record struct RecordB(int a_id, int b_id, string text, int value);
 
