@@ -3,17 +3,32 @@ using Carbunql.Postgres;
 
 namespace Carbunql.Building.Test;
 
-public class ExpressionTreeTest
+public class PostgresExpressionTreeTest
 {
 	private readonly QueryCommandMonitor Monitor;
 
-	public ExpressionTreeTest(ITestOutputHelper output)
+	public PostgresExpressionTreeTest(ITestOutputHelper output)
 	{
 		Monitor = new QueryCommandMonitor(output);
 		Output = output;
 	}
 
 	private ITestOutputHelper Output { get; set; }
+
+	[Fact]
+	public void Minus()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.From("table_a").As<RecordA>("a");
+
+		sq.SelectAll();
+
+		sq.Where(() => a.a_id == -1);
+
+		Monitor.Log(sq);
+
+		Assert.Equal(14, sq.GetTokens().ToList().Count);
+	}
 
 	[Fact]
 	public void Test()
@@ -29,6 +44,21 @@ public class ExpressionTreeTest
 		Monitor.Log(sq);
 
 		Assert.Equal(18, sq.GetTokens().ToList().Count);
+	}
+
+	[Fact]
+	public void Negative()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.From("table_a").As<RecordA>("a");
+
+		sq.SelectAll();
+
+		sq.Where(() => !(a.a_id == 1));
+
+		Monitor.Log(sq);
+
+		Assert.Equal(14, sq.GetTokens().ToList().Count);
 	}
 
 	[Fact]
@@ -304,11 +334,34 @@ public class ExpressionTreeTest
 		Assert.Equal(166, sq.GetTokens().ToList().Count);
 	}
 
+	[Fact]
+	public void WhereTest_RecordDefinition()
+	{
+		var c = new Myclass { MyProperty = 1 };
+
+		var sq = new SelectQuery();
+		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
+
+		sq.SelectAll();
+
+		sq.Where(() => a.a_id == c.MyProperty);
+
+		Monitor.Log(sq);
+
+		Assert.Equal(14, sq.GetTokens().ToList().Count);
+	}
+
+	[RecordDefinition]
 	public record struct RecordA(int a_id, string text, int value, bool is_enabled, double rate, DateTime timestamp);
 
+	[RecordDefinition]
 	public record struct RecordN(int? a_id, string? text, int? value, bool? is_enabled, double? rate, DateTime? timestamp);
 
+	[RecordDefinition]
 	public record struct RecordB(int a_id, int b_id, string text, int value);
 
+	[RecordDefinition]
 	public record struct RecordC(int a_id, int c_id, string text, int value);
+
+	public class Myclass { public int MyProperty { get; set; } }
 }

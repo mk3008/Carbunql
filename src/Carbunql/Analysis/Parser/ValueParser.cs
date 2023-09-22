@@ -72,7 +72,7 @@ public static class ValueParser
 	{
 		var item = r.Peek();
 
-		if (String.IsNullOrEmpty(item)) throw new EndOfStreamException();
+		if (string.IsNullOrEmpty(item)) throw new EndOfStreamException();
 
 		if (NegativeValueParser.IsNegativeValue(item))
 		{
