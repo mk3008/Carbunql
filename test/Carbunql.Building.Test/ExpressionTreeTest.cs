@@ -159,15 +159,41 @@ public class ExpressionTreeTest
 		sq.Where(() => a.is_enablesd != false);
 
 		sq.Where(() => a.timestamp >= new DateTime(2000, 1, 1));
-		sq.Where(() => a.timestamp >= DateTime.Now);
+
+		Monitor.Log(sq);
+
+		Assert.Equal(99, sq.GetTokens().ToList().Count);
+	}
+
+	[Fact]
+	public void WhereTest_VariableDateTime()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
+
+		sq.SelectAll();
 
 		var dt = DateTime.Now;
 		sq.Where(() => a.timestamp >= dt);
 
+		Monitor.Log(sq);
+
+		Assert.Equal(19, sq.GetTokens().ToList().Count);
+	}
+
+	[Fact]
+	public void WhereTest_DateTimeNow()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
+
+		sq.SelectAll();
+
+		sq.Where(() => a.timestamp >= DateTime.Now);
 
 		Monitor.Log(sq);
 
-		Assert.Equal(120, sq.GetTokens().ToList().Count);
+		Assert.Equal(14, sq.GetTokens().ToList().Count);
 	}
 
 	public record struct RecordA(int a_id, string text, int value, bool is_enablesd, DateTime timestamp);
