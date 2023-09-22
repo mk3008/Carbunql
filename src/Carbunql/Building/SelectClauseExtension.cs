@@ -86,14 +86,7 @@ public static class SelectClauseExtension
 		return item;
 	}
 
-	public static SelectableItem Select(this SelectQuery source, Expression<Func<object>> fnc)
-	{
-		var v = fnc.Body.ToValue();
-		var item = new SelectableItem(v, v.GetDefaultName());
-		source.SelectClause ??= new();
-		source.SelectClause.Add(item);
-		return item;
-	}
+
 
 	public static SelectableItem Select(this SelectQuery source, int value)
 	{

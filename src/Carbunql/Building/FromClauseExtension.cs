@@ -58,13 +58,6 @@ public static class FromClauseExtension
 		return (source, source.Root);
 	}
 
-	public static (FromClause, T) As<T>(this FromClause source, string alias)
-	{
-		source.As(alias);
-		var r = (T)Activator.CreateInstance(typeof(T))!;
-		return (source, r);
-	}
-
 	public static Relation InnerJoin(this FromClause source, IReadQuery query)
 	{
 		var st = query.ToSelectableTable();
@@ -208,15 +201,6 @@ public static class FromClauseExtension
 	public static SelectableTable On(this Relation source, FromClause from, string column)
 	{
 		return source.On(from.Root, new[] { column });
-	}
-
-	public static T On<T>(this (Relation relation, T record) source, Expression<Func<T, bool>> predicate)
-	{
-		var v = ((BinaryExpression)predicate.Body).ToValue();
-
-		source.relation.On((_) => v);
-
-		return source.record;
 	}
 
 	public static SelectableTable On(this Relation source, SelectableTable sourceTable, string column)

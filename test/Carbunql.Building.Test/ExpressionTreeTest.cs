@@ -1,5 +1,5 @@
 ﻿using Xunit.Abstractions;
-//using static Carbunql.Building.Test.ExpressionTreeTest;
+using Carbunql.Postgres;
 
 namespace Carbunql.Building.Test;
 

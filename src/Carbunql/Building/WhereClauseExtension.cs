@@ -31,23 +31,6 @@ public static class WhereClauseExtension
 		return source.Where(v);
 	}
 
-
-	public static ValueBase Where(this SelectQuery source, Expression<Func<bool>> predicate)
-	{
-		var v = predicate.Body.ToValue();
-
-		if (v is BracketValue)
-		{
-			source.Where(v);
-		}
-		else
-		{
-			source.Where(new BracketValue(v));
-		}
-
-		return v;
-	}
-
 	public static ValueBase Where(this SelectQuery source, Func<ValueBase> builder)
 	{
 		var v = builder();
