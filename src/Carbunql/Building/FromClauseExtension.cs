@@ -54,6 +54,7 @@ public static class FromClauseExtension
 
 	public static (FromClause, SelectableTable) As(this FromClause source, string alias)
 	{
+		if (string.IsNullOrEmpty(alias)) throw new ArgumentNullException("alias");
 		source.Root.SetAlias(alias);
 		return (source, source.Root);
 	}
