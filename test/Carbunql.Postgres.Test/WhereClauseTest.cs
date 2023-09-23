@@ -1,14 +1,13 @@
-﻿using Xunit.Abstractions;
-using Carbunql.Postgres;
-using System.Linq.Expressions;
+﻿using Carbunql.Building;
+using Xunit.Abstractions;
 
-namespace Carbunql.Building.Test;
+namespace Carbunql.Postgres.Test;
 
-public class PostgresExpressionTreeTest
+public class WhereClauseTest
 {
 	private readonly QueryCommandMonitor Monitor;
 
-	public PostgresExpressionTreeTest(ITestOutputHelper output)
+	public WhereClauseTest(ITestOutputHelper output)
 	{
 		Monitor = new QueryCommandMonitor(output);
 		Output = output;
@@ -17,7 +16,7 @@ public class PostgresExpressionTreeTest
 	private ITestOutputHelper Output { get; set; }
 
 	[Fact]
-	public void Minus()
+	public void EqualMinus()
 	{
 		var sq = new SelectQuery();
 		var (from, a) = sq.From("table_a").As<RecordA>("a");
@@ -32,7 +31,7 @@ public class PostgresExpressionTreeTest
 	}
 
 	[Fact]
-	public void Test()
+	public void Equal()
 	{
 		var sq = new SelectQuery();
 		var (from, a) = sq.From("table_a").As<RecordA>("a");
@@ -48,7 +47,7 @@ public class PostgresExpressionTreeTest
 	}
 
 	[Fact]
-	public void Negative()
+	public void NegativeEqual()
 	{
 		var sq = new SelectQuery();
 		var (from, a) = sq.From("table_a").As<RecordA>("a");
@@ -108,82 +107,7 @@ public class PostgresExpressionTreeTest
 	}
 
 	[Fact]
-	public void JoinTest()
-	{
-		var sq = new SelectQuery();
-		var (from, a) = sq.From("table_a").As<RecordA>("a");
-		var b = from.InnerJoin("table_b").As<RecordB>("b").On(b => a.a_id == b.a_id && b.text == "test");
-		var c = from.LeftJoin("table_c").As<RecordC>("c").On(c => a.a_id == c.a_id);
-
-		sq.SelectAll();
-
-		sq.Where(() => a.a_id == 1 || b.b_id == 2);
-
-		Monitor.Log(sq);
-
-		Assert.Equal(52, sq.GetTokens().ToList().Count);
-	}
-
-	[Fact]
-	public void SelectTest()
-	{
-		var sq = new SelectQuery();
-		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
-
-		sq.Select("a", "a_id");
-		sq.Select(nameof(a), "a_id");
-		sq.Select(() => a.a_id);
-		sq.Select(() => a.a_id).As("id");
-
-		Monitor.Log(sq);
-
-		Assert.Equal(22, sq.GetTokens().ToList().Count);
-	}
-
-	[Fact]
-	public void SelectAll()
-	{
-		var sq = new SelectQuery();
-		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
-
-		sq.SelectAll(() => a);
-
-		Monitor.Log(sq);
-
-		Assert.Equal(32, sq.GetTokens().ToList().Count);
-	}
-
-	[Fact]
-	public void SelectTest_Expression()
-	{
-		var sq = new SelectQuery();
-		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
-
-		sq.Select("1 + 2 * 3.14");
-		sq.Select(() => 1 + 2 * 3.14);
-		sq.Select(() => 1 + 2 * 3.14).As("value");
-
-		Monitor.Log(sq);
-
-		Assert.Equal(18, sq.GetTokens().ToList().Count);
-	}
-
-	[Fact]
-	public void SelectTest_Expression_FourArithmeticOperations()
-	{
-		var sq = new SelectQuery();
-		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
-
-		sq.Select(() => a.value * 2 / 10 + 1 - 3);
-		sq.Select(() => a.value * 2 / 10 + 1 - 3).As("value");
-
-		Monitor.Log(sq);
-
-		Assert.Equal(30, sq.GetTokens().ToList().Count);
-	}
-
-	[Fact]
-	public void WhereTest()
+	public void DefaultTest()
 	{
 		var sq = new SelectQuery();
 		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
@@ -217,7 +141,7 @@ public class PostgresExpressionTreeTest
 	}
 
 	[Fact]
-	public void WhereTest_Enum()
+	public void EnumTest()
 	{
 		var sq = new SelectQuery();
 		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
@@ -236,16 +160,10 @@ public class PostgresExpressionTreeTest
 	{
 		var sq = new SelectQuery();
 		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
+		sq.SelectAll();
 
 		var text = "';delete";
 		Func<string> fn = () => text;
-
-		sq.Select(() => "abc ");
-		sq.Select(() => "abc ".Trim());
-		sq.Select(() => "';delete");
-		sq.Select(() => text);
-		sq.Select(() => text.Trim());
-		sq.Select(() => fn());
 
 		sq.Where(() => a.text == "abc");
 		sq.Where(() => a.text == "';delete");
@@ -257,18 +175,12 @@ public class PostgresExpressionTreeTest
 
 		var sql = @"
 /*
-  :method_trim = 'abc'
   :member_text = '';delete'
   :method_text_trim = '';delete'
   :invoke_fn = '';delete'
 */
 SELECT
-    'abc ',
-    :method_trim,
-    '',
-    :member_text,
-    :method_text_trim,
-    :invoke_fn
+    *
 FROM
     table_a AS a
 WHERE
@@ -282,7 +194,7 @@ WHERE
 	}
 
 	[Fact]
-	public void WhereTest_VariableInt()
+	public void IntTest()
 	{
 		var sq = new SelectQuery();
 		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
@@ -298,7 +210,7 @@ WHERE
 	}
 
 	[Fact]
-	public void WhereTest_VariableDouble()
+	public void DoubleTest()
 	{
 		var sq = new SelectQuery();
 		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
@@ -314,7 +226,7 @@ WHERE
 	}
 
 	[Fact]
-	public void WhereTest_VariableBool()
+	public void BoolTest()
 	{
 		var sq = new SelectQuery();
 		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
@@ -330,7 +242,7 @@ WHERE
 	}
 
 	[Fact]
-	public void WhereTest_VariableDateTime()
+	public void DateTimeTest()
 	{
 		var sq = new SelectQuery();
 		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
@@ -346,7 +258,7 @@ WHERE
 	}
 
 	[Fact]
-	public void WhereTest_DateTimeNow()
+	public void DateTimeNowTest()
 	{
 		var sq = new SelectQuery();
 		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
@@ -362,7 +274,7 @@ WHERE
 	}
 
 	[Fact]
-	public void WhereTest_Null()
+	public void NullTest()
 	{
 		var sq = new SelectQuery();
 		var (from, a) = sq.From("table_a").As<RecordN>("a"); ;
@@ -400,7 +312,7 @@ WHERE
 	}
 
 	[Fact]
-	public void WhereTest_RecordDefinition()
+	public void RecordDefinitionTest()
 	{
 		var c = new Myclass { MyProperty = 1 };
 
