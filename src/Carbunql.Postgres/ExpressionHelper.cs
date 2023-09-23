@@ -3,9 +3,9 @@ using Carbunql.Building;
 using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Values;
+using System.Collections;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Reflection.Metadata;
 using System.Text.RegularExpressions;
 
 namespace Carbunql.Postgres;
@@ -431,13 +431,29 @@ public static class ExpressionHelper
 
 			if (mc.Method.Name == "Concat") return mc.ToConcatValue();
 
+			if (mc.Method.Name == "Contains")
+			{
+				if (mc.Object == null && mc.Method.DeclaringType == typeof(Enumerable))
+				{
+					return mc.ToAnyFunctionValue();
+				}
+				if (mc.Object != null && typeof(IList).IsAssignableFrom(mc.Object.Type))
+				{
+					return mc.ToAnyFunctionValue();
+				}
+				else
+				{
+					return mc.ToContainsLikeClause();
+				}
+			}
+
 			if (mc.Object == null) throw new NullReferenceException("MethodCallExpression.Object is null.");
 			if (mc.Object.NodeType == ExpressionType.Constant)
 			{
 				return ((MethodCallExpression)exp).ToParameterValue();
 			}
 
-			if (mc.Method.Name == "Contains") return mc.ToContainsLikeClause();
+
 			if (mc.Method.Name == "StartsWith") return mc.ToStartsWithLikeClause();
 			if (mc.Method.Name == "EndsWith") return mc.ToEndsWithLikeClause();
 			if (mc.Method.Name == "Trim") return mc.ToTrimValue();
@@ -481,6 +497,24 @@ public static class ExpressionHelper
 
 		var m = (MemberExpression)exp.Object!;
 		return new FunctionValue("trim", m.ToValue());
+	}
+
+	private static ValueBase ToAnyFunctionValue(this MethodCallExpression exp)
+	{
+		if (exp.Method.Name != "Contains") throw new InvalidProgramException();
+
+		if (exp.Object == null)
+		{
+			var value = exp.Arguments[1].ToValue();
+			var arg = exp.Arguments[0].ToValue();
+			return value.Equal(new FunctionValue("any", arg));
+		}
+		else
+		{
+			var value = exp.Arguments.First().ToValue();
+			var arg = (MemberExpression)exp.Object!;
+			return value.Equal(new FunctionValue("any", arg.ToValue()));
+		}
 	}
 
 	private static LikeClause CreateLikeClause(ValueBase value, params ValueBase[] args)

@@ -16,6 +16,44 @@ public class FunctionTest
 	private ITestOutputHelper Output { get; set; }
 
 	[Fact]
+	public void AnyTest()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.FromAs<table_a>("a");
+
+		var list = new List<int>() { 1, 2, 3 };
+		var array = new int[] { 1, 2, 3 };
+
+		sq.SelectAll();
+
+		sq.Where(() => list.Contains(a.a_id));
+		sq.Where(() => !list.Contains(a.a_id));
+
+		sq.Where(() => array.Contains(a.a_id));
+		sq.Where(() => !array.Contains(a.a_id));
+
+		Monitor.Log(sq);
+
+		var sql = @"
+/*
+  :member_list = System.Collections.Generic.List`1[System.Int32]
+  :member_array = System.Int32[]
+*/
+SELECT
+    *
+FROM
+    table_a AS a
+WHERE
+    (a.a_id = ANY(:member_list))
+    AND (NOT (a.a_id = ANY(:member_list)))
+    AND (a.a_id = ANY(:member_array))
+    AND (NOT (a.a_id = ANY(:member_array)))";
+
+		Assert.Equal(56, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
+	[Fact]
 	public void ConcatTest()
 	{
 		var sq = new SelectQuery();
