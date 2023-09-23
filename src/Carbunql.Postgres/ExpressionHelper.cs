@@ -593,6 +593,11 @@ public static class ExpressionHelper
 			return cons.ToValue();
 		}
 
+		if (exp.Operand is MethodCallExpression ce)
+		{
+			return ce.ToValue();
+		}
+
 		return ((BinaryExpression)exp.Operand).ToValueExpression();
 	}
 

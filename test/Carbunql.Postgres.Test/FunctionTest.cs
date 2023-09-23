@@ -144,6 +144,37 @@ WHERE
 	}
 
 	[Fact]
+	public void LikeTest_NotContains()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.FromAs<table_a>("a");
+
+		var text = "word";
+
+		sq.SelectAll();
+
+		sq.Where(() => !a.text.Contains("word"));
+		sq.Where(() => !a.text.Contains(text));
+
+		Monitor.Log(sq);
+
+		var sql = @"
+/*
+  :member_text = 'word'
+*/
+SELECT
+    *
+FROM
+    table_a AS a
+WHERE
+    (NOT (a.text LIKE '%' || 'word' || '%'))
+    AND (NOT (a.text LIKE '%' || :member_text || '%'))";
+
+		Assert.Equal(36, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
+	[Fact]
 	public void LikeTest_StartsWith()
 	{
 		var sq = new SelectQuery();
