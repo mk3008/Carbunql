@@ -305,7 +305,7 @@ public static class ExpressionHelper
 
 		if (exp.NodeType == ExpressionType.Constant)
 		{
-			return ValueParser.Parse(exp.ToString());
+			return ((ConstantExpression)exp).ToValue();
 		}
 
 		if (exp.NodeType == ExpressionType.MemberAccess)
@@ -315,51 +315,92 @@ public static class ExpressionHelper
 
 		if (exp is UnaryExpression unary)
 		{
-			var v = unary.ToValue();
-			if (exp.NodeType == ExpressionType.Convert) return v;
-			if (exp.NodeType == ExpressionType.Not) return new NegativeValue(v.ToBracket());
-			throw new NotSupportedException();
+			return unary.ToValue();
 		}
 
 		if (exp is NewExpression ne)
 		{
-			var args = ne.Arguments.Select(x => x.ToObject()).ToArray();
+			return ne.ToValue();
+		}
 
-			var d = ne.Constructor!.Invoke(args);
+		if (exp.NodeType == ExpressionType.Invoke)
+		{
+			return ((InvocationExpression)exp).ToParameterValue();
+		}
 
-			if (ne.Type == typeof(DateTime))
-			{
-				return ((DateTime)d).ToValue();
-			}
-
-			return new LiteralValue($"'{d}'");
+		if (exp.NodeType == ExpressionType.Call)
+		{
+			return ((MethodCallExpression)exp).ToParameterValue();
 		}
 
 		return ((BinaryExpression)exp).ToValueExpression();
 	}
 
-	private static ValueBase ToValue(this UnaryExpression unary)
+	private static ValueBase ToValue(this NewExpression exp)
 	{
-		if (unary.Operand is MemberExpression prop)
-		{
-			var column = prop.Member.Name;
+		var args = exp.Arguments.Select(x => x.ToObject()).ToArray();
 
-			if (prop.Expression is MemberExpression tp)
-			{
-				var table = tp.Member.Name;
-				return new ColumnValue(table, column);
-			}
-			else
-			{
-				throw new NotSupportedException();
-			}
+		var d = exp.Constructor!.Invoke(args);
+
+		if (exp.Type == typeof(DateTime))
+		{
+			return ((DateTime)d).ToValue();
 		}
-		if (unary.Operand is ConstantExpression cons)
+
+		return ValueParser.Parse($"'{d}'");
+	}
+
+	private static ParameterValue ToParameterValue(this MethodCallExpression exp)
+	{
+		var value = exp.Execute();
+
+		var key = string.Empty;
+		if (exp.Object is MemberExpression mem)
+		{
+			key = mem.Member.Name + '_' + exp.Method.Name;
+		}
+		else
+		{
+			key = exp.Method.Name;
+		}
+		key = key.ToParameterName("method");
+
+		var prm = new ParameterValue(key, value);
+		return prm;
+	}
+
+	private static ParameterValue ToParameterValue(this InvocationExpression exp)
+	{
+		var value = exp.Execute();
+
+		var inner = exp.Expression;
+		var key = ((MemberExpression)inner).Member.Name.ToParameterName("invoke");
+
+		var prm = new ParameterValue(key, value);
+		return prm;
+	}
+
+	private static ValueBase ToValue(this UnaryExpression exp)
+	{
+		var v = exp.ToValueCore();
+		if (exp.NodeType == ExpressionType.Convert) return v;
+		if (exp.NodeType == ExpressionType.Not) return new NegativeValue(v.ToBracket());
+		throw new NotSupportedException();
+	}
+
+	private static ValueBase ToValueCore(this UnaryExpression exp)
+	{
+		if (exp.Operand is MemberExpression mem)
+		{
+			return mem.ToValue();
+		}
+
+		if (exp.Operand is ConstantExpression cons)
 		{
 			return cons.ToValue();
 		}
 
-		return ((BinaryExpression)unary.Operand).ToValueExpression();
+		return ((BinaryExpression)exp.Operand).ToValueExpression();
 	}
 
 	private static ValueBase ToValue(this MemberExpression exp)
@@ -418,8 +459,9 @@ public static class ExpressionHelper
 	private static ValueBase ToValue(this ConstantExpression exp)
 	{
 		var value = exp.Execute();
+		if (value == null) return ValueParser.Parse("null");
 		if (value is DateTime d) return d.ToValue();
-		if (value is string s) return new LiteralValue($"'value'");
+		if (value is string s) return ValueParser.Parse($"'{value}'");
 		return new LiteralValue(value.ToString());
 	}
 
@@ -430,51 +472,31 @@ public static class ExpressionHelper
 
 		if (exp.Expression is MemberExpression m)
 		{
-			key = ":" + (m.Member.Name + '_' + exp.Member.Name).ToSnakeCase();
+			key = m.Member.Name + '_' + exp.Member.Name;
 		}
 		else
 		{
-			key = ":" + exp.Member.Name.ToSnakeCase();
+			key = exp.Member.Name;
 		}
+		key = key.ToParameterName("member");
 
 		var prm = new ParameterValue(key, value);
 		return prm;
 	}
 
-	private static object Execute(this Expression exp)
+	private static object? Execute(this Expression exp)
 	{
-		if (exp.Type == typeof(DateTime))
-		{
-			var lm = Expression.Lambda<Func<DateTime>>(exp);
-			return lm.Compile().Invoke();
-		}
-		if (exp.Type == typeof(string))
-		{
-			var lm = Expression.Lambda<Func<string>>(exp);
-			return lm.Compile().Invoke();
-		}
-		if (exp.Type == typeof(int))
-		{
-			var lm = Expression.Lambda<Func<int>>(exp);
-			return lm.Compile().Invoke();
-		}
-		if (exp.Type == typeof(double))
-		{
-			var lm = Expression.Lambda<Func<double>>(exp);
-			return lm.Compile().Invoke();
-		}
-		if (exp.Type == typeof(float))
-		{
-			var lm = Expression.Lambda<Func<float>>(exp);
-			return lm.Compile().Invoke();
-		}
-		if (exp.Type == typeof(bool))
-		{
-			var lm = Expression.Lambda<Func<bool>>(exp);
-			return lm.Compile().Invoke();
-		}
+		var method = typeof(ExpressionHelper)
+			.GetMethod(nameof(ExecuteCore), BindingFlags.NonPublic | BindingFlags.Static)!
+			.MakeGenericMethod(exp.Type);
 
-		throw new NotSupportedException($"cannot compile. Type:{exp.Type.FullName}");
+		return method.Invoke(null, new object[] { exp });
+	}
+
+	private static T ExecuteCore<T>(this Expression exp)
+	{
+		var lm = Expression.Lambda<Func<T>>(exp);
+		return lm.Compile().Invoke();
 	}
 
 	private static ValueBase ToValue(this DateTime d)
@@ -494,8 +516,26 @@ public static class ExpressionHelper
 
 	private static string ToSnakeCase(this string input)
 	{
-		if (string.IsNullOrEmpty(input)) return input;
+		var cleanedInput = Regex.Replace(input, @"[^a-zA-Z0-9]", "");
+		if (string.IsNullOrEmpty(cleanedInput)) return string.Empty;
+		return Regex.Replace(cleanedInput, @"([a-z0-9])([A-Z])", "$1_$2").ToLower();
+	}
 
-		return Regex.Replace(input, @"([a-z0-9])([A-Z])", "$1_$2").ToLower();
+	private static string ToParameterName(this string input, string prefix)
+	{
+		var name = input.ToSnakeCase();
+		if (string.IsNullOrEmpty(name)) throw new Exception("key name is empty.");
+
+		if (!string.IsNullOrEmpty(prefix))
+		{
+			name = prefix.ToSnakeCase() + "_" + name;
+		}
+
+		name = ':' + name;
+		if (name.Length > 60)
+		{
+			name = name.Substring(0, 60);
+		}
+		return name;
 	}
 }

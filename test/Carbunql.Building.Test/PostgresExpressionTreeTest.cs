@@ -232,19 +232,53 @@ public class PostgresExpressionTreeTest
 	}
 
 	[Fact]
-	public void WhereTest_VariableText()
+	public void StringTest()
 	{
 		var sq = new SelectQuery();
 		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
 
-		sq.SelectAll();
+		var text = "';delete";
+		Func<string> fn = () => text;
 
-		var text = "test";
+		sq.Select(() => "abc ");
+		sq.Select(() => "abc ".Trim());
+		sq.Select(() => "';delete");
+		sq.Select(() => text);
+		sq.Select(() => text.Trim());
+		sq.Select(() => fn());
+
+		sq.Where(() => a.text == "abc");
+		sq.Where(() => a.text == "';delete");
 		sq.Where(() => a.text == text);
+		sq.Where(() => a.text == text.Trim());
+		sq.Where(() => a.text == fn());
 
 		Monitor.Log(sq);
 
-		Assert.Equal(14, sq.GetTokens().ToList().Count);
+		var sql = @"
+/*
+  :method_trim = 'abc'
+  :member_text = '';delete'
+  :method_text_trim = '';delete'
+  :invoke_fn = '';delete'
+*/
+SELECT
+    'abc ',
+    :method_trim,
+    '',
+    :member_text,
+    :method_text_trim,
+    :invoke_fn
+FROM
+    table_a AS a
+WHERE
+    (a.text = 'abc')
+    AND (a.text = '')
+    AND (a.text = :member_text)
+    AND (a.text = :method_text_trim)
+    AND (a.text = :invoke_fn)
+";
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
 	[Fact]
@@ -317,7 +351,8 @@ public class PostgresExpressionTreeTest
 		var sq = new SelectQuery();
 		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
 
-		sq.SelectAll();
+
+		sq.Select(() => DateTime.Now);
 
 		sq.Where(() => a.timestamp >= DateTime.Now);
 
