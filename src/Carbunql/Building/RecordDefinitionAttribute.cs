@@ -6,6 +6,14 @@
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false)]
 public class RecordDefinitionAttribute : Attribute
 {
-	public string Schema { get; set; } = string.Empty;
+	public RecordDefinitionAttribute()
+	{
+	}
+
+	public RecordDefinitionAttribute(string table)
+	{
+		Table = table;
+	}
+
 	public string Table { get; set; } = string.Empty;
 }

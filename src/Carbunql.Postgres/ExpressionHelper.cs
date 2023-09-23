@@ -11,13 +11,6 @@ namespace Carbunql.Postgres;
 
 public static class ExpressionHelper
 {
-	public static (FromClause, T) As<T>(this FromClause source, string alias)
-	{
-		source.As(alias);
-		var r = (T)Activator.CreateInstance(typeof(T))!;
-		return (source, r);
-	}
-
 	public static void SelectAll(this SelectQuery source, Expression<Func<object>> fnc)
 	{
 		var v = fnc.Compile().Invoke();
@@ -37,6 +30,105 @@ public static class ExpressionHelper
 		source.SelectClause ??= new();
 		source.SelectClause.Add(item);
 		return item;
+	}
+
+	public static (FromClause, T) FromAs<T>(this SelectQuery source, string alias)
+	{
+		var atr = typeof(T).GetCustomAttribute(typeof(RecordDefinitionAttribute)) as RecordDefinitionAttribute;
+		if (atr == null || string.IsNullOrEmpty(atr.Table))
+		{
+			return source.FromAs<T>(typeof(T).Name, alias);
+		}
+		else
+		{
+			return source.FromAs<T>(atr.Table, alias);
+		}
+	}
+
+	public static (FromClause, T) FromAs<T>(this SelectQuery source, string table, string alias)
+	{
+		var r = (T)Activator.CreateInstance(typeof(T))!;
+		var (from, _) = source.From(table).As(alias);
+		return (from, r);
+	}
+
+	public static (FromClause, T) As<T>(this FromClause source, string alias)
+	{
+		source.As(alias);
+		var r = (T)Activator.CreateInstance(typeof(T))!;
+		return (source, r);
+	}
+
+	public static (Relation, T) InnerJoinAs<T>(this FromClause source, string alias)
+	{
+		var atr = typeof(T).GetCustomAttribute(typeof(RecordDefinitionAttribute)) as RecordDefinitionAttribute;
+		if (atr == null || string.IsNullOrEmpty(atr.Table))
+		{
+			return source.InnerJoinAs<T>(typeof(T).Name, alias);
+		}
+		else
+		{
+			return source.InnerJoinAs<T>(atr.Table, alias);
+		}
+	}
+
+	public static (Relation, T) InnerJoinAs<T>(this FromClause source, string table, string alias)
+	{
+		return source.InnerJoin(table).As<T>(alias);
+	}
+
+	public static (Relation, T) LeftJoinAs<T>(this FromClause source, string alias)
+	{
+		var atr = typeof(T).GetCustomAttribute(typeof(RecordDefinitionAttribute)) as RecordDefinitionAttribute;
+		if (atr == null || string.IsNullOrEmpty(atr.Table))
+		{
+			return source.LeftJoinAs<T>(typeof(T).Name, alias);
+		}
+		else
+		{
+			return source.LeftJoinAs<T>(atr.Table, alias);
+		}
+	}
+
+	public static (Relation, T) LeftJoinAs<T>(this FromClause source, string table, string alias)
+	{
+		return source.LeftJoin(table).As<T>(alias);
+	}
+
+	public static (Relation, T) RightJoinAs<T>(this FromClause source, string alias)
+	{
+		var atr = typeof(T).GetCustomAttribute(typeof(RecordDefinitionAttribute)) as RecordDefinitionAttribute;
+		if (atr == null || string.IsNullOrEmpty(atr.Table))
+		{
+			return source.RightJoinAs<T>(typeof(T).Name, alias);
+		}
+		else
+		{
+			return source.RightJoinAs<T>(atr.Table, alias);
+		}
+	}
+
+	public static (Relation, T) RightJoinAs<T>(this FromClause source, string table, string alias)
+	{
+		return source.RightJoin(table).As<T>(alias);
+	}
+
+	public static (Relation, T) CrossJoinAs<T>(this FromClause source, string alias)
+	{
+		var atr = typeof(T).GetCustomAttribute(typeof(RecordDefinitionAttribute)) as RecordDefinitionAttribute;
+		if (atr == null || string.IsNullOrEmpty(atr.Table))
+		{
+			return source.CrossJoinAs<T>(typeof(T).Name, alias);
+		}
+		else
+		{
+			return source.CrossJoinAs<T>(atr.Table, alias);
+		}
+	}
+
+	public static (Relation, T) CrossJoinAs<T>(this FromClause source, string table, string alias)
+	{
+		return source.CrossJoin(table).As<T>(alias);
 	}
 
 	public static T On<T>(this (Relation relation, T record) source, Expression<Func<T, bool>> predicate)
