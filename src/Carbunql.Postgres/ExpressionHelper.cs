@@ -5,16 +5,29 @@ using Carbunql.Extensions;
 using Carbunql.Values;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace Carbunql.Postgres;
 
-public static class ExpressionExtension
+public static class ExpressionHelper
 {
 	public static (FromClause, T) As<T>(this FromClause source, string alias)
 	{
 		source.As(alias);
 		var r = (T)Activator.CreateInstance(typeof(T))!;
 		return (source, r);
+	}
+
+	public static void SelectAll(this SelectQuery source, Expression<Func<object>> fnc)
+	{
+		var v = fnc.Compile().Invoke();
+		var exp = (UnaryExpression)fnc.Body;
+		var op = (MemberExpression)exp.Operand;
+
+		foreach (var prop in v.GetType().GetProperties())
+		{
+			source.Select(op.Member.Name, prop.Name);
+		}
 	}
 
 	public static SelectableItem Select(this SelectQuery source, Expression<Func<object>> fnc)
@@ -51,41 +64,49 @@ public static class ExpressionExtension
 		return v;
 	}
 
-	public static ValueBase ToValueExpression(this BinaryExpression exp)
+	private static ValueBase ToValueExpression(this BinaryExpression exp)
 	{
 		var op = string.Empty;
 		switch (exp.NodeType)
 		{
 			case ExpressionType.Add:
-			case ExpressionType.AddChecked:
 				op = "+";
 				break;
+
 			case ExpressionType.And:
 			case ExpressionType.AndAlso:
 				op = "and";
 				break;
+
 			case ExpressionType.Equal:
 				op = "=";
 				break;
+
 			case ExpressionType.Divide:
 				op = "/";
 				break;
+
 			case ExpressionType.GreaterThan:
 				op = ">";
 				break;
+
 			case ExpressionType.GreaterThanOrEqual:
 				op = ">=";
 				break;
+
 			case ExpressionType.LessThan:
 				op = "<";
 				break;
+
 			case ExpressionType.LessThanOrEqual:
 				op = "<=";
 				break;
+
 			case ExpressionType.Or:
 			case ExpressionType.OrElse:
 				op = "or";
 				break;
+
 			case ExpressionType.NotEqual:
 				op = "<>";
 				break;
@@ -97,6 +118,8 @@ public static class ExpressionExtension
 				op = "-";
 				break;
 
+			case ExpressionType.AddChecked:
+				break;
 			case ExpressionType.ArrayLength:
 				break;
 			case ExpressionType.ArrayIndex:
@@ -113,18 +136,14 @@ public static class ExpressionExtension
 				break;
 			case ExpressionType.ConvertChecked:
 				break;
-
-
 			case ExpressionType.ExclusiveOr:
 				break;
-
 			case ExpressionType.Invoke:
 				break;
 			case ExpressionType.Lambda:
 				break;
 			case ExpressionType.LeftShift:
 				break;
-
 			case ExpressionType.ListInit:
 				break;
 			case ExpressionType.MemberAccess:
@@ -133,7 +152,6 @@ public static class ExpressionExtension
 				break;
 			case ExpressionType.Modulo:
 				break;
-
 			case ExpressionType.MultiplyChecked:
 				break;
 			case ExpressionType.Negate:
@@ -282,7 +300,7 @@ public static class ExpressionExtension
 		return new BracketValue(left);
 	}
 
-	public static ValueBase ToValue(this Expression exp)
+	private static ValueBase ToValue(this Expression exp)
 	{
 
 		if (exp.NodeType == ExpressionType.Constant)
@@ -295,28 +313,12 @@ public static class ExpressionExtension
 			return ((MemberExpression)exp).ToValue();
 		}
 
-		if (exp.NodeType == ExpressionType.Convert && exp is UnaryExpression unary)
+		if (exp is UnaryExpression unary)
 		{
-			if (unary.Operand is MemberExpression prop)
-			{
-				var column = prop.Member.Name;
-
-				if (prop.Expression is MemberExpression tp)
-				{
-					var table = tp.Member.Name;
-					return new ColumnValue(table, column);
-				}
-				else
-				{
-					throw new NotSupportedException();
-				}
-			}
-			if (unary.Operand is ConstantExpression cons)
-			{
-				return cons.ExecuteAndConvert(cons.Type);
-			}
-
-			return ((BinaryExpression)unary.Operand).ToValueExpression();
+			var v = unary.ToValue();
+			if (exp.NodeType == ExpressionType.Convert) return v;
+			if (exp.NodeType == ExpressionType.Not) return new NegativeValue(v.ToBracket());
+			throw new NotSupportedException();
 		}
 
 		if (exp is NewExpression ne)
@@ -336,7 +338,31 @@ public static class ExpressionExtension
 		return ((BinaryExpression)exp).ToValueExpression();
 	}
 
-	public static ValueBase ToValue(this MemberExpression exp)
+	private static ValueBase ToValue(this UnaryExpression unary)
+	{
+		if (unary.Operand is MemberExpression prop)
+		{
+			var column = prop.Member.Name;
+
+			if (prop.Expression is MemberExpression tp)
+			{
+				var table = tp.Member.Name;
+				return new ColumnValue(table, column);
+			}
+			else
+			{
+				throw new NotSupportedException();
+			}
+		}
+		if (unary.Operand is ConstantExpression cons)
+		{
+			return cons.ToValue();
+		}
+
+		return ((BinaryExpression)unary.Operand).ToValueExpression();
+	}
+
+	private static ValueBase ToValue(this MemberExpression exp)
 	{
 		if (exp.ToString() == "DateTime.Now")
 		{
@@ -369,60 +395,94 @@ public static class ExpressionExtension
 
 		if (exp.Expression is MemberExpression mem)
 		{
-			var table = mem.Member.Name;
-			var column = exp.Member.Name;
-			return new ColumnValue(table, column);
+			//If there is a RecordDefinition attribute,
+			//treat it as an expression without compiling it.
+			if (mem.Type.GetCustomAttribute<RecordDefinitionAttribute>() != null)
+			{
+				var table = mem.Member.Name;
+				var column = exp.Member.Name;
+				return new ColumnValue(table, column);
+			}
+
+			return exp.ToParameterValue();
 		}
 
 		if (exp.Expression is ConstantExpression)
 		{
-			return exp.ExecuteAndConvert(exp.Type);
+			return exp.ToParameterValue();
 		}
 
 		throw new NotSupportedException($"propExpression.Expression type:{exp.Expression.GetType().Name}");
 	}
 
-	public static ValueBase ExecuteAndConvert(this Expression exp, Type type)
+	private static ValueBase ToValue(this ConstantExpression exp)
 	{
-		if (type == typeof(DateTime))
-		{
-			var lm = Expression.Lambda<Func<DateTime>>(exp);
-			var d = lm.Compile().Invoke();
-			return d.ToValue();
-		}
-		if (type == typeof(string))
-		{
-			var lm = Expression.Lambda<Func<string>>(exp);
-			var d = lm.Compile().Invoke();
-			return ValueParser.Parse($"'{d}'");
-		}
-		if (type == typeof(int))
-		{
-			var lm = Expression.Lambda<Func<int>>(exp);
-			var d = lm.Compile().Invoke();
-			return ValueParser.Parse(d.ToString());
-		}
-		if (type == typeof(double))
-		{
-			var lm = Expression.Lambda<Func<double>>(exp);
-			var d = lm.Compile().Invoke();
-			return ValueParser.Parse(d.ToString());
-		}
-		if (type == typeof(bool))
-		{
-			var lm = Expression.Lambda<Func<bool>>(exp);
-			var d = lm.Compile().Invoke();
-			return ValueParser.Parse(d.ToString());
-		}
-		return ValueParser.Parse(exp.ToString());
+		var value = exp.Execute();
+		if (value is DateTime d) return d.ToValue();
+		if (value is string s) return new LiteralValue($"'value'");
+		return new LiteralValue(value.ToString());
 	}
 
-	public static ValueBase ToValue(this DateTime d)
+	private static ParameterValue ToParameterValue(this MemberExpression exp)
+	{
+		var value = exp.Execute();
+		var key = string.Empty;
+
+		if (exp.Expression is MemberExpression m)
+		{
+			key = ":" + (m.Member.Name + '_' + exp.Member.Name).ToSnakeCase();
+		}
+		else
+		{
+			key = ":" + exp.Member.Name.ToSnakeCase();
+		}
+
+		var prm = new ParameterValue(key, value);
+		return prm;
+	}
+
+	private static object Execute(this Expression exp)
+	{
+		if (exp.Type == typeof(DateTime))
+		{
+			var lm = Expression.Lambda<Func<DateTime>>(exp);
+			return lm.Compile().Invoke();
+		}
+		if (exp.Type == typeof(string))
+		{
+			var lm = Expression.Lambda<Func<string>>(exp);
+			return lm.Compile().Invoke();
+		}
+		if (exp.Type == typeof(int))
+		{
+			var lm = Expression.Lambda<Func<int>>(exp);
+			return lm.Compile().Invoke();
+		}
+		if (exp.Type == typeof(double))
+		{
+			var lm = Expression.Lambda<Func<double>>(exp);
+			return lm.Compile().Invoke();
+		}
+		if (exp.Type == typeof(float))
+		{
+			var lm = Expression.Lambda<Func<float>>(exp);
+			return lm.Compile().Invoke();
+		}
+		if (exp.Type == typeof(bool))
+		{
+			var lm = Expression.Lambda<Func<bool>>(exp);
+			return lm.Compile().Invoke();
+		}
+
+		throw new NotSupportedException($"cannot compile. Type:{exp.Type.FullName}");
+	}
+
+	private static ValueBase ToValue(this DateTime d)
 	{
 		return new FunctionValue("cast", new CastValue(new LiteralValue($"'{d}'"), "as", new LiteralValue("timestamp")));
 	}
 
-	public static object ToObject(this Expression exp)
+	private static object ToObject(this Expression exp)
 	{
 		if (exp.NodeType != ExpressionType.Constant) { throw new NotSupportedException(); }
 
@@ -430,5 +490,12 @@ public static class ExpressionExtension
 		if (exp.Type == typeof(int)) return int.Parse(exp.ToString());
 
 		throw new NotSupportedException();
+	}
+
+	private static string ToSnakeCase(this string input)
+	{
+		if (string.IsNullOrEmpty(input)) return input;
+
+		return Regex.Replace(input, @"([a-z0-9])([A-Z])", "$1_$2").ToLower();
 	}
 }
