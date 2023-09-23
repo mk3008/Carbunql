@@ -422,10 +422,67 @@ public static class ExpressionHelper
 
 		if (exp.NodeType == ExpressionType.Call)
 		{
+			var mc = (MethodCallExpression)exp;
+			if (mc.Method.Name == "Contains") return mc.ToContainsLikeClause();
+			if (mc.Method.Name == "StartsWith") return mc.ToStartsWithLikeClause();
+			if (mc.Method.Name == "EndsWith") return mc.ToEndsWithLikeClause();
+
 			return ((MethodCallExpression)exp).ToParameterValue();
 		}
 
 		return ((BinaryExpression)exp).ToValueExpression();
+	}
+
+	private static LikeClause CreateLikeClause(ValueBase value, params ValueBase[] args)
+	{
+		ValueBase? prm = null;
+		foreach (var item in args)
+		{
+			if (prm == null)
+			{
+				prm = item;
+			}
+			else
+			{
+				prm.AddOperatableValue("||", item);
+			}
+		}
+		if (prm == null) throw new InvalidProgramException();
+
+		return new LikeClause(value, prm);
+	}
+
+	private static LikeClause ToContainsLikeClause(this MethodCallExpression exp)
+	{
+		if (exp.Method.Name != "Contains") throw new InvalidProgramException();
+		if (exp.Object == null) throw new NullReferenceException("MethodCallExpression.Object is null.");
+		if (exp.Object.NodeType != ExpressionType.MemberAccess) throw new NotSupportedException($"object type is not supported. type:'{exp.Object.Type.Name}'");
+
+		var arg = exp.Arguments.First().ToValue();
+		var m = (MemberExpression)exp.Object;
+		return CreateLikeClause(m.ToValue(), new[] { new LiteralValue("'%'"), arg, new LiteralValue("'%'") });
+	}
+
+	private static LikeClause ToStartsWithLikeClause(this MethodCallExpression exp)
+	{
+		if (exp.Method.Name != "StartsWith") throw new InvalidProgramException();
+		if (exp.Object == null) throw new NullReferenceException("MethodCallExpression.Object is null.");
+		if (exp.Object.NodeType != ExpressionType.MemberAccess) throw new NotSupportedException($"object type is not supported. type:'{exp.Object.Type.Name}'");
+
+		var arg = exp.Arguments.First().ToValue();
+		var m = (MemberExpression)exp.Object;
+		return CreateLikeClause(m.ToValue(), new[] { arg, new LiteralValue("'%'") });
+	}
+
+	private static LikeClause ToEndsWithLikeClause(this MethodCallExpression exp)
+	{
+		if (exp.Method.Name != "EndsWith") throw new InvalidProgramException();
+		if (exp.Object == null) throw new NullReferenceException("MethodCallExpression.Object is null.");
+		if (exp.Object.NodeType != ExpressionType.MemberAccess) throw new NotSupportedException($"object type is not supported. type:'{exp.Object.Type.Name}'");
+
+		var arg = exp.Arguments.First().ToValue();
+		var m = (MemberExpression)exp.Object;
+		return CreateLikeClause(m.ToValue(), new[] { new LiteralValue("'%'"), arg });
 	}
 
 	private static ValueBase ToValue(this NewExpression exp)

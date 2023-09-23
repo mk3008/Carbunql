@@ -1,4 +1,5 @@
-﻿using Carbunql.Extensions;
+﻿using Carbunql.Analysis.Parser;
+using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
 using MessagePack;
@@ -36,6 +37,11 @@ public abstract class ValueBase : IQueryCommandable
 		}
 		OperatableValue = new OperatableValue(@operator, value);
 		return value;
+	}
+
+	public ValueBase AddOperatableValue(string @operator, string value)
+	{
+		return AddOperatableValue(@operator, ValueParser.Parse(value));
 	}
 
 	public IEnumerable<string> GetOperators()
