@@ -16,6 +16,28 @@ public class FunctionTest
 	private ITestOutputHelper Output { get; set; }
 
 	[Fact]
+	public void ConcatTest()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.FromAs<table_a>("a");
+
+		sq.Select(() => string.Concat(a.a_id, " ", a.text));
+		sq.Select(() => a.a_id + " " + a.text);
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    CONCAT(a.a_id, ' ', a.text),
+    a.a_id || ' ' || a.text
+FROM
+    table_a AS a";
+
+		Assert.Equal(27, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
+	[Fact]
 	public void TrimTest()
 	{
 		var sq = new SelectQuery();

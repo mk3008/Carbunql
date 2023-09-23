@@ -371,6 +371,10 @@ public static class ExpressionHelper
 		{
 			op = (op == "=") ? "is" : "is not";
 		}
+		else if (op == "+" && (exp.Left.Type == typeof(string) || exp.Right.Type == typeof(string)))
+		{
+			op = "||";
+		}
 
 		if (!op.IsEqualNoCase("or") && !op.IsEqualNoCase("and"))
 		{
@@ -424,6 +428,9 @@ public static class ExpressionHelper
 		if (exp.NodeType == ExpressionType.Call)
 		{
 			var mc = (MethodCallExpression)exp;
+
+			if (mc.Method.Name == "Concat") return mc.ToConcatValue();
+
 			if (mc.Object == null) throw new NullReferenceException("MethodCallExpression.Object is null.");
 			if (mc.Object.NodeType == ExpressionType.Constant)
 			{
@@ -441,6 +448,15 @@ public static class ExpressionHelper
 		}
 
 		return ((BinaryExpression)exp).ToValueExpression();
+	}
+
+	private static FunctionValue ToConcatValue(this MethodCallExpression exp)
+	{
+		if (exp.Method.Name != "Concat") throw new InvalidProgramException();
+
+		var collection = exp.Arguments.Select(x => x.ToValue()).ToList();
+		var args = new ValueCollection(collection);
+		return new FunctionValue("concat", args);
 	}
 
 	private static FunctionValue ToTrimStartValue(this MethodCallExpression exp)
