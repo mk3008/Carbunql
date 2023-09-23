@@ -5,6 +5,7 @@ using Carbunql.Extensions;
 using Carbunql.Values;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Metadata;
 using System.Text.RegularExpressions;
 
 namespace Carbunql.Postgres;
@@ -423,14 +424,47 @@ public static class ExpressionHelper
 		if (exp.NodeType == ExpressionType.Call)
 		{
 			var mc = (MethodCallExpression)exp;
+			if (mc.Object == null) throw new NullReferenceException("MethodCallExpression.Object is null.");
+			if (mc.Object.NodeType == ExpressionType.Constant)
+			{
+				return ((MethodCallExpression)exp).ToParameterValue();
+			}
+
 			if (mc.Method.Name == "Contains") return mc.ToContainsLikeClause();
 			if (mc.Method.Name == "StartsWith") return mc.ToStartsWithLikeClause();
 			if (mc.Method.Name == "EndsWith") return mc.ToEndsWithLikeClause();
+			if (mc.Method.Name == "Trim") return mc.ToTrimValue();
+			if (mc.Method.Name == "TrimStart") return mc.ToTrimStartValue();
+			if (mc.Method.Name == "TrimEnd") return mc.ToTrimEndValue();
 
 			return ((MethodCallExpression)exp).ToParameterValue();
 		}
 
 		return ((BinaryExpression)exp).ToValueExpression();
+	}
+
+	private static FunctionValue ToTrimStartValue(this MethodCallExpression exp)
+	{
+		if (exp.Method.Name != "TrimStart") throw new InvalidProgramException();
+
+		var m = (MemberExpression)exp.Object!;
+		return new FunctionValue("ltrim", m.ToValue());
+	}
+
+	private static FunctionValue ToTrimEndValue(this MethodCallExpression exp)
+	{
+		if (exp.Method.Name != "TrimEnd") throw new InvalidProgramException();
+
+		var m = (MemberExpression)exp.Object!;
+		return new FunctionValue("rtrim", m.ToValue());
+	}
+
+	private static FunctionValue ToTrimValue(this MethodCallExpression exp)
+	{
+		if (exp.Method.Name != "Trim") throw new InvalidProgramException();
+
+		var m = (MemberExpression)exp.Object!;
+		return new FunctionValue("trim", m.ToValue());
 	}
 
 	private static LikeClause CreateLikeClause(ValueBase value, params ValueBase[] args)
@@ -455,33 +489,27 @@ public static class ExpressionHelper
 	private static LikeClause ToContainsLikeClause(this MethodCallExpression exp)
 	{
 		if (exp.Method.Name != "Contains") throw new InvalidProgramException();
-		if (exp.Object == null) throw new NullReferenceException("MethodCallExpression.Object is null.");
-		if (exp.Object.NodeType != ExpressionType.MemberAccess) throw new NotSupportedException($"object type is not supported. type:'{exp.Object.Type.Name}'");
 
 		var arg = exp.Arguments.First().ToValue();
-		var m = (MemberExpression)exp.Object;
+		var m = (MemberExpression)exp.Object!;
 		return CreateLikeClause(m.ToValue(), new[] { new LiteralValue("'%'"), arg, new LiteralValue("'%'") });
 	}
 
 	private static LikeClause ToStartsWithLikeClause(this MethodCallExpression exp)
 	{
 		if (exp.Method.Name != "StartsWith") throw new InvalidProgramException();
-		if (exp.Object == null) throw new NullReferenceException("MethodCallExpression.Object is null.");
-		if (exp.Object.NodeType != ExpressionType.MemberAccess) throw new NotSupportedException($"object type is not supported. type:'{exp.Object.Type.Name}'");
 
 		var arg = exp.Arguments.First().ToValue();
-		var m = (MemberExpression)exp.Object;
+		var m = (MemberExpression)exp.Object!;
 		return CreateLikeClause(m.ToValue(), new[] { arg, new LiteralValue("'%'") });
 	}
 
 	private static LikeClause ToEndsWithLikeClause(this MethodCallExpression exp)
 	{
 		if (exp.Method.Name != "EndsWith") throw new InvalidProgramException();
-		if (exp.Object == null) throw new NullReferenceException("MethodCallExpression.Object is null.");
-		if (exp.Object.NodeType != ExpressionType.MemberAccess) throw new NotSupportedException($"object type is not supported. type:'{exp.Object.Type.Name}'");
 
 		var arg = exp.Arguments.First().ToValue();
-		var m = (MemberExpression)exp.Object;
+		var m = (MemberExpression)exp.Object!;
 		return CreateLikeClause(m.ToValue(), new[] { new LiteralValue("'%'"), arg });
 	}
 

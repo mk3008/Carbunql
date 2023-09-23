@@ -176,7 +176,6 @@ public class WhereClauseTest
 		var sql = @"
 /*
   :member_text = '';delete'
-  :method_text_trim = '';delete'
   :invoke_fn = '';delete'
 */
 SELECT
@@ -187,7 +186,7 @@ WHERE
     (a.text = 'abc')
     AND (a.text = '')
     AND (a.text = :member_text)
-    AND (a.text = :method_text_trim)
+    AND (a.text = TRIM(:member_text))
     AND (a.text = :invoke_fn)
 ";
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
