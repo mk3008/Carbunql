@@ -18,13 +18,6 @@ public static class ExpressionHelper
 		return (source, r);
 	}
 
-	public static string GetMemberName(Expression<Func<object>> fnc)
-	{
-		var exp = (UnaryExpression)fnc.Body;
-		var op = (MemberExpression)exp.Operand;
-		return op.Member.Name;
-	}
-
 	public static void SelectAll(this SelectQuery source, Expression<Func<object>> fnc)
 	{
 		var v = fnc.Compile().Invoke();

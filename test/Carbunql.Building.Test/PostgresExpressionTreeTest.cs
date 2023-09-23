@@ -130,11 +130,8 @@ public class PostgresExpressionTreeTest
 		var sq = new SelectQuery();
 		var (from, a) = sq.From("table_a").As<RecordA>("a"); ;
 
-		var table = ExpressionHelper.GetMemberName(() => a);
-		var column = ExpressionHelper.GetMemberName(() => a.a_id);
-
 		sq.Select("a", "a_id");
-		sq.Select(table, column);
+		sq.Select(nameof(a), "a_id");
 		sq.Select(() => a.a_id);
 		sq.Select(() => a.a_id).As("id");
 
