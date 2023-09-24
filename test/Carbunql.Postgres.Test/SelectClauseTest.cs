@@ -84,7 +84,6 @@ public class SelectClauseTest
 /*
   :method_trim = 'abc'
   :member_text = '';delete'
-  :method_text_trim = '';delete'
   :invoke_fn = '';delete'
 */
 SELECT
@@ -92,7 +91,7 @@ SELECT
     :method_trim,
     '',
     :member_text,
-    :method_text_trim,
+    TRIM(:member_text),
     :invoke_fn
 FROM
     table_a AS a
