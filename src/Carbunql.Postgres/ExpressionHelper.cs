@@ -53,58 +53,6 @@ public static class ExpressionHelper
 		return (source, r);
 	}
 
-	public static (Relation, T) InnerJoinAs<T>(this FromClause source, string alias)
-	{
-		var table = typeof(T).ToTableName();
-		return source.InnerJoinAs<T>(table, alias);
-	}
-
-	public static (Relation, T) InnerJoinAs<T>(this FromClause source, string table, string alias)
-	{
-		return source.InnerJoin(table).As<T>(alias);
-	}
-
-	public static (Relation, T) LeftJoinAs<T>(this FromClause source, string alias)
-	{
-		var table = typeof(T).ToTableName();
-		return source.LeftJoinAs<T>(table, alias);
-	}
-
-	public static (Relation, T) LeftJoinAs<T>(this FromClause source, string table, string alias)
-	{
-		return source.LeftJoin(table).As<T>(alias);
-	}
-
-	public static (Relation, T) RightJoinAs<T>(this FromClause source, string alias)
-	{
-		var table = typeof(T).ToTableName();
-		return source.RightJoinAs<T>(table, alias);
-	}
-
-	public static (Relation, T) RightJoinAs<T>(this FromClause source, string table, string alias)
-	{
-		return source.RightJoin(table).As<T>(alias);
-	}
-
-	public static (Relation, T) CrossJoinAs<T>(this FromClause source, string alias)
-	{
-		var table = typeof(T).ToTableName();
-		return source.CrossJoinAs<T>(table, alias);
-	}
-
-	public static (Relation, T) CrossJoinAs<T>(this FromClause source, string table, string alias)
-	{
-		return source.CrossJoin(table).As<T>(alias);
-	}
-
-	public static T On<T>(this (Relation relation, T record) source, Expression<Func<T, bool>> predicate)
-	{
-		var v = predicate.Body.ToValue();
-
-		source.relation.On((_) => v);
-
-		return source.record;
-	}
 
 	public static ValueBase Where(this SelectQuery source, Expression<Func<bool>> predicate)
 	{
@@ -120,30 +68,6 @@ public static class ExpressionHelper
 		}
 
 		return v;
-	}
-
-
-	public static WhereBridge<T> WhereAs<T>(this SelectQuery source, string alias)
-	{
-		return source.WhereAs<T>(typeof(T).ToTableName(), alias);
-	}
-
-	public static WhereBridge<T> WhereAs<T>(this SelectQuery source, string table, string alias)
-	{
-		var sq = new SelectQuery();
-		sq.From(table).As(alias);
-		sq.SelectAll();
-
-		return new WhereBridge<T>(source, sq);
-	}
-
-	public static WhereBridge<T> WhereAs<T>(this SelectQuery source, Func<SelectQuery> subqueryBuilder, string alias)
-	{
-		var sq = new SelectQuery();
-		sq.From(subqueryBuilder()).As(alias);
-		sq.SelectAll();
-
-		return new WhereBridge<T>(source, sq);
 	}
 
 	internal static string ToTableName(this Type type)
