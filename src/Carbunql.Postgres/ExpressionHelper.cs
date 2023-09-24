@@ -35,15 +35,8 @@ public static class ExpressionHelper
 
 	public static (FromClause, T) FromAs<T>(this SelectQuery source, string alias)
 	{
-		var atr = typeof(T).GetCustomAttribute(typeof(RecordDefinitionAttribute)) as RecordDefinitionAttribute;
-		if (atr == null || string.IsNullOrEmpty(atr.Table))
-		{
-			return source.FromAs<T>(typeof(T).Name, alias);
-		}
-		else
-		{
-			return source.FromAs<T>(atr.Table, alias);
-		}
+		var table = typeof(T).ToTableName();
+		return source.FromAs<T>(table, alias);
 	}
 
 	public static (FromClause, T) FromAs<T>(this SelectQuery source, string table, string alias)
@@ -62,15 +55,8 @@ public static class ExpressionHelper
 
 	public static (Relation, T) InnerJoinAs<T>(this FromClause source, string alias)
 	{
-		var atr = typeof(T).GetCustomAttribute(typeof(RecordDefinitionAttribute)) as RecordDefinitionAttribute;
-		if (atr == null || string.IsNullOrEmpty(atr.Table))
-		{
-			return source.InnerJoinAs<T>(typeof(T).Name, alias);
-		}
-		else
-		{
-			return source.InnerJoinAs<T>(atr.Table, alias);
-		}
+		var table = typeof(T).ToTableName();
+		return source.InnerJoinAs<T>(table, alias);
 	}
 
 	public static (Relation, T) InnerJoinAs<T>(this FromClause source, string table, string alias)
@@ -80,15 +66,8 @@ public static class ExpressionHelper
 
 	public static (Relation, T) LeftJoinAs<T>(this FromClause source, string alias)
 	{
-		var atr = typeof(T).GetCustomAttribute(typeof(RecordDefinitionAttribute)) as RecordDefinitionAttribute;
-		if (atr == null || string.IsNullOrEmpty(atr.Table))
-		{
-			return source.LeftJoinAs<T>(typeof(T).Name, alias);
-		}
-		else
-		{
-			return source.LeftJoinAs<T>(atr.Table, alias);
-		}
+		var table = typeof(T).ToTableName();
+		return source.LeftJoinAs<T>(table, alias);
 	}
 
 	public static (Relation, T) LeftJoinAs<T>(this FromClause source, string table, string alias)
@@ -98,15 +77,8 @@ public static class ExpressionHelper
 
 	public static (Relation, T) RightJoinAs<T>(this FromClause source, string alias)
 	{
-		var atr = typeof(T).GetCustomAttribute(typeof(RecordDefinitionAttribute)) as RecordDefinitionAttribute;
-		if (atr == null || string.IsNullOrEmpty(atr.Table))
-		{
-			return source.RightJoinAs<T>(typeof(T).Name, alias);
-		}
-		else
-		{
-			return source.RightJoinAs<T>(atr.Table, alias);
-		}
+		var table = typeof(T).ToTableName();
+		return source.RightJoinAs<T>(table, alias);
 	}
 
 	public static (Relation, T) RightJoinAs<T>(this FromClause source, string table, string alias)
@@ -116,15 +88,8 @@ public static class ExpressionHelper
 
 	public static (Relation, T) CrossJoinAs<T>(this FromClause source, string alias)
 	{
-		var atr = typeof(T).GetCustomAttribute(typeof(RecordDefinitionAttribute)) as RecordDefinitionAttribute;
-		if (atr == null || string.IsNullOrEmpty(atr.Table))
-		{
-			return source.CrossJoinAs<T>(typeof(T).Name, alias);
-		}
-		else
-		{
-			return source.CrossJoinAs<T>(atr.Table, alias);
-		}
+		var table = typeof(T).ToTableName();
+		return source.CrossJoinAs<T>(table, alias);
 	}
 
 	public static (Relation, T) CrossJoinAs<T>(this FromClause source, string table, string alias)
@@ -157,7 +122,44 @@ public static class ExpressionHelper
 		return v;
 	}
 
-	private static ValueBase ToValueExpression(this BinaryExpression exp)
+
+	public static WhereBridge<T> WhereAs<T>(this SelectQuery source, string alias)
+	{
+		return source.WhereAs<T>(typeof(T).ToTableName(), alias);
+	}
+
+	public static WhereBridge<T> WhereAs<T>(this SelectQuery source, string table, string alias)
+	{
+		var sq = new SelectQuery();
+		sq.From(table).As(alias);
+		sq.SelectAll();
+
+		return new WhereBridge<T>(source, sq);
+	}
+
+	public static WhereBridge<T> WhereAs<T>(this SelectQuery source, Func<SelectQuery> subqueryBuilder, string alias)
+	{
+		var sq = new SelectQuery();
+		sq.From(subqueryBuilder()).As(alias);
+		sq.SelectAll();
+
+		return new WhereBridge<T>(source, sq);
+	}
+
+	internal static string ToTableName(this Type type)
+	{
+		var atr = type.GetCustomAttribute(typeof(RecordDefinitionAttribute)) as RecordDefinitionAttribute;
+		if (atr == null || string.IsNullOrEmpty(atr.Table))
+		{
+			return type.Name;
+		}
+		else
+		{
+			return atr.Table;
+		}
+	}
+
+	internal static ValueBase ToValueExpression(this BinaryExpression exp)
 	{
 		var op = string.Empty;
 		switch (exp.NodeType)
@@ -397,7 +399,7 @@ public static class ExpressionHelper
 		return new BracketValue(left);
 	}
 
-	private static ValueBase ToValue(this Expression exp)
+	internal static ValueBase ToValue(this Expression exp)
 	{
 
 		if (exp.NodeType == ExpressionType.Constant)
@@ -466,7 +468,7 @@ public static class ExpressionHelper
 		return ((BinaryExpression)exp).ToValueExpression();
 	}
 
-	private static FunctionValue ToConcatValue(this MethodCallExpression exp)
+	internal static FunctionValue ToConcatValue(this MethodCallExpression exp)
 	{
 		if (exp.Method.Name != "Concat") throw new InvalidProgramException();
 
@@ -475,7 +477,7 @@ public static class ExpressionHelper
 		return new FunctionValue("concat", args);
 	}
 
-	private static FunctionValue ToTrimStartValue(this MethodCallExpression exp)
+	internal static FunctionValue ToTrimStartValue(this MethodCallExpression exp)
 	{
 		if (exp.Method.Name != "TrimStart") throw new InvalidProgramException();
 
@@ -483,7 +485,7 @@ public static class ExpressionHelper
 		return new FunctionValue("ltrim", m.ToValue());
 	}
 
-	private static FunctionValue ToTrimEndValue(this MethodCallExpression exp)
+	internal static FunctionValue ToTrimEndValue(this MethodCallExpression exp)
 	{
 		if (exp.Method.Name != "TrimEnd") throw new InvalidProgramException();
 
@@ -491,7 +493,7 @@ public static class ExpressionHelper
 		return new FunctionValue("rtrim", m.ToValue());
 	}
 
-	private static FunctionValue ToTrimValue(this MethodCallExpression exp)
+	internal static FunctionValue ToTrimValue(this MethodCallExpression exp)
 	{
 		if (exp.Method.Name != "Trim") throw new InvalidProgramException();
 
@@ -499,7 +501,7 @@ public static class ExpressionHelper
 		return new FunctionValue("trim", m.ToValue());
 	}
 
-	private static ValueBase ToAnyFunctionValue(this MethodCallExpression exp)
+	internal static ValueBase ToAnyFunctionValue(this MethodCallExpression exp)
 	{
 		if (exp.Method.Name != "Contains") throw new InvalidProgramException();
 
@@ -517,7 +519,7 @@ public static class ExpressionHelper
 		}
 	}
 
-	private static LikeClause CreateLikeClause(ValueBase value, params ValueBase[] args)
+	internal static LikeClause CreateLikeClause(ValueBase value, params ValueBase[] args)
 	{
 		ValueBase? prm = null;
 		foreach (var item in args)
@@ -536,7 +538,7 @@ public static class ExpressionHelper
 		return new LikeClause(value, prm);
 	}
 
-	private static LikeClause ToContainsLikeClause(this MethodCallExpression exp)
+	internal static LikeClause ToContainsLikeClause(this MethodCallExpression exp)
 	{
 		if (exp.Method.Name != "Contains") throw new InvalidProgramException();
 
@@ -545,7 +547,7 @@ public static class ExpressionHelper
 		return CreateLikeClause(m.ToValue(), new[] { new LiteralValue("'%'"), arg, new LiteralValue("'%'") });
 	}
 
-	private static LikeClause ToStartsWithLikeClause(this MethodCallExpression exp)
+	internal static LikeClause ToStartsWithLikeClause(this MethodCallExpression exp)
 	{
 		if (exp.Method.Name != "StartsWith") throw new InvalidProgramException();
 
@@ -554,7 +556,7 @@ public static class ExpressionHelper
 		return CreateLikeClause(m.ToValue(), new[] { arg, new LiteralValue("'%'") });
 	}
 
-	private static LikeClause ToEndsWithLikeClause(this MethodCallExpression exp)
+	internal static LikeClause ToEndsWithLikeClause(this MethodCallExpression exp)
 	{
 		if (exp.Method.Name != "EndsWith") throw new InvalidProgramException();
 
@@ -563,7 +565,7 @@ public static class ExpressionHelper
 		return CreateLikeClause(m.ToValue(), new[] { new LiteralValue("'%'"), arg });
 	}
 
-	private static ValueBase ToValue(this NewExpression exp)
+	internal static ValueBase ToValue(this NewExpression exp)
 	{
 		var args = exp.Arguments.Select(x => x.ToObject()).ToArray();
 
@@ -577,7 +579,7 @@ public static class ExpressionHelper
 		return ValueParser.Parse($"'{d}'");
 	}
 
-	private static ParameterValue ToParameterValue(this MethodCallExpression exp)
+	internal static ParameterValue ToParameterValue(this MethodCallExpression exp)
 	{
 		var value = exp.Execute();
 
@@ -596,7 +598,7 @@ public static class ExpressionHelper
 		return prm;
 	}
 
-	private static ParameterValue ToParameterValue(this InvocationExpression exp)
+	internal static ParameterValue ToParameterValue(this InvocationExpression exp)
 	{
 		var value = exp.Execute();
 
@@ -607,7 +609,7 @@ public static class ExpressionHelper
 		return prm;
 	}
 
-	private static ValueBase ToValue(this UnaryExpression exp)
+	internal static ValueBase ToValue(this UnaryExpression exp)
 	{
 		var v = exp.ToValueCore();
 		if (exp.NodeType == ExpressionType.Convert) return v;
@@ -615,7 +617,7 @@ public static class ExpressionHelper
 		throw new NotSupportedException();
 	}
 
-	private static ValueBase ToValueCore(this UnaryExpression exp)
+	internal static ValueBase ToValueCore(this UnaryExpression exp)
 	{
 		if (exp.Operand is MemberExpression mem)
 		{
@@ -635,7 +637,7 @@ public static class ExpressionHelper
 		return ((BinaryExpression)exp.Operand).ToValueExpression();
 	}
 
-	private static ValueBase ToValue(this MemberExpression exp)
+	internal static ValueBase ToValue(this MemberExpression exp)
 	{
 		if (exp.ToString() == "DateTime.Now")
 		{
@@ -688,7 +690,7 @@ public static class ExpressionHelper
 		throw new NotSupportedException($"propExpression.Expression type:{exp.Expression.GetType().Name}");
 	}
 
-	private static ValueBase ToValue(this ConstantExpression exp)
+	internal static ValueBase ToValue(this ConstantExpression exp)
 	{
 		var value = exp.Execute();
 		if (value == null) return ValueParser.Parse("null");
@@ -697,7 +699,7 @@ public static class ExpressionHelper
 		return new LiteralValue(value.ToString());
 	}
 
-	private static ParameterValue ToParameterValue(this MemberExpression exp)
+	internal static ParameterValue ToParameterValue(this MemberExpression exp)
 	{
 		var value = exp.Execute();
 		var key = string.Empty;
@@ -716,7 +718,7 @@ public static class ExpressionHelper
 		return prm;
 	}
 
-	private static object? Execute(this Expression exp)
+	internal static object? Execute(this Expression exp)
 	{
 		var method = typeof(ExpressionHelper)
 			.GetMethod(nameof(ExecuteCore), BindingFlags.NonPublic | BindingFlags.Static)!
@@ -725,18 +727,18 @@ public static class ExpressionHelper
 		return method.Invoke(null, new object[] { exp });
 	}
 
-	private static T ExecuteCore<T>(this Expression exp)
+	internal static T ExecuteCore<T>(this Expression exp)
 	{
 		var lm = Expression.Lambda<Func<T>>(exp);
 		return lm.Compile().Invoke();
 	}
 
-	private static ValueBase ToValue(this DateTime d)
+	internal static ValueBase ToValue(this DateTime d)
 	{
 		return new FunctionValue("cast", new CastValue(new LiteralValue($"'{d}'"), "as", new LiteralValue("timestamp")));
 	}
 
-	private static object ToObject(this Expression exp)
+	internal static object ToObject(this Expression exp)
 	{
 		if (exp.NodeType != ExpressionType.Constant) { throw new NotSupportedException(); }
 
@@ -746,14 +748,14 @@ public static class ExpressionHelper
 		throw new NotSupportedException();
 	}
 
-	private static string ToSnakeCase(this string input)
+	internal static string ToSnakeCase(this string input)
 	{
 		var cleanedInput = Regex.Replace(input, @"[^a-zA-Z0-9]", "");
 		if (string.IsNullOrEmpty(cleanedInput)) return string.Empty;
 		return Regex.Replace(cleanedInput, @"([a-z0-9])([A-Z])", "$1_$2").ToLower();
 	}
 
-	private static string ToParameterName(this string input, string prefix)
+	internal static string ToParameterName(this string input, string prefix)
 	{
 		var name = input.ToSnakeCase();
 		if (string.IsNullOrEmpty(name)) throw new Exception("key name is empty.");
