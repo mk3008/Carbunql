@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace Carbunql.Postgres;
 
-public static class JoingBridgeExtension
+public static class JoinExtension
 {
 	public static (Relation, T) InnerJoinAs<T>(this FromClause source, string alias)
 	{

@@ -1,12 +1,13 @@
 ﻿using Carbunql.Building;
+using Carbunql.Clauses;
 using Carbunql.Values;
 using System.Linq.Expressions;
 
 namespace Carbunql.Postgres;
 
-public class WhereBridge<T>
+public class WhereExtension<T>
 {
-	internal WhereBridge(SelectQuery sourceQuery, SelectQuery argumentQuery)
+	internal WhereExtension(SelectQuery sourceQuery, SelectQuery argumentQuery)
 	{
 		SourceQuery = sourceQuery;
 		ArgumentQuery = argumentQuery;
@@ -35,28 +36,44 @@ public class WhereBridge<T>
 	}
 }
 
-public static class WhereBridgeExtension
+public static class WhereExtension
 {
-	public static WhereBridge<T> WhereAs<T>(this SelectQuery source, string alias)
+	public static ValueBase Where(this SelectQuery source, Expression<Func<bool>> predicate)
+	{
+		var v = predicate.Body.ToValue();
+
+		if (v is BracketValue)
+		{
+			source.Where(v);
+		}
+		else
+		{
+			source.Where(new BracketValue(v));
+		}
+
+		return v;
+	}
+
+	public static WhereExtension<T> WhereAs<T>(this SelectQuery source, string alias)
 	{
 		return source.WhereAs<T>(typeof(T).ToTableName(), alias);
 	}
 
-	public static WhereBridge<T> WhereAs<T>(this SelectQuery source, string table, string alias)
+	public static WhereExtension<T> WhereAs<T>(this SelectQuery source, string table, string alias)
 	{
 		var sq = new SelectQuery();
 		sq.From(table).As(alias);
 		sq.SelectAll();
 
-		return new WhereBridge<T>(source, sq);
+		return new WhereExtension<T>(source, sq);
 	}
 
-	public static WhereBridge<T> WhereAs<T>(this SelectQuery source, Func<SelectQuery> subqueryBuilder, string alias)
+	public static WhereExtension<T> WhereAs<T>(this SelectQuery source, Func<SelectQuery> subqueryBuilder, string alias)
 	{
 		var sq = new SelectQuery();
 		sq.From(subqueryBuilder()).As(alias);
 		sq.SelectAll();
 
-		return new WhereBridge<T>(source, sq);
+		return new WhereExtension<T>(source, sq);
 	}
 }

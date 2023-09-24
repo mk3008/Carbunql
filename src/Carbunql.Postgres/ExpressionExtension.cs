@@ -6,83 +6,11 @@ using Carbunql.Values;
 using System.Collections;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text.RegularExpressions;
 
 namespace Carbunql.Postgres;
 
-public static class ExpressionHelper
+public static class ExpressionExtension
 {
-	public static void SelectAll(this SelectQuery source, Expression<Func<object>> fnc)
-	{
-		var v = fnc.Compile().Invoke();
-		var exp = (UnaryExpression)fnc.Body;
-		var op = (MemberExpression)exp.Operand;
-
-		foreach (var prop in v.GetType().GetProperties())
-		{
-			source.Select(op.Member.Name, prop.Name);
-		}
-	}
-
-	public static SelectableItem Select(this SelectQuery source, Expression<Func<object>> fnc)
-	{
-		var v = fnc.Body.ToValue();
-		var item = new SelectableItem(v, v.GetDefaultName());
-		source.SelectClause ??= new();
-		source.SelectClause.Add(item);
-		return item;
-	}
-
-	public static (FromClause, T) FromAs<T>(this SelectQuery source, string alias)
-	{
-		var table = typeof(T).ToTableName();
-		return source.FromAs<T>(table, alias);
-	}
-
-	public static (FromClause, T) FromAs<T>(this SelectQuery source, string table, string alias)
-	{
-		var r = (T)Activator.CreateInstance(typeof(T))!;
-		var (from, _) = source.From(table).As(alias);
-		return (from, r);
-	}
-
-	public static (FromClause, T) As<T>(this FromClause source, string alias)
-	{
-		source.As(alias);
-		var r = (T)Activator.CreateInstance(typeof(T))!;
-		return (source, r);
-	}
-
-
-	public static ValueBase Where(this SelectQuery source, Expression<Func<bool>> predicate)
-	{
-		var v = predicate.Body.ToValue();
-
-		if (v is BracketValue)
-		{
-			source.Where(v);
-		}
-		else
-		{
-			source.Where(new BracketValue(v));
-		}
-
-		return v;
-	}
-
-	internal static string ToTableName(this Type type)
-	{
-		var atr = type.GetCustomAttribute(typeof(RecordDefinitionAttribute)) as RecordDefinitionAttribute;
-		if (atr == null || string.IsNullOrEmpty(atr.Table))
-		{
-			return type.Name;
-		}
-		else
-		{
-			return atr.Table;
-		}
-	}
-
 	internal static ValueBase ToValueExpression(this BinaryExpression exp)
 	{
 		var op = string.Empty;
@@ -644,7 +572,7 @@ public static class ExpressionHelper
 
 	internal static object? Execute(this Expression exp)
 	{
-		var method = typeof(ExpressionHelper)
+		var method = typeof(ExpressionExtension)
 			.GetMethod(nameof(ExecuteCore), BindingFlags.NonPublic | BindingFlags.Static)!
 			.MakeGenericMethod(exp.Type);
 
@@ -670,30 +598,5 @@ public static class ExpressionHelper
 		if (exp.Type == typeof(int)) return int.Parse(exp.ToString());
 
 		throw new NotSupportedException();
-	}
-
-	internal static string ToSnakeCase(this string input)
-	{
-		var cleanedInput = Regex.Replace(input, @"[^a-zA-Z0-9]", "");
-		if (string.IsNullOrEmpty(cleanedInput)) return string.Empty;
-		return Regex.Replace(cleanedInput, @"([a-z0-9])([A-Z])", "$1_$2").ToLower();
-	}
-
-	internal static string ToParameterName(this string input, string prefix)
-	{
-		var name = input.ToSnakeCase();
-		if (string.IsNullOrEmpty(name)) throw new Exception("key name is empty.");
-
-		if (!string.IsNullOrEmpty(prefix))
-		{
-			name = prefix.ToSnakeCase() + "_" + name;
-		}
-
-		name = ':' + name;
-		if (name.Length > 60)
-		{
-			name = name.Substring(0, 60);
-		}
-		return name;
 	}
 }
