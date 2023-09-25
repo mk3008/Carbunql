@@ -6,6 +6,7 @@ This is an experimental library. Specifications are subject to significant chang
 
 ## Demo
 Let's build a simple SQL statement using table joins and Where conditions.
+![TypeSaleBuilding](https://github.com/mk3008/Carbunql/assets/7686540/db89e1d9-5004-4920-92be-903ac9789525)
 
 ### Definition 
 
