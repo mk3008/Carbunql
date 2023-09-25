@@ -72,14 +72,14 @@ public static class ValueParser
 	{
 		var item = r.Peek();
 
-		if (String.IsNullOrEmpty(item)) throw new EndOfStreamException();
+		if (string.IsNullOrEmpty(item)) throw new EndOfStreamException();
 
 		if (NegativeValueParser.IsNegativeValue(item))
 		{
 			return NegativeValueParser.Parse(r);
 		}
 
-		if (LiteralValueParser.IsLiteralValue(item))
+		if (item == "null" || LiteralValueParser.IsLiteralValue(item))
 		{
 			return LiteralValueParser.Parse(r);
 		}

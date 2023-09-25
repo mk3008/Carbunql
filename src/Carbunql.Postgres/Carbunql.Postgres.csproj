@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Version>0.0.1</Version>
+    <Authors>mk3008net</Authors>
+    <PackageProjectUrl>https://github.com/mk3008/Carbunql</PackageProjectUrl>
+    <Copyright>mk3008net</Copyright>
+    <Description>Type-safe SelectQuery Builder using Expression.For Postgres.</Description>
+    <PackageReadmeFile>README_QueryBuilder.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/mk3008/Carbunql.git</RepositoryUrl>
+    <PackageTags>SQL;SQLBuilder;Typesafe;Postgres</PackageTags>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\..\README_QueryBuilder.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Carbunql\Carbunql.csproj" />
+  </ItemGroup>
+
+</Project>

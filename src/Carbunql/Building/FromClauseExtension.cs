@@ -1,6 +1,7 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
 using Carbunql.Values;
+using System.Linq.Expressions;
 
 namespace Carbunql.Building;
 
@@ -53,6 +54,7 @@ public static class FromClauseExtension
 
 	public static (FromClause, SelectableTable) As(this FromClause source, string alias)
 	{
+		if (string.IsNullOrEmpty(alias)) throw new ArgumentNullException("alias");
 		source.Root.SetAlias(alias);
 		return (source, source.Root);
 	}
@@ -188,6 +190,13 @@ public static class FromClauseExtension
 	{
 		source.Table.SetAlias(Alias);
 		return source;
+	}
+
+	public static (Relation, T) As<T>(this Relation source, string Alias)
+	{
+		source.Table.SetAlias(Alias);
+		var r = (T)Activator.CreateInstance(typeof(T))!;
+		return (source, r);
 	}
 
 	public static SelectableTable On(this Relation source, FromClause from, string column)

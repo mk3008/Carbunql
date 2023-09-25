@@ -19,6 +19,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CarbunqlConsole", "..\demo\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carbunql.DynamicQuery.Test", "..\test\Carbunql.DynamicQuery.Test\Carbunql.DynamicQuery.Test.csproj", "{E0F59B0B-1486-4829-BD60-C5B0B6BC6DB3}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carbunql.Postgres", "Carbunql.Postgres\Carbunql.Postgres.csproj", "{F0DC1058-312C-456C-8625-FD25C31F528B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carbunql.Postgres.Test", "..\test\Carbunql.Postgres.Test\Carbunql.Postgres.Test.csproj", "{8F3D86A8-F2DE-4313-88D0-D65AD70DD81E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +61,14 @@ Global
 		{E0F59B0B-1486-4829-BD60-C5B0B6BC6DB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E0F59B0B-1486-4829-BD60-C5B0B6BC6DB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E0F59B0B-1486-4829-BD60-C5B0B6BC6DB3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F0DC1058-312C-456C-8625-FD25C31F528B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0DC1058-312C-456C-8625-FD25C31F528B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0DC1058-312C-456C-8625-FD25C31F528B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0DC1058-312C-456C-8625-FD25C31F528B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F3D86A8-F2DE-4313-88D0-D65AD70DD81E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F3D86A8-F2DE-4313-88D0-D65AD70DD81E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F3D86A8-F2DE-4313-88D0-D65AD70DD81E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F3D86A8-F2DE-4313-88D0-D65AD70DD81E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
