@@ -53,9 +53,9 @@ public class Demo
 		Output.WriteLine(sql);
 	}
 
-	[RecordDefinition]
+	[TableDefinition]
 	public record struct table_a(int a_id, string text, int value);
 
-	[RecordDefinition]
+	[TableDefinition]
 	public record struct table_b(int a_id, int b_id, string text, int value);
 }
