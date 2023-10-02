@@ -4,13 +4,13 @@
 /// When used with Expression, it is treated as an expression.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false)]
-public class RecordDefinitionAttribute : Attribute
+public class TableDefinitionAttribute : Attribute
 {
-	public RecordDefinitionAttribute()
+	public TableDefinitionAttribute()
 	{
 	}
 
-	public RecordDefinitionAttribute(string table)
+	public TableDefinitionAttribute(string table)
 	{
 		Table = table;
 	}

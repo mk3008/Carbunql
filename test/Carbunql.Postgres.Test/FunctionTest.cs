@@ -274,9 +274,9 @@ WHERE
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
-	[RecordDefinition]
+	[TableDefinition]
 	public record struct table_a(int a_id, string text, int value, bool is_enabled, double rate, DateTime timestamp);
 
-	[RecordDefinition]
+	[TableDefinition]
 	public record struct table_b(int a_id, string text, int value, bool is_enabled, double rate, DateTime timestamp);
 }

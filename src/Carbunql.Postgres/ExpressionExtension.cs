@@ -524,7 +524,7 @@ public static class ExpressionExtension
 		{
 			//If there is a RecordDefinition attribute,
 			//treat it as an expression without compiling it.
-			if (mem.Type.GetCustomAttribute<RecordDefinitionAttribute>() != null)
+			if (mem.Type.GetCustomAttribute<TableDefinitionAttribute>() != null)
 			{
 				var table = mem.Member.Name;
 				var column = exp.Member.Name;

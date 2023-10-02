@@ -99,16 +99,16 @@ FROM
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
-	[RecordDefinition]
+	[TableDefinition]
 	public record struct RecordA(int a_id, string text, int value, bool is_enabled, double rate, DateTime timestamp, Gender gender);
 
-	[RecordDefinition]
+	[TableDefinition]
 	public record struct RecordN(int? a_id, string? text, int? value, bool? is_enabled, double? rate, DateTime? timestamp);
 
-	[RecordDefinition]
+	[TableDefinition]
 	public record struct RecordB(int a_id, int b_id, string text, int value);
 
-	[RecordDefinition]
+	[TableDefinition]
 	public record struct RecordC(int a_id, int c_id, string text, int value);
 
 	public class Myclass { public int MyProperty { get; set; } }
