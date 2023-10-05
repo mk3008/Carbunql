@@ -149,10 +149,7 @@ WHERE
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
-	[TableDefinition]
 	public record struct table_a(int a_id, string text, int value, bool is_enabled, double rate, DateTime timestamp);
 
-	[TableDefinition]
 	public record struct table_b(int a_id, int b_id, string text, int value, bool is_enabled, double rate, DateTime timestamp);
-
 }

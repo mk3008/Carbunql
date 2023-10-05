@@ -7,14 +7,14 @@ internal static class TypeExtension
 {
 	internal static string ToTableName(this Type type)
 	{
-		var atr = type.GetCustomAttribute(typeof(TableDefinitionAttribute)) as TableDefinitionAttribute;
-		if (atr == null || string.IsNullOrEmpty(atr.Table))
+		var atr = type.GetCustomAttribute(typeof(TableAttribute)) as TableAttribute;
+		if (atr != null && !string.IsNullOrEmpty(atr.GetTableFullName()))
 		{
-			return type.Name;
+			return atr.GetTableFullName();
 		}
 		else
 		{
-			return atr.Table;
+			return type.Name;
 		}
 	}
 }

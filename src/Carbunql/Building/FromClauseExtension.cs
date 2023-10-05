@@ -192,13 +192,6 @@ public static class FromClauseExtension
 		return source;
 	}
 
-	public static (Relation, T) As<T>(this Relation source, string Alias)
-	{
-		source.Table.SetAlias(Alias);
-		var r = (T)Activator.CreateInstance(typeof(T))!;
-		return (source, r);
-	}
-
 	public static SelectableTable On(this Relation source, FromClause from, string column)
 	{
 		return source.On(from.Root, new[] { column });
