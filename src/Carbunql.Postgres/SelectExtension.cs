@@ -20,7 +20,9 @@ public static class SelectExtension
 
 	public static SelectableItem Select(this SelectQuery source, Expression<Func<object>> fnc)
 	{
-		var v = fnc.Body.ToValue();
+		var tables = source.GetSelectableTables().Select(x => x.Alias).Distinct().ToList();
+
+		var v = fnc.Body.ToValue(tables);
 		var item = new SelectableItem(v, v.GetDefaultName());
 		source.SelectClause ??= new();
 		source.SelectClause.Add(item);

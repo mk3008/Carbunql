@@ -19,7 +19,8 @@ public class WhereExtension<T>
 
 	public void Exists(Expression<Func<T, bool>> predicate)
 	{
-		var v = predicate.Body.ToValue();
+		var tables = SourceQuery.GetSelectableTables().Select(x => x.Alias).Distinct().ToList();
+		var v = predicate.Body.ToValue(tables);
 
 		ArgumentQuery.Where(v);
 
@@ -28,7 +29,8 @@ public class WhereExtension<T>
 
 	public void NotExists(Expression<Func<T, bool>> predicate)
 	{
-		var v = predicate.Body.ToValue();
+		var tables = SourceQuery.GetSelectableTables().Select(x => x.Alias).Distinct().ToList();
+		var v = predicate.Body.ToValue(tables);
 
 		ArgumentQuery.Where(v);
 
@@ -40,7 +42,8 @@ public static class WhereExtension
 {
 	public static ValueBase Where(this SelectQuery source, Expression<Func<bool>> predicate)
 	{
-		var v = predicate.Body.ToValue();
+		var tables = source.GetSelectableTables().Select(x => x.Alias).Distinct().ToList();
+		var v = predicate.Body.ToValue(tables);
 
 		if (v is BracketValue)
 		{

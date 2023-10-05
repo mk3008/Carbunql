@@ -10,13 +10,11 @@ Let's build a simple SQL statement using table joins and Where conditions.
 
 ### Definition 
 
-Declare the table definition class.The class must have a TableDefinition attribute.
+Declare the table definition class.
 
 ```cs
-[TableDefinition]
 public record struct table_a(int a_id, string text, int value);
 
-[TableDefinition]
 public record struct table_b(int a_id, int b_id, string text, int value);
 ```
 

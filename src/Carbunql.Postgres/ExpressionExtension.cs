@@ -11,7 +11,7 @@ namespace Carbunql.Postgres;
 
 public static class ExpressionExtension
 {
-	internal static ValueBase ToValueExpression(this BinaryExpression exp)
+	internal static ValueBase ToValueExpression(this BinaryExpression exp, List<string> tables)
 	{
 		var op = string.Empty;
 		switch (exp.NodeType)
@@ -218,8 +218,8 @@ public static class ExpressionExtension
 
 		var isBracket = exp.ToString().StartsWith("(");
 
-		var left = exp.Left.ToValue();
-		var right = exp.Right.ToValue();
+		var left = exp.Left.ToValue(tables);
+		var right = exp.Right.ToValue(tables);
 
 		if ((left is LiteralValue lv && lv.IsNullValue) || (right is LiteralValue rv && rv.IsNullValue))
 		{
@@ -251,7 +251,7 @@ public static class ExpressionExtension
 		return new BracketValue(left);
 	}
 
-	internal static ValueBase ToValue(this Expression exp)
+	internal static ValueBase ToValue(this Expression exp, List<string> tables)
 	{
 
 		if (exp.NodeType == ExpressionType.Constant)
@@ -261,17 +261,17 @@ public static class ExpressionExtension
 
 		if (exp.NodeType == ExpressionType.MemberAccess)
 		{
-			return ((MemberExpression)exp).ToValue();
+			return ((MemberExpression)exp).ToValue(tables);
 		}
 
 		if (exp is UnaryExpression unary)
 		{
-			return unary.ToValue();
+			return unary.ToValue(tables);
 		}
 
 		if (exp is NewExpression ne)
 		{
-			return ne.ToValue();
+			return ne.ToValue(tables);
 		}
 
 		if (exp.NodeType == ExpressionType.Invoke)
@@ -283,21 +283,21 @@ public static class ExpressionExtension
 		{
 			var mc = (MethodCallExpression)exp;
 
-			if (mc.Method.Name == "Concat") return mc.ToConcatValue();
+			if (mc.Method.Name == "Concat") return mc.ToConcatValue(tables);
 
 			if (mc.Method.Name == "Contains")
 			{
 				if (mc.Object == null && mc.Method.DeclaringType == typeof(Enumerable))
 				{
-					return mc.ToAnyFunctionValue();
+					return mc.ToAnyFunctionValue(tables);
 				}
 				if (mc.Object != null && typeof(IList).IsAssignableFrom(mc.Object.Type))
 				{
-					return mc.ToAnyFunctionValue();
+					return mc.ToAnyFunctionValue(tables);
 				}
 				else
 				{
-					return mc.ToContainsLikeClause();
+					return mc.ToContainsLikeClause(tables);
 				}
 			}
 
@@ -307,67 +307,66 @@ public static class ExpressionExtension
 				return ((MethodCallExpression)exp).ToParameterValue();
 			}
 
-
-			if (mc.Method.Name == "StartsWith") return mc.ToStartsWithLikeClause();
-			if (mc.Method.Name == "EndsWith") return mc.ToEndsWithLikeClause();
-			if (mc.Method.Name == "Trim") return mc.ToTrimValue();
-			if (mc.Method.Name == "TrimStart") return mc.ToTrimStartValue();
-			if (mc.Method.Name == "TrimEnd") return mc.ToTrimEndValue();
+			if (mc.Method.Name == "StartsWith") return mc.ToStartsWithLikeClause(tables);
+			if (mc.Method.Name == "EndsWith") return mc.ToEndsWithLikeClause(tables);
+			if (mc.Method.Name == "Trim") return mc.ToTrimValue(tables);
+			if (mc.Method.Name == "TrimStart") return mc.ToTrimStartValue(tables);
+			if (mc.Method.Name == "TrimEnd") return mc.ToTrimEndValue(tables);
 
 			return ((MethodCallExpression)exp).ToParameterValue();
 		}
 
-		return ((BinaryExpression)exp).ToValueExpression();
+		return ((BinaryExpression)exp).ToValueExpression(tables);
 	}
 
-	internal static FunctionValue ToConcatValue(this MethodCallExpression exp)
+	internal static FunctionValue ToConcatValue(this MethodCallExpression exp, List<string> tables)
 	{
 		if (exp.Method.Name != "Concat") throw new InvalidProgramException();
 
-		var collection = exp.Arguments.Select(x => x.ToValue()).ToList();
+		var collection = exp.Arguments.Select(x => x.ToValue(tables)).ToList();
 		var args = new ValueCollection(collection);
 		return new FunctionValue("concat", args);
 	}
 
-	internal static FunctionValue ToTrimStartValue(this MethodCallExpression exp)
+	internal static FunctionValue ToTrimStartValue(this MethodCallExpression exp, List<string> tables)
 	{
 		if (exp.Method.Name != "TrimStart") throw new InvalidProgramException();
 
 		var m = (MemberExpression)exp.Object!;
-		return new FunctionValue("ltrim", m.ToValue());
+		return new FunctionValue("ltrim", m.ToValue(tables));
 	}
 
-	internal static FunctionValue ToTrimEndValue(this MethodCallExpression exp)
+	internal static FunctionValue ToTrimEndValue(this MethodCallExpression exp, List<string> tables)
 	{
 		if (exp.Method.Name != "TrimEnd") throw new InvalidProgramException();
 
 		var m = (MemberExpression)exp.Object!;
-		return new FunctionValue("rtrim", m.ToValue());
+		return new FunctionValue("rtrim", m.ToValue(tables));
 	}
 
-	internal static FunctionValue ToTrimValue(this MethodCallExpression exp)
+	internal static FunctionValue ToTrimValue(this MethodCallExpression exp, List<string> tables)
 	{
 		if (exp.Method.Name != "Trim") throw new InvalidProgramException();
 
 		var m = (MemberExpression)exp.Object!;
-		return new FunctionValue("trim", m.ToValue());
+		return new FunctionValue("trim", m.ToValue(tables));
 	}
 
-	internal static ValueBase ToAnyFunctionValue(this MethodCallExpression exp)
+	internal static ValueBase ToAnyFunctionValue(this MethodCallExpression exp, List<string> tables)
 	{
 		if (exp.Method.Name != "Contains") throw new InvalidProgramException();
 
 		if (exp.Object == null)
 		{
-			var value = exp.Arguments[1].ToValue();
-			var arg = exp.Arguments[0].ToValue();
+			var value = exp.Arguments[1].ToValue(tables);
+			var arg = exp.Arguments[0].ToValue(tables);
 			return value.Equal(new FunctionValue("any", arg));
 		}
 		else
 		{
-			var value = exp.Arguments.First().ToValue();
+			var value = exp.Arguments.First().ToValue(tables);
 			var arg = (MemberExpression)exp.Object!;
-			return value.Equal(new FunctionValue("any", arg.ToValue()));
+			return value.Equal(new FunctionValue("any", arg.ToValue(tables)));
 		}
 	}
 
@@ -390,34 +389,34 @@ public static class ExpressionExtension
 		return new LikeClause(value, prm);
 	}
 
-	internal static LikeClause ToContainsLikeClause(this MethodCallExpression exp)
+	internal static LikeClause ToContainsLikeClause(this MethodCallExpression exp, List<string> tables)
 	{
 		if (exp.Method.Name != "Contains") throw new InvalidProgramException();
 
-		var arg = exp.Arguments.First().ToValue();
+		var arg = exp.Arguments.First().ToValue(tables);
 		var m = (MemberExpression)exp.Object!;
-		return CreateLikeClause(m.ToValue(), new[] { new LiteralValue("'%'"), arg, new LiteralValue("'%'") });
+		return CreateLikeClause(m.ToValue(tables), new[] { new LiteralValue("'%'"), arg, new LiteralValue("'%'") });
 	}
 
-	internal static LikeClause ToStartsWithLikeClause(this MethodCallExpression exp)
+	internal static LikeClause ToStartsWithLikeClause(this MethodCallExpression exp, List<string> tables)
 	{
 		if (exp.Method.Name != "StartsWith") throw new InvalidProgramException();
 
-		var arg = exp.Arguments.First().ToValue();
+		var arg = exp.Arguments.First().ToValue(tables);
 		var m = (MemberExpression)exp.Object!;
-		return CreateLikeClause(m.ToValue(), new[] { arg, new LiteralValue("'%'") });
+		return CreateLikeClause(m.ToValue(tables), new[] { arg, new LiteralValue("'%'") });
 	}
 
-	internal static LikeClause ToEndsWithLikeClause(this MethodCallExpression exp)
+	internal static LikeClause ToEndsWithLikeClause(this MethodCallExpression exp, List<string> tables)
 	{
 		if (exp.Method.Name != "EndsWith") throw new InvalidProgramException();
 
-		var arg = exp.Arguments.First().ToValue();
+		var arg = exp.Arguments.First().ToValue(tables);
 		var m = (MemberExpression)exp.Object!;
-		return CreateLikeClause(m.ToValue(), new[] { new LiteralValue("'%'"), arg });
+		return CreateLikeClause(m.ToValue(tables), new[] { new LiteralValue("'%'"), arg });
 	}
 
-	internal static ValueBase ToValue(this NewExpression exp)
+	internal static ValueBase ToValue(this NewExpression exp, List<string> tables)
 	{
 		var args = exp.Arguments.Select(x => x.ToObject()).ToArray();
 
@@ -461,19 +460,19 @@ public static class ExpressionExtension
 		return prm;
 	}
 
-	internal static ValueBase ToValue(this UnaryExpression exp)
+	internal static ValueBase ToValue(this UnaryExpression exp, List<string> tables)
 	{
-		var v = exp.ToValueCore();
+		var v = exp.ToValueCore(tables);
 		if (exp.NodeType == ExpressionType.Convert) return v;
 		if (exp.NodeType == ExpressionType.Not) return new NegativeValue(v.ToBracket());
 		throw new NotSupportedException();
 	}
 
-	internal static ValueBase ToValueCore(this UnaryExpression exp)
+	internal static ValueBase ToValueCore(this UnaryExpression exp, List<string> tables)
 	{
 		if (exp.Operand is MemberExpression mem)
 		{
-			return mem.ToValue();
+			return mem.ToValue(tables);
 		}
 
 		if (exp.Operand is ConstantExpression cons)
@@ -483,13 +482,13 @@ public static class ExpressionExtension
 
 		if (exp.Operand is MethodCallExpression ce)
 		{
-			return ce.ToValue();
+			return ce.ToValue(tables);
 		}
 
-		return ((BinaryExpression)exp.Operand).ToValueExpression();
+		return ((BinaryExpression)exp.Operand).ToValueExpression(tables);
 	}
 
-	internal static ValueBase ToValue(this MemberExpression exp)
+	internal static ValueBase ToValue(this MemberExpression exp, List<string> tables)
 	{
 		if (exp.ToString() == "DateTime.Now")
 		{
@@ -522,11 +521,10 @@ public static class ExpressionExtension
 
 		if (exp.Expression is MemberExpression mem)
 		{
-			//If there is a RecordDefinition attribute,
-			//treat it as an expression without compiling it.
-			if (mem.Type.GetCustomAttribute<TableDefinitionAttribute>() != null)
+			var table = tables.Where(x => x == mem.Member.Name).FirstOrDefault();
+
+			if (!string.IsNullOrEmpty(table))
 			{
-				var table = mem.Member.Name;
 				var column = exp.Member.Name;
 				return new ColumnValue(table, column);
 			}

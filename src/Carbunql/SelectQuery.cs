@@ -247,32 +247,21 @@ public class SelectQuery : ReadQuery, IQueryCommandable
 		}
 	}
 
-    public IEnumerable<SelectableItem> GetSelectableItems()
+	public IEnumerable<SelectableItem> GetSelectableItems()
 	{
 		if (SelectClause != null)
 		{
-            foreach (var item in SelectClause)
-            {
-				yield return item;
-            }
-        }
-	}
-
-
-    public IEnumerable<SelectableTable> GetSelectableTables()
-	{
-		if (FromClause != null)
-		{
-			yield return FromClause.Root;
-
-			if (FromClause.Relations != null)
+			foreach (var item in SelectClause)
 			{
-				foreach (var item in FromClause.Relations)
-				{
-					yield return item.Table;
-				}
+				yield return item;
 			}
 		}
+	}
+
+	public IEnumerable<SelectableTable> GetSelectableTables()
+	{
+		if (FromClause == null) yield break;
+		foreach (var item in FromClause.GetSelectableTables()) yield return item;
 	}
 
 	public override IEnumerable<CommonTable> GetCommonTables()

@@ -53,6 +53,20 @@ public class FromClause : IQueryCommandable
 			}
 		}
 	}
+
+	public IEnumerable<SelectableTable> GetSelectableTables()
+	{
+		yield return Root;
+
+		if (Relations != null)
+		{
+			foreach (var item in Relations)
+			{
+				yield return item.Table;
+			}
+		}
+	}
+
 	public IEnumerable<CommonTable> GetCommonTables()
 	{
 		foreach (var item in Root.GetCommonTables())
