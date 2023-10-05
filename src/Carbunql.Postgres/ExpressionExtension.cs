@@ -3,6 +3,7 @@ using Carbunql.Building;
 using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Values;
+using System;
 using System.Collections;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -283,6 +284,11 @@ public static class ExpressionExtension
 		{
 			var mc = (MethodCallExpression)exp;
 
+			if (mc.Method.Name == "ExistsAs" && mc.Method.DeclaringType == typeof(Sql))
+			{
+				return mc.ToExistsExpression(tables);
+			}
+
 			if (mc.Method.Name == "Concat") return mc.ToConcatValue(tables);
 
 			if (mc.Method.Name == "Contains")
@@ -317,6 +323,30 @@ public static class ExpressionExtension
 		}
 
 		return ((BinaryExpression)exp).ToValueExpression(tables);
+	}
+
+	internal static ExistsExpression ToExistsExpression(this MethodCallExpression exp, List<string> tables)
+	{
+		if (exp.Method.Name != "ExistsAs") throw new InvalidProgramException();
+
+		var tableType = exp.Method.GetGenericArguments()[0];
+		var alias = exp.Arguments[1].Execute() as string;
+		var predicate = exp.Arguments[2].Execute() as LambdaExpression;
+
+		if (tableType == null || alias == null || predicate == null) throw new NullReferenceException();
+
+		var sq = new SelectQuery();
+		sq.From(tableType.ToTableName()).As(alias);
+		sq.SelectAll();
+
+		var lst = new List<string>();
+		lst.AddRange(tables);
+		lst.Add(alias);
+		var condition = predicate.Body.ToValue(lst);
+
+		sq.Where(condition);
+
+		return new ExistsExpression(sq);
 	}
 
 	internal static FunctionValue ToConcatValue(this MethodCallExpression exp, List<string> tables)

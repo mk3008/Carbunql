@@ -125,10 +125,10 @@ FROM
         FROM
             table_b AS b
         WHERE
-            (b.b_id <= 10)
+            b.b_id <= 10
     ) AS b ON a.a_id = b.a_id";
 
-		Assert.Equal(47, sq.GetTokens().ToList().Count);
+		Assert.Equal(45, sq.GetTokens().ToList().Count);
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 

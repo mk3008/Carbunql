@@ -139,13 +139,83 @@ WHERE
                 FROM
                     table_b AS b
                 WHERE
-                    (b.is_enabled)
+                    b.is_enabled
             ) AS b
         WHERE
             a.a_id = b.a_id
     )";
 
-		Assert.Equal(37, sq.GetTokens().ToList().Count);
+		Assert.Equal(35, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
+	[Fact]
+	public void ExistsAsTest()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.FromAs<table_a>("a");
+		sq.SelectAll();
+
+		sq.Where(() => sq.ExistsAs<table_b>("b", b => a.a_id == b.a_id));
+
+		Monitor.Log(sq);
+
+		var sql = @"
+	SELECT
+	    *
+	FROM
+	    table_a AS a
+	WHERE
+	    EXISTS (
+		    SELECT
+		        *
+		    FROM
+		        table_b AS b
+		    WHERE
+		        a.a_id = b.a_id
+		)";
+
+		Assert.Equal(24, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
+	[Fact]
+	public void OrTest()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.FromAs<table_a>("a");
+		sq.SelectAll();
+
+		sq.Where(() =>
+			sq.ExistsAs<table_b>("b", b => a.a_id == b.a_id)
+			|| sq.ExistsAs<table_b>("b", b => a.a_id == b.a_id && a.a_id == 1)
+		);
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    *
+FROM
+    table_a AS a
+WHERE
+    (EXISTS (
+        SELECT
+            *
+        FROM
+            table_b AS b
+        WHERE
+            a.a_id = b.a_id
+    ) OR EXISTS (
+        SELECT
+            *
+        FROM
+            table_b AS b
+        WHERE
+            (a.a_id = b.a_id AND a.a_id = 1)
+    ))";
+
+		Assert.Equal(52, sq.GetTokens().ToList().Count);
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
