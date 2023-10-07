@@ -20,9 +20,9 @@ public class JoinTest
 	{
 		var sq = new SelectQuery();
 		var (from, a) = sq.FromAs<RecordA>("a");
-		var b = from.InnerJoinAs<RecordB>("b").On(b => a.a_id == b.a_id && b.text == "test");
-		var c = from.LeftJoinAs<RecordC>("c").On(c => a.a_id == c.a_id);
-		var d = from.RightJoinAs<RecordC>("d").On(d => a.a_id == d.a_id);
+		var b = from.InnerJoinAs<RecordB>(b => a.a_id == b.a_id && b.text == "test");
+		var c = from.LeftJoinAs<RecordC>(c => a.a_id == c.a_id);
+		var d = from.RightJoinAs<RecordC>(d => a.a_id == d.a_id);
 		var e = from.CrossJoinAs<RecordC>("e");
 
 		sq.SelectAll();
@@ -48,7 +48,7 @@ FROM
 	{
 		var sq = new SelectQuery();
 		var (from, a) = sq.FromAs<RecordA>("a");
-		var b = from.InnerJoinAs<RecordB>("b").On(b => a.a_id == b.a_id);
+		var b = from.InnerJoinAs<RecordB>(b => a.a_id == b.a_id);
 
 		sq.SelectAll(() => b);
 
@@ -73,7 +73,7 @@ FROM
 	{
 		var sq = new SelectQuery();
 		var (from, a) = sq.FromAs<RecordA>("a");
-		var b = from.InnerJoinAs<RecordB>("INPUT_TABLE", "b").On(b => a.a_id == b.a_id);
+		var b = from.InnerJoinAs<RecordB>("INPUT_TABLE", b => a.a_id == b.a_id);
 
 		sq.SelectAll(() => b);
 
@@ -105,7 +105,7 @@ FROM
 			subq.SelectAll();
 			subq.Where(() => b.b_id <= 10);
 			return subq;
-		}, "b").On(b => a.a_id == b.a_id);
+		}, b => a.a_id == b.a_id);
 
 		sq.SelectAll(() => b);
 
@@ -137,7 +137,7 @@ FROM
 	{
 		var sq = new SelectQuery();
 		var (from, a) = sq.FromAs<RecordA>("a");
-		var b = from.LeftJoinAs<RecordB>("b").On(b => a.a_id == b.a_id);
+		var b = from.LeftJoinAs<RecordB>(b => a.a_id == b.a_id);
 
 		sq.SelectAll(() => b);
 
@@ -162,7 +162,7 @@ FROM
 	{
 		var sq = new SelectQuery();
 		var (from, a) = sq.FromAs<RecordA>("a");
-		var b = from.RightJoinAs<RecordB>("b").On(b => a.a_id == b.a_id);
+		var b = from.RightJoinAs<RecordB>(b => a.a_id == b.a_id);
 
 		sq.SelectAll(() => b);
 
