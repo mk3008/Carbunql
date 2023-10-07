@@ -27,7 +27,7 @@ public class WhereClauseTest
 
 		Monitor.Log(sq);
 
-		Assert.Equal(14, sq.GetTokens().ToList().Count);
+		Assert.Equal(12, sq.GetTokens().ToList().Count);
 	}
 
 	[Fact]
@@ -43,7 +43,7 @@ public class WhereClauseTest
 
 		Monitor.Log(sq);
 
-		Assert.Equal(18, sq.GetTokens().ToList().Count);
+		Assert.Equal(16, sq.GetTokens().ToList().Count);
 	}
 
 	[Fact]
@@ -58,7 +58,7 @@ public class WhereClauseTest
 
 		Monitor.Log(sq);
 
-		Assert.Equal(17, sq.GetTokens().ToList().Count);
+		Assert.Equal(15, sq.GetTokens().ToList().Count);
 	}
 
 	[Fact]
@@ -137,7 +137,7 @@ public class WhereClauseTest
 
 		Monitor.Log(sq);
 
-		Assert.Equal(107, sq.GetTokens().ToList().Count);
+		Assert.Equal(81, sq.GetTokens().ToList().Count);
 	}
 
 	[Fact]
@@ -152,7 +152,7 @@ public class WhereClauseTest
 
 		Monitor.Log(sq);
 
-		Assert.Equal(14, sq.GetTokens().ToList().Count);
+		Assert.Equal(12, sq.GetTokens().ToList().Count);
 	}
 
 	[Fact]
@@ -183,11 +183,11 @@ SELECT
 FROM
     table_a AS a
 WHERE
-    (a.text = 'abc')
-    AND (a.text = '')
-    AND (a.text = :member_text)
-    AND (a.text = TRIM(:member_text))
-    AND (a.text = :invoke_fn)
+    a.text = 'abc'
+    AND a.text = ''
+    AND a.text = :member_text
+    AND a.text = TRIM(:member_text)
+    AND a.text = :invoke_fn
 ";
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
@@ -205,7 +205,7 @@ WHERE
 
 		Monitor.Log(sq);
 
-		Assert.Equal(14, sq.GetTokens().ToList().Count);
+		Assert.Equal(12, sq.GetTokens().ToList().Count);
 	}
 
 	[Fact]
@@ -221,7 +221,7 @@ WHERE
 
 		Monitor.Log(sq);
 
-		Assert.Equal(14, sq.GetTokens().ToList().Count);
+		Assert.Equal(12, sq.GetTokens().ToList().Count);
 	}
 
 	[Fact]
@@ -237,7 +237,7 @@ WHERE
 
 		Monitor.Log(sq);
 
-		Assert.Equal(14, sq.GetTokens().ToList().Count);
+		Assert.Equal(12, sq.GetTokens().ToList().Count);
 	}
 
 	[Fact]
@@ -253,7 +253,7 @@ WHERE
 
 		Monitor.Log(sq);
 
-		Assert.Equal(14, sq.GetTokens().ToList().Count);
+		Assert.Equal(12, sq.GetTokens().ToList().Count);
 	}
 
 	[Fact]
@@ -269,7 +269,7 @@ WHERE
 
 		Monitor.Log(sq);
 
-		Assert.Equal(14, sq.GetTokens().ToList().Count);
+		Assert.Equal(12, sq.GetTokens().ToList().Count);
 	}
 
 	[Fact]
@@ -307,7 +307,7 @@ WHERE
 
 		Monitor.Log(sq);
 
-		Assert.Equal(166, sq.GetTokens().ToList().Count);
+		Assert.Equal(126, sq.GetTokens().ToList().Count);
 	}
 
 	[Fact]
@@ -324,7 +324,7 @@ WHERE
 
 		Monitor.Log(sq);
 
-		Assert.Equal(14, sq.GetTokens().ToList().Count);
+		Assert.Equal(12, sq.GetTokens().ToList().Count);
 	}
 
 	public record struct RecordA(int a_id, string text, int value, bool is_enabled, double rate, DateTime timestamp, Gender gender);

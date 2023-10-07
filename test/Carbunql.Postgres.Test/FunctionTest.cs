@@ -44,12 +44,12 @@ SELECT
 FROM
     table_a AS a
 WHERE
-    (a.a_id = ANY(:member_list))
-    AND (NOT (a.a_id = ANY(:member_list)))
-    AND (a.a_id = ANY(:member_array))
-    AND (NOT (a.a_id = ANY(:member_array)))";
+    a.a_id = ANY(:member_list)
+    AND NOT (a.a_id = ANY(:member_list))
+    AND a.a_id = ANY(:member_array)
+    AND NOT (a.a_id = ANY(:member_array))";
 
-		Assert.Equal(56, sq.GetTokens().ToList().Count);
+		Assert.Equal(48, sq.GetTokens().ToList().Count);
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
@@ -174,10 +174,10 @@ SELECT
 FROM
     table_a AS a
 WHERE
-    (a.text LIKE '%' || 'word' || '%')
-    AND (a.text LIKE '%' || :member_text || '%')";
+    a.text LIKE '%' || 'word' || '%'
+    AND a.text LIKE '%' || :member_text || '%'";
 
-		Assert.Equal(30, sq.GetTokens().ToList().Count);
+		Assert.Equal(26, sq.GetTokens().ToList().Count);
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
@@ -205,10 +205,10 @@ SELECT
 FROM
     table_a AS a
 WHERE
-    (NOT (a.text LIKE '%' || 'word' || '%'))
-    AND (NOT (a.text LIKE '%' || :member_text || '%'))";
+    NOT (a.text LIKE '%' || 'word' || '%')
+    AND NOT (a.text LIKE '%' || :member_text || '%')";
 
-		Assert.Equal(36, sq.GetTokens().ToList().Count);
+		Assert.Equal(32, sq.GetTokens().ToList().Count);
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
@@ -236,10 +236,10 @@ SELECT
 FROM
     table_a AS a
 WHERE
-    (a.text LIKE 'word' || '%')
-    AND (a.text LIKE :member_text || '%')";
+    a.text LIKE 'word' || '%'
+    AND a.text LIKE :member_text || '%'";
 
-		Assert.Equal(26, sq.GetTokens().ToList().Count);
+		Assert.Equal(22, sq.GetTokens().ToList().Count);
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
@@ -267,10 +267,10 @@ SELECT
 FROM
     table_a AS a
 WHERE
-    (a.text LIKE '%' || 'word')
-    AND (a.text LIKE '%' || :member_text)";
+    a.text LIKE '%' || 'word'
+    AND a.text LIKE '%' || :member_text";
 
-		Assert.Equal(26, sq.GetTokens().ToList().Count);
+		Assert.Equal(22, sq.GetTokens().ToList().Count);
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
