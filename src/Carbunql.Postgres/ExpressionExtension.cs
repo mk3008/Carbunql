@@ -3,7 +3,6 @@ using Carbunql.Building;
 using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Values;
-using System;
 using System.Collections;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -329,24 +328,81 @@ public static class ExpressionExtension
 	{
 		if (exp.Method.Name != "ExistsAs") throw new InvalidProgramException();
 
-		var tableType = exp.Method.GetGenericArguments()[0];
-		var alias = exp.Arguments[1].Execute() as string;
-		var predicate = exp.Arguments[2].Execute() as LambdaExpression;
+		if (exp.Arguments.Count < 3) throw new NotSupportedException();
 
-		if (tableType == null || alias == null || predicate == null) throw new NullReferenceException();
+		if (exp.Arguments.Count == 3)
+		{
+			var tableType = exp.Method.GetGenericArguments()[0];
+			var alias = exp.Arguments[1].Execute() as string;
+			var predicate = exp.Arguments[2].Execute() as LambdaExpression;
 
-		var sq = new SelectQuery();
-		sq.From(tableType.ToTableName()).As(alias);
-		sq.SelectAll();
+			if (tableType == null || alias == null || predicate == null) throw new NullReferenceException();
 
-		var lst = new List<string>();
-		lst.AddRange(tables);
-		lst.Add(alias);
-		var condition = predicate.Body.ToValue(lst);
+			var sq = new SelectQuery();
+			sq.From(tableType.ToTableName()).As(alias);
+			sq.SelectAll();
 
-		sq.Where(condition);
+			var lst = new List<string>();
+			lst.AddRange(tables);
+			lst.Add(alias);
+			var condition = predicate.Body.ToValue(lst);
 
-		return new ExistsExpression(sq);
+			sq.Where(condition);
+
+			return new ExistsExpression(sq);
+		}
+
+		var arg1 = exp.Arguments[1].Execute();
+
+		if (exp.Arguments.Count == 4 && arg1 is IReadQuery)
+		{
+			var tableType = exp.Method.GetGenericArguments()[0];
+			var query = arg1 as IReadQuery;
+			var alias = exp.Arguments[2].Execute() as string;
+			var predicate = exp.Arguments[3].Execute() as LambdaExpression;
+
+			if (tableType == null || query == null || alias == null || predicate == null) throw new NullReferenceException();
+
+			var sq = new SelectQuery();
+			sq.From(query).As(alias);
+			sq.SelectAll();
+
+			var lst = new List<string>();
+			lst.AddRange(tables);
+			lst.Add(alias);
+			var condition = predicate.Body.ToValue(lst);
+
+			sq.Where(condition);
+
+			return new ExistsExpression(sq);
+		}
+
+		if (exp.Arguments.Count == 4 && arg1 is string)
+		{
+			var tableType = exp.Method.GetGenericArguments()[0];
+			var table = arg1 as string;
+			var alias = exp.Arguments[2].Execute() as string;
+			var predicate = exp.Arguments[3].Execute() as LambdaExpression;
+
+			if (tableType == null || table == null || alias == null || predicate == null) throw new NullReferenceException();
+
+			var sq = new SelectQuery();
+			sq.From(table).As(alias);
+			sq.SelectAll();
+
+			var lst = new List<string>();
+			lst.AddRange(tables);
+			lst.Add(alias);
+			var condition = predicate.Body.ToValue(lst);
+
+			sq.Where(condition);
+
+			return new ExistsExpression(sq);
+		}
+
+
+
+		throw new NotSupportedException();
 	}
 
 	internal static FunctionValue ToConcatValue(this MethodCallExpression exp, List<string> tables)
@@ -494,7 +550,14 @@ public static class ExpressionExtension
 	{
 		var v = exp.ToValueCore(tables);
 		if (exp.NodeType == ExpressionType.Convert) return v;
-		if (exp.NodeType == ExpressionType.Not) return new NegativeValue(v.ToBracket());
+		if (exp.NodeType == ExpressionType.Not)
+		{
+			if (v is ExistsExpression)
+			{
+				return new NegativeValue(v);
+			}
+			return new NegativeValue(v.ToBracket());
+		}
 		throw new NotSupportedException();
 	}
 
