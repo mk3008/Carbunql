@@ -328,81 +328,71 @@ public static class ExpressionExtension
 	{
 		if (exp.Method.Name != "ExistsAs") throw new InvalidProgramException();
 
-		if (exp.Arguments.Count < 3) throw new NotSupportedException();
+		if (exp.Arguments.Count < 2) throw new NotSupportedException();
 
-		if (exp.Arguments.Count == 3)
+		if (exp.Arguments.Count == 2)
 		{
 			var tableType = exp.Method.GetGenericArguments()[0];
-			var alias = exp.Arguments[1].Execute() as string;
-			var predicate = exp.Arguments[2].Execute() as LambdaExpression;
+			var predicate = exp.Arguments[1].Execute() as LambdaExpression;
+			if (tableType == null || predicate == null) throw new NullReferenceException();
 
-			if (tableType == null || alias == null || predicate == null) throw new NullReferenceException();
+			var alias = predicate.Parameters[0].Name;
+			if (string.IsNullOrEmpty(alias)) throw new InvalidProgramException();
 
 			var sq = new SelectQuery();
 			sq.From(tableType.ToTableName()).As(alias);
 			sq.SelectAll();
 
-			var lst = new List<string>();
-			lst.AddRange(tables);
-			lst.Add(alias);
-			var condition = predicate.Body.ToValue(lst);
-
-			sq.Where(condition);
-
-			return new ExistsExpression(sq);
+			return sq.ToExistsExpression(alias, predicate, tables);
 		}
 
 		var arg1 = exp.Arguments[1].Execute();
 
-		if (exp.Arguments.Count == 4 && arg1 is IReadQuery)
+		if (exp.Arguments.Count == 3 && arg1 is IReadQuery query)
 		{
 			var tableType = exp.Method.GetGenericArguments()[0];
-			var query = arg1 as IReadQuery;
-			var alias = exp.Arguments[2].Execute() as string;
-			var predicate = exp.Arguments[3].Execute() as LambdaExpression;
+			var predicate = exp.Arguments[2].Execute() as LambdaExpression;
+			if (tableType == null || query == null || predicate == null) throw new NullReferenceException();
 
-			if (tableType == null || query == null || alias == null || predicate == null) throw new NullReferenceException();
+			var alias = predicate.Parameters[0].Name;
+			if (string.IsNullOrEmpty(alias)) throw new InvalidProgramException();
 
 			var sq = new SelectQuery();
 			sq.From(query).As(alias);
 			sq.SelectAll();
 
-			var lst = new List<string>();
-			lst.AddRange(tables);
-			lst.Add(alias);
-			var condition = predicate.Body.ToValue(lst);
-
-			sq.Where(condition);
-
-			return new ExistsExpression(sq);
+			return sq.ToExistsExpression(alias, predicate, tables);
 		}
 
-		if (exp.Arguments.Count == 4 && arg1 is string)
+		if (exp.Arguments.Count == 3 && arg1 is string table)
 		{
 			var tableType = exp.Method.GetGenericArguments()[0];
-			var table = arg1 as string;
-			var alias = exp.Arguments[2].Execute() as string;
-			var predicate = exp.Arguments[3].Execute() as LambdaExpression;
+			var predicate = exp.Arguments[2].Execute() as LambdaExpression;
+			if (tableType == null || table == null || predicate == null) throw new NullReferenceException();
 
-			if (tableType == null || table == null || alias == null || predicate == null) throw new NullReferenceException();
+			var alias = predicate.Parameters[0].Name;
+			if (string.IsNullOrEmpty(alias)) throw new InvalidProgramException();
 
 			var sq = new SelectQuery();
 			sq.From(table).As(alias);
 			sq.SelectAll();
 
-			var lst = new List<string>();
-			lst.AddRange(tables);
-			lst.Add(alias);
-			var condition = predicate.Body.ToValue(lst);
-
-			sq.Where(condition);
-
-			return new ExistsExpression(sq);
+			return sq.ToExistsExpression(alias, predicate, tables);
 		}
 
-
-
 		throw new NotSupportedException();
+	}
+
+	internal static ExistsExpression ToExistsExpression(this SelectQuery sq, string alias, LambdaExpression predicate, List<string> tables)
+	{
+		var lst = new List<string>();
+		lst.AddRange(tables);
+		lst.Add(alias);
+		var condition = predicate.Body.ToValue(lst);
+
+		sq.Where(condition);
+
+		return new ExistsExpression(sq);
 	}
 
 	internal static FunctionValue ToConcatValue(this MethodCallExpression exp, List<string> tables)

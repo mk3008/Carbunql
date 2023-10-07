@@ -22,7 +22,7 @@ public class ExistsTest
 		var (from, a) = sq.FromAs<table_a>("a");
 		sq.SelectAll();
 
-		sq.Where(() => sq.ExistsAs<table_b>("b", b => a.a_id == b.a_id));
+		sq.Where(() => sq.ExistsAs<table_b>(x => a.a_id == x.a_id));
 
 		Monitor.Log(sq);
 
@@ -36,9 +36,9 @@ public class ExistsTest
 		    SELECT
 		        *
 		    FROM
-		        table_b AS b
+		        table_b AS x
 		    WHERE
-		        a.a_id = b.a_id
+		        a.a_id = x.a_id
 		)";
 
 		Assert.Equal(24, sq.GetTokens().ToList().Count);
@@ -53,8 +53,8 @@ public class ExistsTest
 		sq.SelectAll();
 
 		sq.Where(() =>
-			sq.ExistsAs<table_b>("b", b => a.a_id == b.a_id)
-			|| sq.ExistsAs<table_b>("b", b => a.a_id == b.a_id && a.a_id == 1)
+			sq.ExistsAs<table_b>(b1 => a.a_id == b1.a_id)
+			|| sq.ExistsAs<table_b>(b2 => a.a_id == b2.a_id && a.a_id == 1)
 		);
 
 		Monitor.Log(sq);
@@ -69,16 +69,16 @@ WHERE
         SELECT
             *
         FROM
-            table_b AS b
+            table_b AS b1
         WHERE
-            a.a_id = b.a_id
+            a.a_id = b1.a_id
     ) OR EXISTS (
         SELECT
             *
         FROM
-            table_b AS b
+            table_b AS b2
         WHERE
-            (a.a_id = b.a_id AND a.a_id = 1)
+            (a.a_id = b2.a_id AND a.a_id = 1)
     ))";
 
 		Assert.Equal(52, sq.GetTokens().ToList().Count);
@@ -93,7 +93,7 @@ WHERE
 		sq.SelectAll();
 
 		sq.Where(() =>
-			!sq.ExistsAs<table_b>("b", b => a.a_id == b.a_id)
+			!sq.ExistsAs<table_b>(b => a.a_id == b.a_id)
 		);
 
 		Monitor.Log(sq);
@@ -124,7 +124,7 @@ WHERE
 		var (from, a) = sq.FromAs<table_a>("a");
 		sq.SelectAll();
 
-		sq.Where(() => sq.ExistsAs<table_b>("TABLE", "b", b => a.a_id == b.a_id));
+		sq.Where(() => sq.ExistsAs<table_b>("TABLE", b => a.a_id == b.a_id));
 
 		Monitor.Log(sq);
 
@@ -159,7 +159,7 @@ WHERE
 		var (from, a) = sq.FromAs<table_a>("a");
 		sq.SelectAll();
 
-		sq.Where(() => sq.ExistsAs<table_b>(subq, "b", b => a.a_id == b.a_id));
+		sq.Where(() => sq.ExistsAs<table_b>(subq, b => a.a_id == b.a_id));
 
 		Monitor.Log(sq);
 
@@ -188,7 +188,6 @@ WHERE
 		Assert.Equal(35, sq.GetTokens().ToList().Count);
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
-
 
 	public record struct table_a(int a_id, string text, int value, bool is_enabled, double rate, DateTime timestamp);
 

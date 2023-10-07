@@ -10,17 +10,17 @@ public static class Sql
 {
 	private static string ERROR = "Definition methods must not be executed.";
 
-	public static bool ExistsAs<T>(this SelectQuery source, IReadQuery subQuery, string alias, Expression<Func<T, bool>> predicate)
+	public static bool ExistsAs<T>(this SelectQuery source, string table, Expression<Func<T, bool>> predicate)
 	{
 		throw new InvalidProgramException(ERROR);
 	}
 
-	public static bool ExistsAs<T>(this SelectQuery source, string table, string alias, Expression<Func<T, bool>> predicate)
+	public static bool ExistsAs<T>(this SelectQuery source, IReadQuery subQuery, Expression<Func<T, bool>> predicate)
 	{
 		throw new InvalidProgramException(ERROR);
 	}
 
-	public static bool ExistsAs<T>(this SelectQuery source, string alias, Expression<Func<T, bool>> predicate)
+	public static bool ExistsAs<T>(this SelectQuery source, Expression<Func<T, bool>> predicate)
 	{
 		throw new InvalidProgramException(ERROR);
 	}
