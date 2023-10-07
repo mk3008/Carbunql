@@ -34,7 +34,7 @@ public class Demo
 		// Write the table join expression.
 		// Combined expressions can be written in a type-safe manner.
 		// Note: Make sure that the join destination table alias name and return value variable name are the same.
-		table_b b = from.InnerJoinAs<table_b>("b").On(b => a.a_id == b.a_id);
+		table_b b = from.InnerJoinAs<table_b>(b => a.a_id == b.a_id);
 
 		// Describe the columns to select.
 		// If you want to get all columns, use the SelectAll method
