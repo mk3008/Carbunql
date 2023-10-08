@@ -3,6 +3,7 @@ using Carbunql.Building;
 using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Values;
+using System;
 using System.Collections;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -287,6 +288,7 @@ public static class ExpressionExtension
 			{
 				if (mc.Method.Name == "ExistsAs") return mc.ToExistsExpression(tables);
 				if (mc.Method.Name == "InAs") return mc.ToInClause(tables);
+				return mc.ToFunctionValue(tables);
 			}
 
 			if (mc.Method.Name == "Concat") return mc.ToConcatValue(tables);
@@ -359,6 +361,19 @@ public static class ExpressionExtension
 		}
 
 		return lst;
+	}
+
+	internal static FunctionValue ToFunctionValue(this MethodCallExpression exp, List<string> tables)
+	{
+		var lexp = exp.Arguments[1].Execute() as LambdaExpression;
+		if (lexp == null) throw new InvalidProgramException();
+
+		var arg = lexp.Body.ToValue(tables);
+
+		//throw new Exception();
+		//var av = arg.B
+		var v = new FunctionValue(exp.Method.Name, arg);
+		return v;
 	}
 
 	internal static InClause ToInClause(this LambdaExpression predicate, Action<SelectQuery> fromBuilder, string alias, List<string> tables)
@@ -716,12 +731,12 @@ public static class ExpressionExtension
 				return new ColumnValue(table, column);
 			}
 
-			return exp.ToParameterValue();
+			return exp.ToValue();
 		}
 
 		if (exp.Expression is ConstantExpression)
 		{
-			return exp.ToParameterValue();
+			return exp.ToValue();
 		}
 
 		throw new NotSupportedException($"propExpression.Expression type:{exp.Expression.GetType().Name}");
@@ -736,9 +751,25 @@ public static class ExpressionExtension
 		return new LiteralValue(value.ToString());
 	}
 
-	internal static ParameterValue ToParameterValue(this MemberExpression exp)
+	internal static ValueBase ToValue(this MemberExpression exp)
 	{
 		var value = exp.Execute();
+
+		if (value is IEnumerable<ValueBase> values)
+		{
+			var vc = new ValueCollection();
+			foreach (var item in values)
+			{
+				vc.Add(item);
+			}
+			return vc;
+		}
+
+		return exp.ToParameterValue(value);
+	}
+
+	internal static ValueBase ToParameterValue(this MemberExpression exp, object? value)
+	{
 		var key = string.Empty;
 
 		if (exp.Expression is MemberExpression m)

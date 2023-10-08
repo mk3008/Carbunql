@@ -1,4 +1,7 @@
 ﻿using Carbunql.Building;
+using Carbunql.Clauses;
+using Carbunql.Values;
+using System.Runtime.CompilerServices;
 using Xunit.Abstractions;
 
 namespace Carbunql.Postgres.Test;
@@ -271,6 +274,65 @@ WHERE
     AND a.text LIKE '%' || :member_text";
 
 		Assert.Equal(22, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
+
+	[Fact]
+	public void GreatestTest()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.FromAs<table_a>("a");
+		var b = from.InnerJoinAs<table_b>(b => a.a_id == b.a_id);
+
+		var args = new ValueBase[]
+		{
+			new LiteralValue(1),
+			sq.GetColumn(() => a.a_id),
+			sq.GetColumn(() => b.a_id)
+		};
+
+		sq.Select(() => sq.Greatest(() => args)).As("max_value");
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    GREATEST(1, a.a_id, b.a_id) AS max_value
+FROM
+    table_a AS a
+    INNER JOIN table_b AS b ON a.a_id = b.a_id";
+
+		Assert.Equal(31, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
+	[Fact]
+	public void LeastTest()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.FromAs<table_a>("a");
+		var b = from.InnerJoinAs<table_b>(b => a.a_id == b.a_id);
+
+		var args = new ValueBase[]
+		{
+			new LiteralValue(1),
+			sq.GetColumn(() => a.a_id),
+			sq.GetColumn(() => b.a_id)
+		};
+
+		sq.Select(() => sq.Least(() => args)).As("min_value");
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    LEAST(1, a.a_id, b.a_id) AS min_value
+FROM
+    table_a AS a
+    INNER JOIN table_b AS b ON a.a_id = b.a_id";
+
+		Assert.Equal(31, sq.GetTokens().ToList().Count);
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
