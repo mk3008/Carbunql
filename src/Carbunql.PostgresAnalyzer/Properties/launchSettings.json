@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "Carbunql.PostgresAnalyzer": {
+      "commandName": "Project"
+    }
+  }
+}
