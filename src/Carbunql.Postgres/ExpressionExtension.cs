@@ -66,6 +66,9 @@ public static class ExpressionExtension
 				op = "-";
 				break;
 
+			case ExpressionType.Coalesce:
+				return exp.ToCoalesceValue(tables);
+
 			case ExpressionType.AddChecked:
 				break;
 			case ExpressionType.ArrayLength:
@@ -73,8 +76,6 @@ public static class ExpressionExtension
 			case ExpressionType.ArrayIndex:
 				break;
 			case ExpressionType.Call:
-				break;
-			case ExpressionType.Coalesce:
 				break;
 			case ExpressionType.Conditional:
 				break;
@@ -366,6 +367,37 @@ public static class ExpressionExtension
 		}
 
 		return lst;
+	}
+
+	internal static FunctionValue ToCoalesceValue(this BinaryExpression exp, List<string> tables)
+	{
+		var vc = exp.ToValueCollection(tables);
+
+		return new FunctionValue("coalesce", vc);
+	}
+
+	internal static ValueCollection ToValueCollection(this BinaryExpression exp, List<string> tables)
+	{
+		var right = exp.Right.ToValue(tables);
+
+		var vc = new ValueCollection
+		{
+			exp.Left.ToValue(tables)
+		};
+
+		if (right is FunctionValue lst && lst.Name == "coalesce")
+		{
+			foreach (var item in lst.Argument)
+			{
+				vc.Add(item);
+			}
+		}
+		else
+		{
+			vc.Add(right);
+		}
+
+		return vc;
 	}
 
 	internal static ValueCollection ToValue(this NewArrayExpression exp, List<string> tables)
