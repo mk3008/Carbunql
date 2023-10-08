@@ -324,6 +324,11 @@ public static class ExpressionExtension
 			return ((MethodCallExpression)exp).ToParameterValue();
 		}
 
+		if (exp is NewArrayExpression arrayexp)
+		{
+			return arrayexp.ToValue(tables);
+		}
+
 		return ((BinaryExpression)exp).ToValueExpression(tables);
 	}
 
@@ -361,6 +366,16 @@ public static class ExpressionExtension
 		}
 
 		return lst;
+	}
+
+	internal static ValueCollection ToValue(this NewArrayExpression exp, List<string> tables)
+	{
+		var vc = new ValueCollection();
+		foreach (var item in exp.Expressions)
+		{
+			vc.Add(item.ToValue(tables));
+		}
+		return vc;
 	}
 
 	internal static FunctionValue ToFunctionValue(this MethodCallExpression exp, List<string> tables)

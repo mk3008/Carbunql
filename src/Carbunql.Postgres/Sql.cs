@@ -42,12 +42,22 @@ public static class Sql
 		throw new InvalidProgramException(ERROR);
 	}
 
+	public static ValueBase Greatest(this SelectQuery source, Expression<Func<IEnumerable<object>>> args)
+	{
+		throw new InvalidProgramException(ERROR);
+	}
+
 	public static ValueBase Greatest(this SelectQuery source, Expression<Func<IEnumerable<ValueBase>>> args)
 	{
 		throw new InvalidProgramException(ERROR);
 	}
 
-	public static ValueBase Least(this SelectQuery source, Expression<Func<IEnumerable<ValueBase>>> predicate)
+	public static ValueBase Least(this SelectQuery source, Expression<Func<IEnumerable<object>>> predicate)
+	{
+		throw new InvalidProgramException(ERROR);
+	}
+
+	public static ValueBase Least(this SelectQuery source, Expression<Func<IEnumerable<ValueBase>>> args)
 	{
 		throw new InvalidProgramException(ERROR);
 	}
