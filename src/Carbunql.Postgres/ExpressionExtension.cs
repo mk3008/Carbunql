@@ -283,9 +283,10 @@ public static class ExpressionExtension
 		{
 			var mc = (MethodCallExpression)exp;
 
-			if (mc.Method.Name == "ExistsAs" && mc.Method.DeclaringType == typeof(Sql))
+			if (mc.Method.DeclaringType == typeof(Sql))
 			{
-				return mc.ToExistsExpression(tables);
+				if (mc.Method.Name == "ExistsAs") return mc.ToExistsExpression(tables);
+				if (mc.Method.Name == "InAs") return mc.ToInClause(tables);
 			}
 
 			if (mc.Method.Name == "Concat") return mc.ToConcatValue(tables);
@@ -324,6 +325,110 @@ public static class ExpressionExtension
 		return ((BinaryExpression)exp).ToValueExpression(tables);
 	}
 
+	internal static List<(ColumnValue Argument, ColumnValue Column)> ToInClause(ColumnValue predicate, string alias)
+	{
+		var lst = new List<(ColumnValue Argument, ColumnValue Column)>();
+
+		if (predicate.TableAlias == alias)
+		{
+			var op = predicate.OperatableValue;
+			if (op == null || op.Operator != "=") throw new InvalidProgramException();
+			var body = op.Value as ColumnValue;
+			if (body == null) throw new NullReferenceException(nameof(body));
+
+			var column = new ColumnValue(predicate.TableAlias, predicate.Column);
+			var arg = new ColumnValue(body.TableAlias, body.Column);
+
+			lst.Add((arg, column));
+
+			if (op.Value.OperatableValue != null) lst.AddRange(ToInClause((ColumnValue)op.Value.OperatableValue.Value, alias));
+		}
+		else
+		{
+			var op = predicate.OperatableValue;
+			if (op == null || op.Operator != "=") throw new InvalidProgramException();
+			var body = op.Value as ColumnValue;
+			if (body!.TableAlias != alias) throw new InvalidProgramException();
+
+			var arg = new ColumnValue(predicate.TableAlias, predicate.Column);
+			var column = new ColumnValue(body.TableAlias, body.Column);
+
+			lst.Add((arg, column));
+
+			if (op.Value.OperatableValue != null) lst.AddRange(ToInClause((ColumnValue)op.Value.OperatableValue.Value, alias));
+		}
+
+		return lst;
+	}
+
+	internal static InClause ToInClause(this LambdaExpression predicate, Action<SelectQuery> fromBuilder, string alias, List<string> tables)
+	{
+		var pv = predicate.Body.ToValue(tables);
+
+		var sq = new SelectQuery();
+		fromBuilder(sq);
+
+		var cv = (pv is ColumnValue v) ? v : (pv is BracketValue bv && bv.Inner is ColumnValue bcv) ? bcv : throw new NotSupportedException();
+
+		var lst = ToInClause(cv, alias);
+
+		var args = new ValueCollection();
+		foreach (var item in lst)
+		{
+			args.Add(item.Argument);
+			sq.Select(item.Column).As(item.Column.Column);
+		}
+		ValueBase arg = (args.Count == 1) ? args : args.ToBracket();
+		return new InClause(arg, sq.ToValue());
+	}
+
+	internal static InClause ToInClause(this MethodCallExpression exp, List<string> tables)
+	{
+		if (exp.Method.Name != "InAs") throw new InvalidProgramException();
+
+		if (exp.Arguments.Count < 2) throw new NotSupportedException();
+
+		if (exp.Arguments.Count == 2)
+		{
+			var tableType = exp.Method.GetGenericArguments()[0];
+			var predicate = exp.Arguments[1].Execute() as LambdaExpression;
+			if (tableType == null || predicate == null) throw new NullReferenceException();
+
+			var alias = predicate.Parameters[0].Name;
+			if (string.IsNullOrEmpty(alias)) throw new InvalidProgramException();
+
+			return predicate.ToInClause(sq => sq.From(tableType.ToTableName()).As(alias), alias, tables);
+		}
+
+		var arg1 = exp.Arguments[1].Execute();
+
+		if (exp.Arguments.Count == 3 && arg1 is IReadQuery query)
+		{
+			var tableType = exp.Method.GetGenericArguments()[0];
+			var predicate = exp.Arguments[2].Execute() as LambdaExpression;
+			if (tableType == null || query == null || predicate == null) throw new NullReferenceException();
+
+			var alias = predicate.Parameters[0].Name;
+			if (string.IsNullOrEmpty(alias)) throw new InvalidProgramException();
+
+			return predicate.ToInClause(sq => sq.From(query).As(alias), alias, tables);
+		}
+
+		if (exp.Arguments.Count == 3 && arg1 is string table)
+		{
+			var tableType = exp.Method.GetGenericArguments()[0];
+			var predicate = exp.Arguments[2].Execute() as LambdaExpression;
+			if (tableType == null || table == null || predicate == null) throw new NullReferenceException();
+
+			var alias = predicate.Parameters[0].Name;
+			if (string.IsNullOrEmpty(alias)) throw new InvalidProgramException();
+
+			return predicate.ToInClause(sq => sq.From(table).As(alias), alias, tables);
+		}
+
+		throw new NotSupportedException();
+	}
+
 	internal static ExistsExpression ToExistsExpression(this MethodCallExpression exp, List<string> tables)
 	{
 		if (exp.Method.Name != "ExistsAs") throw new InvalidProgramException();
@@ -339,11 +444,7 @@ public static class ExpressionExtension
 			var alias = predicate.Parameters[0].Name;
 			if (string.IsNullOrEmpty(alias)) throw new InvalidProgramException();
 
-			var sq = new SelectQuery();
-			sq.From(tableType.ToTableName()).As(alias);
-			sq.SelectAll();
-
-			return sq.ToExistsExpression(alias, predicate, tables);
+			return predicate.ToExistsExpression(sq => sq.From(tableType.ToTableName()).As(alias), alias, tables);
 		}
 
 		var arg1 = exp.Arguments[1].Execute();
@@ -357,11 +458,7 @@ public static class ExpressionExtension
 			var alias = predicate.Parameters[0].Name;
 			if (string.IsNullOrEmpty(alias)) throw new InvalidProgramException();
 
-			var sq = new SelectQuery();
-			sq.From(query).As(alias);
-			sq.SelectAll();
-
-			return sq.ToExistsExpression(alias, predicate, tables);
+			return predicate.ToExistsExpression(sq => sq.From(query).As(alias), alias, tables);
 		}
 
 		if (exp.Arguments.Count == 3 && arg1 is string table)
@@ -373,22 +470,22 @@ public static class ExpressionExtension
 			var alias = predicate.Parameters[0].Name;
 			if (string.IsNullOrEmpty(alias)) throw new InvalidProgramException();
 
-			var sq = new SelectQuery();
-			sq.From(table).As(alias);
-			sq.SelectAll();
-
-			return sq.ToExistsExpression(alias, predicate, tables);
+			return predicate.ToExistsExpression(sq => sq.From(table).As(alias), alias, tables);
 		}
 
 		throw new NotSupportedException();
 	}
 
-	internal static ExistsExpression ToExistsExpression(this SelectQuery sq, string alias, LambdaExpression predicate, List<string> tables)
+	internal static ExistsExpression ToExistsExpression(this LambdaExpression predicate, Action<SelectQuery> fromBuilder, string alias, List<string> tables)
 	{
 		var lst = new List<string>();
 		lst.AddRange(tables);
 		lst.Add(alias);
 		var condition = predicate.Body.ToValue(lst);
+
+		var sq = new SelectQuery();
+		fromBuilder(sq);
+		sq.SelectAll();
 
 		sq.Where(condition);
 
@@ -542,9 +639,16 @@ public static class ExpressionExtension
 		if (exp.NodeType == ExpressionType.Convert) return v;
 		if (exp.NodeType == ExpressionType.Not)
 		{
-			if (v is ExistsExpression)
+			if (v is ExistsExpression) return new NegativeValue(v);
+			if (v is InClause ic)
 			{
-				return new NegativeValue(v);
+				ic.IsNegative = true;
+				return ic;
+			}
+			if (v is LikeClause lc)
+			{
+				lc.IsNegative = true;
+				return lc;
 			}
 			return new NegativeValue(v.ToBracket());
 		}

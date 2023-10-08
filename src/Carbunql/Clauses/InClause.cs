@@ -59,7 +59,7 @@ public class InClause : ValueBase
 		}
 	}
 
-	public bool IsNegative { get; init; }
+	public bool IsNegative { get; set; }
 
 	public override IEnumerable<Token> GetCurrentTokens(Token? parent)
 	{

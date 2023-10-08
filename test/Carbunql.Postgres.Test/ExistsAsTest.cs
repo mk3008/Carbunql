@@ -3,11 +3,11 @@ using Xunit.Abstractions;
 
 namespace Carbunql.Postgres.Test;
 
-public class ExistsTest
+public class ExistsAsTest
 {
 	private readonly QueryCommandMonitor Monitor;
 
-	public ExistsTest(ITestOutputHelper output)
+	public ExistsAsTest(ITestOutputHelper output)
 	{
 		Monitor = new QueryCommandMonitor(output);
 		Output = output;
@@ -16,7 +16,7 @@ public class ExistsTest
 	private ITestOutputHelper Output { get; set; }
 
 	[Fact]
-	public void ExistsAsTest()
+	public void Default()
 	{
 		var sq = new SelectQuery();
 		var (from, a) = sq.FromAs<table_a>("a");

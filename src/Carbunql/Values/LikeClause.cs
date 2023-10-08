@@ -17,7 +17,7 @@ public class LikeClause : ValueBase
 
 	public ValueBase Argument { get; init; }
 
-	public bool IsNegative { get; init; }
+	public bool IsNegative { get; set; }
 
 	protected override IEnumerable<SelectQuery> GetInternalQueriesCore()
 	{
