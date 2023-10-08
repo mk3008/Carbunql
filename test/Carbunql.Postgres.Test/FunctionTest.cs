@@ -205,10 +205,10 @@ SELECT
 FROM
     table_a AS a
 WHERE
-    NOT (a.text LIKE '%' || 'word' || '%')
-    AND NOT (a.text LIKE '%' || :member_text || '%')";
+    a.text NOT LIKE '%' || 'word' || '%'
+    AND a.text NOT LIKE '%' || :member_text || '%'";
 
-		Assert.Equal(32, sq.GetTokens().ToList().Count);
+		Assert.Equal(28, sq.GetTokens().ToList().Count);
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 

@@ -24,4 +24,19 @@ public static class Sql
 	{
 		throw new InvalidProgramException(ERROR);
 	}
+
+	public static bool InAs<T>(this SelectQuery source, string table, Expression<Func<T, bool>> predicate)
+	{
+		throw new InvalidProgramException(ERROR);
+	}
+
+	public static bool InAs<T>(this SelectQuery source, IReadQuery subQuery, Expression<Func<T, bool>> predicate)
+	{
+		throw new InvalidProgramException(ERROR);
+	}
+
+	public static bool InAs<T>(this SelectQuery source, Expression<Func<T, bool>> predicate)
+	{
+		throw new InvalidProgramException(ERROR);
+	}
 }
