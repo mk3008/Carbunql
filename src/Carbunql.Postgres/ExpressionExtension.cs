@@ -330,6 +330,11 @@ public static class ExpressionExtension
 			return arrayexp.ToValue(tables);
 		}
 
+		if (exp is ConditionalExpression cond)
+		{
+			return cond.ToValue(tables);
+		}
+
 		return ((BinaryExpression)exp).ToValueExpression(tables);
 	}
 
@@ -734,6 +739,11 @@ public static class ExpressionExtension
 			return ce.ToValue(tables);
 		}
 
+		if (exp.Operand is ConditionalExpression cond)
+		{
+			return cond.ToValue(tables);
+		}
+
 		return ((BinaryExpression)exp.Operand).ToValueExpression(tables);
 	}
 
@@ -789,12 +799,36 @@ public static class ExpressionExtension
 		throw new NotSupportedException($"propExpression.Expression type:{exp.Expression.GetType().Name}");
 	}
 
+	internal static CaseExpression ToValue(this ConditionalExpression exp, List<string> tables)
+	{
+		var test = exp.Test.ToValue(tables);
+		var truevale = exp.IfTrue.ToValue(tables);
+
+		var cw = new CaseExpression();
+		cw.WhenExpressions.Add(new WhenExpression(test, truevale));
+
+		var v = exp.IfFalse.ToValue(tables);
+		if (v is CaseExpression c)
+		{
+			foreach (var item in c.WhenExpressions)
+			{
+				cw.WhenExpressions.Add(item);
+			}
+		}
+		else
+		{
+			cw.Else(v);
+		}
+		return cw;
+	}
+
 	internal static ValueBase ToValue(this ConstantExpression exp)
 	{
 		var value = exp.Execute();
 		if (value == null) return ValueParser.Parse("null");
 		if (value is DateTime d) return d.ToValue();
 		if (value is string s) return ValueParser.Parse($"'{value}'");
+		if (value is char c) return ValueParser.Parse($"'{value}'");
 		return new LiteralValue(value.ToString());
 	}
 

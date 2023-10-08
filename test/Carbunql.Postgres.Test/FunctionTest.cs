@@ -380,6 +380,32 @@ FROM
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
+	[Fact]
+	public void CaseWhenTest()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.FromAs<table_a>("a");
+		var b = from.InnerJoinAs<table_b>(b => a.a_id == b.a_id);
+
+		sq.Select(() => a.a_id == 1 ? "x" : b.a_id == 1 ? 'y' : 'z').As("text");
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    CASE
+        WHEN a.a_id = 1 THEN 'x'
+        WHEN b.a_id = 1 THEN 'y'
+        ELSE 'z'
+    END AS text
+FROM
+    table_a AS a
+    INNER JOIN table_b AS b ON a.a_id = b.a_id";
+
+		Assert.Equal(39, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
 	public record struct table_a(int a_id, string text, int? value, bool is_enabled, double rate, DateTime timestamp);
 
 	public record struct table_b(int a_id, string text, int? value, bool is_enabled, double rate, DateTime timestamp);
