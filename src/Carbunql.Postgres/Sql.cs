@@ -1,4 +1,6 @@
-﻿using System.Linq.Expressions;
+﻿using Carbunql.Clauses;
+using Carbunql.Values;
+using System.Linq.Expressions;
 
 namespace Carbunql.Postgres;
 
@@ -36,6 +38,26 @@ public static class Sql
 	}
 
 	public static bool InAs<T>(this SelectQuery source, Expression<Func<T, bool>> predicate)
+	{
+		throw new InvalidProgramException(ERROR);
+	}
+
+	public static ValueBase Greatest(this SelectQuery source, Expression<Func<IEnumerable<object>>> args)
+	{
+		throw new InvalidProgramException(ERROR);
+	}
+
+	public static ValueBase Greatest(this SelectQuery source, Expression<Func<IEnumerable<ValueBase>>> args)
+	{
+		throw new InvalidProgramException(ERROR);
+	}
+
+	public static ValueBase Least(this SelectQuery source, Expression<Func<IEnumerable<object>>> predicate)
+	{
+		throw new InvalidProgramException(ERROR);
+	}
+
+	public static ValueBase Least(this SelectQuery source, Expression<Func<IEnumerable<ValueBase>>> args)
 	{
 		throw new InvalidProgramException(ERROR);
 	}

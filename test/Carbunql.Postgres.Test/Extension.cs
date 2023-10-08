@@ -1,4 +1,7 @@
-﻿namespace Carbunql.Postgres.Test;
+﻿using Carbunql.Values;
+using System.Linq.Expressions;
+
+namespace Carbunql.Postgres.Test;
 
 public static class Extension
 {
@@ -6,4 +9,6 @@ public static class Extension
 	{
 		return source.Replace("\t", "").Replace("\r", "").Replace("\n", "").Replace(" ", "");
 	}
+
+
 }

@@ -1,4 +1,8 @@
 ﻿using Carbunql.Building;
+using Carbunql.Clauses;
+using Carbunql.Values;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.ObjectiveC;
 using Xunit.Abstractions;
 
 namespace Carbunql.Postgres.Test;
@@ -274,7 +278,87 @@ WHERE
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
+	[Fact]
+	public void GreatestTest_objectArray()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.FromAs<table_a>("a");
+		var b = from.InnerJoinAs<table_b>(b => a.a_id == b.a_id);
+
+		sq.Select(() => sq.Greatest(() => new object[] { 1, a.a_id, b.a_id })).As("max_value");
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    GREATEST(1, a.a_id, b.a_id) AS max_value
+FROM
+    table_a AS a
+    INNER JOIN table_b AS b ON a.a_id = b.a_id";
+
+		Assert.Equal(31, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
+	[Fact]
+	public void GreatestTest()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.FromAs<table_a>("a");
+		var b = from.InnerJoinAs<table_b>(b => a.a_id == b.a_id);
+
+		var args = new ValueBase[]
+		{
+			new LiteralValue(1),
+			sq.GetColumn(() => a.a_id),
+			sq.GetColumn(() => b.a_id)
+		};
+
+		sq.Select(() => sq.Greatest(() => args)).As("max_value");
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    GREATEST(1, a.a_id, b.a_id) AS max_value
+FROM
+    table_a AS a
+    INNER JOIN table_b AS b ON a.a_id = b.a_id";
+
+		Assert.Equal(31, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
+	[Fact]
+	public void LeastTest()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.FromAs<table_a>("a");
+		var b = from.InnerJoinAs<table_b>(b => a.a_id == b.a_id);
+
+		var args = new ValueBase[]
+		{
+			new LiteralValue(1),
+			sq.GetColumn(() => a.a_id),
+			sq.GetColumn(() => b.a_id)
+		};
+
+		sq.Select(() => sq.Least(() => args)).As("min_value");
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    LEAST(1, a.a_id, b.a_id) AS min_value
+FROM
+    table_a AS a
+    INNER JOIN table_b AS b ON a.a_id = b.a_id";
+
+		Assert.Equal(31, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
 	public record struct table_a(int a_id, string text, int value, bool is_enabled, double rate, DateTime timestamp);
 
-	public record struct table_b(int a_id, string text, int value, bool is_enabled, double rate, DateTime timestamp);
+	public record struct table_b(long a_id, string text, int value, bool is_enabled, double rate, DateTime timestamp);
 }

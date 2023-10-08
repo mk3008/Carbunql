@@ -1,5 +1,6 @@
 ﻿using Carbunql.Building;
 using Carbunql.Clauses;
+using Carbunql.Values;
 using System.Linq.Expressions;
 
 namespace Carbunql.Postgres;
@@ -27,5 +28,11 @@ public static class SelectExtension
 		source.SelectClause ??= new();
 		source.SelectClause.Add(item);
 		return item;
+	}
+
+	public static ColumnValue GetColumn(this SelectQuery source, Expression<Func<object>> fnc)
+	{
+		var tables = source.GetSelectableTables().Select(x => x.Alias).Distinct().ToList();
+		return (ColumnValue)fnc.Body.ToValue(tables);
 	}
 }
