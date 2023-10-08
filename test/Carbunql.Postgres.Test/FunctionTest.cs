@@ -358,7 +358,29 @@ FROM
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
-	public record struct table_a(int a_id, string text, int value, bool is_enabled, double rate, DateTime timestamp);
+	[Fact]
+	public void CoalesceTest()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.FromAs<table_a>("a");
+		var b = from.InnerJoinAs<table_b>(b => a.a_id == b.a_id);
 
-	public record struct table_b(long a_id, string text, int value, bool is_enabled, double rate, DateTime timestamp);
+		sq.Select(() => a.value ?? b.value ?? 1).As("value");
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    COALESCE(a.value, b.value, 1) AS value
+FROM
+    table_a AS a
+    INNER JOIN table_b AS b ON a.a_id = b.a_id";
+
+		Assert.Equal(31, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
+	public record struct table_a(int a_id, string text, int? value, bool is_enabled, double rate, DateTime timestamp);
+
+	public record struct table_b(int a_id, string text, int? value, bool is_enabled, double rate, DateTime timestamp);
 }
