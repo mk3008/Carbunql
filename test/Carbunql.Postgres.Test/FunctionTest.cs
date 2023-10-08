@@ -387,7 +387,7 @@ FROM
 		var (from, a) = sq.FromAs<table_a>("a");
 		var b = from.InnerJoinAs<table_b>(b => a.a_id == b.a_id);
 
-		sq.Select(() => a.a_id == 1 ? "x" : (b.a_id == 1 ? 'y' : 'z')).As("text");
+		sq.Select(() => a.a_id == 1 ? "x" : b.a_id == 1 ? 'y' : 'z').As("text");
 
 		Monitor.Log(sq);
 
