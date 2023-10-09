@@ -30,6 +30,17 @@ public class SelectClauseTest
 		Monitor.Log(sq);
 
 		Assert.Equal(22, sq.GetTokens().ToList().Count);
+
+		var sql = @"
+SELECT
+    a.a_id,
+    a.a_id,
+    a.a_id,
+    a.a_id AS id
+FROM
+    table_a AS a
+";
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
 	[Fact]
@@ -43,6 +54,20 @@ public class SelectClauseTest
 		Monitor.Log(sq);
 
 		Assert.Equal(32, sq.GetTokens().ToList().Count);
+
+		var sql = @"
+SELECT
+    a.a_id,
+    a.text,
+    a.value,
+    a.is_enabled,
+    a.rate,
+    a.timestamp,
+    a.gender
+FROM
+    table_a AS a
+";
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
 	[Fact]
@@ -60,6 +85,18 @@ public class SelectClauseTest
 		Monitor.Log(sq);
 
 		Assert.Equal(44, sq.GetTokens().ToList().Count);
+
+		var sql = @"
+SELECT
+    1 + 2 * 3.14 AS column,
+    7.28,
+    7.28 AS value,
+    a.value * 2 / 10 + 1 - 3,
+    a.value * 2 / 10 + 1 - 3 AS value
+FROM
+    table_a AS a
+";
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
 	[Fact]
