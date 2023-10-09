@@ -480,6 +480,76 @@ FROM
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
+	[Fact]
+	public void RowNumberTest()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.FromAs<table_a>("a");
+
+		sq.Select(() => sq.RowNumber(() => new object[] { a.rate }, () => new object[] { a.text, a.a_id })).As("text");
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    ROW_NUMBER() OVER(
+        PARTITION BY
+            a.rate
+        ORDER BY
+            a.text,
+            a.a_id
+    ) AS text
+FROM
+    table_a AS a";
+
+		Assert.Equal(25, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
+	[Fact]
+	public void RowNumberOrderOnly()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.FromAs<table_a>("a");
+
+		sq.Select(() => sq.RowNumber(() => null, () => new object[] { a.text, a.a_id })).As("text");
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    ROW_NUMBER() OVER(
+        ORDER BY
+            a.text,
+            a.a_id
+    ) AS text
+FROM
+    table_a AS a";
+
+		Assert.Equal(21, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
+	[Fact]
+	public void RowNumberOmit()
+	{
+		var sq = new SelectQuery();
+		var (from, a) = sq.FromAs<table_a>("a");
+
+		sq.Select(() => sq.RowNumber(() => null, () => null)).As("text");
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    ROW_NUMBER() AS text
+FROM
+    table_a AS a";
+
+		Assert.Equal(10, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
 	public record struct table_a(int a_id, string text, int? value, bool is_enabled, double rate, DateTime timestamp);
 
 	public record struct table_b(int a_id, string text, int? value, bool is_enabled, double rate, DateTime timestamp);

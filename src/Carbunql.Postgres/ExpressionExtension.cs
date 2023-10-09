@@ -3,7 +3,6 @@ using Carbunql.Building;
 using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Values;
-using System;
 using System.Collections;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -12,6 +11,12 @@ namespace Carbunql.Postgres;
 
 public static class ExpressionExtension
 {
+	internal static string ToDbFunction(this string method)
+	{
+		if (method.IsEqualNoCase("rownumber")) return "row_number";
+		return method;
+	}
+
 	internal static bool ToTryDbType(this Type type, out string dbType)
 	{
 		switch (Type.GetTypeCode(type))
@@ -344,6 +349,7 @@ public static class ExpressionExtension
 			{
 				if (mc.Method.Name == "ExistsAs") return mc.ToExistsExpression(tables);
 				if (mc.Method.Name == "InAs") return mc.ToInClause(tables);
+				if (mc.Method.Name == "RowNumber") return mc.ToFunctionValue(tables);
 				return mc.ToFunctionValue(tables);
 			}
 
@@ -408,7 +414,6 @@ public static class ExpressionExtension
 		}
 		return v;
 	}
-
 
 	internal static List<(ColumnValue Argument, ColumnValue Column)> ToInClause(ColumnValue predicate, string alias)
 	{
@@ -489,12 +494,54 @@ public static class ExpressionExtension
 
 	internal static FunctionValue ToFunctionValue(this MethodCallExpression exp, List<string> tables)
 	{
-		var lexp = exp.Arguments[1].Execute() as LambdaExpression;
-		if (lexp == null) throw new InvalidProgramException();
+		PartitionClause? partition = null;
+		OrderClause? order = null;
+		ValueBase? arg = null;
 
-		var arg = lexp.Body.ToValue(tables);
+		for (int i = 1; i < exp.Arguments.Count; i++)
+		{
+			var argval = exp.Arguments[i].ToValue(tables);
+			var name = exp.Method.GetParameters()[i].Name;
+			if (name == "partitionby")
+			{
+				if (argval is ValueCollection vc)
+				{
+					partition = new PartitionClause(vc.ToList());
+				}
+				continue;
+			}
+			else if (name == "orderby")
+			{
+				if (argval is ValueCollection vc)
+				{
+					order = new OrderClause(vc.ToList<IQueryCommandable>());
+				}
+				continue;
+			}
+			if (partition == null && order == null && arg == null)
+			{
+				arg = argval;
+				continue;
+			}
+			throw new NotSupportedException();
+		}
 
-		var v = new FunctionValue(exp.Method.Name, arg);
+		var fn = exp.Method.Name.ToDbFunction();
+		var v = (arg != null) ? new FunctionValue(fn, arg) : new FunctionValue(fn);
+
+		if (partition != null && order != null)
+		{
+			v.Over = new OverClause(new WindowDefinition(partition, order));
+		}
+		else if (partition != null && order == null)
+		{
+			v.Over = new OverClause(new WindowDefinition(partition));
+		}
+		else if (partition == null && order != null)
+		{
+			v.Over = new OverClause(new WindowDefinition(order));
+		}
+
 		return v;
 	}
 
@@ -774,6 +821,7 @@ public static class ExpressionExtension
 	{
 		var v = exp.ToValueCore(tables);
 		if (exp.NodeType == ExpressionType.Convert) return v;
+		if (exp.NodeType == ExpressionType.Quote) return v;
 		if (exp.NodeType == ExpressionType.Not)
 		{
 			if (v is ExistsExpression) return new NegativeValue(v);
@@ -822,6 +870,13 @@ public static class ExpressionExtension
 		if (exp.NodeType == ExpressionType.Convert)
 		{
 			return exp.ToCastValue(tables);
+		}
+
+		if (exp.NodeType == ExpressionType.Quote)
+		{
+			var lexp = exp.Execute() as LambdaExpression;
+			if (lexp == null) throw new InvalidProgramException();
+			return lexp.Body.ToValue(tables);
 		}
 
 		throw new NotSupportedException(exp.Operand.ToString());
