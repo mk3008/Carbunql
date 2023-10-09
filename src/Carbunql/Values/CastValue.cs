@@ -1,4 +1,5 @@
-﻿using Carbunql.Clauses;
+﻿using Carbunql.Analysis.Parser;
+using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Tables;
 using MessagePack;
@@ -20,6 +21,13 @@ public class CastValue : ValueBase
 		Inner = inner;
 		Symbol = symbol;
 		Type = type;
+	}
+
+	public CastValue(ValueBase inner, string symbol, string type)
+	{
+		Inner = inner;
+		Symbol = symbol;
+		Type = ValueParser.Parse(type);
 	}
 
 	public ValueBase Inner { get; init; }

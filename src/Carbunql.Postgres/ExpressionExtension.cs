@@ -12,6 +12,61 @@ namespace Carbunql.Postgres;
 
 public static class ExpressionExtension
 {
+	internal static bool ToTryDbType(this Type type, out string dbType)
+	{
+		switch (Type.GetTypeCode(type))
+		{
+			case TypeCode.Boolean:
+				dbType = "boolean";
+				return true;
+			case TypeCode.Char:
+				dbType = "character";
+				return true;
+			case TypeCode.SByte:
+				dbType = "smallint";
+				return true;
+			case TypeCode.Byte:
+				dbType = "smallint"; // PostgreSQLにはbyteに相当する型がないためsmallintにマッピング
+				return true;
+			case TypeCode.Int16:
+				dbType = "smallint";
+				return true;
+			case TypeCode.UInt16:
+				dbType = "integer"; // PostgreSQLにはushortに相当する型がないためintegerにマッピング
+				return true;
+			case TypeCode.Int32:
+				dbType = "integer";
+				return true;
+			case TypeCode.UInt32:
+				dbType = "bigint"; // PostgreSQLにはuintに相当する型がないためbigintにマッピング
+				return true;
+			case TypeCode.Int64:
+				dbType = "bigint";
+				return true;
+			case TypeCode.UInt64:
+				dbType = "numeric"; // PostgreSQLにはulongに相当する型がないためnumericにマッピング
+				return true;
+			case TypeCode.Single:
+				dbType = "real";
+				return true;
+			case TypeCode.Double:
+				dbType = "double precision";
+				return true;
+			case TypeCode.Decimal:
+				dbType = "numeric";
+				return true;
+			case TypeCode.DateTime:
+				dbType = "timestamp";
+				return true;
+			case TypeCode.String:
+				dbType = "text";
+				return true;
+			default:
+				dbType = string.Empty;
+				return false;
+		}
+	}
+
 	internal static ValueBase ToValueExpression(this BinaryExpression exp, List<string> tables)
 	{
 		var op = string.Empty;
@@ -310,6 +365,11 @@ public static class ExpressionExtension
 				}
 			}
 
+			if (mc.Method.DeclaringType == typeof(Convert))
+			{
+				return mc.ToCastValue(tables);
+			}
+
 			if (mc.Object == null) throw new NullReferenceException("MethodCallExpression.Object is null.");
 			if (mc.Object.NodeType == ExpressionType.Constant)
 			{
@@ -337,6 +397,18 @@ public static class ExpressionExtension
 
 		return ((BinaryExpression)exp).ToValueExpression(tables);
 	}
+
+	internal static ValueBase ToCastValue(this MethodCallExpression exp, List<string> tables)
+	{
+		var v = exp.Arguments[0].ToValue(tables);
+
+		if (exp.Type.ToTryDbType(out var dbType))
+		{
+			return new CastValue(v, "::", dbType);
+		}
+		return v;
+	}
+
 
 	internal static List<(ColumnValue Argument, ColumnValue Column)> ToInClause(ColumnValue predicate, string alias)
 	{
@@ -422,8 +494,6 @@ public static class ExpressionExtension
 
 		var arg = lexp.Body.ToValue(tables);
 
-		//throw new Exception();
-		//var av = arg.B
 		var v = new FunctionValue(exp.Method.Name, arg);
 		return v;
 	}
@@ -744,7 +814,28 @@ public static class ExpressionExtension
 			return cond.ToValue(tables);
 		}
 
-		return ((BinaryExpression)exp.Operand).ToValueExpression(tables);
+		if (exp.Operand is BinaryExpression binary)
+		{
+			return binary.ToValueExpression(tables);
+		}
+
+		if (exp.NodeType == ExpressionType.Convert)
+		{
+			return exp.ToCastValue(tables);
+		}
+
+		throw new NotSupportedException(exp.Operand.ToString());
+	}
+
+	internal static ValueBase ToCastValue(this UnaryExpression exp, List<string> tables)
+	{
+		var v = exp.Operand.ToValue(tables);
+
+		if (exp.Operand.Type.ToTryDbType(out var dbType))
+		{
+			return new CastValue(v, "::", dbType);
+		}
+		return v;
 	}
 
 	internal static ValueBase ToValue(this MemberExpression exp, List<string> tables)

@@ -204,6 +204,11 @@ public class VanillaTokenReader : LexReader
 			return ReadAndJoinOrDefault(token, "materialized");
 		}
 
+		if (token.IsEqualNoCase("double"))
+		{
+			return ReadAndJoinOrDefault(token, "precision");
+
+		}
 		return token;
 	}
 }
