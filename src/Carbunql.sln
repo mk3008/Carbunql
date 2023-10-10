@@ -21,7 +21,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carbunql.DynamicQuery.Test"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carbunql.Postgres", "Carbunql.Postgres\Carbunql.Postgres.csproj", "{F0DC1058-312C-456C-8625-FD25C31F528B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carbunql.Postgres.Test", "..\test\Carbunql.Postgres.Test\Carbunql.Postgres.Test.csproj", "{8F3D86A8-F2DE-4313-88D0-D65AD70DD81E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carbunql.Postgres.Test", "..\test\Carbunql.Postgres.Test\Carbunql.Postgres.Test.csproj", "{8F3D86A8-F2DE-4313-88D0-D65AD70DD81E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryBuilderByLinq", "QueryBuilderByLinq\QueryBuilderByLinq.csproj", "{714CD166-9CF1-4C31-A2E2-05D3A324ED15}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryBuilderByLinq.Test", "..\test\QueryBuilderByLinq.Test\QueryBuilderByLinq.Test.csproj", "{4F19B15C-64FB-4706-8983-6703CE9CC396}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,6 +73,14 @@ Global
 		{8F3D86A8-F2DE-4313-88D0-D65AD70DD81E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F3D86A8-F2DE-4313-88D0-D65AD70DD81E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F3D86A8-F2DE-4313-88D0-D65AD70DD81E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{714CD166-9CF1-4C31-A2E2-05D3A324ED15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{714CD166-9CF1-4C31-A2E2-05D3A324ED15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{714CD166-9CF1-4C31-A2E2-05D3A324ED15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{714CD166-9CF1-4C31-A2E2-05D3A324ED15}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F19B15C-64FB-4706-8983-6703CE9CC396}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F19B15C-64FB-4706-8983-6703CE9CC396}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F19B15C-64FB-4706-8983-6703CE9CC396}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F19B15C-64FB-4706-8983-6703CE9CC396}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
