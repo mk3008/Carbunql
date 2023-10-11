@@ -39,6 +39,8 @@ public abstract class ValueBase : IQueryCommandable
 		return value;
 	}
 
+	public string RecommendedName { get; set; } = string.Empty;
+
 	public ValueBase AddOperatableValue(string @operator, string value)
 	{
 		return AddOperatableValue(@operator, ValueParser.Parse(value));

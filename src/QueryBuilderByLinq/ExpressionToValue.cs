@@ -790,8 +790,14 @@ internal static class ExpressionToValue
 	{
 		if (exp.Type.IsAnonymousType())
 		{
-			var args = exp.Arguments.Select(x => x.ToValue(tables)).ToList();
-			return new ValueCollection(args);
+			var lst = new List<ValueBase>();
+			for (var i = 0; i < exp.Arguments.Count; i++)
+			{
+				var v = exp.Arguments[i].ToValue(tables);
+				v.RecommendedName = exp.Members![i].Name;
+				lst.Add(v);
+			}
+			return new ValueCollection(lst);
 		}
 
 		else if (exp.Type == typeof(DateTime))

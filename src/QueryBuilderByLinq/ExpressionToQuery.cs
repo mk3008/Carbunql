@@ -24,12 +24,12 @@ public static class ExpressionToQuery
 			{
 				foreach (var item in vc)
 				{
-					sq.Select(item).As(item.GetDefaultName());
+					sq.Select(item).As(!string.IsNullOrEmpty(item.RecommendedName) ? item.RecommendedName : item.GetDefaultName());
 				}
 			}
 			else
 			{
-				sq.Select(v).As(v.GetDefaultName());
+				sq.Select(v).As(!string.IsNullOrEmpty(v.RecommendedName) ? v.RecommendedName : v.GetDefaultName());
 			}
 
 			return sq;

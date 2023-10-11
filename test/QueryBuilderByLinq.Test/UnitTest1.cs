@@ -77,6 +77,31 @@ FROM
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
+
+	[Fact]
+	public void SelectAliasColumsFrom()
+	{
+		var query = from a in new List<table_a>().AsQueryable()
+					select new
+					{
+						ID = a.a_id,
+						Text = a.text
+					};
+		var sq = query.Expression.ToQueryAsPostgres();
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    a.a_id AS ID,
+    a.text AS Text
+FROM
+    table_a AS a";
+
+		Assert.Equal(16, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
 	//[Fact]
 	//public void SelectFromWhere()
 	//{
