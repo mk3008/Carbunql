@@ -404,7 +404,9 @@ internal static class ExpressionToValue
 
 		if (exp is ParameterExpression pexp)
 		{
-			return new AllColumnValue(pexp.Name!) { ActualColumns = pexp.Type.GetProperties().Select(x => x.Name).ToList() };
+			var alias = pexp.Name!;
+			var lst = pexp.Type.GetProperties().Select(x => new ColumnValue(alias, x.Name)).ToList<ValueBase>();
+			return new ValueCollection(lst);
 		}
 
 		if (exp is BinaryExpression bexp)
@@ -786,16 +788,24 @@ internal static class ExpressionToValue
 
 	internal static ValueBase ToValue(this NewExpression exp, List<string> tables)
 	{
-		var args = exp.Arguments.Select(x => x.ToObject()).ToArray();
-
-		var d = exp.Constructor!.Invoke(args);
-
-		if (exp.Type == typeof(DateTime))
+		if (exp.Type.IsAnonymousType())
 		{
-			return ((DateTime)d).ToValue();
+			var args = exp.Arguments.Select(x => x.ToValue(tables)).ToList();
+			return new ValueCollection(args);
 		}
 
-		return ValueParser.Parse($"'{d}'");
+		else if (exp.Type == typeof(DateTime))
+		{
+			var args = exp.Arguments.Select(x => x.ToObject()).ToArray();
+			var d = exp.Constructor!.Invoke(args);
+			return ((DateTime)d).ToValue();
+		}
+		else
+		{
+			var args = exp.Arguments.Select(x => x.ToObject()).ToArray();
+			var d = exp.Constructor!.Invoke(args);
+			return ValueParser.Parse($"'{d}'");
+		}
 	}
 
 	internal static ParameterValue ToParameterValue(this MethodCallExpression exp)

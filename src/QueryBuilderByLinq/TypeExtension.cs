@@ -17,4 +17,19 @@ internal static class TypeExtension
 			return type.Name;
 		}
 	}
+
+	public static bool IsAnonymousType(this Type type)
+	{
+		if (type == null)
+		{
+			throw new ArgumentNullException(nameof(type));
+		}
+
+		return Attribute.IsDefined(type, typeof(System.Runtime.CompilerServices.CompilerGeneratedAttribute), false)
+			   && type.IsGenericType && type.Name.Contains("AnonymousType", StringComparison.Ordinal)
+			   && (type.Name.StartsWith("<>", StringComparison.OrdinalIgnoreCase)
+				   || type.Name.StartsWith("VB$", StringComparison.OrdinalIgnoreCase))
+			   && (type.Attributes & TypeAttributes.NotPublic) == TypeAttributes.NotPublic;
+	}
+
 }

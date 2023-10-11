@@ -20,11 +20,11 @@ public static class ExpressionToQuery
 			var tables = sq.GetSelectableTables().Select(x => x.Alias).ToList();
 			var v = operand.Body.ToValue(tables);
 
-			if (v is AllColumnValue ac && ac.ActualColumns.Any())
+			if (v is ValueCollection vc)
 			{
-				foreach (var item in ac.ActualColumns)
+				foreach (var item in vc)
 				{
-					sq.Select(ac.TableAlias, item).As(item);
+					sq.Select(item).As(item.GetDefaultName());
 				}
 			}
 			else
