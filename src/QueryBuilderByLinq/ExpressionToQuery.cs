@@ -2,6 +2,7 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using Carbunql.Building;
+using Carbunql.Values;
 
 namespace QueryBuilderByLinq;
 
@@ -19,7 +20,17 @@ public static class ExpressionToQuery
 			var tables = sq.GetSelectableTables().Select(x => x.Alias).ToList();
 			var v = operand.Body.ToValue(tables);
 
-			sq.Select(v).As(v.GetDefaultName());
+			if (v is AllColumnValue ac && ac.ActualColumns.Any())
+			{
+				foreach (var item in ac.ActualColumns)
+				{
+					sq.Select(ac.TableAlias, item).As(item);
+				}
+			}
+			else
+			{
+				sq.Select(v).As(v.GetDefaultName());
+			}
 
 			return sq;
 		}

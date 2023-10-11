@@ -19,8 +19,7 @@ public class UnitTest1
 	public void SelectFrom()
 	{
 		var query = from a in new List<table_a>().AsQueryable() select a.a_id;
-		var exp = query.Expression;
-		var sq = exp.ToQueryAsPostgres();
+		var sq = query.Expression.ToQueryAsPostgres();
 
 		Monitor.Log(sq);
 
@@ -31,6 +30,26 @@ FROM
     table_a AS a";
 
 		Assert.Equal(8, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
+	[Fact]
+	public void SelectAllFrom()
+	{
+		var query = from a in new List<table_a>().AsQueryable() select a;
+		var sq = query.Expression.ToQueryAsPostgres();
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    a.a_id,
+    a.text,
+    a.value
+FROM
+    table_a AS a";
+
+		Assert.Equal(16, sq.GetTokens().ToList().Count);
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 

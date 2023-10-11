@@ -402,7 +402,17 @@ internal static class ExpressionToValue
 			return cond.ToValue(tables);
 		}
 
-		return ((BinaryExpression)exp).ToValueExpression(tables);
+		if (exp is ParameterExpression pexp)
+		{
+			return new AllColumnValue(pexp.Name!) { ActualColumns = pexp.Type.GetProperties().Select(x => x.Name).ToList() };
+		}
+
+		if (exp is BinaryExpression bexp)
+		{
+			bexp.ToValueExpression(tables);
+		}
+
+		throw new NotSupportedException(exp.GetType().Name);
 	}
 
 	internal static ValueBase ToCastValue(this MethodCallExpression exp, List<string> tables)
