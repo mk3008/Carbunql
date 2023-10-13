@@ -102,13 +102,47 @@ FROM
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
-	//[Fact]
-	//public void SelectFromWhere()
-	//{
-	//	var query = from a in new List<table_a>().AsQueryable() where a.a_id == 1 select a.a_id;
-	//	var exp = query.Expression;
-	//	SelectQuery sq = exp.ToQueryAsPostgres();
-	//}
+	[Fact]
+	public void SelectFromWhere()
+	{
+		var query = from a in new List<table_a>().AsQueryable() where a.a_id == 1 select a.text;
+		var exp = query.Expression;
+		SelectQuery sq = exp.ToQueryAsPostgres();
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    a.text
+FROM
+    table_a AS a
+WHERE
+    a.a_id = 1";
+
+		Assert.Equal(14, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
+	//	[Fact]
+	//	public void SelectAllWhere()
+	//	{
+	//		var query = from a in new List<table_a>().AsQueryable() where a.a_id == 1 select a;
+	//		var exp = query.Expression;
+	//		SelectQuery sq = exp.ToQueryAsPostgres();
+
+	//		Monitor.Log(sq);
+
+	//		var sql = @"
+	//SELECT
+	//    a.text
+	//FROM
+	//    table_a AS a
+	//WHERE
+	//    a.a_id = 1";
+
+	//		Assert.Equal(14, sq.GetTokens().ToList().Count);
+	//		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	//	}
 
 	public record struct table_a(int a_id, string text, int value);
 }

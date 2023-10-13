@@ -411,8 +411,14 @@ internal static class ExpressionToValue
 
 		if (exp is BinaryExpression bexp)
 		{
-			bexp.ToValueExpression(tables);
+			return bexp.ToValueExpression(tables);
 		}
+
+		if (exp is LambdaExpression lexp)
+		{
+			return lexp.Body.ToValue(tables);
+		}
+
 
 		throw new NotSupportedException(exp.GetType().Name);
 	}
@@ -997,7 +1003,7 @@ internal static class ExpressionToValue
 
 	internal static ValueBase ToValue(this ConstantExpression exp)
 	{
-		var value = exp.Execute();
+		var value = exp.Value; //.Execute();
 		if (value == null) return ValueParser.Parse("null");
 		if (value is DateTime d) return d.ToValue();
 		if (value is string s) return ValueParser.Parse($"'{value}'");
