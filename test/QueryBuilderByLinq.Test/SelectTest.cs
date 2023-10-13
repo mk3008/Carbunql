@@ -3,11 +3,11 @@ using Xunit.Abstractions;
 
 namespace QueryBuilderByLinq.Test;
 
-public class UnitTest1
+public class SelectTest
 {
 	private readonly QueryCommandMonitor Monitor;
 
-	public UnitTest1(ITestOutputHelper output)
+	public SelectTest(ITestOutputHelper output)
 	{
 		Monitor = new QueryCommandMonitor(output);
 		Output = output;
@@ -16,7 +16,7 @@ public class UnitTest1
 	private ITestOutputHelper Output { get; set; }
 
 	[Fact]
-	public void SelectFrom()
+	public void SelectScalar()
 	{
 		var query = from a in new List<table_a>().AsQueryable() select a.a_id;
 		var sq = query.Expression.ToQueryAsPostgres();
@@ -34,7 +34,7 @@ FROM
 	}
 
 	[Fact]
-	public void SelectAllFrom()
+	public void SelectAll()
 	{
 		var query = from a in new List<table_a>().AsQueryable() select a;
 		var sq = query.Expression.ToQueryAsPostgres();
@@ -54,7 +54,7 @@ FROM
 	}
 
 	[Fact]
-	public void SelectColumsFrom()
+	public void SelectColums()
 	{
 		var query = from a in new List<table_a>().AsQueryable()
 					select new
@@ -79,7 +79,7 @@ FROM
 
 
 	[Fact]
-	public void SelectAliasColumsFrom()
+	public void SelectAliasColums()
 	{
 		var query = from a in new List<table_a>().AsQueryable()
 					select new
@@ -99,50 +99,6 @@ FROM
     table_a AS a";
 
 		Assert.Equal(16, sq.GetTokens().ToList().Count);
-		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
-	}
-
-	[Fact]
-	public void SelectFromWhere()
-	{
-		var query = from a in new List<table_a>().AsQueryable() where a.a_id == 1 select a.text;
-		var exp = query.Expression;
-		SelectQuery sq = exp.ToQueryAsPostgres();
-
-		Monitor.Log(sq);
-
-		var sql = @"
-SELECT
-    a.text
-FROM
-    table_a AS a
-WHERE
-    a.a_id = 1";
-
-		Assert.Equal(14, sq.GetTokens().ToList().Count);
-		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
-	}
-
-	[Fact]
-	public void SelectAllWhere()
-	{
-		var query = from a in new List<table_a>().AsQueryable() where a.a_id == 1 select a;
-		var exp = query.Expression;
-		SelectQuery sq = exp.ToQueryAsPostgres();
-
-		Monitor.Log(sq);
-
-		var sql = @"
-SELECT
-    a.a_id,
-    a.text,
-    a.value
-FROM
-    table_a AS a
-WHERE
-    a.a_id = 1";
-
-		Assert.Equal(22, sq.GetTokens().ToList().Count);
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
