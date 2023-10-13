@@ -1,5 +1,6 @@
 ﻿using Carbunql;
 using Carbunql.Building;
+using Carbunql.Clauses;
 using Carbunql.Values;
 using System.Linq.Expressions;
 
@@ -17,56 +18,11 @@ internal static class MethodCallExpressionExtension
 
 		if (exp.Method.Name == "Where")
 		{
-			var sq = CreateSelectQuery_Where(exp);
-			return exp.SetSelectClause_Where(sq);
+			var builder = new SelectQueryBuilderByWhere(exp);
+			return builder.Build();
 		}
 
 		throw new NotSupportedException();
-	}
-
-	private static SelectQuery CreateSelectQuery_Where(this MethodCallExpression exp)
-	{
-		if (exp.Method.Name != "Where") throw new InvalidProgramException();
-
-		var from = exp.Arguments.GetExpressions<ConstantExpression>().FirstOrDefault();
-		var where = exp.Arguments.GetExpressions<UnaryExpression>().FirstOrDefault();
-
-		if (from == null || where == null) throw new NotSupportedException();
-
-		var table = from.GetTableName();
-		var alias = where.GetTableAlias();
-
-		var sq = new SelectQuery();
-		sq.From(table).As(alias);
-
-		var whereOperand = (LambdaExpression)where.Operand;
-		sq.Where(whereOperand.ToValue(new List<string> { alias }));
-		return sq;
-	}
-
-	private static SelectQuery SetSelectClause_Where(this MethodCallExpression mexp, SelectQuery sq)
-	{
-		var me = mexp.Arguments.GetExpressions<MethodCallExpression>().First();
-
-		var ue = mexp.Arguments.GetExpressions<UnaryExpression>().First();
-		var operand = (LambdaExpression)ue.Operand;
-
-		var tables = sq.GetSelectableTables().Select(x => x.Alias).ToList();
-		var v = operand.Body.ToValue(tables);
-
-		if (v is ValueCollection vc)
-		{
-			foreach (var item in vc)
-			{
-				sq.Select(item).As(!string.IsNullOrEmpty(item.RecommendedName) ? item.RecommendedName : item.GetDefaultName());
-			}
-		}
-		else
-		{
-			sq.Select(v).As(!string.IsNullOrEmpty(v.RecommendedName) ? v.RecommendedName : v.GetDefaultName());
-		}
-
-		return sq;
 	}
 
 	internal static (string TableName, string Alias) GetTableNameInfo(this MethodCallExpression exp)
@@ -167,6 +123,57 @@ public class SelectQueryBuilderBySelect
 		{
 			sq.Select(v).As(!string.IsNullOrEmpty(v.RecommendedName) ? v.RecommendedName : v.GetDefaultName());
 		}
+
+		return sq;
+	}
+}
+
+public class SelectQueryBuilderByWhere
+{
+	public SelectQueryBuilderByWhere(MethodCallExpression expression)
+	{
+		if (expression.Method.Name != "Where") throw new InvalidProgramException();
+		Expression = expression;
+	}
+
+	public MethodCallExpression Expression { get; init; }
+
+	public SelectQuery Build()
+	{
+		var from = Expression.Arguments.GetExpressions<ConstantExpression>().FirstOrDefault();
+		var where = Expression.Arguments.GetExpressions<UnaryExpression>().FirstOrDefault();
+
+		if (from == null || where == null) throw new NotSupportedException();
+
+		var name = from.GetTableName();
+		var alias = where.GetTableAlias();
+
+		var sq = new SelectQuery();
+		sq.From(name).As(alias);
+
+		SetWhereClause(sq, where);
+		SetSelectClause(sq, where);
+
+		return sq;
+	}
+
+	private SelectQuery SetWhereClause(SelectQuery sq, UnaryExpression where)
+	{
+		var tables = sq.GetSelectableTables().Select(x => x.Alias).ToList();
+		sq.Where(where.Operand.ToValue(tables));
+
+		return sq;
+	}
+
+	private SelectQuery SetSelectClause(SelectQuery sq, UnaryExpression where)
+	{
+		var operand = (LambdaExpression)where.Operand;
+		var tp = operand.Parameters[0].Type;
+		var alias = operand.Parameters[0].Name!;
+		tp.GetProperties().ToList().ForEach(x =>
+		{
+			sq.Select(alias, x.Name).As(x.Name);
+		});
 
 		return sq;
 	}
