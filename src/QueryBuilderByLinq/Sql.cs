@@ -19,6 +19,11 @@ public static class Sql
 	{
 		return new Table<T>();
 	}
+
+	public static IQueryable<T> CrossJoin<T>(Expression<Predicate<T>> condition)
+	{
+		return new Table<T>();
+	}
 }
 
 public class Table<T> : IQueryable<T>

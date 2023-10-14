@@ -11,8 +11,10 @@ internal static class MethodCallExpressionExtension
 	{
 		if (exp.Method.Name == "Select")
 		{
-			var builder = new SelectQueryBuilderBySelect(exp);
-			return builder.Build();
+			//var builder = new SelectQueryBuilderBySelect(exp);
+			//return builder.Build();
+			var builder = new SelectQueryBuilderBySelectMany(exp);
+			return builder.Build(exp);
 		}
 
 		if (exp.Method.Name == "Where")
@@ -30,7 +32,7 @@ internal static class MethodCallExpressionExtension
 		if (exp.Method.Name == "SelectMany")
 		{
 			var builder = new SelectQueryBuilderBySelectMany(exp);
-			return builder.Build();
+			return builder.Build(exp);
 		}
 
 
@@ -257,39 +259,109 @@ public class SelectQueryBuilderByJoin
 	}
 }
 
+public class RootTable
+{
+	public RootTable(ConstantExpression from, string table, string alias)
+	{
+		From = from;
+		Table = table;
+		Alias = alias;
+	}
+	public ConstantExpression From { get; init; }
+	public string Table { get; set; }
+	public string Alias { get; set; }
+}
 
 public class SelectQueryBuilderBySelectMany
 {
 	public SelectQueryBuilderBySelectMany(MethodCallExpression expression)
 	{
-		if (expression.Method.Name != "SelectMany") throw new InvalidProgramException();
+		//if (expression.Method.Name != "SelectMany") throw new InvalidProgramException();
 		Expression = expression;
 	}
 
 	public MethodCallExpression Expression { get; init; }
 
-	private LambdaExpression GetSelectExpression()
+	private LambdaExpression GetSelectExpression(MethodCallExpression expression)
 	{
-		var q = Expression.Arguments.GetExpressions<UnaryExpression>();
-		return q.Select(x => x.Operand).GetExpressions<LambdaExpression>().Where(x => x.ReturnType.IsAnonymousType()).First();
+		if (expression.Arguments.Count == 2)
+		{
+			var ue = (UnaryExpression)expression.Arguments[1];
+			return (LambdaExpression)ue.Operand;
+		}
+		else if (expression.Arguments.Count == 3)
+		{
+			var ue = (UnaryExpression)expression.Arguments[2];
+			return (LambdaExpression)ue.Operand;
+		}
+		throw new NotSupportedException();
+		//var q = expression.Arguments.GetExpressions<UnaryExpression>();
+		//return q.Select(x => x.Operand).GetExpressions<LambdaExpression>().Where(x => x.ReturnType.IsAnonymousType()).First();
 	}
 
-	private ConstantExpression GetFromExpression()
+	private LambdaExpression? GetJoinExpression(MethodCallExpression expression)
 	{
-		return Expression.Arguments.GetExpressions<ConstantExpression>().First();
+		if (expression.Arguments.Count == 3)
+		{
+			var ue = (UnaryExpression)expression.Arguments[1];
+			return (LambdaExpression)ue.Operand;
+		}
+		return null;
+		//var q = expression.Arguments.GetExpressions<UnaryExpression>();
+		//return q.Select(x => x.Operand).GetExpressions<LambdaExpression>().Where(x => !x.ReturnType.IsAnonymousType()).FirstOrDefault();
 	}
 
-	private List<LambdaExpression> GetJoinExpressions()
+	//private ConstantExpression GetFromExpression()
+	//{
+	//	var exp = Expression.Arguments[0];
+	//	if (exp is ConstantExpression ce) return ce;
+
+	//	if (exp is MethodCallExpression me)
+	//	{
+	//		var arg0 = (MethodCallExpression)me.Arguments[0];
+	//		var arg00 = (MethodCallExpression)arg0.Arguments[0];
+	//	}
+
+	//	throw new NotSupportedException();
+	//}
+
+	//private ConstantExpression GetFromExpression(MethodCallExpression expression)
+	//{
+	//	var arg0 = expression.Arguments[0];
+	//	if (arg0 is ConstantExpression ce)
+	//	{
+
+	//	}
+
+	//	if (arg0 is MethodCallExpression me)
+	//	{
+	//		return GetFromExpression(me);
+	//	}
+
+	//	throw new NotSupportedException();
+	//}
+
+	public SelectQuery Build(MethodCallExpression expression)
 	{
-		var q = Expression.Arguments.GetExpressions<UnaryExpression>();
-		return q.Select(x => x.Operand).GetExpressions<LambdaExpression>().Where(x => !x.ReturnType.IsAnonymousType()).ToList();
+		if (expression.Arguments[0] is ConstantExpression)
+		{
+			return BuildAsRoot(expression);
+		}
+		else if (expression.Arguments[0] is MethodCallExpression mce)
+		{
+			var sq = Build(mce);
+			var x = BuildAsNest(expression, sq);
+			return sq;
+		}
+
+		throw new NotSupportedException();
 	}
 
-	public SelectQuery Build()
+	private SelectQuery BuildAsRoot(MethodCallExpression expression)
 	{
-		var from = GetFromExpression();
-		var joins = GetJoinExpressions();
-		var select = GetSelectExpression();
+		var from = (ConstantExpression)expression.Arguments[0];
+		var join = GetJoinExpression(expression);
+		var select = GetSelectExpression(expression);
 
 		var fromTableAlias = select.Parameters.First().Name!;
 		var tables = select.Parameters.Select(x => x.Name!).ToList();
@@ -297,9 +369,9 @@ public class SelectQueryBuilderBySelectMany
 		var sq = new SelectQuery();
 		var (f, t) = sq.From(from.GetTableName()).As(fromTableAlias);
 
-		foreach (var item in joins)
+		if (join != null)
 		{
-			var me = (MethodCallExpression)item.Body;
+			var me = (MethodCallExpression)join.Body;
 
 			if (me.Method.Name == "InnerJoin")
 			{
@@ -312,10 +384,8 @@ public class SelectQueryBuilderBySelectMany
 
 				var condition = lambda.ToValue(tables);
 				f.InnerJoin(tablename).As(alias).On((_) => condition);
-				continue;
 			}
-
-			if (me.Method.Name == "LeftJoin")
+			else if (me.Method.Name == "LeftJoin")
 			{
 				var arg = (UnaryExpression)me.Arguments.First();
 				var lambda = (LambdaExpression)arg.Operand;
@@ -326,10 +396,91 @@ public class SelectQueryBuilderBySelectMany
 
 				var condition = lambda.ToValue(tables);
 				f.LeftJoin(tablename).As(alias).On((_) => condition);
-				continue;
 			}
+			//else if (me.Method.Name == "From")
+			//{
+			//	var table = item.Parameters.First();
+			//	var alias = table.Name!;
+			//	var tablename = table.Type.ToTableName();
 
-			throw new NotSupportedException();
+			//	f.CrossJoin(tablename).As(alias);
+			//}
+			else
+			{
+				throw new NotSupportedException();
+			}
+		}
+
+		var v = select.Body.ToValue(tables);
+
+		if (v is ValueCollection vc)
+		{
+			foreach (var item in vc)
+			{
+				sq.Select(item).As(!string.IsNullOrEmpty(item.RecommendedName) ? item.RecommendedName : item.GetDefaultName());
+			}
+		}
+		else
+		{
+			sq.Select(v).As(!string.IsNullOrEmpty(v.RecommendedName) ? v.RecommendedName : v.GetDefaultName());
+		}
+
+		return sq;
+	}
+
+	private SelectQuery BuildAsNest(MethodCallExpression expression, SelectQuery sq)
+	{
+		sq.SelectClause = null;
+
+		var join = GetJoinExpression(expression);
+		var select = GetSelectExpression(expression);
+
+		var joinAlias = select.Parameters[1].Name!;
+		var tables = sq.GetSelectableTables().Select(x => x.Alias).ToList();
+		tables.Add(joinAlias);
+
+		var f = sq.FromClause!;
+
+		if (join != null)
+		{
+			var me = (MethodCallExpression)join.Body;
+
+			if (me.Method.Name == "InnerJoin")
+			{
+				var arg = (UnaryExpression)me.Arguments.First();
+				var lambda = (LambdaExpression)arg.Operand;
+
+				var table = lambda.Parameters.First();
+				var alias = table.Name!;
+				var tablename = table.Type.ToTableName();
+
+				var condition = lambda.ToValue(tables);
+				f.InnerJoin(tablename).As(alias).On((_) => condition);
+			}
+			else if (me.Method.Name == "LeftJoin")
+			{
+				var arg = (UnaryExpression)me.Arguments.First();
+				var lambda = (LambdaExpression)arg.Operand;
+
+				var table = lambda.Parameters.First();
+				var alias = table.Name!;
+				var tablename = table.Type.ToTableName();
+
+				var condition = lambda.ToValue(tables);
+				f.LeftJoin(tablename).As(alias).On((_) => condition);
+			}
+			//else if (me.Method.Name == "From")
+			//{
+			//	var table = item.Parameters.First();
+			//	var alias = table.Name!;
+			//	var tablename = table.Type.ToTableName();
+
+			//	f.CrossJoin(tablename).As(alias);
+			//}
+			else
+			{
+				throw new NotSupportedException();
+			}
 		}
 
 		var v = select.Body.ToValue(tables);
