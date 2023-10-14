@@ -1,6 +1,5 @@
 ﻿using Carbunql;
 using Carbunql.Building;
-using Carbunql.Clauses;
 using Carbunql.Values;
 using System.Linq.Expressions;
 
@@ -22,7 +21,13 @@ internal static class MethodCallExpressionExtension
 			return builder.Build();
 		}
 
-		throw new NotSupportedException();
+		if (exp.Method.Name == "Join")
+		{
+			var builder = new SelectQueryBuilderByJoin(exp);
+			return builder.Build();
+		}
+
+		throw new NotSupportedException($"Method not supported: {exp.Method.Name}");
 	}
 
 	internal static (string TableName, string Alias) GetTableNameInfo(this MethodCallExpression exp)
@@ -174,6 +179,72 @@ public class SelectQueryBuilderByWhere
 		{
 			sq.Select(alias, x.Name).As(x.Name);
 		});
+
+		return sq;
+	}
+}
+
+
+public class SelectQueryBuilderByJoin
+{
+	public SelectQueryBuilderByJoin(MethodCallExpression expression)
+	{
+		if (expression.Method.Name != "Join") throw new InvalidProgramException();
+		Expression = expression;
+	}
+
+	public MethodCallExpression Expression { get; init; }
+
+	public SelectQuery Build()
+	{
+		var from = (ConstantExpression)Expression.Arguments[0];
+		var to = (ConstantExpression)Expression.Arguments[1];
+
+		var fromCondition = (UnaryExpression)Expression.Arguments[2];
+		var toCondition = (UnaryExpression)Expression.Arguments[3];
+
+		var select = (UnaryExpression)Expression.Arguments[4];
+		var selectLambda = (LambdaExpression)select.Operand;
+
+		var tables = new List<string>()
+		{
+			fromCondition.GetTableAlias(),
+			toCondition.GetTableAlias()
+		};
+
+		var sq = new SelectQuery();
+		var (f, t) = sq.From(from.GetTableName()).As(fromCondition.GetTableAlias());
+		f.InnerJoin(to.GetTableName()).As(toCondition.GetTableAlias()).On(jt =>
+		{
+			var left = ((LambdaExpression)fromCondition.Operand).Body.ToValue(tables);
+			var right = ((LambdaExpression)toCondition.Operand).Body.ToValue(tables);
+			return left.Equal(right);
+		});
+
+		SetSelectClause(sq);
+
+		return sq;
+	}
+
+	private SelectQuery SetSelectClause(SelectQuery sq)
+	{
+		var select = (UnaryExpression)Expression.Arguments[4];
+		var lambda = (LambdaExpression)select.Operand;
+
+		var tables = sq.GetSelectableTables().Select(x => x.Alias).ToList();
+		var v = lambda.Body.ToValue(tables);
+
+		if (v is ValueCollection vc)
+		{
+			foreach (var item in vc)
+			{
+				sq.Select(item).As(!string.IsNullOrEmpty(item.RecommendedName) ? item.RecommendedName : item.GetDefaultName());
+			}
+		}
+		else
+		{
+			sq.Select(v).As(!string.IsNullOrEmpty(v.RecommendedName) ? v.RecommendedName : v.GetDefaultName());
+		}
 
 		return sq;
 	}
