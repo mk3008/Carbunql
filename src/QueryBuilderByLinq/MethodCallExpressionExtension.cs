@@ -127,7 +127,9 @@ public class SelectQueryBuilder
 		else if (expression.Arguments.Count == 3)
 		{
 			var ue = (UnaryExpression)expression.Arguments[2];
-			return (LambdaExpression)ue.Operand;
+			var operand = (LambdaExpression)ue.Operand;
+			if (operand.ReturnType == typeof(bool)) return null;
+			return operand;
 		}
 		throw new NotSupportedException();
 	}
@@ -275,19 +277,31 @@ public class SelectQueryBuilder
 
 	private SelectQuery BuildAsNest(MethodCallExpression expression, SelectQuery sq)
 	{
-		sq.SelectClause = null;
+
 
 		var join = GetJoinExpression(expression);
 		var select = GetSelectExpression(expression);
+		var where = GetWhereExpression(expression);
 
-		var joinAlias = select.Parameters[1].Name!;
+		var joinAlias = string.Empty;
+		if (select != null && select.Parameters.Count == 2)
+		{
+			joinAlias = select.Parameters[1].Name!;
+		}
+		else if (join != null && where != null)
+		{
+			joinAlias = where.Parameters.First().Name!;
+		}
+
 		var tables = sq.GetSelectableTables().Select(x => x.Alias).ToList();
-		tables.Add(joinAlias);
+		if (!string.IsNullOrEmpty(joinAlias)) tables.Add(joinAlias);
 
 		var f = sq.FromClause!;
 
-		if (join != null)
+		if (join != null && !string.IsNullOrEmpty(joinAlias))
 		{
+
+
 			var me = (MethodCallExpression)join.Body;
 
 			if (me.Method.Name == "InnerJoin")
@@ -328,18 +342,39 @@ public class SelectQueryBuilder
 			}
 		}
 
-		var v = select.Body.ToValue(tables);
+		if (where != null) sq.Where(where.ToValue(tables));
 
-		if (v is ValueCollection vc)
+
+		sq.SelectClause = null;
+
+		if (select != null)
 		{
-			foreach (var item in vc)
+			var v = select.Body.ToValue(tables);
+
+			if (v is ValueCollection vc)
 			{
-				sq.Select(item).As(!string.IsNullOrEmpty(item.RecommendedName) ? item.RecommendedName : item.GetDefaultName());
+				foreach (var item in vc)
+				{
+					sq.Select(item).As(!string.IsNullOrEmpty(item.RecommendedName) ? item.RecommendedName : item.GetDefaultName());
+				}
 			}
+			else
+			{
+				sq.Select(v).As(!string.IsNullOrEmpty(v.RecommendedName) ? v.RecommendedName : v.GetDefaultName());
+			}
+		}
+		else if (where != null)
+		{
+			var tp = where.Parameters[0].Type;
+			var alias = where.Parameters[0].Name!;
+			tp.GetProperties().ToList().ForEach(x =>
+			{
+				sq.Select(alias, x.Name).As(x.Name);
+			});
 		}
 		else
 		{
-			sq.Select(v).As(!string.IsNullOrEmpty(v.RecommendedName) ? v.RecommendedName : v.GetDefaultName());
+			throw new NotSupportedException();
 		}
 
 		return sq;

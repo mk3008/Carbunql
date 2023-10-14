@@ -46,36 +46,38 @@ FROM
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
-	//	[Fact]
-	//	public void InnerJoinWhere()
-	//	{
-	//		var query = from b in From<table_b>()
-	//					from a in InnerJoin<table_a>(a => b.b_id == a.a_id)
-	//					where a.a_id == 1
-	//					select new
-	//					{
-	//						a.a_id,
-	//						b.b_id,
-	//						b.text,
-	//						b.value
-	//					};
-	//		var sq = query.Expression.ToQueryAsPostgres();
+	[Fact]
+	public void InnerJoinWhere()
+	{
+		var query = from b in From<table_b>()
+					from a in InnerJoin<table_a>(a => b.b_id == a.a_id)
+					where a.a_id == 1
+					select new
+					{
+						a.a_id,
+						b.b_id,
+						b.text,
+						b.value
+					};
+		var sq = query.Expression.ToQueryAsPostgres();
 
-	//		Monitor.Log(sq);
+		Monitor.Log(sq);
 
-	//		var sql = @"
-	//SELECT
-	//    a.a_id,
-	//    b.b_id,
-	//    b.text,
-	//    b.value
-	//FROM
-	//    table_b AS b
-	//    INNER JOIN table_a AS a ON b.b_id = a.a_id";
+		var sql = @"
+SELECT
+    a.a_id,
+    b.b_id,
+    b.text,
+    b.value
+FROM
+    table_b AS b
+    INNER JOIN table_a AS a ON b.b_id = a.a_id
+WHERE
+    a.a_id = 1";
 
-	//		Assert.Equal(32, sq.GetTokens().ToList().Count);
-	//		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
-	//	}
+		Assert.Equal(38, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
 
 	[Fact]
 	public void LeftJoin()
