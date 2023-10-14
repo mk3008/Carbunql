@@ -27,6 +27,13 @@ internal static class MethodCallExpressionExtension
 			return builder.Build();
 		}
 
+		if (exp.Method.Name == "SelectMany")
+		{
+			var builder = new SelectQueryBuilderBySelectMany(exp);
+			return builder.Build();
+		}
+
+
 		throw new NotSupportedException($"Method not supported: {exp.Method.Name}");
 	}
 
@@ -233,6 +240,99 @@ public class SelectQueryBuilderByJoin
 
 		var tables = sq.GetSelectableTables().Select(x => x.Alias).ToList();
 		var v = lambda.Body.ToValue(tables);
+
+		if (v is ValueCollection vc)
+		{
+			foreach (var item in vc)
+			{
+				sq.Select(item).As(!string.IsNullOrEmpty(item.RecommendedName) ? item.RecommendedName : item.GetDefaultName());
+			}
+		}
+		else
+		{
+			sq.Select(v).As(!string.IsNullOrEmpty(v.RecommendedName) ? v.RecommendedName : v.GetDefaultName());
+		}
+
+		return sq;
+	}
+}
+
+
+public class SelectQueryBuilderBySelectMany
+{
+	public SelectQueryBuilderBySelectMany(MethodCallExpression expression)
+	{
+		if (expression.Method.Name != "SelectMany") throw new InvalidProgramException();
+		Expression = expression;
+	}
+
+	public MethodCallExpression Expression { get; init; }
+
+	private LambdaExpression GetSelectExpression()
+	{
+		var q = Expression.Arguments.GetExpressions<UnaryExpression>();
+		return q.Select(x => x.Operand).GetExpressions<LambdaExpression>().Where(x => x.ReturnType.IsAnonymousType()).First();
+	}
+
+	private ConstantExpression GetFromExpression()
+	{
+		return Expression.Arguments.GetExpressions<ConstantExpression>().First();
+	}
+
+	private List<LambdaExpression> GetJoinExpressions()
+	{
+		var q = Expression.Arguments.GetExpressions<UnaryExpression>();
+		return q.Select(x => x.Operand).GetExpressions<LambdaExpression>().Where(x => !x.ReturnType.IsAnonymousType()).ToList();
+	}
+
+	public SelectQuery Build()
+	{
+		var from = GetFromExpression();
+		var joins = GetJoinExpressions();
+		var select = GetSelectExpression();
+
+		var fromTableAlias = select.Parameters.First().Name!;
+		var tables = select.Parameters.Select(x => x.Name!).ToList();
+
+		var sq = new SelectQuery();
+		var (f, t) = sq.From(from.GetTableName()).As(fromTableAlias);
+
+		foreach (var item in joins)
+		{
+			var me = (MethodCallExpression)item.Body;
+
+			if (me.Method.Name == "InnerJoin")
+			{
+				var arg = (UnaryExpression)me.Arguments.First();
+				var lambda = (LambdaExpression)arg.Operand;
+
+				var table = lambda.Parameters.First();
+				var alias = table.Name!;
+				var tablename = table.Type.ToTableName();
+
+				var condition = lambda.ToValue(tables);
+				f.InnerJoin(tablename).As(alias).On((_) => condition);
+				continue;
+			}
+
+			if (me.Method.Name == "LeftJoin")
+			{
+				var arg = (UnaryExpression)me.Arguments.First();
+				var lambda = (LambdaExpression)arg.Operand;
+
+				var table = lambda.Parameters.First();
+				var alias = table.Name!;
+				var tablename = table.Type.ToTableName();
+
+				var condition = lambda.ToValue(tables);
+				f.LeftJoin(tablename).As(alias).On((_) => condition);
+				continue;
+			}
+
+			throw new NotSupportedException();
+		}
+
+		var v = select.Body.ToValue(tables);
 
 		if (v is ValueCollection vc)
 		{
