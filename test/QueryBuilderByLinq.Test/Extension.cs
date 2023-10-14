@@ -1,7 +1,4 @@
-﻿using Carbunql.Values;
-using System.Linq.Expressions;
-
-namespace QueryBuilderByLinq.Test;
+﻿namespace QueryBuilderByLinq.Test;
 
 public static class Extension
 {
@@ -9,6 +6,4 @@ public static class Extension
 	{
 		return source.Replace("\t", "").Replace("\r", "").Replace("\n", "").Replace(" ", "");
 	}
-
-
 }

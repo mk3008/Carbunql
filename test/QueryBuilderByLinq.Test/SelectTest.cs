@@ -1,5 +1,6 @@
 using Carbunql;
 using Xunit.Abstractions;
+using static QueryBuilderByLinq.Sql;
 
 namespace QueryBuilderByLinq.Test;
 
@@ -18,7 +19,7 @@ public class SelectTest
 	[Fact]
 	public void SelectScalar()
 	{
-		var query = from a in new List<table_a>().AsQueryable() select a.a_id;
+		var query = from a in From<table_a>() select a.a_id;
 		var sq = query.Expression.ToQueryAsPostgres();
 
 		Monitor.Log(sq);
@@ -36,7 +37,7 @@ FROM
 	[Fact]
 	public void SelectAll()
 	{
-		var query = from a in new List<table_a>().AsQueryable() select a;
+		var query = from a in From<table_a>() select a;
 		var sq = query.Expression.ToQueryAsPostgres();
 
 		Monitor.Log(sq);
@@ -56,7 +57,7 @@ FROM
 	[Fact]
 	public void SelectColums()
 	{
-		var query = from a in new List<table_a>().AsQueryable()
+		var query = from a in From<table_a>()
 					select new
 					{
 						a.a_id,
@@ -81,7 +82,7 @@ FROM
 	[Fact]
 	public void SelectAliasColums()
 	{
-		var query = from a in new List<table_a>().AsQueryable()
+		var query = from a in From<table_a>()
 					select new
 					{
 						ID = a.a_id,

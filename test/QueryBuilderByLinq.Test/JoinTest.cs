@@ -1,5 +1,6 @@
 ﻿using Carbunql;
 using Xunit.Abstractions;
+using static QueryBuilderByLinq.Sql;
 
 namespace QueryBuilderByLinq.Test;
 
@@ -18,8 +19,8 @@ public class JoinTest
 	[Fact]
 	public void SelectAliasColums()
 	{
-		var query = from b in new List<table_b>().AsQueryable()
-					join a in new List<table_a>().AsQueryable() on b.a_id equals a.a_id
+		var query = from b in From<table_b>()
+					join a in From<table_a>() on b.a_id equals a.a_id
 					select new
 					{
 						a.a_id,

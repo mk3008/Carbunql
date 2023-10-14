@@ -1,5 +1,6 @@
 using Carbunql;
 using Xunit.Abstractions;
+using static QueryBuilderByLinq.Sql;
 
 namespace QueryBuilderByLinq.Test;
 
@@ -18,7 +19,7 @@ public class WhereTest
 	[Fact]
 	public void SelectColumnWhere()
 	{
-		var query = from a in new List<table_a>().AsQueryable() where a.a_id == 1 select a.text;
+		var query = from a in From<table_a>() where a.a_id == 1 select a.text;
 		var exp = query.Expression;
 		SelectQuery sq = exp.ToQueryAsPostgres();
 
@@ -39,7 +40,7 @@ WHERE
 	[Fact]
 	public void SelectAllWhere()
 	{
-		var query = from a in new List<table_a>().AsQueryable() where a.a_id == 1 select a;
+		var query = from a in From<table_a>() where a.a_id == 1 select a;
 		var exp = query.Expression;
 		SelectQuery sq = exp.ToQueryAsPostgres();
 
