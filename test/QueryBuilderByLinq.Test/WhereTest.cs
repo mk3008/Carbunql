@@ -41,8 +41,7 @@ public class WhereTest
 	public void SelectAllWhere()
 	{
 		var query = from a in From<table_a>() where a.a_id == 1 select a;
-		var exp = query.Expression;
-		SelectQuery sq = exp.ToQueryAsPostgres();
+		SelectQuery sq = query.ToQueryAsPostgres();
 
 		Monitor.Log(sq);
 

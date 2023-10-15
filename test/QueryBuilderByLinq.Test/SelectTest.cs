@@ -20,7 +20,7 @@ public class SelectTest
 	public void SelectScalar()
 	{
 		var query = from a in From<table_a>() select a.a_id;
-		var sq = query.Expression.ToQueryAsPostgres();
+		var sq = query.ToQueryAsPostgres();
 
 		Monitor.Log(sq);
 
@@ -38,7 +38,7 @@ FROM
 	public void SelectAll()
 	{
 		var query = from a in From<table_a>() select a;
-		var sq = query.Expression.ToQueryAsPostgres();
+		var sq = query.ToQueryAsPostgres();
 
 		Monitor.Log(sq);
 
@@ -63,7 +63,7 @@ FROM
 						a.a_id,
 						a.text
 					};
-		var sq = query.Expression.ToQueryAsPostgres();
+		var sq = query.ToQueryAsPostgres();
 
 		Monitor.Log(sq);
 
@@ -88,7 +88,7 @@ FROM
 						ID = a.a_id,
 						Text = a.text
 					};
-		var sq = query.Expression.ToQueryAsPostgres();
+		var sq = query.ToQueryAsPostgres();
 
 		Monitor.Log(sq);
 

@@ -28,7 +28,7 @@ public class JoinTest
 						b.text,
 						b.value
 					};
-		var sq = query.Expression.ToQueryAsPostgres();
+		var sq = query.ToQueryAsPostgres();
 
 		Monitor.Log(sq);
 
@@ -59,7 +59,7 @@ FROM
 						b.text,
 						b.value
 					};
-		var sq = query.Expression.ToQueryAsPostgres();
+		var sq = query.ToQueryAsPostgres();
 
 		Monitor.Log(sq);
 
@@ -91,7 +91,7 @@ WHERE
 						b.text,
 						b.value
 					};
-		var sq = query.Expression.ToQueryAsPostgres();
+		var sq = query.ToQueryAsPostgres();
 
 		Monitor.Log(sq);
 
@@ -120,7 +120,7 @@ FROM
 					{
 						a.a_id
 					};
-		var sq = query.Expression.ToQueryAsPostgres();
+		var sq = query.ToQueryAsPostgres();
 
 		Monitor.Log(sq);
 
