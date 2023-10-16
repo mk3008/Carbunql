@@ -91,15 +91,18 @@ internal static class SelectQueryExtension
 			sq.Select(v).As(!string.IsNullOrEmpty(v.RecommendedName) ? v.RecommendedName : v.GetDefaultName());
 		}
 
-		var lst = sq.GetSelectableItems().Where(x => x.Value is ColumnValue c && c.TableAlias == "<>h__TransparentIdentifier1").ToList();
+		var lst = sq.GetSelectableItems().Where(x => x.Value is ColumnValue c && c.TableAlias.StartsWith("<>h__TransparentIdentifier")).ToList();
 		if (lst.Any())
 		{
 			foreach (var item in lst)
 			{
-				var t = sq.GetSelectableTables().Where(x => x.Alias == item.Alias).First().Table;
-				foreach (var c in t.GetColumnNames())
+				var t = sq.GetSelectableTables().Where(x => x.Alias == item.Alias).FirstOrDefault()?.Table;
+				if (t != null)
 				{
-					sq.Select(item.Alias, c);
+					foreach (var c in t.GetColumnNames())
+					{
+						sq.Select(item.Alias, c);
+					}
 				}
 				sq.SelectClause!.Remove(item);
 
