@@ -1,5 +1,6 @@
 ﻿using Carbunql;
 using Carbunql.Building;
+using Carbunql.Tables;
 using System.Linq.Expressions;
 
 namespace QueryBuilderByLinq;
@@ -77,26 +78,26 @@ public class SelectQueryBuilder
 		var select = GetSelectExpression(expression);
 		var where = GetWhereExpression(expression);
 
-		var fromAlias = string.Empty;
-		var joinAlias = string.Empty;
+		ParameterExpression? fromAlias = null;
+		ParameterExpression? joinAlias = null;
 		if (select != null)
 		{
-			fromAlias = select.Parameters.First().Name!;
-			if (select.Parameters.Count > 1) joinAlias = select.Parameters.Last().Name!;
+			fromAlias = select.Parameters.First();
+			if (select.Parameters.Count > 1) joinAlias = select.Parameters.Last();
 		}
 		else if (where != null)
 		{
-			fromAlias = where.Parameters.First().Name!;
+			fromAlias = where.Parameters.First();
 		}
+		if (fromAlias == null) throw new NotSupportedException();
 
-		var tables = new List<string> { fromAlias };
-
+		var tables = new List<string> { fromAlias.Name! };
 
 		var sq = new SelectQuery();
-		sq.From(from.GetTableName()).As(fromAlias);
+		sq.From(fromAlias.ToSelectable()).As(fromAlias.Name!);
 
 		if (where != null) sq.Where(where.ToValue(tables));
-		if (join != null)
+		if (join != null && joinAlias != null)
 		{
 			sq.AddJoinClause(join, tables, joinAlias);
 		}
@@ -110,20 +111,20 @@ public class SelectQueryBuilder
 		var select = GetSelectExpression(expression);
 		var where = GetWhereExpression(expression);
 
-		var joinAlias = string.Empty;
+		ParameterExpression? joinAlias = null;
 		if (select != null && select.Parameters.Count > 1)
 		{
-			joinAlias = select.Parameters.Last().Name!;
+			joinAlias = select.Parameters.Last();
 		}
 		else if (where != null)
 		{
-			joinAlias = where.Parameters.First().Name!;
+			joinAlias = where.Parameters.First();
 		}
 
 		var tables = sq.GetSelectableTables().Select(x => x.Alias).ToList();
-		if (!string.IsNullOrEmpty(joinAlias)) tables.Add(joinAlias);
+		if (joinAlias != null) tables.Add(joinAlias.Name!);
 
-		if (join != null && !string.IsNullOrEmpty(joinAlias))
+		if (join != null && joinAlias != null)
 		{
 			sq.AddJoinClause(join, tables, joinAlias);
 		}

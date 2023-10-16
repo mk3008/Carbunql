@@ -137,6 +137,51 @@ FROM
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
+	[Fact]
+	public void RelationsAll()
+	{
+		var query = from d in From<table_d>()
+					from c in InnerJoin<table_c>(x => d.c_id == x.c_id)
+					from b in InnerJoin<table_b>(x => c.b_id == x.b_id)
+					from a in LeftJoin<table_a>(x => b.a_id == x.a_id)
+					select new
+					{
+						a,
+						b,
+						c,
+						d
+					};
+		var sq = query.ToQueryAsPostgres();
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    a.a_id,
+    a.text,
+    a.value,
+    b.a_id,
+    b.b_id,
+    b.text,
+    b.value,
+    c.b_id,
+    c.c_id,
+    c.text,
+    c.value,
+    d.c_id,
+    d.d_id,
+    d.text,
+    d.value
+FROM
+    table_d AS d
+    INNER JOIN table_c AS c ON d.c_id = c.c_id
+    INNER JOIN table_b AS b ON c.b_id = b.b_id
+    LEFT JOIN table_a AS a ON b.a_id = a.a_id";
+
+		Assert.Equal(100, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
 	//	[Fact]
 	//	public void CrossJoin()
 	//	{

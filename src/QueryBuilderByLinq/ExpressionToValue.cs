@@ -316,7 +316,6 @@ internal static class ExpressionToValue
 
 	internal static ValueBase ToValue(this Expression exp, List<string> tables)
 	{
-
 		if (exp.NodeType == ExpressionType.Constant)
 		{
 			return ((ConstantExpression)exp).ToValue();
@@ -965,6 +964,11 @@ internal static class ExpressionToValue
 			{
 				var column = exp.Member.Name;
 				return new ColumnValue(table, column);
+			}
+
+			if (mem.Expression != null)
+			{
+				return mem.ToValue(tables);
 			}
 
 			return exp.ToValue();

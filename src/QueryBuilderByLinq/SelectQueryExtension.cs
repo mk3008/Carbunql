@@ -1,5 +1,7 @@
 ﻿using Carbunql;
 using Carbunql.Building;
+using Carbunql.Clauses;
+using Carbunql.Tables;
 using Carbunql.Values;
 using System.Linq.Expressions;
 
@@ -7,7 +9,17 @@ namespace QueryBuilderByLinq;
 
 internal static class SelectQueryExtension
 {
-	public static SelectQuery AddJoinClause(this SelectQuery sq, LambdaExpression join, List<string> tables, string joinAlias)
+	public static SelectableTable ToSelectable(this ParameterExpression prm)
+	{
+		var t = new PhysicalTable()
+		{
+			Table = prm.Type.ToTableName(),
+			ColumnNames = prm.Type.GetProperties().ToList().Select(x => x.Name).ToList()
+		};
+		return t.ToSelectable();
+	}
+
+	public static SelectQuery AddJoinClause(this SelectQuery sq, LambdaExpression join, List<string> tables, ParameterExpression joinAlias)
 	{
 		var f = sq.FromClause!;
 
@@ -24,16 +36,13 @@ internal static class SelectQueryExtension
 
 			var condition = lambda.ToValue(tables);
 
-			if (!string.IsNullOrEmpty(joinAlias))
+			// Replace the alias of the destination table name with the correct name.
+			foreach (ColumnValue item in condition.GetValues().Where(x => x is ColumnValue c && c.TableAlias == alias))
 			{
-				// Replace the alias of the destination table name with the correct name.
-				foreach (ColumnValue item in condition.GetValues().Where(x => x is ColumnValue c && c.TableAlias == alias))
-				{
-					item.TableAlias = joinAlias;
-				}
+				item.TableAlias = joinAlias.Name!;
 			}
 
-			f.InnerJoin(tablename).As(joinAlias).On((_) => condition);
+			f.InnerJoin(joinAlias.ToSelectable()).As(joinAlias.Name!).On((_) => condition);
 			return sq;
 		}
 
@@ -48,16 +57,13 @@ internal static class SelectQueryExtension
 
 			var condition = lambda.ToValue(tables);
 
-			if (!string.IsNullOrEmpty(joinAlias))
+			// Replace the alias of the destination table name with the correct name.
+			foreach (ColumnValue item in condition.GetValues().Where(x => x is ColumnValue c && c.TableAlias == alias))
 			{
-				// Replace the alias of the destination table name with the correct name.
-				foreach (ColumnValue item in condition.GetValues().Where(x => x is ColumnValue c && c.TableAlias == alias))
-				{
-					item.TableAlias = joinAlias;
-				}
+				item.TableAlias = joinAlias.Name!;
 			}
 
-			f.LeftJoin(tablename).As(joinAlias).On((_) => condition);
+			f.LeftJoin(joinAlias.ToSelectable()).As(joinAlias.Name!).On((_) => condition);
 
 			return sq;
 		}
@@ -78,14 +84,43 @@ internal static class SelectQueryExtension
 
 		if (v is ValueCollection vc)
 		{
-			foreach (var item in vc)
-			{
-				sq.Select(item).As(!string.IsNullOrEmpty(item.RecommendedName) ? item.RecommendedName : item.GetDefaultName());
-			}
+			sq.AddSelectClause(vc);
 		}
 		else
 		{
 			sq.Select(v).As(!string.IsNullOrEmpty(v.RecommendedName) ? v.RecommendedName : v.GetDefaultName());
+		}
+
+		var lst = sq.GetSelectableItems().Where(x => x.Value is ColumnValue c && c.TableAlias == "<>h__TransparentIdentifier1").ToList();
+		if (lst.Any())
+		{
+			foreach (var item in lst)
+			{
+				var t = sq.GetSelectableTables().Where(x => x.Alias == item.Alias).First().Table;
+				foreach (var c in t.GetColumnNames())
+				{
+					sq.Select(item.Alias, c);
+				}
+				sq.SelectClause!.Remove(item);
+
+			}
+
+		}
+		return sq;
+	}
+
+	private static SelectQuery AddSelectClause(this SelectQuery sq, ValueCollection collection)
+	{
+		foreach (var item in collection)
+		{
+			if (item is ValueCollection vc)
+			{
+				sq.AddSelectClause(vc);
+			}
+			else
+			{
+				sq.Select(item).As(!string.IsNullOrEmpty(item.RecommendedName) ? item.RecommendedName : item.GetDefaultName());
+			}
 		}
 		return sq;
 	}
