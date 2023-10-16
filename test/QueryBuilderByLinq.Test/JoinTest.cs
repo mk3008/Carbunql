@@ -113,9 +113,9 @@ FROM
 	public void Relations()
 	{
 		var query = from d in From<table_d>()
-					from c in InnerJoin<table_c>(c => d.c_id == c.c_id)
-					from b in InnerJoin<table_b>(b => c.b_id == b.b_id)
-					from a in LeftJoin<table_a>(a => b.a_id == a.a_id)
+					from c in InnerJoin<table_c>(x => d.c_id == x.c_id)
+					from b in InnerJoin<table_b>(x => c.b_id == x.b_id)
+					from a in LeftJoin<table_a>(x => b.a_id == x.a_id)
 					select new
 					{
 						a.a_id

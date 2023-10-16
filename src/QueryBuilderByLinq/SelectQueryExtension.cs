@@ -7,7 +7,7 @@ namespace QueryBuilderByLinq;
 
 internal static class SelectQueryExtension
 {
-	public static SelectQuery AddJoinClause(this SelectQuery sq, LambdaExpression join, List<string> tables)
+	public static SelectQuery AddJoinClause(this SelectQuery sq, LambdaExpression join, List<string> tables, string joinAlias)
 	{
 		var f = sq.FromClause!;
 
@@ -23,7 +23,17 @@ internal static class SelectQueryExtension
 			var tablename = table.Type.ToTableName();
 
 			var condition = lambda.ToValue(tables);
-			f.InnerJoin(tablename).As(alias).On((_) => condition);
+
+			if (!string.IsNullOrEmpty(joinAlias))
+			{
+				// Replace the alias of the destination table name with the correct name.
+				foreach (ColumnValue item in condition.GetValues().Where(x => x is ColumnValue c && c.TableAlias == alias))
+				{
+					item.TableAlias = joinAlias;
+				}
+			}
+
+			f.InnerJoin(tablename).As(joinAlias).On((_) => condition);
 			return sq;
 		}
 
@@ -37,7 +47,17 @@ internal static class SelectQueryExtension
 			var tablename = table.Type.ToTableName();
 
 			var condition = lambda.ToValue(tables);
-			f.LeftJoin(tablename).As(alias).On((_) => condition);
+
+			if (!string.IsNullOrEmpty(joinAlias))
+			{
+				// Replace the alias of the destination table name with the correct name.
+				foreach (ColumnValue item in condition.GetValues().Where(x => x is ColumnValue c && c.TableAlias == alias))
+				{
+					item.TableAlias = joinAlias;
+				}
+			}
+
+			f.LeftJoin(tablename).As(joinAlias).On((_) => condition);
 
 			return sq;
 		}

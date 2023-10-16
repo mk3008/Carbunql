@@ -105,6 +105,19 @@ public abstract class ValueBase : IQueryCommandable
 		}
 	}
 
+	public IEnumerable<ValueBase> GetValues()
+	{
+		yield return this;
+
+		if (OperatableValue != null)
+		{
+			foreach (var item in OperatableValue.Value.GetValues())
+			{
+				yield return item;
+			}
+		}
+	}
+
 	protected abstract IDictionary<string, object?> GetParametersCore();
 
 	protected abstract IEnumerable<SelectQuery> GetInternalQueriesCore();
