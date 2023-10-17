@@ -25,15 +25,12 @@ internal static class SelectQueryExtension
 
 		var me = (MethodCallExpression)join.Body;
 
-		if (me.Method.Name == "InnerJoin")
+		if (me.Method.Name == nameof(Sql.InnerJoin))
 		{
 			var arg = (UnaryExpression)me.Arguments.First();
 			var lambda = (LambdaExpression)arg.Operand;
 
-			var table = lambda.Parameters.First();
-			var alias = table.Name!;
-			var tablename = table.Type.ToTableName();
-
+			var alias = lambda.Parameters.First().Name!;
 			var condition = lambda.ToValue(tables);
 
 			// Replace the alias of the destination table name with the correct name.
@@ -46,15 +43,12 @@ internal static class SelectQueryExtension
 			return sq;
 		}
 
-		if (me.Method.Name == "LeftJoin")
+		if (me.Method.Name == nameof(Sql.LeftJoin))
 		{
 			var arg = (UnaryExpression)me.Arguments.First();
 			var lambda = (LambdaExpression)arg.Operand;
 
-			var table = lambda.Parameters.First();
-			var alias = table.Name!;
-			var tablename = table.Type.ToTableName();
-
+			var alias = lambda.Parameters.First().Name!;
 			var condition = lambda.ToValue(tables);
 
 			// Replace the alias of the destination table name with the correct name.
@@ -64,11 +58,10 @@ internal static class SelectQueryExtension
 			}
 
 			f.LeftJoin(joinAlias.ToSelectable()).As(joinAlias.Name!).On((_) => condition);
-
 			return sq;
 		}
 
-		if (me.Method.Name == "CrossJoin")
+		if (me.Method.Name == nameof(Sql.CrossJoin))
 		{
 			f.CrossJoin(joinAlias.ToSelectable()).As(joinAlias.Name!);
 			return sq;
@@ -111,9 +104,7 @@ internal static class SelectQueryExtension
 					}
 				}
 				sq.SelectClause!.Remove(item);
-
 			}
-
 		}
 		return sq;
 	}
