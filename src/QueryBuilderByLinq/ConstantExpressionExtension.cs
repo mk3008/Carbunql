@@ -7,11 +7,6 @@ namespace QueryBuilderByLinq;
 
 internal static class ConstantExpressionExtension
 {
-	internal static string GetTableName(this ConstantExpression exp)
-	{
-		return ((IQueryable)exp.Value!).ElementType.ToTableName();
-	}
-
 	internal static ValueBase ToValue(this ConstantExpression exp)
 	{
 		var value = exp.Value;

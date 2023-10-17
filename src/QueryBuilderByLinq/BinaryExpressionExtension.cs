@@ -107,7 +107,7 @@ internal static class BinaryExpressionExtension
 		return new BracketValue(left);
 	}
 
-	internal static FunctionValue ToCoalesceValue(this BinaryExpression exp, List<string> tables)
+	private static FunctionValue ToCoalesceValue(this BinaryExpression exp, List<string> tables)
 	{
 		var vc = exp.ToValueCollection(tables);
 

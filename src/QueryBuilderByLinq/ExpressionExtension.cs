@@ -113,7 +113,6 @@ internal static class ExpressionExtension
 			return lexp.Body.ToValue(tables);
 		}
 
-
 		throw new NotSupportedException(exp.GetType().Name);
 	}
 

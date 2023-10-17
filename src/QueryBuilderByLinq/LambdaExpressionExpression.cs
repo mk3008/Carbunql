@@ -45,7 +45,7 @@ internal static class LambdaExpressionExpression
 		return new InClause(arg, sq.ToValue());
 	}
 
-	internal static List<(ColumnValue Argument, ColumnValue Column)> ToInClause(ColumnValue predicate, string alias)
+	private static List<(ColumnValue Argument, ColumnValue Column)> ToInClause(ColumnValue predicate, string alias)
 	{
 		var lst = new List<(ColumnValue Argument, ColumnValue Column)>();
 
