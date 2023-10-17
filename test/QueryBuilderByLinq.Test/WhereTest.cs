@@ -161,5 +161,33 @@ WHERE
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
+	[Fact]
+	public void AnyParameterTest()
+	{
+		var ids = new[] { 1, 2, 3 };
+		var query = from a in From<table_a>()
+					where ids.Contains(a.a_id)
+					select a;
+		SelectQuery sq = query.ToQueryAsPostgres();
+
+		Monitor.Log(sq);
+
+		var sql = @"
+/*
+  :member_ids = System.Int32[]
+*/
+SELECT
+    a.a_id,
+    a.text,
+    a.value
+FROM
+    table_a AS a
+WHERE
+    a.a_id = ANY(:member_ids)";
+
+		Assert.Equal(25, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
 	public record struct table_a(int a_id, string text, int value);
 }

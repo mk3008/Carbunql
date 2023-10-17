@@ -144,9 +144,15 @@ internal static class MethodCallExpressionExpression
 		{
 			var value = exp.Arguments[1].ToValue(tables);
 			var arg = exp.Arguments[0].ToValue(tables);
-			var arrayvalue = new ArrayValue(arg);
-
-			return value.Equal(new FunctionValue("any", arrayvalue));
+			if (arg is ParameterValue)
+			{
+				return value.Equal(new FunctionValue("any", arg));
+			}
+			else
+			{
+				var arrayvalue = new ArrayValue(arg);
+				return value.Equal(new FunctionValue("any", arrayvalue));
+			}
 		}
 		else
 		{
@@ -155,7 +161,6 @@ internal static class MethodCallExpressionExpression
 			return value.Equal(new FunctionValue("any", arg.ToValue(tables)));
 		}
 	}
-
 
 	internal static LikeClause ToContainsLikeClause(this MethodCallExpression exp, List<string> tables)
 	{
