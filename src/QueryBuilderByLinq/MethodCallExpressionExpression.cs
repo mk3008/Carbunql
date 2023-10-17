@@ -144,7 +144,9 @@ internal static class MethodCallExpressionExpression
 		{
 			var value = exp.Arguments[1].ToValue(tables);
 			var arg = exp.Arguments[0].ToValue(tables);
-			return value.Equal(new FunctionValue("any", arg));
+			var arrayvalue = new ArrayValue(arg);
+
+			return value.Equal(new FunctionValue("any", arrayvalue));
 		}
 		else
 		{
