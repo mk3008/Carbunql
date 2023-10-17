@@ -38,9 +38,11 @@ public class WhereTest
 	//	}
 
 	[Fact]
-	public void SelectAllWhere()
+	public void DefaultTest()
 	{
-		var query = from a in From<table_a>() where a.a_id == 1 select a;
+		var query = from a in From<table_a>()
+					where a.a_id == 1
+					select a;
 		SelectQuery sq = query.ToQueryAsPostgres();
 
 		Monitor.Log(sq);
@@ -54,6 +56,82 @@ FROM
     table_a AS a
 WHERE
     a.a_id = 1";
+
+		Assert.Equal(22, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
+	[Fact]
+	public void AndTest()
+	{
+		var query = from a in From<table_a>()
+					where a.a_id == 1 && a.text == "test"
+					select a;
+		SelectQuery sq = query.ToQueryAsPostgres();
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    a.a_id,
+    a.text,
+    a.value
+FROM
+    table_a AS a
+WHERE
+    (a.a_id = 1 AND a.text = 'test')";
+
+		Assert.Equal(30, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
+	[Fact]
+	public void OrTest()
+	{
+		var query = from a in From<table_a>()
+					where a.a_id == 1 || a.text == "test"
+					select a;
+		SelectQuery sq = query.ToQueryAsPostgres();
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    a.a_id,
+    a.text,
+    a.value
+FROM
+    table_a AS a
+WHERE
+    (a.a_id = 1 OR a.text = 'test')";
+
+		Assert.Equal(30, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
+	[Fact]
+	public void ParameterTest()
+	{
+		var id = 1;
+		var query = from a in From<table_a>()
+					where a.a_id == id
+					select a;
+		SelectQuery sq = query.ToQueryAsPostgres();
+
+		Monitor.Log(sq);
+
+		var sql = @"
+/*
+  :member_id = 1
+*/
+SELECT
+    a.a_id,
+    a.text,
+    a.value
+FROM
+    table_a AS a
+WHERE
+    a.a_id = :member_id";
 
 		Assert.Equal(22, sq.GetTokens().ToList().Count);
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());

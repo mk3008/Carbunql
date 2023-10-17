@@ -120,11 +120,14 @@ internal static class ExpressionExtension
 
 	internal static object? Execute(this Expression exp)
 	{
-		var method = typeof(IQueryableExtension)
-			.GetMethod(nameof(ExecuteCore), BindingFlags.NonPublic | BindingFlags.Static)!
-			.MakeGenericMethod(exp.Type);
+		var m = typeof(IQueryableExtension).GetMethod(nameof(ExecuteCore));
+		if (m != null)
+		{
+			var method = m.MakeGenericMethod(exp.Type);
+			return method.Invoke(null, new object[] { exp });
+		}
 
-		return method.Invoke(null, new object[] { exp });
+		throw new NotSupportedException();
 	}
 
 	private static T ExecuteCore<T>(this Expression exp)

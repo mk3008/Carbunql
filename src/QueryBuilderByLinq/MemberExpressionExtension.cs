@@ -67,7 +67,15 @@ internal static class MemberExpressionExtension
 
 	private static ValueBase ToValue(this MemberExpression exp)
 	{
-		var value = exp.Execute();
+		object? value = null;
+		if (exp.Member is FieldInfo field && exp.Expression is ConstantExpression ce)
+		{
+			value = field.GetValue(ce.Value);
+		}
+		else
+		{
+			value = exp.Execute();
+		}
 
 		if (value is IEnumerable<ValueBase> values)
 		{
