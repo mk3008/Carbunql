@@ -19,8 +19,8 @@ public static class Sql
 		return new Table<T>();
 	}
 
-	public static IQueryable<T> CrossJoin<T>(Expression<Predicate<T>> condition)
+	public static IQueryable<T> CrossJoin<T>()
 	{
-		return new Table<T>();
+		return Enumerable.Empty<T>().AsQueryable();
 	}
 }

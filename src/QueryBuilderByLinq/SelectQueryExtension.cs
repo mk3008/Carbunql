@@ -68,6 +68,12 @@ internal static class SelectQueryExtension
 			return sq;
 		}
 
+		if (me.Method.Name == "CrossJoin")
+		{
+			f.CrossJoin(joinAlias.ToSelectable()).As(joinAlias.Name!);
+			return sq;
+		}
+
 		throw new NotSupportedException();
 	}
 

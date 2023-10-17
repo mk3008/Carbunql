@@ -110,6 +110,36 @@ FROM
 	}
 
 	[Fact]
+	public void CrossJoin()
+	{
+		var query = from b in From<table_b>()
+					from a in CrossJoin<table_a>()
+					select new
+					{
+						a.a_id,
+						b.b_id,
+						b.text,
+						b.value
+					};
+		var sq = query.ToQueryAsPostgres();
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    a.a_id,
+    b.b_id,
+    b.text,
+    b.value
+FROM
+    table_b AS b
+    CROSS JOIN table_a AS a";
+
+		Assert.Equal(24, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
+	[Fact]
 	public void Relations()
 	{
 		var query = from d in From<table_d>()
