@@ -11,6 +11,11 @@ public static class Sql
 		return Enumerable.Empty<T>().AsQueryable();
 	}
 
+	public static IQueryable<object> Dual()
+	{
+		return Enumerable.Empty<object>().AsQueryable();
+	}
+
 	public static IQueryable<T> InnerJoin<T>(Expression<Predicate<T>> condition)
 	{
 		return new Table<T>();

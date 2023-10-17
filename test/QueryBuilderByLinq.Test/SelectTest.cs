@@ -37,7 +37,7 @@ FROM
 	[Fact]
 	public void ConstValue()
 	{
-		var query = from a in From<table_a>()
+		var query = from a in Dual()
 					select new
 					{
 						v1 = 1,
@@ -46,8 +46,7 @@ FROM
 						v4 = DateTime.Now,
 						v5 = true,
 						v6 = 3.14,
-						v7 = 1 + 2 + 3,
-						v8 = a.value * 10
+						v7 = 1 + 2 + 3
 					};
 		var sq = query.ToQueryAsPostgres();
 
@@ -61,12 +60,9 @@ SELECT
     current_timestamp AS v4,
     True AS v5,
     3.14 AS v6,
-    6 AS v7,
-    a.value * 10 AS v8
-FROM
-    table_a AS a";
+    6 AS v7";
 
-		Assert.Equal(45, sq.GetTokens().ToList().Count);
+		Assert.Equal(33, sq.GetTokens().ToList().Count);
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 

@@ -33,6 +33,16 @@ public class SelectQueryBuilder
 		throw new NotSupportedException();
 	}
 
+	//private LambdaExpression? GetJoinExpression(MethodCallExpression expression)
+	//{
+	//	if (expression.Arguments.Count == 3)
+	//	{
+	//		var ue = (UnaryExpression)expression.Arguments[1];
+	//		return (LambdaExpression)ue.Operand;
+	//	}
+	//	return null;
+	//}
+
 	private LambdaExpression? GetJoinExpression(MethodCallExpression expression)
 	{
 		if (expression.Arguments.Count == 3)
@@ -94,14 +104,16 @@ public class SelectQueryBuilder
 		var tables = new List<string> { fromAlias.Name! };
 
 		var sq = new SelectQuery();
-		sq.From(fromAlias.ToSelectable()).As(fromAlias.Name!);
-
-		if (where != null) sq.Where(where.ToValue(tables));
-		if (join != null && joinAlias != null)
+		if (fromAlias.Type != typeof(object))
 		{
-			sq.AddJoinClause(join, tables, joinAlias);
-		}
+			sq.From(fromAlias.ToSelectable()).As(fromAlias.Name!);
 
+			if (where != null) sq.Where(where.ToValue(tables));
+			if (join != null && joinAlias != null)
+			{
+				sq.AddJoinClause(join, tables, joinAlias);
+			}
+		}
 		return sq.AddSelectClause(select, where, tables);
 	}
 
