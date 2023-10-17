@@ -105,41 +105,41 @@ internal static class MethodCallExpressionExpression
 
 	internal static FunctionValue ToConcatValue(this MethodCallExpression exp, List<string> tables)
 	{
-		if (exp.Method.Name != "Concat") throw new InvalidProgramException();
-
 		var collection = exp.Arguments.Select(x => x.ToValue(tables)).ToList();
 		var args = new ValueCollection(collection);
 		return new FunctionValue("concat", args);
 	}
 
+	internal static CastValue ToStringValue(this MethodCallExpression exp, List<string> tables)
+	{
+		var m = (MemberExpression)exp.Object!;
+		if (typeof(string).ToTryDbType(out var tp))
+		{
+			return new CastValue(m.ToValue(tables), "::", tp);
+		}
+		throw new NotSupportedException();
+	}
+
 	internal static FunctionValue ToTrimStartValue(this MethodCallExpression exp, List<string> tables)
 	{
-		if (exp.Method.Name != "TrimStart") throw new InvalidProgramException();
-
 		var m = (MemberExpression)exp.Object!;
 		return new FunctionValue("ltrim", m.ToValue(tables));
 	}
 
 	internal static FunctionValue ToTrimEndValue(this MethodCallExpression exp, List<string> tables)
 	{
-		if (exp.Method.Name != "TrimEnd") throw new InvalidProgramException();
-
 		var m = (MemberExpression)exp.Object!;
 		return new FunctionValue("rtrim", m.ToValue(tables));
 	}
 
 	internal static FunctionValue ToTrimValue(this MethodCallExpression exp, List<string> tables)
 	{
-		if (exp.Method.Name != "Trim") throw new InvalidProgramException();
-
 		var m = (MemberExpression)exp.Object!;
 		return new FunctionValue("trim", m.ToValue(tables));
 	}
 
 	internal static ValueBase ToAnyFunctionValue(this MethodCallExpression exp, List<string> tables)
 	{
-		if (exp.Method.Name != "Contains") throw new InvalidProgramException();
-
 		if (exp.Object == null)
 		{
 			var value = exp.Arguments[1].ToValue(tables);
@@ -157,8 +157,6 @@ internal static class MethodCallExpressionExpression
 
 	internal static LikeClause ToContainsLikeClause(this MethodCallExpression exp, List<string> tables)
 	{
-		if (exp.Method.Name != "Contains") throw new InvalidProgramException();
-
 		var arg = exp.Arguments.First().ToValue(tables);
 		var m = (MemberExpression)exp.Object!;
 		return CreateLikeClause(m.ToValue(tables), new[] { new LiteralValue("'%'"), arg, new LiteralValue("'%'") });
@@ -166,8 +164,6 @@ internal static class MethodCallExpressionExpression
 
 	internal static LikeClause ToStartsWithLikeClause(this MethodCallExpression exp, List<string> tables)
 	{
-		if (exp.Method.Name != "StartsWith") throw new InvalidProgramException();
-
 		var arg = exp.Arguments.First().ToValue(tables);
 		var m = (MemberExpression)exp.Object!;
 		return CreateLikeClause(m.ToValue(tables), new[] { arg, new LiteralValue("'%'") });
@@ -175,8 +171,6 @@ internal static class MethodCallExpressionExpression
 
 	internal static LikeClause ToEndsWithLikeClause(this MethodCallExpression exp, List<string> tables)
 	{
-		if (exp.Method.Name != "EndsWith") throw new InvalidProgramException();
-
 		var arg = exp.Arguments.First().ToValue(tables);
 		var m = (MemberExpression)exp.Object!;
 		return CreateLikeClause(m.ToValue(tables), new[] { new LiteralValue("'%'"), arg });

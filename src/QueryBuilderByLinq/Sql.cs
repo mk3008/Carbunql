@@ -68,13 +68,20 @@ public static class Sql
 		throw new InvalidProgramException(ERROR);
 	}
 
-	public static ValueBase RowNumber(this SelectQuery source)
+	public static ValueBase RowNumber()
 	{
 		throw new InvalidProgramException(ERROR);
 	}
 
-	public static ValueBase RowNumber(this SelectQuery source, Expression<Func<IEnumerable<object>?>> partitionby, Expression<Func<IEnumerable<object>?>> orderby)
+	public static ValueBase RowNumber(object? orderby)
 	{
 		throw new InvalidProgramException(ERROR);
 	}
+
+	public static ValueBase RowNumber(object? partitionby, object? orderby)
+	{
+		throw new InvalidProgramException(ERROR);
+	}
+
+
 }

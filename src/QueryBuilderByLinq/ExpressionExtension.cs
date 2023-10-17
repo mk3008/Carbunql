@@ -83,6 +83,8 @@ internal static class ExpressionExtension
 			if (mc.Method.Name == "TrimStart") return mc.ToTrimStartValue(tables);
 			if (mc.Method.Name == "TrimEnd") return mc.ToTrimEndValue(tables);
 
+			if (mc.Method.Name == nameof(String.ToString)) return mc.ToStringValue(tables);
+
 			return ((MethodCallExpression)exp).ToParameterValue();
 		}
 

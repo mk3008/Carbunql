@@ -147,5 +147,107 @@ FROM
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
+	[Fact]
+	public void RownumberTest()
+	{
+		var query = from a in From<table_a>()
+					select new
+					{
+						val = RowNumber()
+					};
+		var sq = query.ToQueryAsPostgres();
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    ROW_NUMBER() AS val
+FROM
+    table_a AS a";
+
+		Assert.Equal(10, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
+	[Fact]
+	public void RownumberTest_OrderBy()
+	{
+		var query = from a in From<table_a>()
+					select new
+					{
+						val = RowNumber(new { a.text, a.a_id })
+					};
+		var sq = query.ToQueryAsPostgres();
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    ROW_NUMBER() OVER(
+        ORDER BY
+            a.text,
+            a.a_id
+    ) AS val
+FROM
+    table_a AS a";
+
+		Assert.Equal(21, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
+	[Fact]
+	public void RownumberTest_PartitionBy()
+	{
+		var query = from a in From<table_a>()
+					select new
+					{
+						val = RowNumber(new { a.text, a.a_id }, null)
+					};
+		var sq = query.ToQueryAsPostgres();
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    ROW_NUMBER() OVER(
+        PARTITION BY
+            a.text,
+            a.a_id
+    ) AS val
+FROM
+    table_a AS a";
+
+		Assert.Equal(21, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
+	[Fact]
+	public void RownumberTest_PartitionByOrderBy()
+	{
+		var query = from a in From<table_a>()
+					select new
+					{
+						val = RowNumber(new { a.text }, new { a.value, a.a_id })
+					};
+		var sq = query.ToQueryAsPostgres();
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    ROW_NUMBER() OVER(
+        PARTITION BY
+            a.text
+        ORDER BY
+            a.value,
+            a.a_id
+    ) AS val
+FROM
+    table_a AS a";
+
+		Assert.Equal(25, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
 	public record struct table_a(int a_id, string text, int value);
 }
