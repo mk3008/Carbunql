@@ -1,4 +1,6 @@
-﻿using System.Linq.Expressions;
+﻿using Carbunql.Clauses;
+using Carbunql;
+using System.Linq.Expressions;
 
 namespace QueryBuilderByLinq;
 
@@ -22,5 +24,57 @@ public static class Sql
 	public static IQueryable<T> CrossJoin<T>()
 	{
 		return Enumerable.Empty<T>().AsQueryable();
+	}
+
+	private static string ERROR = "Definition methods must not be executed.";
+
+	public static bool ExistsAs<T>(this SelectQuery source, string table, Expression<Func<T, bool>> predicate)
+	{
+		throw new InvalidProgramException(ERROR);
+	}
+
+	public static bool ExistsAs<T>(this SelectQuery source, IReadQuery subQuery, Expression<Func<T, bool>> predicate)
+	{
+		throw new InvalidProgramException(ERROR);
+	}
+
+	public static bool ExistsAs<T>(this SelectQuery source, Expression<Func<T, bool>> predicate)
+	{
+		throw new InvalidProgramException(ERROR);
+	}
+
+	public static bool InAs<T>(this SelectQuery source, string table, Expression<Func<T, bool>> predicate)
+	{
+		throw new InvalidProgramException(ERROR);
+	}
+
+	public static bool InAs<T>(this SelectQuery source, IReadQuery subQuery, Expression<Func<T, bool>> predicate)
+	{
+		throw new InvalidProgramException(ERROR);
+	}
+
+	public static bool InAs<T>(this SelectQuery source, Expression<Func<T, bool>> predicate)
+	{
+		throw new InvalidProgramException(ERROR);
+	}
+
+	public static ValueBase Greatest(params object[] args)
+	{
+		throw new InvalidProgramException(ERROR);
+	}
+
+	public static ValueBase Least(params object[] args)
+	{
+		throw new InvalidProgramException(ERROR);
+	}
+
+	public static ValueBase RowNumber(this SelectQuery source)
+	{
+		throw new InvalidProgramException(ERROR);
+	}
+
+	public static ValueBase RowNumber(this SelectQuery source, Expression<Func<IEnumerable<object>?>> partitionby, Expression<Func<IEnumerable<object>?>> orderby)
+	{
+		throw new InvalidProgramException(ERROR);
 	}
 }

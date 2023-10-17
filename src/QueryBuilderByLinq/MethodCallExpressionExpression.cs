@@ -11,7 +11,7 @@ internal static class MethodCallExpressionExpression
 {
 	internal static InClause ToInClause(this MethodCallExpression exp, List<string> tables)
 	{
-		if (exp.Method.Name != "InAs") throw new InvalidProgramException();
+		if (exp.Method.Name != nameof(Sql.InAs)) throw new InvalidProgramException();
 
 		if (exp.Arguments.Count < 2) throw new NotSupportedException();
 
@@ -58,7 +58,7 @@ internal static class MethodCallExpressionExpression
 
 	internal static ExistsExpression ToExistsExpression(this MethodCallExpression exp, List<string> tables)
 	{
-		if (exp.Method.Name != "ExistsAs") throw new InvalidProgramException();
+		if (exp.Method.Name != nameof(Sql.ExistsAs)) throw new InvalidProgramException();
 
 		if (exp.Arguments.Count < 2) throw new NotSupportedException();
 
@@ -207,7 +207,7 @@ internal static class MethodCallExpressionExpression
 		OrderClause? order = null;
 		ValueBase? arg = null;
 
-		for (int i = 1; i < exp.Arguments.Count; i++)
+		for (int i = 0; i < exp.Arguments.Count; i++)
 		{
 			var argval = exp.Arguments[i].ToValue(tables);
 			var name = exp.Method.GetParameters()[i].Name;
@@ -267,7 +267,7 @@ internal static class MethodCallExpressionExpression
 
 	private static string ToDbFunction(this string method)
 	{
-		if (method.IsEqualNoCase("rownumber")) return "row_number";
+		if (method.IsEqualNoCase(nameof(Sql.RowNumber))) return "row_number";
 		return method;
 	}
 

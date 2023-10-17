@@ -103,5 +103,49 @@ FROM
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
+	[Fact]
+	public void GreatestTest()
+	{
+		var query = from a in From<table_a>()
+					select new
+					{
+						val = Greatest(a.a_id, a.value)
+					};
+		var sq = query.ToQueryAsPostgres();
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    GREATEST(a.a_id, a.value) AS val
+FROM
+    table_a AS a";
+
+		Assert.Equal(17, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
+	[Fact]
+	public void LeastTest()
+	{
+		var query = from a in From<table_a>()
+					select new
+					{
+						val = Least(a.a_id, a.value)
+					};
+		var sq = query.ToQueryAsPostgres();
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    LEAST(a.a_id, a.value) AS val
+FROM
+    table_a AS a";
+
+		Assert.Equal(17, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
 	public record struct table_a(int a_id, string text, int value);
 }

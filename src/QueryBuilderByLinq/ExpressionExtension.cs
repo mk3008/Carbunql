@@ -40,13 +40,13 @@ internal static class ExpressionExtension
 		{
 			var mc = (MethodCallExpression)exp;
 
-			//if (mc.Method.DeclaringType == typeof(Sql))
-			//{
-			//	if (mc.Method.Name == "ExistsAs") return mc.ToExistsExpression(tables);
-			//	if (mc.Method.Name == "InAs") return mc.ToInClause(tables);
-			//	if (mc.Method.Name == "RowNumber") return mc.ToFunctionValue(tables);
-			//	return mc.ToFunctionValue(tables);
-			//}
+			if (mc.Method.DeclaringType == typeof(Sql))
+			{
+				//if (mc.Method.Name == "ExistsAs") return mc.ToExistsExpression(tables);
+				//if (mc.Method.Name == "InAs") return mc.ToInClause(tables);
+				//if (mc.Method.Name == "RowNumber") return mc.ToFunctionValue(tables);
+				return mc.ToFunctionValue(tables);
+			}
 
 			if (mc.Method.Name == "Concat") return mc.ToConcatValue(tables);
 
