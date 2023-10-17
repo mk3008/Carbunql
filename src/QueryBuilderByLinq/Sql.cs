@@ -6,14 +6,23 @@ namespace QueryBuilderByLinq;
 
 public static class Sql
 {
+	/// <summary>
+	/// This function returns a dual table.
+	/// </summary>
+	/// <returns>Returns an empty queryable object.</returns>
+	public static IQueryable<object> Dual()
+	{
+		return Enumerable.Empty<object>().AsQueryable();
+	}
+
 	public static IQueryable<T> From<T>()
 	{
 		return Enumerable.Empty<T>().AsQueryable();
 	}
 
-	public static IQueryable<object> Dual()
+	public static IQueryable<T> From<T>(string table)
 	{
-		return Enumerable.Empty<object>().AsQueryable();
+		return Enumerable.Empty<T>().AsQueryable();
 	}
 
 	public static IQueryable<T> InnerJoin<T>(Expression<Predicate<T>> condition)
@@ -87,6 +96,4 @@ public static class Sql
 	{
 		throw new InvalidProgramException(ERROR);
 	}
-
-
 }
