@@ -4,6 +4,7 @@ using Carbunql.Clauses;
 using Carbunql.Tables;
 using Carbunql.Values;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 
 namespace QueryBuilderByLinq;
 
@@ -19,6 +20,24 @@ internal static class SelectQueryExtension
 		return t.ToSelectable();
 	}
 
+	private static bool GetJoinTableName(this MethodCallExpression exp, out string tablename)
+	{
+		tablename = string.Empty;
+		if (!exp.Arguments.Any()) return false;
+
+		if (!(exp.Method.Name == nameof(Sql.InnerJoin) || exp.Method.Name == nameof(Sql.LeftJoin) || exp.Method.Name == nameof(Sql.CrossJoin)))
+		{
+			return false;
+		}
+		if (exp.Arguments[0] is ConstantExpression ce)
+		{
+			if (ce.Value == null) return false;
+			tablename = ce.Value.ToString();
+			return (string.IsNullOrEmpty(tablename)) ? false : true;
+		}
+		return false;
+	}
+
 	public static SelectQuery AddJoinClause(this SelectQuery sq, LambdaExpression join, List<string> tables, ParameterExpression joinAlias)
 	{
 		var f = sq.FromClause!;
@@ -27,7 +46,7 @@ internal static class SelectQueryExtension
 
 		if (me.Method.Name == nameof(Sql.InnerJoin))
 		{
-			var arg = (UnaryExpression)me.Arguments.First();
+			var arg = (UnaryExpression)me.Arguments.Where(x => x is UnaryExpression).First();
 			var lambda = (LambdaExpression)arg.Operand;
 
 			var alias = lambda.Parameters.First().Name!;
@@ -39,13 +58,20 @@ internal static class SelectQueryExtension
 				item.TableAlias = joinAlias.Name!;
 			}
 
-			f.InnerJoin(joinAlias.ToSelectable()).As(joinAlias.Name!).On((_) => condition);
+			if (me.GetJoinTableName(out var name))
+			{
+				f.InnerJoin(name).As(joinAlias.Name!).On((_) => condition);
+			}
+			else
+			{
+				f.InnerJoin(joinAlias.ToSelectable()).As(joinAlias.Name!).On((_) => condition);
+			}
 			return sq;
 		}
 
 		if (me.Method.Name == nameof(Sql.LeftJoin))
 		{
-			var arg = (UnaryExpression)me.Arguments.First();
+			var arg = (UnaryExpression)me.Arguments.Where(x => x is UnaryExpression).First();
 			var lambda = (LambdaExpression)arg.Operand;
 
 			var alias = lambda.Parameters.First().Name!;
@@ -57,13 +83,27 @@ internal static class SelectQueryExtension
 				item.TableAlias = joinAlias.Name!;
 			}
 
-			f.LeftJoin(joinAlias.ToSelectable()).As(joinAlias.Name!).On((_) => condition);
+			if (me.GetJoinTableName(out var name))
+			{
+				f.LeftJoin(name).As(joinAlias.Name!).On((_) => condition);
+			}
+			else
+			{
+				f.LeftJoin(joinAlias.ToSelectable()).As(joinAlias.Name!).On((_) => condition);
+			}
 			return sq;
 		}
 
 		if (me.Method.Name == nameof(Sql.CrossJoin))
 		{
-			f.CrossJoin(joinAlias.ToSelectable()).As(joinAlias.Name!);
+			if (me.GetJoinTableName(out var name))
+			{
+				f.CrossJoin(name).As(joinAlias.Name!);
+			}
+			else
+			{
+				f.CrossJoin(joinAlias.ToSelectable()).As(joinAlias.Name!);
+			}
 			return sq;
 		}
 

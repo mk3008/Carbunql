@@ -47,6 +47,36 @@ FROM
 	}
 
 	[Fact]
+	public void OverrideTableName()
+	{
+		var query = from b in From<table_b>("sale_details")
+					from a in InnerJoin<table_a>("sales", a => b.b_id == a.a_id)
+					select new
+					{
+						a.a_id,
+						b.b_id,
+						b.text,
+						b.value
+					};
+		var sq = query.ToQueryAsPostgres();
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    a.a_id,
+    b.b_id,
+    b.text,
+    b.value
+FROM
+    sale_details AS b
+    INNER JOIN sales AS a ON b.b_id = a.a_id";
+
+		Assert.Equal(32, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
+	[Fact]
 	public void InnerJoinWhere()
 	{
 		var query = from b in From<table_b>()
@@ -144,8 +174,8 @@ FROM
 	{
 		var query = from d in From<table_d>()
 					from c in InnerJoin<table_c>(x => d.c_id == x.c_id)
-					from b in InnerJoin<table_b>(x => c.b_id == x.b_id)
-					from a in LeftJoin<table_a>(x => b.a_id == x.a_id)
+					from b in LeftJoin<table_b>(x => c.b_id == x.b_id)
+					from a in CrossJoin<table_a>()
 					select new
 					{
 						a.a_id,
@@ -166,10 +196,44 @@ SELECT
 FROM
     table_d AS d
     INNER JOIN table_c AS c ON d.c_id = c.c_id
-    INNER JOIN table_b AS b ON c.b_id = b.b_id
-    LEFT JOIN table_a AS a ON b.a_id = a.a_id";
+    LEFT JOIN table_b AS b ON c.b_id = b.b_id
+    CROSS JOIN table_a AS a";
 
-		Assert.Equal(56, sq.GetTokens().ToList().Count);
+		Assert.Equal(48, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
+	[Fact]
+	public void Relations_TableOverride()
+	{
+		var query = from d in From<table_d>("table__d")
+					from c in InnerJoin<table_c>("table__c", x => d.c_id == x.c_id)
+					from b in LeftJoin<table_b>("table__b", x => c.b_id == x.b_id)
+					from a in CrossJoin<table_a>("table__a")
+					select new
+					{
+						a.a_id,
+						b.b_id,
+						c.c_id,
+						d.d_id
+					};
+		var sq = query.ToQueryAsPostgres();
+
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    a.a_id,
+    b.b_id,
+    c.c_id,
+    d.d_id
+FROM
+    table__d AS d
+    INNER JOIN table__c AS c ON d.c_id = c.c_id
+    LEFT JOIN table__b AS b ON c.b_id = b.b_id
+    CROSS JOIN table__a AS a";
+
+		Assert.Equal(48, sq.GetTokens().ToList().Count);
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
