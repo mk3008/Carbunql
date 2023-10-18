@@ -5,7 +5,9 @@ namespace QueryBuilderByLinq;
 
 public abstract class TableQuery
 {
-	public string TableName { get; set; } = string.Empty;
+	public string TableName { get; internal set; } = string.Empty;
+
+	public IQueryable? InnerQuery { get; internal set; }
 }
 
 public class TableQuery<T> : TableQuery, IOrderedQueryable<T>, IQueryProvider

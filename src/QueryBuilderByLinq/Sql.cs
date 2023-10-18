@@ -26,6 +26,11 @@ public static class Sql
 		return new Table<T>(tableName);
 	}
 
+	public static IQueryable<T> From<T>(IQueryable<T> subquery)
+	{
+		return new Table<T>(subquery);
+	}
+
 	public static IQueryable<T> InnerJoin<T>(Expression<Predicate<T>> condition)
 	{
 		return new Table<T>();

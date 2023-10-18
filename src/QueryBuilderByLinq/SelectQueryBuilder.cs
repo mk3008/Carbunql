@@ -108,7 +108,14 @@ public class SelectQueryBuilder
 		{
 			if (from.Value is IQueryable q && q.Provider is TableQuery tq)
 			{
-				sq.From(tq.TableName).As(fromAlias.Name!);
+				if (tq.InnerQuery != null)
+				{
+					sq.From(tq.InnerQuery.ToQueryAsPostgres()).As(fromAlias.Name!);
+				}
+				else
+				{
+					sq.From(tq.TableName).As(fromAlias.Name!);
+				}
 			}
 			else
 			{

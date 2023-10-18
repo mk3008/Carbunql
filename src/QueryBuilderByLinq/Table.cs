@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Carbunql.Clauses;
+using System.Collections;
 using System.Linq.Expressions;
 
 namespace QueryBuilderByLinq;
@@ -13,6 +14,11 @@ public class Table<T> : IQueryable<T>
 	public Table(string tableName)
 	{
 		Query = new TableQuery<T>() { TableName = tableName };
+	}
+
+	public Table(IQueryable<T> subquery)
+	{
+		Query = new TableQuery<T>() { InnerQuery = subquery.AsQueryable() };
 	}
 
 	private IQueryable<T> Query { get; set; }
