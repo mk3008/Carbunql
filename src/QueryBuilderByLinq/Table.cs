@@ -5,7 +5,17 @@ namespace QueryBuilderByLinq;
 
 public class Table<T> : IQueryable<T>
 {
-	private readonly IQueryable<T> Query = Enumerable.Empty<T>().AsQueryable();
+	public Table()
+	{
+		Query = Enumerable.Empty<T>().AsQueryable();
+	}
+
+	public Table(string tableName)
+	{
+		Query = new TableQuery<T>() { TableName = tableName };
+	}
+
+	private IQueryable<T> Query { get; set; }
 
 	public Type ElementType => Query.ElementType;
 

@@ -106,7 +106,14 @@ public class SelectQueryBuilder
 		var sq = new SelectQuery();
 		if (fromAlias.Type != typeof(object))
 		{
-			sq.From(fromAlias.ToSelectable()).As(fromAlias.Name!);
+			if (from.Value is IQueryable q && q.Provider is TableQuery tq)
+			{
+				sq.From(tq.TableName).As(fromAlias.Name!);
+			}
+			else
+			{
+				sq.From(fromAlias.ToSelectable()).As(fromAlias.Name!);
+			}
 
 			if (where != null) sq.Where(where.ToValue(tables));
 			if (join != null && joinAlias != null)

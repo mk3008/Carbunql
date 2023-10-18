@@ -1,6 +1,7 @@
-﻿using Carbunql.Clauses;
-using Carbunql;
+﻿using Carbunql;
+using Carbunql.Clauses;
 using System.Linq.Expressions;
+
 
 namespace QueryBuilderByLinq;
 
@@ -20,9 +21,9 @@ public static class Sql
 		return Enumerable.Empty<T>().AsQueryable();
 	}
 
-	public static IQueryable<T> From<T>(string table)
+	public static IQueryable<T> From<T>(string tableName)
 	{
-		return Enumerable.Empty<T>().AsQueryable();
+		return new Table<T>(tableName);
 	}
 
 	public static IQueryable<T> InnerJoin<T>(Expression<Predicate<T>> condition)
