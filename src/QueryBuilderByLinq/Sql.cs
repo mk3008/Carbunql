@@ -16,62 +16,62 @@ public static class Sql
 		return Enumerable.Empty<object>().AsQueryable();
 	}
 
-	public static IQueryable<T> From<T>()
+	public static IQueryable<T> Table<T>()
 	{
 		return Enumerable.Empty<T>().AsQueryable();
 	}
 
-	public static IQueryable<T> From<T>(string tableName)
+	public static IQueryable<T> Table<T>(string tableName)
 	{
 		return new Table<T>(tableName);
 	}
 
-	public static IQueryable<T> From<T>(IQueryable<T> subquery)
+	public static IQueryable<T> Table<T>(IQueryable<T> subquery)
 	{
 		return new Table<T>(subquery);
 	}
 
-	public static IQueryable<T> InnerJoin<T>(Expression<Predicate<T>> condition)
+	public static IQueryable<T> InnerJoinTable<T>(Expression<Predicate<T>> condition)
 	{
 		return new Table<T>();
 	}
 
-	public static IQueryable<T> InnerJoin<T>(string tableName, Expression<Predicate<T>> condition)
+	public static IQueryable<T> InnerJoinTable<T>(string tableName, Expression<Predicate<T>> condition)
 	{
 		return new Table<T>(tableName);
 	}
 
-	public static IQueryable<T> InnerJoin<T>(IQueryable<T> subquery, Expression<Predicate<T>> condition)
+	public static IQueryable<T> InnerJoinTable<T>(IQueryable<T> subquery, Expression<Predicate<T>> condition)
 	{
 		return new Table<T>(subquery);
 	}
 
-	public static IQueryable<T> LeftJoin<T>(Expression<Predicate<T>> condition)
+	public static IQueryable<T> LeftJoinTable<T>(Expression<Predicate<T>> condition)
 	{
 		return new Table<T>();
 	}
 
-	public static IQueryable<T> LeftJoin<T>(string tableName, Expression<Predicate<T>> condition)
+	public static IQueryable<T> LeftJoinTable<T>(string tableName, Expression<Predicate<T>> condition)
 	{
 		return new Table<T>(tableName);
 	}
 
-	public static IQueryable<T> LeftJoin<T>(IQueryable<T> subquery, Expression<Predicate<T>> condition)
+	public static IQueryable<T> LeftJoinTable<T>(IQueryable<T> subquery, Expression<Predicate<T>> condition)
 	{
 		return new Table<T>(subquery);
 	}
 
-	public static IQueryable<T> CrossJoin<T>()
+	public static IQueryable<T> CrossJoinTable<T>()
 	{
 		return Enumerable.Empty<T>().AsQueryable();
 	}
 
-	public static IQueryable<T> CrossJoin<T>(string tableName)
+	public static IQueryable<T> CrossJoinTable<T>(string tableName)
 	{
 		return new Table<T>(tableName);
 	}
 
-	public static IQueryable<T> CrossJoin<T>(IQueryable<T> subquery)
+	public static IQueryable<T> CrossJoinTable<T>(IQueryable<T> subquery)
 	{
 		return new Table<T>(subquery);
 	}

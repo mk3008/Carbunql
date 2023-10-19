@@ -19,7 +19,7 @@ public class SelectTest
 	[Fact]
 	public void SelectScalar()
 	{
-		var query = from a in From<table_a>() select a.a_id;
+		var query = from a in Table<table_a>() select a.a_id;
 		var sq = query.ToQueryAsPostgres();
 
 		Monitor.Log(sq);
@@ -37,7 +37,7 @@ FROM
 	[Fact]
 	public void SelectFrom()
 	{
-		var query = from a in From<table_a>("sales") select a.a_id;
+		var query = from a in Table<table_a>("sales") select a.a_id;
 		var sq = query.ToQueryAsPostgres();
 
 		Monitor.Log(sq);
@@ -55,7 +55,7 @@ FROM
 	[Fact]
 	public void SelectAll()
 	{
-		var query = from a in From<table_a>() select a;
+		var query = from a in Table<table_a>() select a;
 		var sq = query.ToQueryAsPostgres();
 
 		Monitor.Log(sq);
@@ -75,7 +75,7 @@ FROM
 	[Fact]
 	public void SelectColums()
 	{
-		var query = from a in From<table_a>()
+		var query = from a in Table<table_a>()
 					select new
 					{
 						a.a_id,
@@ -100,7 +100,7 @@ FROM
 	[Fact]
 	public void SelectAliasColums()
 	{
-		var query = from a in From<table_a>()
+		var query = from a in Table<table_a>()
 					select new
 					{
 						ID = a.a_id,
@@ -124,7 +124,7 @@ FROM
 	[Fact]
 	public void GreatestTest()
 	{
-		var query = from a in From<table_a>()
+		var query = from a in Table<table_a>()
 					select new
 					{
 						val = Greatest(a.a_id, a.value)
@@ -146,7 +146,7 @@ FROM
 	[Fact]
 	public void LeastTest()
 	{
-		var query = from a in From<table_a>()
+		var query = from a in Table<table_a>()
 					select new
 					{
 						val = Least(a.a_id, a.value)
@@ -168,7 +168,7 @@ FROM
 	[Fact]
 	public void RownumberTest()
 	{
-		var query = from a in From<table_a>()
+		var query = from a in Table<table_a>()
 					select new
 					{
 						val = RowNumber()
@@ -190,7 +190,7 @@ FROM
 	[Fact]
 	public void RownumberTest_OrderBy()
 	{
-		var query = from a in From<table_a>()
+		var query = from a in Table<table_a>()
 					select new
 					{
 						val = RowNumber(new { a.text, a.a_id })
@@ -216,7 +216,7 @@ FROM
 	[Fact]
 	public void RownumberTest_PartitionBy()
 	{
-		var query = from a in From<table_a>()
+		var query = from a in Table<table_a>()
 					select new
 					{
 						val = RowNumber(new { a.text, a.a_id }, null)
@@ -242,7 +242,7 @@ FROM
 	[Fact]
 	public void RownumberTest_PartitionByOrderBy()
 	{
-		var query = from a in From<table_a>()
+		var query = from a in Table<table_a>()
 					select new
 					{
 						val = RowNumber(new { a.text }, new { a.value, a.a_id })

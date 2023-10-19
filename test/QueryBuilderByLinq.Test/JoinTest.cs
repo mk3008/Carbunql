@@ -19,8 +19,8 @@ public class JoinTest
 	[Fact]
 	public void InnerJoin()
 	{
-		var query = from b in From<table_b>()
-					from a in InnerJoin<table_a>(a => b.b_id == a.a_id)
+		var query = from b in Table<table_b>()
+					from a in InnerJoinTable<table_a>(a => b.b_id == a.a_id)
 					select new
 					{
 						a.a_id,
@@ -49,8 +49,8 @@ FROM
 	[Fact]
 	public void OverrideTableName()
 	{
-		var query = from b in From<table_b>("sale_details")
-					from a in InnerJoin<table_a>("sales", a => b.b_id == a.a_id)
+		var query = from b in Table<table_b>("sale_details")
+					from a in InnerJoinTable<table_a>("sales", a => b.b_id == a.a_id)
 					select new
 					{
 						a.a_id,
@@ -79,8 +79,8 @@ FROM
 	[Fact]
 	public void InnerJoinWhere()
 	{
-		var query = from b in From<table_b>()
-					from a in InnerJoin<table_a>(a => b.b_id == a.a_id)
+		var query = from b in Table<table_b>()
+					from a in InnerJoinTable<table_a>(a => b.b_id == a.a_id)
 					where a.a_id == 1
 					select new
 					{
@@ -112,8 +112,8 @@ WHERE
 	[Fact]
 	public void LeftJoin()
 	{
-		var query = from b in From<table_b>()
-					from a in LeftJoin<table_a>(a => b.b_id == a.a_id)
+		var query = from b in Table<table_b>()
+					from a in LeftJoinTable<table_a>(a => b.b_id == a.a_id)
 					select new
 					{
 						a.a_id,
@@ -142,8 +142,8 @@ FROM
 	[Fact]
 	public void CrossJoin()
 	{
-		var query = from b in From<table_b>()
-					from a in CrossJoin<table_a>()
+		var query = from b in Table<table_b>()
+					from a in CrossJoinTable<table_a>()
 					select new
 					{
 						a.a_id,
@@ -172,10 +172,10 @@ FROM
 	[Fact]
 	public void Relations()
 	{
-		var query = from d in From<table_d>()
-					from c in InnerJoin<table_c>(x => d.c_id == x.c_id)
-					from b in LeftJoin<table_b>(x => c.b_id == x.b_id)
-					from a in CrossJoin<table_a>()
+		var query = from d in Table<table_d>()
+					from c in InnerJoinTable<table_c>(x => d.c_id == x.c_id)
+					from b in LeftJoinTable<table_b>(x => c.b_id == x.b_id)
+					from a in CrossJoinTable<table_a>()
 					select new
 					{
 						a.a_id,
@@ -206,10 +206,10 @@ FROM
 	[Fact]
 	public void Relations_TableOverride()
 	{
-		var query = from d in From<table_d>("table__d")
-					from c in InnerJoin<table_c>("table__c", x => d.c_id == x.c_id)
-					from b in LeftJoin<table_b>("table__b", x => c.b_id == x.b_id)
-					from a in CrossJoin<table_a>("table__a")
+		var query = from d in Table<table_d>("table__d")
+					from c in InnerJoinTable<table_c>("table__c", x => d.c_id == x.c_id)
+					from b in LeftJoinTable<table_b>("table__b", x => c.b_id == x.b_id)
+					from a in CrossJoinTable<table_a>("table__a")
 					select new
 					{
 						a.a_id,
@@ -240,10 +240,10 @@ FROM
 	[Fact]
 	public void RelationsAll()
 	{
-		var query = from d in From<table_d>()
-					from c in InnerJoin<table_c>(x => d.c_id == x.c_id)
-					from b in InnerJoin<table_b>(x => c.b_id == x.b_id)
-					from a in LeftJoin<table_a>(x => b.a_id == x.a_id)
+		var query = from d in Table<table_d>()
+					from c in InnerJoinTable<table_c>(x => d.c_id == x.c_id)
+					from b in InnerJoinTable<table_b>(x => c.b_id == x.b_id)
+					from a in LeftJoinTable<table_a>(x => b.a_id == x.a_id)
 					select new
 					{
 						a,
@@ -285,10 +285,10 @@ FROM
 	[Fact]
 	public void RelationsAllWhere()
 	{
-		var query = from d in From<table_d>()
-					from c in InnerJoin<table_c>(x => d.c_id == x.c_id)
-					from b in InnerJoin<table_b>(x => c.b_id == x.b_id)
-					from a in LeftJoin<table_a>(x => b.a_id == x.a_id)
+		var query = from d in Table<table_d>()
+					from c in InnerJoinTable<table_c>(x => d.c_id == x.c_id)
+					from b in InnerJoinTable<table_b>(x => c.b_id == x.b_id)
+					from a in LeftJoinTable<table_a>(x => b.a_id == x.a_id)
 					where (a.a_id == 1 && b.b_id == 2) || c.text == "text" || d.value != 10
 					select new
 					{

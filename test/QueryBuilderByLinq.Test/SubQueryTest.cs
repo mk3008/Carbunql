@@ -19,8 +19,8 @@ public class SubQueryTest
 	[Fact]
 	public void DefaultTest()
 	{
-		var subq = from a in From<table_a>() select new { ID = a.a_id, Text = a.text };
-		var query = from x in From(subq) select new { x.ID, x.Text };
+		var subq = from a in Table<table_a>() select new { ID = a.a_id, Text = a.text };
+		var query = from x in Table(subq) select new { x.ID, x.Text };
 
 		var sq = query.ToQueryAsPostgres();
 
@@ -46,15 +46,15 @@ FROM
 	[Fact]
 	public void JoinTest()
 	{
-		var suba = from a in From<table_a>() select new { a.a_id, a_text = a.text };
-		var subx = from a in From<table_a>() select new { x_id = a.a_id, x_text = a.text };
-		var suby = from a in From<table_a>() select new { y_id = a.a_id, y_text = a.text };
-		var subz = from a in From<table_a>() select new { z_id = a.a_id, z_text = a.text };
+		var suba = from a in Table<table_a>() select new { a.a_id, a_text = a.text };
+		var subx = from a in Table<table_a>() select new { x_id = a.a_id, x_text = a.text };
+		var suby = from a in Table<table_a>() select new { y_id = a.a_id, y_text = a.text };
+		var subz = from a in Table<table_a>() select new { z_id = a.a_id, z_text = a.text };
 
-		var query = from a in From(suba)
-					from x in InnerJoin(subx, x => a.a_id == x.x_id)
-					from y in LeftJoin(suby, y => a.a_id == y.y_id)
-					from z in CrossJoin(subz)
+		var query = from a in Table(suba)
+					from x in InnerJoinTable(subx, x => a.a_id == x.x_id)
+					from y in LeftJoinTable(suby, y => a.a_id == y.y_id)
+					from z in CrossJoinTable(subz)
 					select new { a, x, y, z };
 
 		var sq = query.ToQueryAsPostgres();

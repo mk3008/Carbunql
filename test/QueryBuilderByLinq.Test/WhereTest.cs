@@ -40,7 +40,7 @@ public class WhereTest
 	[Fact]
 	public void DefaultTest()
 	{
-		var query = from a in From<table_a>()
+		var query = from a in Table<table_a>()
 					where a.a_id == 1
 					select a;
 		SelectQuery sq = query.ToQueryAsPostgres();
@@ -64,7 +64,7 @@ WHERE
 	[Fact]
 	public void AndTest()
 	{
-		var query = from a in From<table_a>()
+		var query = from a in Table<table_a>()
 					where a.a_id == 1 && a.text == "test"
 					select a;
 		SelectQuery sq = query.ToQueryAsPostgres();
@@ -88,7 +88,7 @@ WHERE
 	[Fact]
 	public void OrTest()
 	{
-		var query = from a in From<table_a>()
+		var query = from a in Table<table_a>()
 					where a.a_id == 1 || a.text == "test"
 					select a;
 		SelectQuery sq = query.ToQueryAsPostgres();
@@ -113,7 +113,7 @@ WHERE
 	public void ParameterTest()
 	{
 		var id = 1;
-		var query = from a in From<table_a>()
+		var query = from a in Table<table_a>()
 					where a.a_id == id
 					select a;
 		SelectQuery sq = query.ToQueryAsPostgres();
@@ -140,7 +140,7 @@ WHERE
 	[Fact]
 	public void AnyTest()
 	{
-		var query = from a in From<table_a>()
+		var query = from a in Table<table_a>()
 					where new[] { 1, 2, 3 }.Contains(a.a_id)
 					select a;
 		SelectQuery sq = query.ToQueryAsPostgres();
@@ -165,7 +165,7 @@ WHERE
 	public void AnyParameterTest()
 	{
 		var ids = new[] { 1, 2, 3 };
-		var query = from a in From<table_a>()
+		var query = from a in Table<table_a>()
 					where ids.Contains(a.a_id)
 					select a;
 		SelectQuery sq = query.ToQueryAsPostgres();

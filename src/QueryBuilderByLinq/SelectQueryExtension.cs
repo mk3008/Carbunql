@@ -25,7 +25,7 @@ internal static class SelectQueryExtension
 		query = null;
 		if (!exp.Arguments.Any()) return false;
 
-		if (!(exp.Method.Name == nameof(Sql.InnerJoin) || exp.Method.Name == nameof(Sql.LeftJoin) || exp.Method.Name == nameof(Sql.CrossJoin)))
+		if (!(exp.Method.Name == nameof(Sql.InnerJoinTable) || exp.Method.Name == nameof(Sql.LeftJoinTable) || exp.Method.Name == nameof(Sql.CrossJoinTable)))
 		{
 			return false;
 		}
@@ -55,7 +55,7 @@ internal static class SelectQueryExtension
 		tablename = string.Empty;
 		if (!exp.Arguments.Any()) return false;
 
-		if (!(exp.Method.Name == nameof(Sql.InnerJoin) || exp.Method.Name == nameof(Sql.LeftJoin) || exp.Method.Name == nameof(Sql.CrossJoin)))
+		if (!(exp.Method.Name == nameof(Sql.InnerJoinTable) || exp.Method.Name == nameof(Sql.LeftJoinTable) || exp.Method.Name == nameof(Sql.CrossJoinTable)))
 		{
 			return false;
 		}
@@ -76,7 +76,7 @@ internal static class SelectQueryExtension
 
 		var me = (MethodCallExpression)join.Body;
 
-		if (me.Method.Name == nameof(Sql.InnerJoin))
+		if (me.Method.Name == nameof(Sql.InnerJoinTable))
 		{
 			var arg = (UnaryExpression)me.Arguments.Where(x => x is UnaryExpression).First();
 			var lambda = (LambdaExpression)arg.Operand;
@@ -105,7 +105,7 @@ internal static class SelectQueryExtension
 			return sq;
 		}
 
-		if (me.Method.Name == nameof(Sql.LeftJoin))
+		if (me.Method.Name == nameof(Sql.LeftJoinTable))
 		{
 			var arg = (UnaryExpression)me.Arguments.Where(x => x is UnaryExpression).First();
 			var lambda = (LambdaExpression)arg.Operand;
@@ -134,7 +134,7 @@ internal static class SelectQueryExtension
 			return sq;
 		}
 
-		if (me.Method.Name == nameof(Sql.CrossJoin))
+		if (me.Method.Name == nameof(Sql.CrossJoinTable))
 		{
 			if (me.GetJoinQuery(out var subq) && subq != null)
 			{
