@@ -4,7 +4,7 @@ using Carbunql.Clauses;
 using Carbunql.Tables;
 using Carbunql.Values;
 using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
+using System.Xml.Linq;
 
 namespace QueryBuilderByLinq;
 
@@ -20,6 +20,36 @@ internal static class SelectQueryExtension
 		return t.ToSelectable();
 	}
 
+	private static bool GetJoinQuery(this MethodCallExpression exp, out IQueryable? query)
+	{
+		query = null;
+		if (!exp.Arguments.Any()) return false;
+
+		if (!(exp.Method.Name == nameof(Sql.InnerJoin) || exp.Method.Name == nameof(Sql.LeftJoin) || exp.Method.Name == nameof(Sql.CrossJoin)))
+		{
+			return false;
+		}
+
+		if (exp.Arguments[0] is MemberExpression mem && mem.Expression is ConstantExpression ce)
+		{
+			var fieldname = mem.Member.Name;
+			var val = ce.Value;
+			if (val == null) return false;
+			var tp = val.GetType();
+			if (!tp.GetFields().Any()) return false;
+			var field = tp.GetFields().Where(x => x.Name == fieldname).FirstOrDefault();
+			if (field == null) return false;
+			if (field.GetValue(ce.Value) is IQueryable q)
+			{
+				query = q;
+				return true;
+			}
+			return false;
+		}
+
+		return false;
+	}
+
 	private static bool GetJoinTableName(this MethodCallExpression exp, out string tablename)
 	{
 		tablename = string.Empty;
@@ -32,7 +62,9 @@ internal static class SelectQueryExtension
 		if (exp.Arguments[0] is ConstantExpression ce)
 		{
 			if (ce.Value == null) return false;
-			tablename = ce.Value.ToString();
+			var name = ce.Value.ToString();
+			if (string.IsNullOrEmpty(name)) return false;
+			tablename = name;
 			return (string.IsNullOrEmpty(tablename)) ? false : true;
 		}
 		return false;
@@ -58,7 +90,11 @@ internal static class SelectQueryExtension
 				item.TableAlias = joinAlias.Name!;
 			}
 
-			if (me.GetJoinTableName(out var name))
+			if (me.GetJoinQuery(out var subq) && subq != null)
+			{
+				f.InnerJoin(subq.ToQueryAsPostgres()).As(joinAlias.Name!).On((_) => condition);
+			}
+			else if (me.GetJoinTableName(out var name))
 			{
 				f.InnerJoin(name).As(joinAlias.Name!).On((_) => condition);
 			}
@@ -83,7 +119,11 @@ internal static class SelectQueryExtension
 				item.TableAlias = joinAlias.Name!;
 			}
 
-			if (me.GetJoinTableName(out var name))
+			if (me.GetJoinQuery(out var subq) && subq != null)
+			{
+				f.LeftJoin(subq.ToQueryAsPostgres()).As(joinAlias.Name!).On((_) => condition);
+			}
+			else if (me.GetJoinTableName(out var name))
 			{
 				f.LeftJoin(name).As(joinAlias.Name!).On((_) => condition);
 			}
@@ -96,7 +136,11 @@ internal static class SelectQueryExtension
 
 		if (me.Method.Name == nameof(Sql.CrossJoin))
 		{
-			if (me.GetJoinTableName(out var name))
+			if (me.GetJoinQuery(out var subq) && subq != null)
+			{
+				f.CrossJoin(subq.ToQueryAsPostgres()).As(joinAlias.Name!);
+			}
+			else if (me.GetJoinTableName(out var name))
 			{
 				f.CrossJoin(name).As(joinAlias.Name!);
 			}
@@ -112,8 +156,14 @@ internal static class SelectQueryExtension
 
 	public static SelectQuery AddSelectClause(this SelectQuery sq, LambdaExpression? select, LambdaExpression? where, List<string> tables)
 	{
-		if (select != null) return sq.AddSelectClauseBySelectExpression(select, tables);
-		if (where != null) return sq.AddSelectClauseByWhereExpression(where, tables);
+		if (select != null)
+		{
+			return sq.AddSelectClauseBySelectExpression(select, tables);
+		}
+		if (where != null)
+		{
+			return sq.AddSelectClauseByWhereExpression(where, tables);
+		}
 		return sq;
 	}
 

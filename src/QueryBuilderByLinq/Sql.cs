@@ -41,6 +41,11 @@ public static class Sql
 		return new Table<T>(tableName);
 	}
 
+	public static IQueryable<T> InnerJoin<T>(IQueryable<T> subquery, Expression<Predicate<T>> condition)
+	{
+		return new Table<T>(subquery);
+	}
+
 	public static IQueryable<T> LeftJoin<T>(Expression<Predicate<T>> condition)
 	{
 		return new Table<T>();
@@ -51,6 +56,11 @@ public static class Sql
 		return new Table<T>(tableName);
 	}
 
+	public static IQueryable<T> LeftJoin<T>(IQueryable<T> subquery, Expression<Predicate<T>> condition)
+	{
+		return new Table<T>(subquery);
+	}
+
 	public static IQueryable<T> CrossJoin<T>()
 	{
 		return Enumerable.Empty<T>().AsQueryable();
@@ -59,6 +69,11 @@ public static class Sql
 	public static IQueryable<T> CrossJoin<T>(string tableName)
 	{
 		return new Table<T>(tableName);
+	}
+
+	public static IQueryable<T> CrossJoin<T>(IQueryable<T> subquery)
+	{
+		return new Table<T>(subquery);
 	}
 
 	private static string ERROR = "Definition methods must not be executed.";
