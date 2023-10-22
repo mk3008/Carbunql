@@ -217,7 +217,7 @@ internal static class SelectQueryExtension
 		return sq;
 	}
 
-	private static SelectQuery AddSelectClause(this SelectQuery sq, ValueCollection collection)
+	internal static SelectQuery AddSelectClause(this SelectQuery sq, ValueCollection collection)
 	{
 		foreach (var item in collection)
 		{

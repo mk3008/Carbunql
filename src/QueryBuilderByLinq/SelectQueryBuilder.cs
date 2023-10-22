@@ -37,45 +37,6 @@ public class SelectQueryBuilder
 		return operand;
 	}
 
-	//private LambdaExpression? GetJoinExpression(MethodCallExpression expression)
-	//{
-	//	if (expression.Arguments.Count == 3)
-	//	{
-	//		var ue = (UnaryExpression)expression.Arguments[1];
-	//		return (LambdaExpression)ue.Operand;
-	//	}
-	//	return null;
-	//}
-
-	private bool TrySetRootSelectQuery(MethodCallExpression expression, ref SelectQuery sq)
-	{
-		if (expression.Arguments.Count != 2) return false;
-
-		var fromExpression = (MethodCallExpression)expression.Arguments[0];
-
-		var sqx = BuildAsNest(fromExpression, sq);
-
-		var ue = (UnaryExpression)fromExpression.Arguments[1];
-		var selectExpression = (UnaryExpression)fromExpression.Arguments[2];
-		var select = selectExpression.Operand as LambdaExpression;
-
-		var lam = (LambdaExpression)ue.Operand;
-		if (lam.Body is MethodCallExpression mem2 && mem2.Method.Name == nameof(Sql.FromTable) && mem2.Arguments.Any())
-		{
-			var val = (ConstantExpression)mem2.Arguments[0];
-			var name = val.Value?.ToString();
-			if (string.IsNullOrEmpty(name)) return false;
-			var table = name;
-			var alias = select!.Parameters[1].Name!;
-
-			sq.From(table).As(alias);
-			//mem.Arguments[3];
-
-			return true;
-		}
-		return false;
-	}
-
 	private LambdaExpression? GetJoinExpression(MethodCallExpression expression)
 	{
 		if (expression.Arguments.Count == 3)
@@ -102,19 +63,19 @@ public class SelectQueryBuilder
 	{
 		if (expression.Arguments[0] is ConstantExpression)
 		{
-			return BuildAsRoot(expression);
+			return BuildRootQuery(expression);
 		}
 		else if (expression.Arguments[0] is MethodCallExpression mce)
 		{
 			var sq = Build(mce);
-			var x = BuildAsNest(expression, sq);
+			var x = BuildNestedQuery(expression, sq);
 			return sq;
 		}
 
 		throw new NotSupportedException();
 	}
 
-	private SelectQuery BuildAsRoot(MethodCallExpression expression)
+	private SelectQuery BuildRootQuery(MethodCallExpression expression)
 	{
 		var root = (ConstantExpression)expression.Arguments[0];
 		var nest = GetJoinExpression(expression);
@@ -123,25 +84,25 @@ public class SelectQueryBuilder
 
 		if (nest == null)
 		{
-			return BuildAsRootNoRelation(expression, root, select, where);
+			return BuildRootQuery(expression, root, select, where);
 		}
 		if (where == null && nest != null && nest.Body is MethodCallExpression mc && select != null)
 		{
 			if (mc.Method.Name == nameof(Sql.FromTable))
 			{
 				// CTE, From pattern
-				return BuildAsRootCte(expression, root, nest, select);
+				return BuildCteQuery(expression, root, nest, select);
 			}
 			else if (mc.Method.Name == nameof(Sql.InnerJoinTable) || mc.Method.Name == nameof(Sql.LeftJoinTable) || mc.Method.Name == nameof(Sql.CrossJoinTable))
 			{
-				return BuildAsRootRelation(expression, root, nest, select, where);
+				return BuildRootQuery(expression, root, nest, select, where);
 			}
 		}
 
 		throw new NotSupportedException();
 	}
 
-	private SelectQuery BuildAsRootCte(MethodCallExpression expression, ConstantExpression cte, LambdaExpression from, LambdaExpression select)
+	private SelectQuery BuildCteQuery(MethodCallExpression expression, ConstantExpression cte, LambdaExpression from, LambdaExpression select)
 	{
 		ParameterExpression? fromAlias = null;
 		ParameterExpression? joinAlias = null;
@@ -170,7 +131,7 @@ public class SelectQueryBuilder
 		return sq;
 	}
 
-	private SelectQuery BuildAsRootRelation(MethodCallExpression expression, ConstantExpression from, LambdaExpression join, LambdaExpression? select, LambdaExpression? where)
+	private SelectQuery BuildRootQuery(MethodCallExpression expression, ConstantExpression from, LambdaExpression join, LambdaExpression? select, LambdaExpression? where)
 	{
 		ParameterExpression? fromAlias = null;
 		ParameterExpression? joinAlias = null;
@@ -215,7 +176,7 @@ public class SelectQueryBuilder
 		return sq.AddSelectClause(select, where, tables);
 	}
 
-	private SelectQuery BuildAsRootNoRelation(MethodCallExpression expression, ConstantExpression from, LambdaExpression? select, LambdaExpression? where)
+	private SelectQuery BuildRootQuery(MethodCallExpression expression, ConstantExpression from, LambdaExpression? select, LambdaExpression? where)
 	{
 		ParameterExpression? fromAlias = null;
 		ParameterExpression? joinAlias = null;
@@ -256,64 +217,81 @@ public class SelectQueryBuilder
 		return sq.AddSelectClause(select, where, tables);
 	}
 
-	private SelectQuery BuildAsNest(MethodCallExpression expression, SelectQuery sq)
+	private ParameterExpression? GetJoinAlias(LambdaExpression? select, LambdaExpression? where)
 	{
-		//var from = GetFromTableName(expression);
-		var join = GetJoinExpression(expression);
-		var select = GetSelectExpression(expression);
+		if (select != null && select.Parameters.Count > 1)
+		{
+			return select.Parameters.Last();
+		}
+		else if (where != null)
+		{
+			return where.Parameters.First();
+		}
+		return null;
+	}
+
+	private SelectQuery BuildNestedQuery(MethodCallExpression expression, SelectQuery sq)
+	{
 		var where = GetWhereExpression(expression);
 
 		if (sq.FromClause == null && (expression.Arguments.Count == 2))
 		{
-			var fromExpression = (MethodCallExpression)expression.Arguments[0];
-			sq = BuildAsNest(fromExpression, sq);
-
-
-			var from = sq.FromClause!.Root;
-			var cols = sq.GetSelectableItems().Where(x => x.Value is ColumnValue).Where(x => from.Alias == ((ColumnValue)x.Value).TableAlias).ToList();
-			cols.ForEach(x => sq.SelectClause!.Remove(x));
-
-			var lst = sq.GetSelectableItems().Where(x => x.Value is ColumnValue).Where(x => from.Table.GetTableFullName() == ((ColumnValue)x.Value).TableAlias).ToList();
-			if (lst.Any())
-			{
-				var t = (PhysicalTable)from.Table;
-				t.ColumnNames = new List<string>();
-				foreach (var item in lst)
-				{
-					var c = (ColumnValue)item.Value;
-					c.TableAlias = from.Alias;
-					t.ColumnNames.Add(c.Column);
-				}
-			}
-
-			var tbls = new List<string> { from.Alias };
-			if (where != null) sq.Where(where.ToValue(tbls));
-			//sq.AddSelectClause(select, where, tbls);
-			var text = sq.ToCommand().CommandText;
-			return sq;
+			var exp = (MethodCallExpression)expression.Arguments[0];
+			return BuildRootQuery(exp, sq, where);
 		}
 
-
-		ParameterExpression? joinAlias = null;
-		if (select != null && select.Parameters.Count > 1)
-		{
-			joinAlias = select.Parameters.Last();
-		}
-		else if (where != null)
-		{
-			joinAlias = where.Parameters.First();
-		}
+		var join = GetJoinExpression(expression);
+		var select = GetSelectExpression(expression);
+		var joinAlias = GetJoinAlias(select, where);
 
 		var tables = sq.GetSelectableTables().Select(x => x.Alias).ToList();
-		if (joinAlias != null) tables.Add(joinAlias.Name!);
 
 		if (join != null && joinAlias != null)
 		{
+			tables.Add(joinAlias.Name!);
 			sq.AddJoinClause(join, tables, joinAlias);
 		}
+
 		if (where != null) sq.Where(where.ToValue(tables));
 
+		//refresh select clause
 		sq.SelectClause = null;
 		return sq.AddSelectClause(select, where, tables);
+	}
+
+	private SelectQuery BuildRootQuery(MethodCallExpression expression, SelectQuery sq, LambdaExpression? where)
+	{
+		var select = GetSelectExpression(expression);
+
+		if (select == null || select.Parameters.Count != 2) throw new NotSupportedException();
+
+		var table = select.Parameters[0];
+		var alias = select.Parameters[1];
+
+		if (string.IsNullOrEmpty(table?.Name)) throw new NotSupportedException();
+		if (string.IsNullOrEmpty(alias?.Name)) throw new NotSupportedException();
+
+		var tables = new List<string> { alias.Name! };
+		if (where != null) sq.Where(where.ToValue(tables));
+
+		var v = (ValueCollection)select.Body.ToValue(tables);
+
+		var columns = (ValueCollection)v.First();
+		var columnnames = columns.Select(x => ((ColumnValue)x).Column).ToList();
+
+		foreach (var column in columnnames)
+		{
+			sq.Select(alias!.Name, column);
+		}
+
+		var pt = new PhysicalTable()
+		{
+			ColumnNames = columnnames,
+			Table = table.Name
+		};
+
+		sq.From(pt.ToSelectable()).As(alias.Name);
+
+		return sq;
 	}
 }

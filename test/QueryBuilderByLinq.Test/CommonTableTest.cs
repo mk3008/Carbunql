@@ -22,9 +22,9 @@ public class CommonTableTest
 		var subq = from a in FromTable<table_a>() select new { ID = a.a_id, Text = a.text };
 
 		var query = from cte in CommonTable(subq)
-					from a in FromTable<table_a>(nameof(cte))
-					where a.a_id == 1
-					select a;
+					from b in FromTable<table_a>(nameof(cte))
+					where b.a_id == 1
+					select b;
 
 		var sq = query.ToQueryAsPostgres();
 
@@ -40,12 +40,12 @@ WITH
             table_a AS a
     )
 SELECT 
-	a.ID
-	, a.Text
+	b.ID
+	, b.Text
 FROM
-    cte AS a
+    cte AS b
 WHERE
-    a.a_id =  1";
+    b.a_id =  1";
 
 		Assert.Equal(39, sq.GetTokens().ToList().Count);
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
