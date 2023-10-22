@@ -16,17 +16,22 @@ public static class Sql
 		return Enumerable.Empty<object>().AsQueryable();
 	}
 
-	public static IQueryable<T> Table<T>()
+	public static IQueryable<T> CommonTable<T>(IQueryable<T> subquery)
+	{
+		return new Table<T>(subquery);
+	}
+
+	public static IQueryable<T> FromTable<T>()
 	{
 		return Enumerable.Empty<T>().AsQueryable();
 	}
 
-	public static IQueryable<T> Table<T>(string tableName)
+	public static IQueryable<T> FromTable<T>(string tableName)
 	{
 		return new Table<T>(tableName);
 	}
 
-	public static IQueryable<T> Table<T>(IQueryable<T> subquery)
+	public static IQueryable<T> FromTable<T>(IQueryable<T> subquery)
 	{
 		return new Table<T>(subquery);
 	}

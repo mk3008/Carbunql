@@ -72,9 +72,26 @@ internal static class SelectQueryExtension
 
 	public static SelectQuery AddJoinClause(this SelectQuery sq, LambdaExpression join, List<string> tables, ParameterExpression joinAlias)
 	{
-		var f = sq.FromClause!;
-
 		var me = (MethodCallExpression)join.Body;
+
+		if (me.Method.Name == nameof(Sql.FromTable) && sq.FromClause == null)
+		{
+			var arg = (ConstantExpression)me.Arguments[0];
+			var table = arg.Value?.ToString();
+			var alias = joinAlias.Name;
+			if (string.IsNullOrEmpty(table)) throw new InvalidProgramException();
+			if (string.IsNullOrEmpty(alias)) throw new InvalidProgramException();
+
+			var t = new PhysicalTable()
+			{
+				Table = table,
+				//ColumnNames = prm.Type.GetProperties().ToList().Select(x => x.Name).ToList()
+			};
+			sq.From(t.ToSelectable()).As(alias);
+			return sq;
+		}
+
+		var f = sq.FromClause!;
 
 		if (me.Method.Name == nameof(Sql.InnerJoinTable))
 		{
@@ -151,7 +168,7 @@ internal static class SelectQueryExtension
 			return sq;
 		}
 
-		throw new NotSupportedException();
+		throw new NotSupportedException($"Method name:{me.Method.Name}");
 	}
 
 	public static SelectQuery AddSelectClause(this SelectQuery sq, LambdaExpression? select, LambdaExpression? where, List<string> tables)
@@ -180,6 +197,7 @@ internal static class SelectQueryExtension
 			sq.Select(v).As(!string.IsNullOrEmpty(v.RecommendedName) ? v.RecommendedName : v.GetDefaultName());
 		}
 
+		//rename table alias for SelectAll syntax.
 		var lst = sq.GetSelectableItems().Where(x => x.Value is ColumnValue c && c.TableAlias.StartsWith("<>h__TransparentIdentifier")).ToList();
 		if (lst.Any())
 		{
