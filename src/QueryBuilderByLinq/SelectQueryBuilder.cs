@@ -233,33 +233,59 @@ public class SelectQueryBuilder
 	private SelectQuery BuildNestedQuery(MethodCallExpression expression, SelectQuery sq)
 	{
 		var where = GetWhereExpression(expression);
-
-		if (sq.FromClause == null && (expression.Arguments.Count == 2))
-		{
-			var exp = (MethodCallExpression)expression.Arguments[0];
-			return BuildRootQuery(exp, sq, where);
-		}
-
 		var join = GetJoinExpression(expression);
 		var select = GetSelectExpression(expression);
 		var joinAlias = GetJoinAlias(select, where);
 
-		var tables = sq.GetSelectableTables().Select(x => x.Alias).ToList();
-
-		if (join != null && joinAlias != null)
+		if (sq.FromClause == null)
 		{
-			tables.Add(joinAlias.Name!);
-			sq.AddJoinClause(join, tables, joinAlias);
+			if (expression.Arguments.Count == 2)
+			{
+				var exp = (MethodCallExpression)expression.Arguments[0];
+				sq = BuildRootQuery(exp, sq);
+
+				var ts = sq.GetSelectableTables().Select(x => x.Alias).ToList();
+				if (where != null) sq.Where(where.ToValue(ts));
+				return sq;
+			}
+			if (expression.Arguments.Count == 3 && join != null && joinAlias != null)
+			{
+				var exp = (MethodCallExpression)expression.Arguments[0];
+				sq = BuildRootQuery(exp, sq);
+
+				var ts = sq.GetSelectableTables().Select(x => x.Alias).ToList();
+				ts.Add(joinAlias.Name!);
+				sq.AddJoinClause(join, ts, joinAlias);
+
+				if (where != null) sq.Where(where.ToValue(ts));
+
+				return sq;
+			}
 		}
 
-		if (where != null) sq.Where(where.ToValue(tables));
+		if (sq.FromClause == null) throw new NotSupportedException();
+		{
+			var tables = sq.GetSelectableTables().Select(x => x.Alias).ToList();
 
-		//refresh select clause
-		sq.SelectClause = null;
-		return sq.AddSelectClause(select, where, tables);
+			if (join != null && joinAlias != null)
+			{
+				tables.Add(joinAlias.Name!);
+				sq.AddJoinClause(join, tables, joinAlias);
+			}
+
+			if (where != null) sq.Where(where.ToValue(tables));
+
+			//refresh select clause
+			if (select != null)
+			{
+				sq.SelectClause = null;
+				sq.AddSelectClause(select, where, tables);
+			}
+			return sq;
+		}
 	}
 
-	private SelectQuery BuildRootQuery(MethodCallExpression expression, SelectQuery sq, LambdaExpression? where)
+	private SelectQuery BuildRootQuery(MethodCallExpression expression, SelectQuery sq)
 	{
 		var select = GetSelectExpression(expression);
 
@@ -272,7 +298,7 @@ public class SelectQueryBuilder
 		if (string.IsNullOrEmpty(alias?.Name)) throw new NotSupportedException();
 
 		var tables = new List<string> { alias.Name! };
-		if (where != null) sq.Where(where.ToValue(tables));
+		//if (where != null) sq.Where(where.ToValue(tables));
 
 		var v = (ValueCollection)select.Body.ToValue(tables);
 

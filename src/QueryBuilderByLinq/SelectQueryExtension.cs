@@ -4,7 +4,6 @@ using Carbunql.Clauses;
 using Carbunql.Tables;
 using Carbunql.Values;
 using System.Linq.Expressions;
-using System.Xml.Linq;
 
 namespace QueryBuilderByLinq;
 
@@ -91,6 +90,10 @@ internal static class SelectQueryExtension
 			return sq;
 		}
 
+		if (sq.FromClause == null)
+		{
+			throw new InvalidProgramException();
+		}
 		var f = sq.FromClause!;
 
 		if (me.Method.Name == nameof(Sql.InnerJoinTable))
@@ -113,7 +116,20 @@ internal static class SelectQueryExtension
 			}
 			else if (me.GetJoinTableName(out var name))
 			{
-				f.InnerJoin(name).As(joinAlias.Name!).On((_) => condition);
+				var cte = sq.WithClause?.Where(x => x.Alias == name).FirstOrDefault();
+				if (cte != null && !string.IsNullOrEmpty(cte.Alias))
+				{
+					var t = new PhysicalTable()
+					{
+						Table = cte.Alias,
+						ColumnNames = cte.GetColumnNames().ToList()
+					};
+					f.InnerJoin(t.ToSelectable()).As(joinAlias.Name!).On((_) => condition);
+				}
+				else
+				{
+					f.InnerJoin(name).As(joinAlias.Name!).On((_) => condition);
+				}
 			}
 			else
 			{
