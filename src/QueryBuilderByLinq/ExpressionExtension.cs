@@ -3,12 +3,22 @@ using Carbunql.Clauses;
 using Carbunql.Values;
 using System.Collections;
 using System.Linq.Expressions;
-using System.Reflection;
 
 namespace QueryBuilderByLinq;
 
 internal static class ExpressionExtension
 {
+
+
+	internal static object? GetValueOrDefault(this Expression exp)
+	{
+		if (exp is ConstantExpression m)
+		{
+			return m.Value;
+		}
+		return null;
+	}
+
 	internal static ValueBase ToValue(this Expression exp, List<string> tables)
 	{
 		if (exp.NodeType == ExpressionType.Constant)

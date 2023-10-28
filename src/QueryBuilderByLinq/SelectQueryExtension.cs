@@ -7,29 +7,35 @@ using System.Linq.Expressions;
 
 namespace QueryBuilderByLinq;
 
-internal static class SelectQueryExtension
+internal static class Queryable
 {
-	public static SelectableTable ToSelectable(this ParameterExpression prm)
+	public static bool TryParse(ConstantExpression @const, out IQueryable query)
 	{
-		var t = new PhysicalTable()
+		query = null!;
+
+		if (@const.Value is IQueryable q && q.Provider is TableQuery tq)
 		{
-			Table = prm.Type.ToTableName(),
-			ColumnNames = prm.Type.GetProperties().ToList().Select(x => x.Name).ToList()
-		};
-		return t.ToSelectable();
+			if (tq.InnerQuery != null)
+			{
+				query = tq.InnerQuery;
+				return true;
+			}
+		}
+		return false;
 	}
 
-	private static bool GetJoinQuery(this MethodCallExpression exp, out IQueryable? query)
+	public static bool TryParse(MethodCallExpression method, out IQueryable query)
 	{
-		query = null;
-		if (!exp.Arguments.Any()) return false;
+		query = null!;
 
-		if (!(exp.Method.Name == nameof(Sql.InnerJoinTable) || exp.Method.Name == nameof(Sql.LeftJoinTable) || exp.Method.Name == nameof(Sql.CrossJoinTable)))
+		if (!method.Arguments.Any()) return false;
+
+		if (!(method.Method.Name == nameof(Sql.InnerJoinTable) || method.Method.Name == nameof(Sql.LeftJoinTable) || method.Method.Name == nameof(Sql.CrossJoinTable) || method.Method.Name == nameof(Sql.CommonTable2)))
 		{
 			return false;
 		}
 
-		if (exp.Arguments[0] is MemberExpression mem && mem.Expression is ConstantExpression ce)
+		if (method.Arguments[0] is MemberExpression mem && mem.Expression is ConstantExpression ce)
 		{
 			var fieldname = mem.Member.Name;
 			var val = ce.Value;
@@ -43,11 +49,55 @@ internal static class SelectQueryExtension
 				query = q;
 				return true;
 			}
-			return false;
 		}
 
 		return false;
 	}
+}
+
+
+
+internal static class SelectQueryExtension
+{
+	public static SelectableTable ToSelectable(this ParameterExpression prm)
+	{
+		var t = new PhysicalTable()
+		{
+			Table = prm.Type.ToTableName(),
+			ColumnNames = prm.Type.GetProperties().ToList().Select(x => x.Name).ToList()
+		};
+		return t.ToSelectable();
+	}
+
+	//public static bool GetJoinQuery(this MethodCallExpression exp, out IQueryable? query)
+	//{
+	//	query = null;
+	//	if (!exp.Arguments.Any()) return false;
+
+	//	if (!(exp.Method.Name == nameof(Sql.InnerJoinTable) || exp.Method.Name == nameof(Sql.LeftJoinTable) || exp.Method.Name == nameof(Sql.CrossJoinTable) || exp.Method.Name == nameof(Sql.CommonTable2)))
+	//	{
+	//		return false;
+	//	}
+
+	//	if (exp.Arguments[0] is MemberExpression mem && mem.Expression is ConstantExpression ce)
+	//	{
+	//		var fieldname = mem.Member.Name;
+	//		var val = ce.Value;
+	//		if (val == null) return false;
+	//		var tp = val.GetType();
+	//		if (!tp.GetFields().Any()) return false;
+	//		var field = tp.GetFields().Where(x => x.Name == fieldname).FirstOrDefault();
+	//		if (field == null) return false;
+	//		if (field.GetValue(ce.Value) is IQueryable q)
+	//		{
+	//			query = q;
+	//			return true;
+	//		}
+	//		return false;
+	//	}
+
+	//	return false;
+	//}
 
 	private static bool GetJoinTableName(this MethodCallExpression exp, out string tablename)
 	{
@@ -110,7 +160,7 @@ internal static class SelectQueryExtension
 				item.TableAlias = joinAlias.Name!;
 			}
 
-			if (me.GetJoinQuery(out var subq) && subq != null)
+			if (Queryable.TryParse(me, out var subq))
 			{
 				f.InnerJoin(subq.ToQueryAsPostgres()).As(joinAlias.Name!).On((_) => condition);
 			}
@@ -152,7 +202,7 @@ internal static class SelectQueryExtension
 				item.TableAlias = joinAlias.Name!;
 			}
 
-			if (me.GetJoinQuery(out var subq) && subq != null)
+			if (Queryable.TryParse(me, out var subq))
 			{
 				f.LeftJoin(subq.ToQueryAsPostgres()).As(joinAlias.Name!).On((_) => condition);
 			}
@@ -169,7 +219,7 @@ internal static class SelectQueryExtension
 
 		if (me.Method.Name == nameof(Sql.CrossJoinTable))
 		{
-			if (me.GetJoinQuery(out var subq) && subq != null)
+			if (Queryable.TryParse(me, out var subq))
 			{
 				f.CrossJoin(subq.ToQueryAsPostgres()).As(joinAlias.Name!);
 			}

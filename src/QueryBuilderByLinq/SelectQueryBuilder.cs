@@ -2,7 +2,9 @@
 using Carbunql.Building;
 using Carbunql.Tables;
 using Carbunql.Values;
+using System.Data.Common;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace QueryBuilderByLinq;
 
@@ -68,6 +70,7 @@ public class SelectQueryBuilder
 		else if (expression.Arguments[0] is MethodCallExpression mce)
 		{
 			var sq = Build(mce);
+			var text = sq.ToCommand().CommandText;
 			var x = BuildNestedQuery(expression, sq);
 			return sq;
 		}
@@ -84,18 +87,30 @@ public class SelectQueryBuilder
 
 		if (nest == null)
 		{
+			// no relation pattern
 			return BuildRootQuery(expression, root, select, where);
 		}
-		if (where == null && nest != null && nest.Body is MethodCallExpression mc && select != null)
+		if (where == null && nest != null && nest.Body is MethodCallExpression nestBody && select != null)
 		{
-			if (mc.Method.Name == nameof(Sql.FromTable))
+			if (nestBody.Method.Name == nameof(Sql.FromTable))
 			{
 				// CTE, From pattern
 				return BuildCteQuery(expression, root, nest, select);
 			}
-			else if (mc.Method.Name == nameof(Sql.InnerJoinTable) || mc.Method.Name == nameof(Sql.LeftJoinTable) || mc.Method.Name == nameof(Sql.CrossJoinTable))
+			else if (nestBody.Method.Name == nameof(Sql.CommonTable))
 			{
+				// CTE, CTE pattern
+				return BuildCteQuery(expression, root, nest, select);
+			}
+			else if (nestBody.Method.Name == nameof(Sql.InnerJoinTable) || nestBody.Method.Name == nameof(Sql.LeftJoinTable) || nestBody.Method.Name == nameof(Sql.CrossJoinTable))
+			{
+				// from, relation pattern
 				return BuildRootQuery(expression, root, nest, select, where);
+			}
+			else if (nestBody.Method.Name == nameof(Sql.CommonTable2))
+			{
+				// CTE, CTE pattern
+				return BuildCteQuery(expression, root, nest, select);
 			}
 		}
 
@@ -108,26 +123,32 @@ public class SelectQueryBuilder
 		ParameterExpression? joinAlias = null;
 		if (select != null)
 		{
+			var prm = expression.Method.GetParameters();
 			fromAlias = select.Parameters.First();
 			if (select.Parameters.Count > 1) joinAlias = select.Parameters.Last();
 		}
 		if (fromAlias == null) throw new NotSupportedException();
 
+
+
 		var sq = new SelectQuery();
 		if (fromAlias.Type != typeof(object))
 		{
-			if (cte.Value is IQueryable q && q.Provider is TableQuery tq)
+			if (Queryable.TryParse(cte, out var cte1))
 			{
-				if (tq.InnerQuery != null)
-				{
-					sq.With(tq.InnerQuery.ToQueryAsPostgres()).As(fromAlias.Name!);
-				}
-				else
-				{
-					throw new NotSupportedException();
-				}
+				sq.With(cte1.ToQueryAsPostgres()).As(fromAlias.Name!);
+			}
+			else
+			{
+				throw new NotSupportedException();
+			}
+
+			if (from.Body is MethodCallExpression fromBody && Queryable.TryParse(fromBody, out var cte2))
+			{
+				sq.With(cte2.ToQueryAsPostgres()).As(joinAlias.Name!);
 			}
 		}
+
 		return sq;
 	}
 
@@ -251,15 +272,30 @@ public class SelectQueryBuilder
 			if (expression.Arguments.Count == 3 && join != null && joinAlias != null)
 			{
 				var exp = (MethodCallExpression)expression.Arguments[0];
-				sq = BuildRootQuery(exp, sq);
+				var exp1 = (UnaryExpression)expression.Arguments[1];
+				var lam = (LambdaExpression)exp1.Operand;
+				var mc = (MethodCallExpression)lam.Body;
 
-				var ts = sq.GetSelectableTables().Select(x => x.Alias).ToList();
-				ts.Add(joinAlias.Name!);
-				sq.AddJoinClause(join, ts, joinAlias);
+				if (mc.Method.Name == nameof(Sql.InnerJoinTable) || mc.Method.Name == nameof(Sql.LeftJoinTable) || mc.Method.Name == nameof(Sql.CrossJoinTable))
+				{
+					// CTE - from - relation pattern
 
-				if (where != null) sq.Where(where.ToValue(ts));
+					sq = BuildRootQuery(exp, sq);
 
-				return sq;
+					var text = sq.ToCommand().CommandText;
+
+					var ts = sq.GetSelectableTables().Select(x => x.Alias).ToList();
+					ts.Add(joinAlias.Name!);
+					sq.AddJoinClause(join, ts, joinAlias);
+
+					if (where != null) sq.Where(where.ToValue(ts));
+
+					return sq;
+				}
+				else if (mc.Method.Name == nameof(Sql.FromTable))
+				{
+					return sq;
+				}
 			}
 		}
 
@@ -285,6 +321,23 @@ public class SelectQueryBuilder
 		}
 	}
 
+	private string GetTableNameOrDefault(UnaryExpression ue)
+	{
+		if (ue.Operand is LambdaExpression lambda)
+		{
+			if (lambda.Body is MethodCallExpression method)
+			{
+				if (method.Arguments.Count >= 1)
+				{
+					var val = method.Arguments[0].GetValueOrDefault();
+					if (val is string s) return s;
+				}
+			}
+		}
+
+		return string.Empty;
+	}
+
 	private SelectQuery BuildRootQuery(MethodCallExpression expression, SelectQuery sq)
 	{
 		var select = GetSelectExpression(expression);
@@ -293,6 +346,9 @@ public class SelectQueryBuilder
 
 		var table = select.Parameters[0];
 		var alias = select.Parameters[1];
+		var tableName = table.Name;
+
+
 
 		if (string.IsNullOrEmpty(table?.Name)) throw new NotSupportedException();
 		if (string.IsNullOrEmpty(alias?.Name)) throw new NotSupportedException();
@@ -302,21 +358,36 @@ public class SelectQueryBuilder
 
 		var v = (ValueCollection)select.Body.ToValue(tables);
 
-		var columns = (ValueCollection)v.First();
+		var columns = (ValueCollection)v[0];
 		var columnnames = columns.Select(x => ((ColumnValue)x).Column).ToList();
+
+		if (expression.Arguments.Count > 2 && expression.Arguments[1] is UnaryExpression ue)
+		{
+			var t = GetTableNameOrDefault(ue);
+			if (tableName != t)
+			{
+				tableName = t;
+				var w = sq.WithClause!.GetCommonTables().Where(x => x.Alias == tableName).First();
+				columnnames = w.GetColumnNames().ToList();
+			}
+		}
+
+		if (string.IsNullOrEmpty(tableName)) throw new NotSupportedException();
+
+
+
+		var pt = new PhysicalTable()
+		{
+			ColumnNames = columnnames,
+			Table = tableName
+		};
+
+		sq.From(pt.ToSelectable()).As(alias.Name);
 
 		foreach (var column in columnnames)
 		{
 			sq.Select(alias!.Name, column);
 		}
-
-		var pt = new PhysicalTable()
-		{
-			ColumnNames = columnnames,
-			Table = table.Name
-		};
-
-		sq.From(pt.ToSelectable()).As(alias.Name);
 
 		return sq;
 	}

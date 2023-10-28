@@ -90,5 +90,53 @@ WHERE
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
+	[Fact]
+	public void CTEsTest()
+	{
+		var sub_a1 = from a in FromTable<table_a>() select new { a.a_id, a.text };
+		var sub_a2 = from a in FromTable<table_a>() select new { a.a_id, a.value };
+
+		var query = from cte1 in CommonTable(sub_a1)
+					from cte2 in CommonTable2(sub_a2)
+					from b in FromTable<table_a>(nameof(cte1))
+					from c in InnerJoinTable<table_a>(nameof(cte2), x => b.a_id == x.a_id)
+					where b.a_id == 1
+					select new { b, c };
+
+		var sq = query.ToQueryAsPostgres();
+
+		Monitor.Log(sq);
+
+		var sql = @"
+WITH
+    cte1 AS (
+        SELECT
+            a.a_id,
+            a.text
+        FROM
+            table_a AS a
+    ),
+    cte2 AS (
+        SELECT
+            a.a_id,
+            a.value
+        FROM
+            table_a AS a
+    )
+SELECT
+    b.a_id,
+    b.text,
+    c.a_id,
+    c.value
+FROM
+    cte1 AS b
+    INNER JOIN cte2 AS c ON b.a_id = c.a_id
+WHERE
+    b.a_id = 1";
+
+		Assert.Equal(72, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
 	public record struct table_a(int a_id, string text, int value);
 }
