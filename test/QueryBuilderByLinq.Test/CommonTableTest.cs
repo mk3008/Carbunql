@@ -97,7 +97,7 @@ WHERE
 		var sub_a2 = from a in FromTable<table_a>() select new { a.a_id, a.value };
 
 		var query = from cte1 in CommonTable(sub_a1)
-					from cte2 in CommonTable2(sub_a2)
+					from cte2 in CommonTable(sub_a2)
 					from b in FromTable<table_a>(nameof(cte1))
 					from c in InnerJoinTable<table_a>(nameof(cte2), x => b.a_id == x.a_id)
 					where b.a_id == 1

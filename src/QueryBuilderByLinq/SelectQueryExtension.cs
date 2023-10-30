@@ -30,7 +30,7 @@ internal static class Queryable
 
 		if (!method.Arguments.Any()) return false;
 
-		if (!(method.Method.Name == nameof(Sql.InnerJoinTable) || method.Method.Name == nameof(Sql.LeftJoinTable) || method.Method.Name == nameof(Sql.CrossJoinTable) || method.Method.Name == nameof(Sql.CommonTable2)))
+		if (!(method.Method.Name == nameof(Sql.InnerJoinTable) || method.Method.Name == nameof(Sql.LeftJoinTable) || method.Method.Name == nameof(Sql.CrossJoinTable) || method.Method.Name == nameof(Sql.CommonTable)))
 		{
 			return false;
 		}

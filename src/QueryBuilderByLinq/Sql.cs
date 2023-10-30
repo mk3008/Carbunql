@@ -21,11 +21,6 @@ public static class Sql
 		return new Table<T>(subquery);
 	}
 
-	public static IQueryable<T> CommonTable2<T>(IQueryable<T> subquery)
-	{
-		return subquery;
-	}
-
 	public static IQueryable<T> FromTable<T>()
 	{
 		return Enumerable.Empty<T>().AsQueryable();

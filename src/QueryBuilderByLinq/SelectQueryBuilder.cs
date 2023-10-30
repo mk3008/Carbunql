@@ -107,11 +107,6 @@ public class SelectQueryBuilder
 				// from, relation pattern
 				return BuildRootQuery(expression, root, nest, select, where);
 			}
-			else if (nestBody.Method.Name == nameof(Sql.CommonTable2))
-			{
-				// CTE, CTE pattern
-				return BuildCteQuery(expression, root, nest, select);
-			}
 		}
 
 		throw new NotSupportedException();
@@ -145,7 +140,7 @@ public class SelectQueryBuilder
 
 			if (from.Body is MethodCallExpression fromBody && Queryable.TryParse(fromBody, out var cte2))
 			{
-				sq.With(cte2.ToQueryAsPostgres()).As(joinAlias.Name!);
+				sq.With(cte2.ToQueryAsPostgres()).As(joinAlias!.Name!);
 			}
 		}
 
