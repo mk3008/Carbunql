@@ -138,5 +138,68 @@ WHERE
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
+	[Fact]
+	public void CTEsTest3()
+	{
+		var sub_a1 = from a in FromTable<table_a>() select new { a.a_id, a.text };
+		var sub_a2 = from a in FromTable<table_a>() select new { a.a_id, a.value };
+		var sub_a3 = from a in FromTable<table_a>() select a;
+
+		var query = from cte1 in CommonTable(sub_a1)
+					from cte2 in CommonTable(sub_a2)
+					from cte3 in CommonTable(sub_a3)
+					from b in FromTable<table_a>(nameof(cte1))
+					from c in InnerJoinTable<table_a>(nameof(cte2), x => b.a_id == x.a_id)
+					from d in InnerJoinTable<table_a>(nameof(cte3), x => b.a_id == x.a_id)
+					where b.a_id == 1
+					select new { b, c, d };
+
+		var sq = query.ToQueryAsPostgres();
+
+		Monitor.Log(sq);
+
+		var sql = @"
+WITH
+    cte1 AS (
+        SELECT
+            a.a_id,
+            a.text
+        FROM
+            table_a AS a
+    ),
+    cte2 AS (
+        SELECT
+            a.a_id,
+            a.value
+        FROM
+            table_a AS a
+    ),
+    cte3 AS (
+        SELECT
+            a.a_id,
+            a.text,
+            a.value
+        FROM
+            table_a AS a
+    )
+SELECT
+    b.a_id,
+    b.text,
+    c.a_id,
+    c.value,
+    d.a_id,
+    d.text,
+    d.value
+FROM
+    cte1 AS b
+    INNER JOIN cte2 AS c ON b.a_id = c.a_id
+    INNER JOIN cte3 AS d ON b.a_id = d.a_id
+WHERE
+    b.a_id = 1";
+
+		Assert.Equal(117, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
 	public record struct table_a(int a_id, string text, int value);
 }
