@@ -2,9 +2,7 @@
 using Carbunql.Building;
 using Carbunql.Tables;
 using Carbunql.Values;
-using System.Data.Common;
 using System.Linq.Expressions;
-using System.Reflection;
 
 namespace QueryBuilderByLinq;
 
@@ -17,50 +15,6 @@ public class SelectQueryBuilder
 
 	public MethodCallExpression Expression { get; init; }
 
-	private LambdaExpression? GetSelectExpression(MethodCallExpression expression)
-	{
-		if (expression.Arguments.Count == 2)
-		{
-			var ue = (UnaryExpression)expression.Arguments[1];
-			return GetSelectExpression(ue);
-		}
-		else if (expression.Arguments.Count == 3)
-		{
-			var ue = (UnaryExpression)expression.Arguments[2];
-			return GetSelectExpression(ue);
-		}
-		throw new NotSupportedException();
-	}
-
-	private LambdaExpression? GetSelectExpression(UnaryExpression ue)
-	{
-		var operand = (LambdaExpression)ue.Operand;
-		if (operand.ReturnType == typeof(bool)) return null;
-		return operand;
-	}
-
-	private LambdaExpression? GetJoinExpression(MethodCallExpression expression)
-	{
-		if (expression.Arguments.Count == 3)
-		{
-			var ue = (UnaryExpression)expression.Arguments[1];
-			return (LambdaExpression)ue.Operand;
-		}
-		return null;
-	}
-
-	private LambdaExpression? GetWhereExpression(MethodCallExpression expression)
-	{
-		if (expression.Arguments.Count == 2)
-		{
-			var ue = (UnaryExpression)expression.Arguments[1];
-			var operand = (LambdaExpression)ue.Operand;
-			if (operand.ReturnType != typeof(bool)) return null;
-			return operand;
-		}
-		return null;
-	}
-
 	public SelectQuery Build(MethodCallExpression expression)
 	{
 		if (expression.Arguments[0] is ConstantExpression)
@@ -70,8 +24,7 @@ public class SelectQueryBuilder
 		else if (expression.Arguments[0] is MethodCallExpression mce)
 		{
 			var sq = Build(mce);
-			var text = sq.ToCommand().CommandText;
-			var x = BuildNestedQuery(expression, sq);
+			sq = BuildNestedQuery(expression, sq);
 			return sq;
 		}
 
@@ -80,32 +33,32 @@ public class SelectQueryBuilder
 
 	private SelectQuery BuildRootQuery(MethodCallExpression expression)
 	{
-		var root = (ConstantExpression)expression.Arguments[0];
-		var nest = GetJoinExpression(expression);
-		var select = GetSelectExpression(expression);
-		var where = GetWhereExpression(expression);
+		var root = expression.GetArgument<ConstantExpression>(index: 0);
+		var method = expression.GetMethodLambdaFromArguments();
+		var select = expression.GetSelectLambdaFromArguments();
+		var condition = expression.GetConditionLambdaFromArguments();
 
-		if (nest == null)
+		if (root != null && method == null)
 		{
 			// no relation pattern
-			return BuildRootQuery(expression, root, select, where);
+			return BuildRootQuery(expression, root, select, condition);
 		}
-		if (where == null && nest != null && nest.Body is MethodCallExpression nestBody && select != null)
+		if (condition == null && method != null && method.Body is MethodCallExpression nestBody && select != null)
 		{
 			if (nestBody.Method.Name == nameof(Sql.FromTable))
 			{
 				// CTE, From pattern
-				return BuildCteQuery(expression, root, nest, select);
+				return BuildCteQuery(expression, root, method, select);
 			}
 			else if (nestBody.Method.Name == nameof(Sql.CommonTable))
 			{
 				// CTE, CTE pattern
-				return BuildCteQuery(expression, root, nest, select);
+				return BuildCteQuery(expression, root, method, select);
 			}
 			else if (nestBody.Method.Name == nameof(Sql.InnerJoinTable) || nestBody.Method.Name == nameof(Sql.LeftJoinTable) || nestBody.Method.Name == nameof(Sql.CrossJoinTable))
 			{
 				// from, relation pattern
-				return BuildRootQuery(expression, root, nest, select, where);
+				return BuildRootQuery(expression, root, method, select, condition);
 			}
 		}
 
@@ -246,33 +199,60 @@ public class SelectQueryBuilder
 		return null;
 	}
 
+	private SelectQuery BuildRootQuery(MethodCallExpression expression, SelectQuery sq, LambdaExpression? where)
+	{
+		var exp = (MethodCallExpression)expression.Arguments[0];
+		sq = BuildRootQuery(exp, sq);
+
+		var ts = sq.GetSelectableTables().Select(x => x.Alias).ToList();
+		if (where != null) sq.Where(where.ToValue(ts));
+		return sq;
+	}
+
+
+
+
+	private LambdaExpression? GetArgumentOperand(MethodCallExpression expression, int argumentIndex)
+	{
+		if (expression.Arguments.Count() < argumentIndex + 1) return null;
+		if (expression.Arguments[argumentIndex] is UnaryExpression u && u.Operand is LambdaExpression lam)
+		{
+			return lam;
+		}
+		return null;
+	}
+
+	private T? GetArgumentOperandBody<T>(MethodCallExpression expression, int argumentIndex)
+	{
+		var lam = GetArgumentOperand(expression, argumentIndex);
+		if (lam == null) return default(T);
+		if (lam.Body is T body) return body;
+		return default(T);
+	}
+
 	private SelectQuery BuildNestedQuery(MethodCallExpression expression, SelectQuery sq)
 	{
-		var where = GetWhereExpression(expression);
-		var join = GetJoinExpression(expression);
-		var select = GetSelectExpression(expression);
-		var joinAlias = GetJoinAlias(select, where);
+		var condition = expression.GetConditionLambdaFromArguments();
+		var method = expression.GetMethodLambdaFromArguments();
+		var select = expression.GetSelectLambdaFromArguments();
+		var joinAlias = GetJoinAlias(select, condition);
 
 		if (sq.FromClause == null)
 		{
 			if (expression.Arguments.Count == 2)
 			{
-				var exp = (MethodCallExpression)expression.Arguments[0];
-				sq = BuildRootQuery(exp, sq);
-
-				var ts = sq.GetSelectableTables().Select(x => x.Alias).ToList();
-				if (where != null) sq.Where(where.ToValue(ts));
-				return sq;
+				return BuildRootQuery(expression, sq, condition);
 			}
-			if (expression.Arguments.Count == 3 && join != null && joinAlias != null)
+			if (expression.Arguments.Count == 3 && method != null && joinAlias != null)
 			{
-				var exp = (MethodCallExpression)expression.Arguments[0];
-				var exp1 = (UnaryExpression)expression.Arguments[1];
-				var lam = (LambdaExpression)exp1.Operand;
-				var mc = (MethodCallExpression)lam.Body;
+				var mc = expression.GetArgument<UnaryExpression>(1).GetOperand<LambdaExpression>().GetBody<MethodCallExpression>(); ;
+
+				if (mc == null) throw new NotSupportedException();
 
 				if (mc.Method.Name == nameof(Sql.InnerJoinTable) || mc.Method.Name == nameof(Sql.LeftJoinTable) || mc.Method.Name == nameof(Sql.CrossJoinTable))
 				{
+					var exp = (MethodCallExpression)expression.Arguments[0];
+
 					// CTE - from - relation pattern
 
 					sq = BuildRootQuery(exp, sq);
@@ -281,9 +261,9 @@ public class SelectQueryBuilder
 
 					var ts = sq.GetSelectableTables().Select(x => x.Alias).ToList();
 					ts.Add(joinAlias.Name!);
-					sq.AddJoinClause(join, ts, joinAlias);
+					sq.AddJoinClause(method, ts, joinAlias);
 
-					if (where != null) sq.Where(where.ToValue(ts));
+					if (condition != null) sq.Where(condition.ToValue(ts));
 
 					return sq;
 				}
@@ -298,19 +278,19 @@ public class SelectQueryBuilder
 		{
 			var tables = sq.GetSelectableTables().Select(x => x.Alias).ToList();
 
-			if (join != null && joinAlias != null)
+			if (method != null && joinAlias != null)
 			{
 				tables.Add(joinAlias.Name!);
-				sq.AddJoinClause(join, tables, joinAlias);
+				sq.AddJoinClause(method, tables, joinAlias);
 			}
 
-			if (where != null) sq.Where(where.ToValue(tables));
+			if (condition != null) sq.Where(condition.ToValue(tables));
 
 			//refresh select clause
 			if (select != null)
 			{
 				sq.SelectClause = null;
-				sq.AddSelectClause(select, where, tables);
+				sq.AddSelectClause(select, condition, tables);
 			}
 			return sq;
 		}
@@ -335,7 +315,7 @@ public class SelectQueryBuilder
 
 	private SelectQuery BuildRootQuery(MethodCallExpression expression, SelectQuery sq)
 	{
-		var select = GetSelectExpression(expression);
+		var select = expression.GetSelectLambdaFromArguments();
 
 		if (select == null || select.Parameters.Count != 2) throw new NotSupportedException();
 
@@ -343,13 +323,10 @@ public class SelectQueryBuilder
 		var alias = select.Parameters[1];
 		var tableName = table.Name;
 
-
-
 		if (string.IsNullOrEmpty(table?.Name)) throw new NotSupportedException();
 		if (string.IsNullOrEmpty(alias?.Name)) throw new NotSupportedException();
 
 		var tables = new List<string> { alias.Name! };
-		//if (where != null) sq.Where(where.ToValue(tables));
 
 		var v = (ValueCollection)select.Body.ToValue(tables);
 
@@ -369,8 +346,6 @@ public class SelectQueryBuilder
 
 		if (string.IsNullOrEmpty(tableName)) throw new NotSupportedException();
 
-
-
 		var pt = new PhysicalTable()
 		{
 			ColumnNames = columnnames,
@@ -385,5 +360,64 @@ public class SelectQueryBuilder
 		}
 
 		return sq;
+	}
+}
+
+internal static class ExpressionHelper
+{
+	internal static IEnumerable<T> GetArguments<T>(this MethodCallExpression? expression)
+	{
+		if (expression == null) yield break;
+
+		for (int i = 0; i < expression.Arguments.Count(); i++)
+		{
+			if (expression.Arguments[i] is T exp) yield return exp;
+		}
+	}
+
+	internal static T? GetArgument<T>(this MethodCallExpression? expression, int index)
+	{
+		if (expression == null) return default(T);
+
+		if (expression.Arguments.Count() < index + 1) return default(T);
+		if (expression.Arguments[index] is T exp) return exp;
+		return default(T);
+	}
+
+	internal static T? GetOperand<T>(this UnaryExpression? expression)
+	{
+		if (expression == null) return default(T);
+
+		if (expression.Operand is T exp) return exp;
+		return default(T);
+	}
+
+	internal static T? GetBody<T>(this LambdaExpression? expression)
+	{
+		if (expression == null) return default(T);
+
+		if (expression.Body is T exp) return exp;
+		return default(T);
+	}
+
+	internal static LambdaExpression? GetSelectLambdaFromArguments(this MethodCallExpression expression)
+	{
+		var args = expression.GetArguments<UnaryExpression>();
+		var lambdas = args.Where(x => x.Operand.NodeType == ExpressionType.Lambda).Select(x => (LambdaExpression)x.Operand);
+		return lambdas.Where(x => x.Body.NodeType != ExpressionType.Call && x.ReturnType != typeof(bool)).FirstOrDefault();
+	}
+
+	internal static LambdaExpression? GetMethodLambdaFromArguments(this MethodCallExpression expression)
+	{
+		var args = expression.GetArguments<UnaryExpression>();
+		var lambdas = args.Where(x => x.Operand.NodeType == ExpressionType.Lambda).Select(x => (LambdaExpression)x.Operand);
+		return lambdas.Where(x => x.Body.NodeType == ExpressionType.Call && x.ReturnType != typeof(bool)).FirstOrDefault();
+	}
+
+	internal static LambdaExpression? GetConditionLambdaFromArguments(this MethodCallExpression expression)
+	{
+		var args = expression.GetArguments<UnaryExpression>();
+		var lambdas = args.Where(x => x.Operand.NodeType == ExpressionType.Lambda).Select(x => (LambdaExpression)x.Operand);
+		return lambdas.Where(x => x.ReturnType == typeof(bool)).FirstOrDefault();
 	}
 }
