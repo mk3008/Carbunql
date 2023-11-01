@@ -108,13 +108,13 @@ internal static class SelectQueryExtension
 		{
 			return false;
 		}
-		if (exp.Arguments[0] is ConstantExpression ce)
+
+		var name = exp.GetArgument<MemberExpression>(index: 0)?.Member?.Name;
+
+		if (name != null)
 		{
-			if (ce.Value == null) return false;
-			var name = ce.Value.ToString();
-			if (string.IsNullOrEmpty(name)) return false;
 			tablename = name;
-			return (string.IsNullOrEmpty(tablename)) ? false : true;
+			return true;
 		}
 		return false;
 	}
@@ -208,7 +208,20 @@ internal static class SelectQueryExtension
 			}
 			else if (me.GetJoinTableName(out var name))
 			{
-				f.LeftJoin(name).As(joinAlias.Name!).On((_) => condition);
+				var cte = sq.WithClause?.Where(x => x.Alias == name).FirstOrDefault();
+				if (cte != null && !string.IsNullOrEmpty(cte.Alias))
+				{
+					var t = new PhysicalTable()
+					{
+						Table = cte.Alias,
+						ColumnNames = cte.GetColumnNames().ToList()
+					};
+					f.LeftJoin(t.ToSelectable()).As(joinAlias.Name!).On((_) => condition);
+				}
+				else
+				{
+					f.LeftJoin(name).As(joinAlias.Name!).On((_) => condition);
+				}
 			}
 			else
 			{

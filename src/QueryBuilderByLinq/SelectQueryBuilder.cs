@@ -56,7 +56,10 @@ public class SelectQueryBuilder
 			if (nestBody.Method.Name == nameof(Sql.FromTable))
 			{
 				// CTE, From pattern
-				return BuildCteQuery(expression, root, method, select);
+				var sq = BuildCteQuery(expression, root, method, select);
+				// from
+				sq.AddRootQuery(expression);
+				return sq;
 			}
 			else if (nestBody.Method.Name == nameof(Sql.CommonTable))
 			{
@@ -372,6 +375,23 @@ internal static class ExpressionHelper
 		return lambdas.Where(x => x.ReturnType == typeof(bool)).FirstOrDefault();
 	}
 
+	internal static List<string> DecodeColumnNames(this ValueCollection collection, string tableAlias)
+	{
+		var columnNames = new List<string>();
+		foreach (var item in collection)
+		{
+			if (item is ValueCollection vc)
+			{
+				columnNames.AddRange(vc.DecodeColumnNames(tableAlias));
+			}
+			else if (item is ColumnValue c && c.TableAlias == tableAlias)
+			{
+				columnNames.Add(c.Column);
+			}
+		}
+		return columnNames;
+	}
+
 	internal static SelectQuery AddRootQuery(this SelectQuery sq, MethodCallExpression expression)
 	{
 		var select = expression.GetSelectLambdaFromArguments();
@@ -390,19 +410,19 @@ internal static class ExpressionHelper
 
 		var v = (ValueCollection)select.Body.ToValue(tables);
 
-		var columns = (ValueCollection)v[0];
-		var columnnames = columns.Select(x => ((ColumnValue)x).Column).ToList();
+		var columnNames = v.DecodeColumnNames(alias.Name!);
 
 		if (method != null)
 		{
-			var t = method.GetBody<MethodCallExpression>().GetArgument<ConstantExpression>(index: 0)!.Value!.ToString();
+			var name = expression.GetArgument<MethodCallExpression>(index: 0).GetArgument<MethodCallExpression>(index: 0).GetArgument<UnaryExpression>(index: 1).GetOperand<LambdaExpression>()?.Parameters[0].Name;
+			if (name == null) name = expression.GetArgument<UnaryExpression>(index: 1).GetOperand<LambdaExpression>().GetBody<MethodCallExpression>().GetArgument<MemberExpression>(index: 0)?.Member.Name;
 
 			// select CTE
-			if (tableName != t)
+			if (name != null && tableName != name)
 			{
-				tableName = t;
+				tableName = name;
 				var w = sq.WithClause!.GetCommonTables().Where(x => x.Alias == tableName).First();
-				columnnames = w.GetColumnNames().ToList();
+				columnNames = w.GetColumnNames().ToList();
 			}
 		}
 
@@ -410,13 +430,13 @@ internal static class ExpressionHelper
 
 		var pt = new PhysicalTable()
 		{
-			ColumnNames = columnnames,
+			ColumnNames = columnNames,
 			Table = tableName
 		};
 
 		sq.From(pt.ToSelectable()).As(alias.Name);
 
-		foreach (var column in columnnames)
+		foreach (var column in columnNames)
 		{
 			sq.Select(alias!.Name, column);
 		}

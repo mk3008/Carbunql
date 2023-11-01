@@ -17,13 +17,12 @@ public class CommonTableTest
 	private ITestOutputHelper Output { get; set; }
 
 	[Fact]
-	public void DefaultTest()
+	public void FromSelect()
 	{
 		var subq = from a in FromTable<table_a>() select new { ID = a.a_id, Text = a.text };
 
 		var query = from cte in CommonTable(subq)
-					from b in FromTable<table_a>(nameof(cte))
-					where b.a_id == 1
+					from b in FromTable(cte)
 					select b;
 
 		var sq = query.ToQueryAsPostgres();
@@ -39,13 +38,46 @@ WITH
         FROM
             table_a AS a
     )
-SELECT 
-	b.ID
-	, b.Text
+SELECT
+    b.ID,
+    b.Text
+FROM
+    cte AS b";
+
+		Assert.Equal(33, sq.GetTokens().ToList().Count);
+		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
+	}
+
+	[Fact]
+	public void FromWhereSelect()
+	{
+		var subq = from a in FromTable<table_a>() select new { ID = a.a_id, Text = a.text };
+
+		var query = from cte in CommonTable(subq)
+					from b in FromTable(cte)
+					where b.ID == 1
+					select b;
+
+		var sq = query.ToQueryAsPostgres();
+
+		Monitor.Log(sq);
+
+		var sql = @"
+WITH
+    cte AS (
+        SELECT
+            a.a_id AS ID,
+            a.text AS Text
+        FROM
+            table_a AS a
+    )
+SELECT
+    b.ID,
+    b.Text
 FROM
     cte AS b
 WHERE
-    b.a_id =  1";
+    b.ID = 1";
 
 		Assert.Equal(39, sq.GetTokens().ToList().Count);
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
@@ -57,9 +89,9 @@ WHERE
 		var subq = from a in FromTable<table_a>() select new { ID = a.a_id, Text = a.text };
 
 		var query = from cte in CommonTable(subq)
-					from b in FromTable<table_a>(nameof(cte))
-					from c in InnerJoinTable<table_a>(nameof(cte), x => b.a_id == x.a_id)
-					where b.a_id == 1
+					from b in FromTable(cte)
+					from c in InnerJoinTable(cte, x => b.ID == x.ID)
+					where b.ID == 1
 					select new { b, c };
 
 		var sq = query.ToQueryAsPostgres();
@@ -82,9 +114,9 @@ SELECT
     c.Text
 FROM
     cte AS b
-    INNER JOIN cte AS c ON b.a_id = c.a_id
+    INNER JOIN cte AS c ON b.ID = c.ID
 WHERE
-    b.a_id = 1";
+    b.ID = 1";
 
 		Assert.Equal(59, sq.GetTokens().ToList().Count);
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
@@ -98,8 +130,8 @@ WHERE
 
 		var query = from cte1 in CommonTable(sub_a1)
 					from cte2 in CommonTable(sub_a2)
-					from b in FromTable<table_a>(nameof(cte1))
-					from c in InnerJoinTable<table_a>(nameof(cte2), x => b.a_id == x.a_id)
+					from b in FromTable(cte1)
+					from c in InnerJoinTable(cte2, x => b.a_id == x.a_id)
 					where b.a_id == 1
 					select new { b, c };
 
@@ -148,11 +180,12 @@ WHERE
 		var query = from cte1 in CommonTable(sub_a1)
 					from cte2 in CommonTable(sub_a2)
 					from cte3 in CommonTable(sub_a3)
-					from b in FromTable<table_a>(nameof(cte1))
-					from c in InnerJoinTable<table_a>(nameof(cte2), x => b.a_id == x.a_id)
-					from d in InnerJoinTable<table_a>(nameof(cte3), x => b.a_id == x.a_id)
+					from b in FromTable(cte1)
+					from c in InnerJoinTable(cte2, x => b.a_id == x.a_id)
+					from d in LeftJoinTable(cte3, x => b.a_id == x.a_id)
+					from e in CrossJoinTable(cte3)
 					where b.a_id == 1
-					select new { b, c, d };
+					select new { b, c, d, e };
 
 		var sq = query.ToQueryAsPostgres();
 
@@ -189,11 +222,15 @@ SELECT
     c.value,
     d.a_id,
     d.text,
-    d.value
+    d.value,
+    e.a_id,
+    e.text,
+    e.value,
 FROM
     cte1 AS b
     INNER JOIN cte2 AS c ON b.a_id = c.a_id
-    INNER JOIN cte3 AS d ON b.a_id = d.a_id
+    LEFT JOIN cte3 AS d ON b.a_id = d.a_id
+    CROSS JOIN cte3 AS e
 WHERE
     b.a_id = 1";
 
