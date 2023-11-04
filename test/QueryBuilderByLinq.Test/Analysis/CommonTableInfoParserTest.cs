@@ -4,11 +4,11 @@ using static QueryBuilderByLinq.Sql;
 
 namespace QueryBuilderByLinq.Test.Analysis;
 
-public class CommonTableParserTest
+public class CommonTableInfoParserTest
 {
 	private readonly QueryCommandMonitor Monitor;
 
-	public CommonTableParserTest(ITestOutputHelper output)
+	public CommonTableInfoParserTest(ITestOutputHelper output)
 	{
 		Monitor = new QueryCommandMonitor(output);
 		Output = output;
@@ -27,7 +27,7 @@ public class CommonTableParserTest
 
 		Monitor.Log(query);
 
-		var ctes = CommonTableParser.Parse(query.Expression);
+		var ctes = CommonTableInfoParser.Parse(query.Expression);
 
 		Assert.Single(ctes);
 		Assert.Equal("cte", ctes[0].Alias);
@@ -45,7 +45,7 @@ public class CommonTableParserTest
 
 		Monitor.Log(query);
 
-		var ctes = CommonTableParser.Parse(query.Expression);
+		var ctes = CommonTableInfoParser.Parse(query.Expression);
 
 		Assert.Equal(2, ctes.Count);
 	}
@@ -65,7 +65,7 @@ public class CommonTableParserTest
 
 		Monitor.Log(query);
 
-		var ctes = CommonTableParser.Parse(query.Expression);
+		var ctes = CommonTableInfoParser.Parse(query.Expression);
 
 		Assert.Equal(5, ctes.Count);
 	}

@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace QueryBuilderByLinq.Analysis;
 
-public static class FromTableParser
+public static class FromTableInfoParser
 {
 	public static FromTableInfo? Parse(Expression exp)
 	{

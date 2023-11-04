@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 
 namespace QueryBuilderByLinq.Analysis;
 
-public static class CommonTableParser
+public static class CommonTableInfoParser
 {
 	public static List<CommonTableInfo> Parse(Expression exp)
 	{

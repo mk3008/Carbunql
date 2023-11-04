@@ -19,7 +19,7 @@ public class CommonTableTest
 
 	private void WriteLog(IQueryable query)
 	{
-		var from = FromTableParser.Parse(query.Expression);
+		var from = FromTableInfoParser.Parse(query.Expression);
 		if (from != null)
 		{
 			Output.WriteLine($"from : {from.Alias}");

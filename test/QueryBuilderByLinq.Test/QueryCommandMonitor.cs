@@ -15,7 +15,7 @@ public class QueryCommandMonitor
 
 	public void Log(IQueryable query)
 	{
-		var from = FromTableParser.Parse(query.Expression);
+		var from = FromTableInfoParser.Parse(query.Expression);
 		if (from != null)
 		{
 			Output.WriteLine("From");
@@ -30,7 +30,7 @@ public class QueryCommandMonitor
 		}
 		Output.WriteLine("--------------------");
 
-		var ctes = CommonTableParser.Parse(query.Expression);
+		var ctes = CommonTableInfoParser.Parse(query.Expression);
 		foreach (var cte in ctes)
 		{
 			Output.WriteLine($"CTE[{ctes.IndexOf(cte)}] : {cte.Alias}");

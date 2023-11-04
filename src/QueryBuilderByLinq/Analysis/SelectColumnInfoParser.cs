@@ -2,7 +2,7 @@
 
 namespace QueryBuilderByLinq.Analysis;
 
-public class JoinTableParser
+public class SelectColumnInfoParser
 {
 	public static List<JoinTableInfo> Parse(Expression exp)
 	{
