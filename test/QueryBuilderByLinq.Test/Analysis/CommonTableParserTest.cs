@@ -1,4 +1,3 @@
-using Carbunql;
 using QueryBuilderByLinq.Analysis;
 using Xunit.Abstractions;
 using static QueryBuilderByLinq.Sql;
