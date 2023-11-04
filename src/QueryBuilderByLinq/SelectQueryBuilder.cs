@@ -1,8 +1,12 @@
 ﻿using Carbunql;
 using Carbunql.Building;
+using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
 using System.Linq.Expressions;
+using System.Reflection;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace QueryBuilderByLinq;
 
@@ -46,6 +50,11 @@ public class SelectQueryBuilder
 		var select = expression.GetSelectLambdaFromArguments();
 		var condition = expression.GetConditionLambdaFromArguments();
 
+		//if (method != null && CommonTableInfo.TryParse(method, out var cte))
+		//{
+		//	var x = cte;
+		//}
+
 		if (root != null && method == null)
 		{
 			// no relation pattern
@@ -88,7 +97,10 @@ public class SelectQueryBuilder
 		}
 		if (fromAlias == null) throw new NotSupportedException();
 
-
+		//if (CommonTableInfo.TryParse(from, out var cte11))
+		//{
+		//	var x = cte11;
+		//}
 
 		var sq = new SelectQuery();
 		if (fromAlias.Type != typeof(object))
@@ -335,6 +347,15 @@ internal static class ExpressionHelper
 
 		if (expression.Arguments.Count() < index + 1) return default(T);
 		if (expression.Arguments[index] is T exp) return exp;
+		return default(T);
+	}
+
+	internal static T? GetParameter<T>(this LambdaExpression? expression, int index)
+	{
+		if (expression == null) return default(T);
+
+		if (expression.Parameters.Count() < index + 1) return default(T);
+		if (expression.Parameters[index] is T exp) return exp;
 		return default(T);
 	}
 

@@ -1,4 +1,5 @@
 using Carbunql;
+using QueryBuilderByLinq.Analysis;
 using Xunit.Abstractions;
 using static QueryBuilderByLinq.Sql;
 
@@ -20,8 +21,11 @@ public class SelectTest
 	public void SelectScalar()
 	{
 		var query = from a in FromTable<table_a>() select a.a_id;
+		//WriteLog(query);
+
 		var sq = query.ToQueryAsPostgres();
 
+		Monitor.Log(query);
 		Monitor.Log(sq);
 
 		var sql = @"
@@ -40,6 +44,7 @@ FROM
 		var query = from a in FromTable<table_a>("sales") select a.a_id;
 		var sq = query.ToQueryAsPostgres();
 
+		Monitor.Log(query);
 		Monitor.Log(sq);
 
 		var sql = @"
@@ -58,6 +63,7 @@ FROM
 		var query = from a in FromTable<table_a>() select a;
 		var sq = query.ToQueryAsPostgres();
 
+		Monitor.Log(query);
 		Monitor.Log(sq);
 
 		var sql = @"
@@ -83,6 +89,7 @@ FROM
 					};
 		var sq = query.ToQueryAsPostgres();
 
+		Monitor.Log(query);
 		Monitor.Log(sq);
 
 		var sql = @"
@@ -108,6 +115,7 @@ FROM
 					};
 		var sq = query.ToQueryAsPostgres();
 
+		Monitor.Log(query);
 		Monitor.Log(sq);
 
 		var sql = @"
@@ -131,6 +139,7 @@ FROM
 					};
 		var sq = query.ToQueryAsPostgres();
 
+		Monitor.Log(query);
 		Monitor.Log(sq);
 
 		var sql = @"
@@ -153,6 +162,7 @@ FROM
 					};
 		var sq = query.ToQueryAsPostgres();
 
+		Monitor.Log(query);
 		Monitor.Log(sq);
 
 		var sql = @"
@@ -175,6 +185,7 @@ FROM
 					};
 		var sq = query.ToQueryAsPostgres();
 
+		Monitor.Log(query);
 		Monitor.Log(sq);
 
 		var sql = @"
@@ -197,6 +208,7 @@ FROM
 					};
 		var sq = query.ToQueryAsPostgres();
 
+		Monitor.Log(query);
 		Monitor.Log(sq);
 
 		var sql = @"
@@ -223,6 +235,7 @@ FROM
 					};
 		var sq = query.ToQueryAsPostgres();
 
+		Monitor.Log(query);
 		Monitor.Log(sq);
 
 		var sql = @"
@@ -249,6 +262,7 @@ FROM
 					};
 		var sq = query.ToQueryAsPostgres();
 
+		Monitor.Log(query);
 		Monitor.Log(sq);
 
 		var sql = @"

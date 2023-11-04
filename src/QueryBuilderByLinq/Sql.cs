@@ -6,15 +6,17 @@ using System.Linq.Expressions;
 
 namespace QueryBuilderByLinq;
 
+public class DualTable { }
+
 public static class Sql
 {
 	/// <summary>
 	/// This function returns a dual table.
 	/// </summary>
 	/// <returns>Returns an empty queryable object.</returns>
-	public static IQueryable<object> Dual()
+	public static IQueryable<DualTable> Dual()
 	{
-		return Enumerable.Empty<object>().AsQueryable();
+		return Enumerable.Empty<DualTable>().AsQueryable();
 	}
 
 	public static IQueryable<T> CommonTable<T>(IQueryable<T> subquery)

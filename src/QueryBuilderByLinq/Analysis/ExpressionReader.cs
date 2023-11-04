@@ -1,18 +1,54 @@
 ﻿using Carbunql.Extensions;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
+using System.Text;
 
-namespace QueryBuilderByLinq;
+namespace QueryBuilderByLinq.Analysis;
 
-public static class ExpressionDebugger
+public static class ExpressionReader
 {
-
-	public static void WriteImmediate(Expression exp)
+	public static IEnumerable<Expression> GetExpressions(this Expression exp)
 	{
-		var s = Analyze(exp);
-		System.Diagnostics.Debug.WriteLine(s);
+		yield return exp;
+
+		if (exp is MethodCallExpression mc)
+		{
+			if (mc.Object != null)
+			{
+				foreach (var item in mc.Object.GetExpressions()) yield return item;
+			}
+			foreach (var arg in mc.Arguments)
+			{
+				foreach (var item in arg.GetExpressions()) yield return item;
+			}
+		}
+		else if (exp is UnaryExpression u)
+		{
+			foreach (var item in u.Operand.GetExpressions()) yield return item;
+		}
+		else if (exp is LambdaExpression l)
+		{
+			foreach (var item in l.Body.GetExpressions()) yield return item;
+			foreach (var prm in l.Parameters)
+			{
+				foreach (var item in prm.GetExpressions()) yield return item;
+			}
+		}
+		else if (exp is MemberExpression m)
+		{
+			if (m.Expression != null)
+			{
+				foreach (var item in m.Expression.GetExpressions()) yield return item;
+			}
+		}
+		else if (exp is NewExpression n)
+		{
+			foreach (var arg in n.Arguments)
+			{
+				foreach (var item in arg.GetExpressions()) yield return item;
+			}
+		}
 	}
 
 	public static string Analyze(Expression exp)
@@ -44,7 +80,7 @@ public static class ExpressionDebugger
 		return $"not support : {exp.NodeType}";
 	}
 
-	public static string Analyze(MethodCallExpression exp)
+	internal static string Analyze(MethodCallExpression exp)
 	{
 		var sb = new StringBuilder();
 
@@ -75,7 +111,7 @@ public static class ExpressionDebugger
 		return sb.ToString().RemoveLastReturn();
 	}
 
-	public static string Analyze(ConstantExpression exp)
+	internal static string Analyze(ConstantExpression exp)
 	{
 		var sb = new StringBuilder();
 
@@ -94,7 +130,7 @@ public static class ExpressionDebugger
 		return sb.ToString().RemoveLastReturn();
 	}
 
-	public static string Analyze(UnaryExpression exp)
+	internal static string Analyze(UnaryExpression exp)
 	{
 		var sb = new StringBuilder();
 
@@ -120,7 +156,7 @@ public static class ExpressionDebugger
 		return sb.ToString().RemoveLastReturn();
 	}
 
-	public static string Analyze(LambdaExpression exp)
+	internal static string Analyze(LambdaExpression exp)
 	{
 		var sb = new StringBuilder();
 
@@ -143,7 +179,7 @@ public static class ExpressionDebugger
 		return sb.ToString().RemoveLastReturn();
 	}
 
-	public static string Analyze(MemberExpression exp)
+	internal static string Analyze(MemberExpression exp)
 	{
 		var sb = new StringBuilder();
 
@@ -167,7 +203,7 @@ public static class ExpressionDebugger
 		return sb.ToString().RemoveLastReturn();
 	}
 
-	public static string Analyze(ParameterExpression exp)
+	internal static string Analyze(ParameterExpression exp)
 	{
 		var sb = new StringBuilder();
 
@@ -179,8 +215,50 @@ public static class ExpressionDebugger
 		return sb.ToString().RemoveLastReturn();
 	}
 
+	internal static string Analyze(NewExpression exp)
+	{
+		var sb = new StringBuilder();
 
-	public static string Analyze(MemberInfo info)
+		sb.AppendLine($"* NewExpression");
+		sb.AppendLine($"NodeType\r\n    {exp.NodeType}");
+		sb.AppendLine($"Type\r\n    {exp.Type.Name}");
+
+		if (exp.Arguments != null)
+		{
+			var cnt = exp.Arguments.Count;
+			sb.AppendLine($"Arguments.Count\r\n    {cnt}");
+
+			foreach (var arg in exp.Arguments)
+			{
+				sb.AppendLine($"- index : {exp.Arguments.IndexOf(arg)}");
+				sb.AppendLine(Analyze(arg).InsertIndent());
+			}
+		}
+		else
+		{
+			sb.AppendLine($"Arguments.Count\r\n    0");
+
+		}
+		if (exp.Members != null)
+		{
+			var cnt = exp.Members.Count;
+			sb.AppendLine($"Members.Count\r\n    {cnt}");
+
+			foreach (var arg in exp.Members)
+			{
+				sb.AppendLine($"- index : {exp.Members.IndexOf(arg)}");
+				sb.AppendLine(Analyze(arg).InsertIndent());
+			}
+		}
+		else
+		{
+			sb.AppendLine($"Members.Count\r\n    0");
+		}
+
+		return sb.ToString().RemoveLastReturn();
+	}
+
+	internal static string Analyze(MemberInfo info)
 	{
 		var sb = new StringBuilder();
 
@@ -192,7 +270,7 @@ public static class ExpressionDebugger
 		return sb.ToString().RemoveLastReturn();
 	}
 
-	public static string Analyze(MethodInfo info)
+	internal static string Analyze(MethodInfo info)
 	{
 		var sb = new StringBuilder();
 
@@ -212,7 +290,7 @@ public static class ExpressionDebugger
 		return sb.ToString().RemoveLastReturn();
 	}
 
-	public static string Analyze(ParameterInfo info)
+	internal static string Analyze(ParameterInfo info)
 	{
 		var sb = new StringBuilder();
 

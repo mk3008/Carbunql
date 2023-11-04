@@ -323,3 +323,18 @@ internal static class SelectQueryExtension
 		return sq;
 	}
 }
+
+
+public class Inner
+{
+	//public static IQueryable<T> LeftJoinTable<T>(Expression<Predicate<T>> condition)
+
+	//public static IQueryable<T> LeftJoinTable<T>(string tableName, Expression<Predicate<T>> condition)
+
+	//public static IQueryable<T> LeftJoinTable<T>(IQueryable<T> subquery, Expression<Predicate<T>> condition)
+
+	//public static IQueryable<T> LeftJoinTable<T>(T rangeVariable, Expression<Predicate<T>> condition)
+
+	public int MyProperty { get; set; }
+
+}
