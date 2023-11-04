@@ -23,12 +23,19 @@ public class QueryCommandMonitor
 			if (from.Query != null) Output.WriteLine($"   Query : {from.Query.ToText()}");
 			if (from.Table != null) Output.WriteLine($"   Table : {from.Table.ToText()}");
 			Output.WriteLine($"   Alias : {from.Alias}");
-			Output.WriteLine("--------------------");
 		}
 		else
 		{
 			Output.WriteLine($"From : [NULL]");
 		}
+		Output.WriteLine("--------------------");
+
+		var ctes = CommonTableParser.Parse(query.Expression);
+		foreach (var cte in ctes)
+		{
+			Output.WriteLine($"CTE[{ctes.IndexOf(cte)}] : {cte.Alias}");
+		}
+		Output.WriteLine("--------------------");
 
 		var text = ExpressionReader.Analyze(query.Expression);
 		Output.WriteLine(text);

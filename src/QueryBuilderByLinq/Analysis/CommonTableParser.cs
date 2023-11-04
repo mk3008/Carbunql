@@ -52,20 +52,37 @@ public static class CommonTableParser
 		if (exp is not MethodCallExpression) return null;
 
 		var method = (MethodCallExpression)exp;
-		if (method.Arguments.Count < 2) return null;
+		if (method.Arguments.Count != 3) return null;
 
 		var commonTableQuery = method.GetArgument<ConstantExpression>(0);
 		if (commonTableQuery == null) return null;
 
 		var operand = method.GetArgument<UnaryExpression>(1).GetOperand<LambdaExpression>();
 		if (operand == null) return null;
-		if (operand.GetBody<MethodCallExpression>()?.Method.Name != nameof(CommonTable)) return null;
-		if (operand.Parameters.Count != 1) return null;
-		var name = operand.Parameters[0].Name!;
 
-		if (Queryable.TryParse(commonTableQuery, out var query))
+		var body = operand.GetBody<MethodCallExpression>();
+		if (body == null) return null;
+
+		if (body.Method.Name == nameof(Sql.FromTable))
 		{
-			return new CommonTableInfo(query, name);
+			if (operand.Parameters.Count != 1) return null;
+			var name = operand.Parameters[0].Name!;
+
+			var c = method.GetArgument<ConstantExpression>(0);
+			if (c?.Value is TableQuery tq)
+			{
+				return new CommonTableInfo(tq.InnerQuery!.AsQueryable(), name);
+			}
+		}
+		else if (body.Method.Name == nameof(CommonTable))
+		{
+			if (operand.Parameters.Count != 1) return null;
+			var name = operand.Parameters[0].Name!;
+
+			if (Queryable.TryParse(commonTableQuery, out var query))
+			{
+				return new CommonTableInfo(query, name);
+			}
 		}
 
 		return null;
@@ -80,7 +97,7 @@ public static class CommonTableParser
 		if (exp is not MethodCallExpression) return null;
 
 		var root = (MethodCallExpression)exp;
-		if (root.Arguments.Count < 3) return null;
+		if (root.Arguments.Count != 3) return null;
 
 		var commonTable = root.GetArgument<UnaryExpression>(1).GetOperand<LambdaExpression>().GetBody<MethodCallExpression>();
 		if (commonTable == null || commonTable.Method.Name != nameof(CommonTable)) return null;
