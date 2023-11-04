@@ -1,4 +1,5 @@
 using Carbunql;
+using QueryBuilderByLinq.Analysis;
 using Xunit.Abstractions;
 using static QueryBuilderByLinq.Sql;
 
@@ -15,6 +16,27 @@ public class CommonTableTest
 	}
 
 	private ITestOutputHelper Output { get; set; }
+
+	private void WriteLog(IQueryable query)
+	{
+		var from = FromTableParser.Parse(query.Expression);
+		if (from != null)
+		{
+			Output.WriteLine($"from : {from.Alias}");
+			Output.WriteLine("--------------------");
+		}
+		else
+		{
+			Output.WriteLine($"from : [NULL]");
+		}
+
+		var text = ExpressionReader.Analyze(query.Expression);
+		Output.WriteLine(text);
+		Output.WriteLine("--------------------");
+
+
+
+	}
 
 	[Fact]
 	public void FromSelect()
@@ -189,6 +211,7 @@ WHERE
 
 		var sq = query.ToQueryAsPostgres();
 
+		Monitor.Log(query);
 		Monitor.Log(sq);
 
 		var sql = @"

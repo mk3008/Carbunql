@@ -6,8 +6,15 @@ using Carbunql.Building;
 
 namespace QueryBuilderByLinq;
 
+
+
+
+
+
+
 internal static class LambdaExpressionExpression
 {
+
 	internal static ExistsExpression ToExistsExpression(this LambdaExpression predicate, Action<SelectQuery> fromBuilder, string alias, List<string> tables)
 	{
 		var lst = new List<string>();

@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 
 namespace QueryBuilderByLinq;
 
-internal static class ExpressionExtension
+internal static partial class ExpressionExtension
 {
 
 
@@ -111,6 +111,7 @@ internal static class ExpressionExtension
 		if (exp is ParameterExpression pexp)
 		{
 			var alias = pexp.Name!;
+			if (alias.StartsWith("<>h__TransparentIdentifier")) return new ValueCollection();
 			var lst = pexp.Type.GetProperties().Select(x => new ColumnValue(alias, x.Name)).ToList<ValueBase>();
 			return new ValueCollection(lst);
 		}

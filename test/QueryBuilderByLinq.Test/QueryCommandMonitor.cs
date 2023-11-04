@@ -1,4 +1,5 @@
 ﻿using Carbunql;
+using QueryBuilderByLinq.Analysis;
 using Xunit.Abstractions;
 
 namespace QueryBuilderByLinq.Test;
@@ -10,6 +11,28 @@ public class QueryCommandMonitor
 	public QueryCommandMonitor(ITestOutputHelper output)
 	{
 		Output = output;
+	}
+
+	public void Log(IQueryable query)
+	{
+		var from = FromTableParser.Parse(query.Expression);
+		if (from != null)
+		{
+			Output.WriteLine("From");
+			if (!string.IsNullOrEmpty(from.PhysicalName)) Output.WriteLine($"   PhysicalName : {from.PhysicalName}");
+			if (from.Query != null) Output.WriteLine($"   Query : {from.Query.ToText()}");
+			if (from.Table != null) Output.WriteLine($"   Table : {from.Table.ToText()}");
+			Output.WriteLine($"   Alias : {from.Alias}");
+			Output.WriteLine("--------------------");
+		}
+		else
+		{
+			Output.WriteLine($"From : [NULL]");
+		}
+
+		var text = ExpressionReader.Analyze(query.Expression);
+		Output.WriteLine(text);
+		Output.WriteLine("--------------------");
 	}
 
 	public void Log(IQueryCommandable arg)

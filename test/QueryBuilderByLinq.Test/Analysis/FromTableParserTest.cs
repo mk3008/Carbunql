@@ -1,0 +1,207 @@
+using Carbunql;
+using QueryBuilderByLinq.Analysis;
+using Xunit.Abstractions;
+using static QueryBuilderByLinq.Sql;
+
+namespace QueryBuilderByLinq.Test.Analysis;
+
+public class FromTableParserTest
+{
+	private readonly QueryCommandMonitor Monitor;
+
+	public FromTableParserTest(ITestOutputHelper output)
+	{
+		Monitor = new QueryCommandMonitor(output);
+		Output = output;
+	}
+
+	private ITestOutputHelper Output { get; set; }
+
+	[Fact]
+	public void DualTableTest()
+	{
+		var query = from a in Dual()
+					select new
+					{
+						v1 = 1,
+					};
+
+		Monitor.Log(query);
+
+		var from = FromTableParser.Parse(query.Expression);
+
+		Assert.Null(from);
+	}
+
+	[Fact]
+	public void TypeTableTest()
+	{
+		var query = from a in FromTable<table_a>()
+					select a;
+
+		Monitor.Log(query);
+
+		var from = FromTableParser.Parse(query.Expression);
+
+		Assert.Equal("table_a", from?.Table?.Alias);
+		Assert.Equal("a", from?.Alias);
+	}
+
+	[Fact]
+	public void StringTableTest()
+	{
+		var query = from a in FromTable<table_a>("TABLE_A")
+					select a;
+
+		Monitor.Log(query);
+
+		var from = FromTableParser.Parse(query.Expression);
+
+		Assert.Equal("TABLE_A", from?.PhysicalName);
+		Assert.Equal("a", from?.Alias);
+	}
+
+	[Fact]
+	public void SubQueryTest()
+	{
+		var subquery = from a in FromTable<table_a>() select a.a_id;
+
+		var query = from x in FromTable(subquery)
+					select x;
+
+		Monitor.Log(query);
+
+		var from = FromTableParser.Parse(query.Expression);
+
+		Assert.Equal("select a.a_id from table_a as a", from?.Query?.ToOneLineText());
+		Assert.Equal("x", from?.Alias);
+	}
+
+	[Fact]
+	public void CommonTableTest()
+	{
+		var subquery = from a in FromTable<table_a>() select a.a_id;
+
+		var query = from cte in CommonTable(subquery)
+					from x in FromTable(cte)
+					select x;
+
+		Monitor.Log(query);
+
+		var from = FromTableParser.Parse(query.Expression);
+
+		Assert.Equal("cte", from?.PhysicalName);
+		Assert.Equal("x", from?.Alias);
+	}
+
+	[Fact]
+	public void CommonTableNest2Test()
+	{
+		var subquery = from a in FromTable<table_a>() select a.a_id;
+
+		var query = from cte1 in CommonTable(subquery)
+					from cte2 in CommonTable(subquery)
+					from x in FromTable(cte1)
+					select x;
+
+		Monitor.Log(query);
+
+		var from = FromTableParser.Parse(query.Expression);
+
+		Assert.Equal("cte1", from?.PhysicalName);
+		Assert.Equal("x", from?.Alias);
+	}
+
+	[Fact]
+	public void CommonTableNestManyTest()
+	{
+		var subquery = from a in FromTable<table_a>() select a.a_id;
+
+		var query = from cte1 in CommonTable(subquery)
+					from cte2 in CommonTable(subquery)
+					from cte3 in CommonTable(subquery)
+					from cte4 in CommonTable(subquery)
+					from cte5 in CommonTable(subquery)
+					from x in FromTable(cte1)
+					select x;
+
+		Monitor.Log(query);
+
+		var from = FromTableParser.Parse(query.Expression);
+
+		Assert.Equal("cte1", from?.PhysicalName);
+		Assert.Equal("x", from?.Alias);
+	}
+
+	[Fact]
+	public void CteAndDual()
+	{
+		var subquery = from a in FromTable<table_a>() select a.a_id;
+
+		var query = from cte1 in CommonTable(subquery)
+					from cte2 in CommonTable(subquery)
+					from x in Dual()
+					select x;
+
+		Monitor.Log(query);
+
+		var from = FromTableParser.Parse(query.Expression);
+
+		Assert.Null(from);
+	}
+
+	[Fact]
+	public void CteAndTypeTable()
+	{
+		var subquery = from a in FromTable<table_a>() select a.a_id;
+
+		var query = from cte1 in CommonTable(subquery)
+					from cte2 in CommonTable(subquery)
+					from x in FromTable<table_a>()
+					select x;
+
+		Monitor.Log(query);
+
+		var from = FromTableParser.Parse(query.Expression);
+
+		Assert.Equal("table_a", from?.Table?.Alias);
+		Assert.Equal("x", from?.Alias);
+	}
+
+	[Fact]
+	public void CteAndStringTable()
+	{
+		var subquery = from a in FromTable<table_a>() select a.a_id;
+
+		var query = from cte1 in CommonTable(subquery)
+					from cte2 in CommonTable(subquery)
+					from x in FromTable<table_a>("sales")
+					select x;
+
+		Monitor.Log(query);
+
+		var from = FromTableParser.Parse(query.Expression);
+
+		Assert.Equal("sales", from?.PhysicalName);
+		Assert.Equal("x", from?.Alias);
+	}
+
+	[Fact]
+	public void CteAndSubQuery()
+	{
+		var subquery = from a in FromTable<table_a>() select a.a_id;
+
+		var query = from cte1 in CommonTable(subquery)
+					from x in FromTable(subquery)
+					select x;
+
+		Monitor.Log(query);
+
+		var from = FromTableParser.Parse(query.Expression);
+
+		Assert.Equal("select a.a_id from table_a as a", from?.Query?.ToOneLineText());
+		Assert.Equal("x", from?.Alias);
+	}
+
+	public record struct table_a(int a_id, string text, int value);
+}
