@@ -35,8 +35,8 @@ public static class FromTableInfoParser
 		var method = (MethodCallExpression)exp;
 		if (method.Arguments.Count != 2) return null;
 
-		var queryExpression = method.GetArgument<ConstantExpression>(0);
-		if (queryExpression == null) return null;
+		var ce = method.GetArgument<ConstantExpression>(0);
+		if (ce == null) return null;
 
 		var operand = method.GetArgument<UnaryExpression>(1).GetOperand<LambdaExpression>();
 		if (operand == null) return null;
@@ -45,23 +45,12 @@ public static class FromTableInfoParser
 		var parameter = operand.Parameters[0];
 		if (parameter.Type == typeof(DualTable)) return null;
 
-		if (queryExpression.Value is IQueryable q && q.Provider is TableQuery provider)
+		if (TryParse(ce, parameter, out var f))
 		{
-			// root syntax
-			if (provider.InnerQuery != null)
-			{
-				return new FromTableInfo(provider.InnerQuery.ToQueryAsPostgres(), parameter.Name!);
-			}
-			else
-			{
-				return new FromTableInfo(provider.TableName, parameter.Name!);
-			}
+			return f;
 		}
-		else
-		{
-			// nest sytax
-			return new FromTableInfo(parameter.ToTypeTable(), parameter.Name!);
-		}
+		// nest sytax
+		return new FromTableInfo(parameter.ToTypeTable(), parameter.Name!);
 	}
 
 	/// <summary>
@@ -77,40 +66,58 @@ public static class FromTableInfoParser
 		var method = (MethodCallExpression)exp;
 		if (method.Arguments.Count != 3) return null;
 
-		//query
-		var lambda = method.GetArgument<UnaryExpression>(1).GetOperand<LambdaExpression>();
-		if (lambda == null) return null;
-
-		var body = lambda.GetBody<MethodCallExpression>();
+		var ce = method.GetArgument<ConstantExpression>(0);
+		var body = method.GetArgument<UnaryExpression>(1).GetOperand<LambdaExpression>().GetBody<MethodCallExpression>(); ;
 		if (body == null) return null;
-
-		// no relation pattern.
-		var operand = method.GetArgument<UnaryExpression>(2).GetOperand<LambdaExpression>();
-		if (operand == null) return null;
-		if (operand.Parameters.Count != 2) return null;
-		var parameter = operand.Parameters[1];
 
 		if (body.Method.Name == nameof(Sql.FromTable))
 		{
+			// no relation pattern.
+			var operand = method.GetArgument<UnaryExpression>(2).GetOperand<LambdaExpression>();
+			if (operand == null) return null;
+			if (operand.Parameters.Count != 2) return null;
+
+			var parameter = operand.Parameters[1];
 			return ParseCore3ArgumentsFromTable(body, parameter);
 		}
-		else if (body.Method.Name == nameof(Sql.InnerJoinTable) || body.Method.Name == nameof(Sql.LeftJoinTable) || body.Method.Name == nameof(Sql.CrossJoinTable))
+		else if (ce != null && (body.Method.Name == nameof(Sql.InnerJoinTable) || body.Method.Name == nameof(Sql.LeftJoinTable) || body.Method.Name == nameof(Sql.CrossJoinTable)))
 		{
-			/*
-				has relation pattern.
-				'body' is relation conditions.
-				'parameter' is relation alias.
-			*/
+			// has relation pattern.
+			var operand = method.GetArgument<UnaryExpression>(2).GetOperand<LambdaExpression>();
+			if (operand == null || operand.Parameters.Count != 2) return null;
 
-			//query
-			lambda = method.GetArgument<UnaryExpression>(2).GetOperand<LambdaExpression>();
-			if (lambda == null || lambda.Parameters.Count != 2) return null;
+			var parameter = operand.Parameters[0];
 
-			var prm = lambda.Parameters[0];
-			return new FromTableInfo(prm.ToTypeTable(), prm.Name!);
+			if (TryParse(ce, parameter, out var f))
+			{
+				return f;
+			}
+			return new FromTableInfo(parameter.ToTypeTable(), parameter.Name!);
 		}
 
 		return null;
+	}
+
+	private static bool TryParse(ConstantExpression methodBody, ParameterExpression parameter, out FromTableInfo from)
+	{
+		from = null!;
+
+		if (methodBody.Value is IQueryable q && q.Provider is TableQuery provider)
+		{
+			if (provider.InnerQuery != null)
+			{
+				// subquery pattern.
+				from = new FromTableInfo(provider.InnerQuery.ToQueryAsPostgres(), parameter.Name!);
+				return true;
+			}
+			else
+			{
+				// override table name pattern.
+				from = new FromTableInfo(provider.TableName, parameter.Name!);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static FromTableInfo? ParseCore3ArgumentsFromTable(MethodCallExpression body, ParameterExpression parameter)

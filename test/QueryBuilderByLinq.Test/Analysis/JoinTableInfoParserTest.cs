@@ -31,7 +31,7 @@ public class JoinTableInfoParserTest
 	}
 
 	[Fact]
-	public void InnerJoinTest()
+	public void InnerJoinTypeTableTest()
 	{
 		var query = from s in FromTable<sale>()
 					from a in InnerJoinTable<article>(x => s.article_id == x.article_id)
@@ -42,6 +42,25 @@ public class JoinTableInfoParserTest
 		var from = FromTableInfoParser.Parse(query.Expression);
 		Assert.Equal("sale", from?.ToSelectable().ToText());
 		Assert.Equal("s", from?.Alias);
+
+		var joins = JoinTableInfoParser.Parse(query.Expression);
+
+		Assert.Empty(joins);
+	}
+
+	[Fact]
+	public void InnerJoinStringTableTest()
+	{
+		var query = from s in FromTable<sale>("sales")
+					from a in InnerJoinTable<article>("articles", x => s.article_id == x.article_id)
+					select a;
+
+		Monitor.Log(query);
+
+		var from = FromTableInfoParser.Parse(query.Expression);
+		Assert.Equal("s", from?.Alias);
+		Assert.Equal("sales AS s", from?.ToSelectable().ToText());
+
 
 		var joins = JoinTableInfoParser.Parse(query.Expression);
 
