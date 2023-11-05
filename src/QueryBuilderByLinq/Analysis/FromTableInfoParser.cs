@@ -82,14 +82,41 @@ public static class FromTableInfoParser
 		if (lambda == null) return null;
 
 		var body = lambda.GetBody<MethodCallExpression>();
-		if (body == null || body.Method.Name != nameof(Sql.FromTable)) return null;
+		if (body == null) return null;
 
+		// no relation pattern.
 		var operand = method.GetArgument<UnaryExpression>(2).GetOperand<LambdaExpression>();
 		if (operand == null) return null;
-
-		//name
 		if (operand.Parameters.Count != 2) return null;
 		var parameter = operand.Parameters[1];
+
+		if (body.Method.Name == nameof(Sql.FromTable))
+		{
+			return ParseCore3ArgumentsFromTable(body, parameter);
+		}
+		else if (body.Method.Name == nameof(Sql.InnerJoinTable) || body.Method.Name == nameof(Sql.LeftJoinTable) || body.Method.Name == nameof(Sql.CrossJoinTable))
+		{
+			/*
+				has relation pattern.
+				'body' is relation conditions.
+				'parameter' is relation alias.
+			*/
+
+			//query
+			lambda = method.GetArgument<UnaryExpression>(2).GetOperand<LambdaExpression>();
+			if (lambda == null || lambda.Parameters.Count != 2) return null;
+
+			var prm = lambda.Parameters[0];
+			return new FromTableInfo(prm.ToTypeTable(), prm.Name!);
+		}
+
+		return null;
+	}
+
+	private static FromTableInfo? ParseCore3ArgumentsFromTable(MethodCallExpression body, ParameterExpression parameter)
+	{
+		if (body.Method.Name != nameof(Sql.FromTable)) throw new InvalidProgramException();
+
 		var alias = parameter.Name!;
 
 		//table
