@@ -203,5 +203,54 @@ public class FromTableInfoParserTest
 		Assert.Equal("x", from?.Alias);
 	}
 
+	[Fact]
+	public void JoinAndTypeTableTest()
+	{
+		var query = from s in FromTable<sale>()
+					from a in InnerJoinTable<article>(x => s.article_id == x.article_id)
+					select a;
+
+		Monitor.Log(query);
+
+		var from = FromTableInfoParser.Parse(query.Expression);
+		Assert.Equal("sale", from?.ToSelectable().ToText());
+		Assert.Equal("s", from?.Alias);
+	}
+
+	[Fact]
+	public void JoinAndStringTableTest()
+	{
+		var query = from s in FromTable<sale>("sales")
+					from a in InnerJoinTable<article>("articles", x => s.article_id == x.article_id)
+					select a;
+
+		Monitor.Log(query);
+
+		var from = FromTableInfoParser.Parse(query.Expression);
+		Assert.Equal("s", from?.Alias);
+		Assert.Equal("sales AS s", from?.ToSelectable().ToText());
+	}
+
+	[Fact]
+	public void JoinAndSubQueryTest()
+	{
+		var subquery = from sales in FromTable<sale>() select sales;
+
+		var query = from s in FromTable(subquery)
+					from a in InnerJoinTable<article>(x => s.article_id == x.article_id)
+					select s;
+
+		Monitor.Log(query);
+
+		var from = FromTableInfoParser.Parse(query.Expression);
+
+		Assert.Equal("select sales.sales_id, sales.article_id, sales.quantity from sale as sales", from?.Query?.ToOneLineText());
+		Assert.Equal("s", from?.Alias);
+	}
+
 	public record struct table_a(int a_id, string text, int value);
+
+	public record struct sale(int sales_id, int article_id, int quantity);
+
+	public record struct article(int article_id, string article_name, int price);
 }

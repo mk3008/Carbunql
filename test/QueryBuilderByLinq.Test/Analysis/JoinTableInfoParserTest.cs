@@ -104,5 +104,6 @@ public class JoinTableInfoParserTest
 	}
 
 	public record struct sale(int sales_id, int article_id, int quantity);
+
 	public record struct article(int article_id, string article_name, int price);
 }
