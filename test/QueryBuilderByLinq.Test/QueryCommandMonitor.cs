@@ -15,7 +15,7 @@ public class QueryCommandMonitor
 
 	public void Log(IQueryable query)
 	{
-		var from = FromTableInfoParser.Parse(query.Expression);
+		var from = TableInfoParser.Parse(query.Expression);
 		if (from != null)
 		{
 			Output.WriteLine("From");

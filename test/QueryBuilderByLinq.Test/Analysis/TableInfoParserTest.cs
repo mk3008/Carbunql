@@ -5,11 +5,11 @@ using static QueryBuilderByLinq.Sql;
 
 namespace QueryBuilderByLinq.Test.Analysis;
 
-public class FromTableInfoParserTest
+public class TableInfoParserTest
 {
 	private readonly QueryCommandMonitor Monitor;
 
-	public FromTableInfoParserTest(ITestOutputHelper output)
+	public TableInfoParserTest(ITestOutputHelper output)
 	{
 		Monitor = new QueryCommandMonitor(output);
 		Output = output;
@@ -28,7 +28,7 @@ public class FromTableInfoParserTest
 
 		Monitor.Log(query);
 
-		var from = FromTableInfoParser.Parse(query.Expression);
+		var from = TableInfoParser.Parse(query.Expression);
 
 		Assert.Null(from);
 	}
@@ -41,7 +41,7 @@ public class FromTableInfoParserTest
 
 		Monitor.Log(query);
 
-		var from = FromTableInfoParser.Parse(query.Expression);
+		var from = TableInfoParser.Parse(query.Expression);
 
 		Assert.Equal("table_a", from?.Table?.Alias);
 		Assert.Equal("a", from?.Alias);
@@ -55,7 +55,7 @@ public class FromTableInfoParserTest
 
 		Monitor.Log(query);
 
-		var from = FromTableInfoParser.Parse(query.Expression);
+		var from = TableInfoParser.Parse(query.Expression);
 
 		Assert.Equal("TABLE_A", from?.PhysicalName);
 		Assert.Equal("a", from?.Alias);
@@ -71,7 +71,7 @@ public class FromTableInfoParserTest
 
 		Monitor.Log(query);
 
-		var from = FromTableInfoParser.Parse(query.Expression);
+		var from = TableInfoParser.Parse(query.Expression);
 
 		Assert.Equal("select a.a_id from table_a as a", from?.Query?.ToOneLineText());
 		Assert.Equal("x", from?.Alias);
@@ -88,7 +88,7 @@ public class FromTableInfoParserTest
 
 		Monitor.Log(query);
 
-		var from = FromTableInfoParser.Parse(query.Expression);
+		var from = TableInfoParser.Parse(query.Expression);
 
 		Assert.Equal("cte", from?.PhysicalName);
 		Assert.Equal("x", from?.Alias);
@@ -106,7 +106,7 @@ public class FromTableInfoParserTest
 
 		Monitor.Log(query);
 
-		var from = FromTableInfoParser.Parse(query.Expression);
+		var from = TableInfoParser.Parse(query.Expression);
 
 		Assert.Equal("cte1", from?.PhysicalName);
 		Assert.Equal("x", from?.Alias);
@@ -127,7 +127,7 @@ public class FromTableInfoParserTest
 
 		Monitor.Log(query);
 
-		var from = FromTableInfoParser.Parse(query.Expression);
+		var from = TableInfoParser.Parse(query.Expression);
 
 		Assert.Equal("cte1", from?.PhysicalName);
 		Assert.Equal("x", from?.Alias);
@@ -145,7 +145,7 @@ public class FromTableInfoParserTest
 
 		Monitor.Log(query);
 
-		var from = FromTableInfoParser.Parse(query.Expression);
+		var from = TableInfoParser.Parse(query.Expression);
 
 		Assert.Null(from);
 	}
@@ -162,7 +162,7 @@ public class FromTableInfoParserTest
 
 		Monitor.Log(query);
 
-		var from = FromTableInfoParser.Parse(query.Expression);
+		var from = TableInfoParser.Parse(query.Expression);
 
 		Assert.Equal("table_a", from?.Table?.Alias);
 		Assert.Equal("x", from?.Alias);
@@ -180,7 +180,7 @@ public class FromTableInfoParserTest
 
 		Monitor.Log(query);
 
-		var from = FromTableInfoParser.Parse(query.Expression);
+		var from = TableInfoParser.Parse(query.Expression);
 
 		Assert.Equal("sales", from?.PhysicalName);
 		Assert.Equal("x", from?.Alias);
@@ -197,7 +197,7 @@ public class FromTableInfoParserTest
 
 		Monitor.Log(query);
 
-		var from = FromTableInfoParser.Parse(query.Expression);
+		var from = TableInfoParser.Parse(query.Expression);
 
 		Assert.Equal("select a.a_id from table_a as a", from?.Query?.ToOneLineText());
 		Assert.Equal("x", from?.Alias);
@@ -212,7 +212,7 @@ public class FromTableInfoParserTest
 
 		Monitor.Log(query);
 
-		var from = FromTableInfoParser.Parse(query.Expression);
+		var from = TableInfoParser.Parse(query.Expression);
 		Assert.Equal("sale", from?.ToSelectable().ToText());
 		Assert.Equal("s", from?.Alias);
 	}
@@ -226,7 +226,7 @@ public class FromTableInfoParserTest
 
 		Monitor.Log(query);
 
-		var from = FromTableInfoParser.Parse(query.Expression);
+		var from = TableInfoParser.Parse(query.Expression);
 		Assert.Equal("s", from?.Alias);
 		Assert.Equal("sales AS s", from?.ToSelectable().ToText());
 	}
@@ -242,7 +242,7 @@ public class FromTableInfoParserTest
 
 		Monitor.Log(query);
 
-		var from = FromTableInfoParser.Parse(query.Expression);
+		var from = TableInfoParser.Parse(query.Expression);
 
 		Assert.Equal("select sales.sales_id, sales.article_id, sales.quantity from sale as sales", from?.Query?.ToOneLineText());
 		Assert.Equal("s", from?.Alias);

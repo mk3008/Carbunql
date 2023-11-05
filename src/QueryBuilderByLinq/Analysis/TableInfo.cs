@@ -4,21 +4,21 @@ using Carbunql.Tables;
 
 namespace QueryBuilderByLinq.Analysis;
 
-public class FromTableInfo
+public class TableInfo
 {
-	public FromTableInfo(SelectQuery query, string alias)
+	public TableInfo(SelectQuery query, string alias)
 	{
 		Alias = alias;
 		Query = query;
 	}
 
-	public FromTableInfo(SelectableTable table, string alias)
+	public TableInfo(SelectableTable table, string alias)
 	{
 		Alias = alias;
 		Table = table;
 	}
 
-	public FromTableInfo(string physicalName, string alias)
+	public TableInfo(string physicalName, string alias)
 	{
 		Alias = alias;
 		PhysicalName = physicalName;

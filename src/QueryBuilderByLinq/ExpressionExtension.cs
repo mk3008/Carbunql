@@ -19,6 +19,10 @@ internal static partial class ExpressionExtension
 		return null;
 	}
 
+	internal static ValueBase ToValue(this Expression exp)
+	{
+		return exp.ToValue(new List<string>());
+	}
 	internal static ValueBase ToValue(this Expression exp, List<string> tables)
 	{
 		if (exp.NodeType == ExpressionType.Constant)

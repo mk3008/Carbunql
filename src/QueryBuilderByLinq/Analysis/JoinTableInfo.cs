@@ -1,26 +1,25 @@
-﻿namespace QueryBuilderByLinq.Analysis;
+﻿using Carbunql.Clauses;
+
+namespace QueryBuilderByLinq.Analysis;
 
 public class JoinTableInfo
 {
-	public JoinTableInfo(IQueryable query, string alias, string relation)
+	public JoinTableInfo(TableInfo tableInfo, string relation)
 	{
-		Alias = alias;
-		Query = query;
+		TableInfo = tableInfo;
 		Relation = relation;
 	}
 
-	public JoinTableInfo(string physicalName, string alias, string relation)
+	public JoinTableInfo(TableInfo tableInfo, string relation, ValueBase condition)
 	{
-		Alias = alias;
-		PhysicalName = physicalName;
+		TableInfo = tableInfo;
 		Relation = relation;
+		Condition = condition;
 	}
 
-	public string Alias { get; private set; }
-
-	public string? PhysicalName { get; private set; }
-
-	public IQueryable? Query { get; private set; }
+	public TableInfo TableInfo { get; set; }
 
 	public string Relation { get; private set; }
+
+	public ValueBase? Condition { get; set; }
 }

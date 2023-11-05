@@ -39,13 +39,14 @@ public class JoinTableInfoParserTest
 
 		Monitor.Log(query);
 
-		var from = FromTableInfoParser.Parse(query.Expression);
-		Assert.Equal("sale", from?.ToSelectable().ToText());
-		Assert.Equal("s", from?.Alias);
-
 		var joins = JoinTableInfoParser.Parse(query.Expression);
 
-		Assert.Empty(joins);
+		Assert.Single(joins);
+
+		Assert.Equal("sale", joins[0].TableInfo.ToSelectable().ToOneLineText());
+		Assert.Equal("InnerJoinTable", joins[0].Relation);
+		Assert.Equal("s.article_id = a.article_id", joins[0].Condition!.ToOneLineText());
+
 	}
 
 	[Fact]
@@ -57,7 +58,7 @@ public class JoinTableInfoParserTest
 
 		Monitor.Log(query);
 
-		var from = FromTableInfoParser.Parse(query.Expression);
+		var from = TableInfoParser.Parse(query.Expression);
 		Assert.Equal("s", from?.Alias);
 		Assert.Equal("sales AS s", from?.ToSelectable().ToText());
 
@@ -76,7 +77,7 @@ public class JoinTableInfoParserTest
 
 		Monitor.Log(query);
 
-		var from = FromTableInfoParser.Parse(query.Expression);
+		var from = TableInfoParser.Parse(query.Expression);
 		Assert.Equal("sale", from?.ToSelectable().ToText());
 		Assert.Equal("s", from?.Alias);
 
@@ -94,7 +95,7 @@ public class JoinTableInfoParserTest
 
 		Monitor.Log(query);
 
-		var from = FromTableInfoParser.Parse(query.Expression);
+		var from = TableInfoParser.Parse(query.Expression);
 		Assert.Equal("sale", from?.ToSelectable().ToText());
 		Assert.Equal("s", from?.Alias);
 

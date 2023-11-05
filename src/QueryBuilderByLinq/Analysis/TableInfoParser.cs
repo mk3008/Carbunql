@@ -1,13 +1,15 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
+using System.Data.Common;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Metadata;
 
 namespace QueryBuilderByLinq.Analysis;
 
-public static class FromTableInfoParser
+public static class TableInfoParser
 {
-	public static FromTableInfo? Parse(Expression exp)
+	public static TableInfo? Parse(Expression exp)
 	{
 		foreach (var item in exp.GetExpressions().ToList())
 		{
@@ -20,7 +22,7 @@ public static class FromTableInfoParser
 		return null;
 	}
 
-	private static FromTableInfo? ParseCore(Expression exp)
+	private static TableInfo? ParseCore(Expression exp)
 	{
 		var from = ParseCore2Arguments(exp);
 		if (from != null) return from;
@@ -28,7 +30,7 @@ public static class FromTableInfoParser
 		return from;
 	}
 
-	private static FromTableInfo? ParseCore2Arguments(Expression exp)
+	private static TableInfo? ParseCore2Arguments(Expression exp)
 	{
 		if (exp is not MethodCallExpression) return null;
 
@@ -50,7 +52,7 @@ public static class FromTableInfoParser
 			return f;
 		}
 		// nest sytax
-		return new FromTableInfo(parameter.ToTypeTable(), parameter.Name!);
+		return Parse(parameter);
 	}
 
 	/// <summary>
@@ -59,7 +61,7 @@ public static class FromTableInfoParser
 	/// </summary>
 	/// <param name="exp"></param>
 	/// <returns></returns>
-	private static FromTableInfo? ParseCore3Arguments(Expression exp)
+	private static TableInfo? ParseCore3Arguments(Expression exp)
 	{
 		if (exp is not MethodCallExpression) return null;
 
@@ -92,13 +94,13 @@ public static class FromTableInfoParser
 			{
 				return f;
 			}
-			return new FromTableInfo(parameter.ToTypeTable(), parameter.Name!);
+			return Parse(parameter);
 		}
 
 		return null;
 	}
 
-	private static bool TryParse(ConstantExpression methodBody, ParameterExpression parameter, out FromTableInfo from)
+	public static bool TryParse(ConstantExpression methodBody, ParameterExpression parameter, out TableInfo from)
 	{
 		from = null!;
 
@@ -107,20 +109,25 @@ public static class FromTableInfoParser
 			if (provider.InnerQuery != null)
 			{
 				// subquery pattern.
-				from = new FromTableInfo(provider.InnerQuery.ToQueryAsPostgres(), parameter.Name!);
+				from = new TableInfo(provider.InnerQuery.ToQueryAsPostgres(), parameter.Name!);
 				return true;
 			}
 			else
 			{
 				// override table name pattern.
-				from = new FromTableInfo(provider.TableName, parameter.Name!);
+				from = new TableInfo(provider.TableName, parameter.Name!);
 				return true;
 			}
 		}
 		return false;
 	}
 
-	private static FromTableInfo? ParseCore3ArgumentsFromTable(MethodCallExpression body, ParameterExpression parameter)
+	public static TableInfo Parse(ParameterExpression parameter)
+	{
+		return new TableInfo(parameter.ToTypeTable(), parameter.Name!);
+	}
+
+	private static TableInfo? ParseCore3ArgumentsFromTable(MethodCallExpression body, ParameterExpression parameter)
 	{
 		if (body.Method.Name != nameof(Sql.FromTable)) throw new InvalidProgramException();
 
@@ -131,7 +138,7 @@ public static class FromTableInfoParser
 		{
 			// type table pattern.
 			// ex.From<T>()
-			return new FromTableInfo(parameter.ToTypeTable(), alias);
+			return new TableInfo(parameter.ToTypeTable(), alias);
 		}
 
 		if (body.Arguments.Count != 1) return null;
@@ -141,7 +148,7 @@ public static class FromTableInfoParser
 			// single common table pattern.
 			// ex.From(IQueryable)
 			var table = body.GetArgument<ParameterExpression>(0)!.Name!;
-			return new FromTableInfo(table, alias);
+			return new TableInfo(table, alias);
 		}
 		else if (body.Arguments[0] is MemberExpression)
 		{
@@ -155,7 +162,7 @@ public static class FromTableInfoParser
 			{
 				// many common tables pattern.
 				// ex.From(IQueryable)
-				return new FromTableInfo(m.Member!.Name!, alias);
+				return new TableInfo(m.Member!.Name!, alias);
 			}
 		}
 		else if (body.Arguments[0] is ConstantExpression)
@@ -163,13 +170,13 @@ public static class FromTableInfoParser
 			// string table pattern.
 			// ex.From<T>("TableName")
 			var table = body.GetArgument<ConstantExpression>(0)?.Value?.ToString()!;
-			return new FromTableInfo(table, alias);
+			return new TableInfo(table, alias);
 		}
 
 		return null;
 	}
 
-	private static FromTableInfo? ParseAsSubQuery(MemberExpression m, string alias)
+	private static TableInfo? ParseAsSubQuery(MemberExpression m, string alias)
 	{
 		if (m.Expression is not ConstantExpression) return null;
 
@@ -187,12 +194,12 @@ public static class FromTableInfoParser
 		}
 		if (value is IQueryable q)
 		{
-			return new FromTableInfo(q.AsQueryable().ToQueryAsPostgres(), alias);
+			return new TableInfo(q.AsQueryable().ToQueryAsPostgres(), alias);
 		}
 		return null;
 	}
 
-	private static SelectableTable ToTypeTable(this ParameterExpression prm)
+	public static SelectableTable ToTypeTable(this ParameterExpression prm)
 	{
 		var t = new PhysicalTable()
 		{
