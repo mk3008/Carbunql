@@ -37,29 +37,70 @@ public class JoinTableInfoParser
 			var operand = method.GetArgument<UnaryExpression>(2).GetOperand<LambdaExpression>();
 			if (operand == null || operand.Parameters.Count != 2) return null;
 
-
-
-			var lambda = body.GetArgument<UnaryExpression>(0).GetOperand<LambdaExpression>();
-			if (lambda == null || lambda.Parameters.Count != 1) return null;
-
-			var tempName = lambda.Parameters[0].Name!;
-			var actualName = operand.Parameters[1].Name!;
-			var condition = lambda.ToValue();
-
-			// replace alias name
-			foreach (ColumnValue item in condition.GetValues().Where(x => x is ColumnValue c && c.TableAlias == tempName))
+			if (body.Arguments.Count == 0)
 			{
-				item.TableAlias = actualName;
+				
+
+				if (TableInfoParser.TryParse(ce, parameter, out var t))
+				{
+					return new JoinTableInfo(t, body.Method.Name);
+				}
+				else
+				{
+					var table = TableInfoParser.Parse(parameter);
+					return new JoinTableInfo(table, body.Method.Name);
+				}
 			}
+			else if (body.Arguments.Count == 2)
+			{
+				var lambda = body.GetArgument<UnaryExpression>(1).GetOperand<LambdaExpression>();
+				if (lambda == null || lambda.Parameters.Count != 1) return null;
 
-			if (TableInfoParser.TryParse(ce, parameter, out var t))
-			{
-				return new JoinTableInfo(t, body.Method.Name, condition);
+				var tempName = lambda.Parameters[0].Name!;
+				var actualName = operand.Parameters[1].Name!;
+				var condition = lambda.ToValue();
+
+				// replace alias name
+				foreach (ColumnValue item in condition.GetValues().Where(x => x is ColumnValue c && c.TableAlias == tempName))
+				{
+					item.TableAlias = actualName;
+				}
+
+				if (TableInfoParser.TryParse(ce, parameter, out var t))
+				{
+					return new JoinTableInfo(t, body.Method.Name, condition);
+				}
+				else
+				{
+					var table = TableInfoParser.Parse(parameter);
+					return new JoinTableInfo(table, body.Method.Name, condition);
+				}
+
 			}
-			else
+			else if (body.Arguments.Count == 1)
 			{
-				var table = TableInfoParser.Parse(parameter);
-				return new JoinTableInfo(table, body.Method.Name, condition);
+				var lambda = body.GetArgument<UnaryExpression>(0).GetOperand<LambdaExpression>();
+				if (lambda == null || lambda.Parameters.Count != 1) return null;
+
+				var tempName = lambda.Parameters[0].Name!;
+				var actualName = operand.Parameters[1].Name!;
+				var condition = lambda.ToValue();
+
+				// replace alias name
+				foreach (ColumnValue item in condition.GetValues().Where(x => x is ColumnValue c && c.TableAlias == tempName))
+				{
+					item.TableAlias = actualName;
+				}
+
+				if (TableInfoParser.TryParse(ce, parameter, out var t))
+				{
+					return new JoinTableInfo(t, body.Method.Name, condition);
+				}
+				else
+				{
+					var table = TableInfoParser.Parse(parameter);
+					return new JoinTableInfo(table, body.Method.Name, condition);
+				}
 			}
 		}
 
