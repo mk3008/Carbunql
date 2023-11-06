@@ -10,32 +10,32 @@ public class JoinTableInfoParser
 		var joins = new List<JoinTableInfo>();
 		foreach (var item in ExpressionReader.GetExpressions(exp))
 		{
-			var j = ParseCore(item);
-			if (j != null) joins.Add(j);
+			if (TryParse(item, out var j))
+			{
+				joins.Add(j);
+			}
 		}
 		return joins;
 	}
 
-	private static JoinTableInfo? ParseCore(Expression exp)
+	public static bool TryParse(Expression exp, out JoinTableInfo join)
 	{
-		if (exp is not MethodCallExpression) return null;
+		join = null!;
+
+		if (exp is not MethodCallExpression) return false;
 
 		var method = (MethodCallExpression)exp;
-		if (method.Arguments.Count != 3) return null;
+		if (method.Arguments.Count != 3) return false;
 
-		var ce = method.GetArgument<ConstantExpression>(0);
 		var op = method.GetArgument<UnaryExpression>(1).GetOperand<LambdaExpression>();
-		if (op == null || op.Parameters.Count() != 1) return null;
-
-		//var parameter = op.Parameters[0];
+		if (op == null || op.Parameters.Count() != 1) return false;
 
 		var body = op.GetBody<MethodCallExpression>(); ;
-		if (body == null) return null;
+		if (body == null) return false;
 
-		//if (ce != null && (body.Method.Name == nameof(Sql.InnerJoinTable) || body.Method.Name == nameof(Sql.LeftJoinTable) || body.Method.Name == nameof(Sql.CrossJoinTable)))
-		//{
 		var operand = method.GetArgument<UnaryExpression>(2).GetOperand<LambdaExpression>();
-		if (operand == null || operand.Parameters.Count != 2) return null;
+		if (operand == null || operand.Parameters.Count != 2) return false;
+
 		var parameter = operand.Parameters[1];
 
 		if (body.Method.Name == nameof(Sql.CrossJoinTable))
@@ -43,91 +43,94 @@ public class JoinTableInfoParser
 			// method : CrossJoinTable
 			if (body.Arguments.Count == 0)
 			{
-				// no argument.
-
-				var table = TableInfoParser.Parse(parameter);
-				return new JoinTableInfo(table, body.Method.Name);
+				join = ParseAsCrossJoinTable(body, parameter);
+				return true;
 			}
 			else if (body.Arguments.Count == 1 && body.GetArgument<ConstantExpression>(0)?.Type == typeof(string))
 			{
-				//arg0 : tablename, Type : strig, NodeType : ConstantExpression
-				var tableName = (string)body.GetArgument<ConstantExpression>(0)!.Value!;
-				var table = new TableInfo(tableName, parameter.Name!);
-				return new JoinTableInfo(table, body.Method.Name);
+				join = ParseAsCrossJoinTable_Arg1(body, parameter);
+				return true;
 			}
 			throw new NotSupportedException();
 		}
-		else if (body.Arguments.Count == 2)
+
+		if (body.Method.Name == nameof(Sql.InnerJoinTable) || body.Method.Name == nameof(Sql.LeftJoinTable))
 		{
-			//method : InnerJoinTable, LeftJoinTable
-			//arg0   : tablename, Type : strig     , NodeType : ConstantExpression
-			//arg1   : condition, Type : Expression, NodeType : Quote(UnrayEcpression)
-
-			var lambda = body.GetArgument<UnaryExpression>(1).GetOperand<LambdaExpression>();
-			if (lambda == null || lambda.Parameters.Count != 1) return null;
-
-			var arg0 = body.GetArgument<ConstantExpression>(0);
-
-
-			var tempName = lambda.Parameters[0].Name!;
-			var actualName = operand.Parameters[1].Name!;
-			var condition = lambda.ToValue();
-
-			// replace alias name
-			foreach (ColumnValue item in condition.GetValues().Where(x => x is ColumnValue c && c.TableAlias == tempName))
+			// method : InnerJoinTable, LeftJoinTable
+			if (body.Arguments.Count == 1)
 			{
-				item.TableAlias = actualName;
+				join = ParseAsJoinTableInfo_Arg1(body, parameter);
+				return true;
 			}
-
-			//if (TableInfoParser.TryParse(ce, parameter, out var t))
-			//{
-			//	return new JoinTableInfo(t, body.Method.Name, condition);
-			//}
-			if (arg0 != null && arg0.Type == typeof(string))
+			if (body.Arguments.Count == 2)
 			{
-				// override tablename pattern.
-				var tableName = (string)arg0.Value!;
-				if (string.IsNullOrEmpty(tableName)) throw new InvalidProgramException();
-				var table = new TableInfo(tableName, parameter.Name!);
-				return new JoinTableInfo(table, body.Method.Name, condition);
+				join = ParseAsJoinTableInfo_Arg2(body, parameter);
+				return true;
 			}
-			else
-			{
-				var table = TableInfoParser.Parse(operand.Parameters[1]);
-				return new JoinTableInfo(table, body.Method.Name, condition);
-			}
-
+			throw new NotSupportedException();
 		}
-		else if (body.Arguments.Count == 1)
+
+		throw new NotSupportedException();
+	}
+
+	private static JoinTableInfo ParseAsCrossJoinTable(MethodCallExpression body, ParameterExpression alias)
+	{
+		var table = TableInfoParser.Parse(alias);
+		return new JoinTableInfo(table, body.Method.Name);
+	}
+
+	private static JoinTableInfo ParseAsCrossJoinTable_Arg1(MethodCallExpression body, ParameterExpression alias)
+	{
+		//arg0 : tablename, Type : strig, NodeType : ConstantExpression
+
+		var tableName = (string)body.GetArgument<ConstantExpression>(0)!.Value!;
+		var table = new TableInfo(tableName, alias.Name!);
+		return new JoinTableInfo(table, body.Method.Name);
+	}
+
+	private static JoinTableInfo ParseAsJoinTableInfo_Arg1(MethodCallExpression body, ParameterExpression alias)
+	{
+		//arg0 : condition, Type : Expression, NodeType : Quote(UnrayEcpression)
+
+		var lambda = body.GetArgument<UnaryExpression>(0).GetOperand<LambdaExpression>();
+		if (lambda == null || lambda.Parameters.Count != 1) throw new NotSupportedException();
+
+		var tempName = lambda.Parameters[0].Name!;
+		var condition = lambda.ToValue();
+
+		// replace alias name
+		foreach (ColumnValue item in condition.GetValues().Where(x => x is ColumnValue c && c.TableAlias == tempName))
 		{
-			//method : CrossJoinTable
-			//arg0   : tablename, Type : strig     , NodeType : ConstantExpression
-
-			var lambda = body.GetArgument<UnaryExpression>(0).GetOperand<LambdaExpression>();
-			if (lambda == null || lambda.Parameters.Count != 1) return null;
-
-			var tempName = lambda.Parameters[0].Name!;
-			var actualName = operand.Parameters[1].Name!;
-			var condition = lambda.ToValue();
-
-			// replace alias name
-			foreach (ColumnValue item in condition.GetValues().Where(x => x is ColumnValue c && c.TableAlias == tempName))
-			{
-				item.TableAlias = actualName;
-			}
-
-			//if (TableInfoParser.TryParse(ce, parameter, out var t))
-			//{
-			//	return new JoinTableInfo(t, body.Method.Name, condition);
-			//}
-			//else
-			{
-				var table = TableInfoParser.Parse(operand.Parameters[1]);
-				return new JoinTableInfo(table, body.Method.Name, condition);
-			}
+			item.TableAlias = alias.Name!;
 		}
-		//}
 
-		return null;
+		var table = TableInfoParser.Parse(alias);
+		return new JoinTableInfo(table, body.Method.Name, condition);
+	}
+
+	private static JoinTableInfo ParseAsJoinTableInfo_Arg2(MethodCallExpression body, ParameterExpression alias)
+	{
+		//arg0 : tablename, Type : strig     , NodeType : ConstantExpression
+		//arg1 : condition, Type : Expression, NodeType : Quote(UnrayEcpression)
+
+		//arg0
+		var tableName = (string)body.GetArgument<ConstantExpression>(0)!.Value!;
+		if (string.IsNullOrEmpty(tableName)) throw new NotSupportedException();
+
+		//arg1
+		var lambda = body.GetArgument<UnaryExpression>(1).GetOperand<LambdaExpression>();
+		if (lambda == null || lambda.Parameters.Count != 1) throw new NotSupportedException();
+
+		var tempName = lambda.Parameters[0].Name!;
+		var condition = lambda.ToValue();
+
+		// replace alias name
+		foreach (ColumnValue item in condition.GetValues().Where(x => x is ColumnValue c && c.TableAlias == tempName))
+		{
+			item.TableAlias = alias.Name!;
+		}
+
+		var table = new TableInfo(tableName, alias.Name!);
+		return new JoinTableInfo(table, body.Method.Name, condition);
 	}
 }
