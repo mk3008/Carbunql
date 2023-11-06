@@ -48,7 +48,7 @@ public class JoinTableInfoParser
 			}
 			else if (body.Arguments.Count == 1 && body.GetArgument<ConstantExpression>(0)?.Type == typeof(string))
 			{
-				join = ParseAsCrossJoinTable_Arg1(body, parameter);
+				join = ParseAsCrossJoinTable_string(body, parameter);
 				return true;
 			}
 			throw new NotSupportedException();
@@ -59,12 +59,12 @@ public class JoinTableInfoParser
 			// method : InnerJoinTable, LeftJoinTable
 			if (body.Arguments.Count == 1)
 			{
-				join = ParseAsJoinTableInfo_Arg1(body, parameter);
+				join = ParseAsJoinTableInfo_expression(body, parameter);
 				return true;
 			}
 			if (body.Arguments.Count == 2)
 			{
-				join = ParseAsJoinTableInfo_Arg2(body, parameter);
+				join = ParseAsJoinTableInfo_string_expression(body, parameter);
 				return true;
 			}
 			throw new NotSupportedException();
@@ -79,7 +79,7 @@ public class JoinTableInfoParser
 		return new JoinTableInfo(table, body.Method.Name);
 	}
 
-	private static JoinTableInfo ParseAsCrossJoinTable_Arg1(MethodCallExpression body, ParameterExpression alias)
+	private static JoinTableInfo ParseAsCrossJoinTable_string(MethodCallExpression body, ParameterExpression alias)
 	{
 		//arg0 : tablename, Type : strig, NodeType : ConstantExpression
 
@@ -88,7 +88,7 @@ public class JoinTableInfoParser
 		return new JoinTableInfo(table, body.Method.Name);
 	}
 
-	private static JoinTableInfo ParseAsJoinTableInfo_Arg1(MethodCallExpression body, ParameterExpression alias)
+	private static JoinTableInfo ParseAsJoinTableInfo_expression(MethodCallExpression body, ParameterExpression alias)
 	{
 		//arg0 : condition, Type : Expression, NodeType : Quote(UnrayEcpression)
 
@@ -108,7 +108,7 @@ public class JoinTableInfoParser
 		return new JoinTableInfo(table, body.Method.Name, condition);
 	}
 
-	private static JoinTableInfo ParseAsJoinTableInfo_Arg2(MethodCallExpression body, ParameterExpression alias)
+	private static JoinTableInfo ParseAsJoinTableInfo_string_expression(MethodCallExpression body, ParameterExpression alias)
 	{
 		//arg0 : tablename, Type : strig     , NodeType : ConstantExpression
 		//arg1 : condition, Type : Expression, NodeType : Quote(UnrayEcpression)
