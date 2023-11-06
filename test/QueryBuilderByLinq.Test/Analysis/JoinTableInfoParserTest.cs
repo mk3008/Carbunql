@@ -43,10 +43,9 @@ public class JoinTableInfoParserTest
 
 		Assert.Single(joins);
 
-		Assert.Equal("sale", joins[0].TableInfo.ToSelectable().ToOneLineText());
+		Assert.Equal("article", joins[0].TableInfo.ToSelectable().ToOneLineText());
 		Assert.Equal("InnerJoinTable", joins[0].Relation);
 		Assert.Equal("s.article_id = a.article_id", joins[0].Condition!.ToOneLineText());
-
 	}
 
 	[Fact]
@@ -62,7 +61,7 @@ public class JoinTableInfoParserTest
 
 		Assert.Single(joins);
 
-		Assert.Equal("sales as s", joins[0].TableInfo.ToSelectable().ToOneLineText());
+		Assert.Equal("articles as a", joins[0].TableInfo.ToSelectable().ToOneLineText());
 		Assert.Equal("InnerJoinTable", joins[0].Relation);
 		Assert.Equal("s.article_id = a.article_id", joins[0].Condition!.ToOneLineText());
 	}
@@ -78,7 +77,25 @@ public class JoinTableInfoParserTest
 
 		var joins = JoinTableInfoParser.Parse(query.Expression);
 
-		Assert.Equal("sale", joins[0].TableInfo.ToSelectable().ToOneLineText());
+		Assert.Equal("article", joins[0].TableInfo.ToSelectable().ToOneLineText());
+		Assert.Equal("LeftJoinTable", joins[0].Relation);
+		Assert.Equal("s.article_id = a.article_id", joins[0].Condition!.ToOneLineText());
+	}
+
+	[Fact]
+	public void LeftJoinStringTableTest()
+	{
+		var query = from s in FromTable<sale>("sales")
+					from a in LeftJoinTable<article>("articles", x => s.article_id == x.article_id)
+					select a;
+
+		Monitor.Log(query);
+
+		var joins = JoinTableInfoParser.Parse(query.Expression);
+
+		Assert.Single(joins);
+
+		Assert.Equal("articles as a", joins[0].TableInfo.ToSelectable().ToOneLineText());
 		Assert.Equal("LeftJoinTable", joins[0].Relation);
 		Assert.Equal("s.article_id = a.article_id", joins[0].Condition!.ToOneLineText());
 	}
@@ -94,10 +111,27 @@ public class JoinTableInfoParserTest
 
 		var joins = JoinTableInfoParser.Parse(query.Expression);
 
-		Assert.Equal("sale", joins[0].TableInfo.ToSelectable().ToOneLineText());
+		Assert.Equal("article", joins[0].TableInfo.ToSelectable().ToOneLineText());
 		Assert.Equal("CrossJoinTable", joins[0].Relation);
 		Assert.Null(joins[0].Condition);
 	}
+
+	[Fact]
+	public void CrossJoinStringTableTest()
+	{
+		var query = from s in FromTable<sale>()
+					from a in CrossJoinTable<article>("articles")
+					select a;
+
+		Monitor.Log(query);
+
+		var joins = JoinTableInfoParser.Parse(query.Expression);
+
+		Assert.Equal("articles as a", joins[0].TableInfo.ToSelectable().ToOneLineText());
+		Assert.Equal("CrossJoinTable", joins[0].Relation);
+		Assert.Null(joins[0].Condition);
+	}
+
 
 	public record struct sale(int sales_id, int article_id, int quantity);
 
