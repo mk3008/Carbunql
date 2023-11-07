@@ -70,7 +70,7 @@ public class JoinTableInfoParser
 			throw new NotSupportedException();
 		}
 
-		throw new NotSupportedException();
+		return false;
 	}
 
 	private static JoinTableInfo ParseAsCrossJoinTable(MethodCallExpression body, ParameterExpression alias)

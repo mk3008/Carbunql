@@ -300,7 +300,10 @@ public class SelectQueryBuilder
 			sq.AddJoinClause(method, tables, joinAlias);
 		}
 
-		if (condition != null) sq.Where(condition.ToValue(tables));
+		if (condition != null)
+		{
+			sq.Where(condition.ToValue(tables));
+		}
 
 		//refresh select clause
 		if (select != null)
