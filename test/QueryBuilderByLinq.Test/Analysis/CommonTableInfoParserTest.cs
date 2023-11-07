@@ -1,3 +1,4 @@
+using Carbunql;
 using QueryBuilderByLinq.Analysis;
 using Xunit.Abstractions;
 using static QueryBuilderByLinq.Sql;
@@ -31,15 +32,17 @@ public class CommonTableInfoParserTest
 
 		Assert.Single(ctes);
 		Assert.Equal("cte", ctes[0].Alias);
+		Assert.Equal("select a.a_id from table_a as a", ctes[0].Query.ToQueryAsPostgres().ToOneLineText());
 	}
 
 	[Fact]
 	public void TwoCommonTablesTest()
 	{
-		var subquery = from a in FromTable<table_a>() select a.a_id;
+		var sub1 = from a in FromTable<table_a>() select a.a_id;
+		var sub2 = from b in FromTable<table_a>() select b.text;
 
-		var query = from cte1 in CommonTable(subquery)
-					from cte2 in CommonTable(subquery)
+		var query = from cte1 in CommonTable(sub1)
+					from cte2 in CommonTable(sub2)
 					from x in FromTable(cte1)
 					select x;
 
@@ -48,6 +51,10 @@ public class CommonTableInfoParserTest
 		var ctes = CommonTableInfoParser.Parse(query.Expression);
 
 		Assert.Equal(2, ctes.Count);
+		Assert.Equal("cte1", ctes[0].Alias);
+		Assert.Equal("select a.a_id from table_a as a", ctes[0].Query.ToQueryAsPostgres().ToOneLineText());
+		Assert.Equal("cte2", ctes[1].Alias);
+		Assert.Equal("select b.text from table_a as b", ctes[1].Query.ToQueryAsPostgres().ToOneLineText());
 	}
 
 	[Fact]
@@ -68,6 +75,11 @@ public class CommonTableInfoParserTest
 		var ctes = CommonTableInfoParser.Parse(query.Expression);
 
 		Assert.Equal(5, ctes.Count);
+		Assert.Equal("cte1", ctes[0].Alias);
+		Assert.Equal("cte2", ctes[1].Alias);
+		Assert.Equal("cte3", ctes[2].Alias);
+		Assert.Equal("cte4", ctes[3].Alias);
+		Assert.Equal("cte5", ctes[4].Alias);
 	}
 
 	public record struct table_a(int a_id, string text, int value);

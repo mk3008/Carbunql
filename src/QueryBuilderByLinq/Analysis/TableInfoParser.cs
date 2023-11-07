@@ -1,9 +1,7 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
-using System.Data.Common;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Reflection.Metadata;
 
 namespace QueryBuilderByLinq.Analysis;
 
@@ -80,7 +78,7 @@ public static class TableInfoParser
 			if (operand.Parameters.Count != 2) return null;
 
 			var parameter = operand.Parameters[1];
-			return ParseCore3ArgumentsFromTable(body, parameter);
+			return ParseAsFromTable(body, parameter);
 		}
 		else if (ce != null && (body.Method.Name == nameof(Sql.InnerJoinTable) || body.Method.Name == nameof(Sql.LeftJoinTable) || body.Method.Name == nameof(Sql.CrossJoinTable)))
 		{
@@ -127,7 +125,7 @@ public static class TableInfoParser
 		return new TableInfo(parameter.ToTypeTable(), parameter.Name!);
 	}
 
-	private static TableInfo? ParseCore3ArgumentsFromTable(MethodCallExpression body, ParameterExpression parameter)
+	private static TableInfo? ParseAsFromTable(MethodCallExpression body, ParameterExpression parameter)
 	{
 		if (body.Method.Name != nameof(Sql.FromTable)) throw new InvalidProgramException();
 
