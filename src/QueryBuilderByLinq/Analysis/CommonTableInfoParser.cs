@@ -47,8 +47,8 @@ public static class CommonTableInfoParser
 		var method = (MethodCallExpression)exp;
 		if (method.Arguments.Count != 3) return false;
 
-		var commonTableQuery = method.GetArgument<ConstantExpression>(0);
-		if (commonTableQuery == null) return false;
+		var ce = method.GetArgument<ConstantExpression>(0);
+		if (ce == null) return false;
 
 		var operand = method.GetArgument<UnaryExpression>(1).GetOperand<LambdaExpression>();
 		if (operand == null) return false;
@@ -58,30 +58,30 @@ public static class CommonTableInfoParser
 
 		if (body.Method.Name == nameof(Sql.FromTable))
 		{
-			if (operand.Parameters.Count != 1) return false;
+			if (operand.Parameters.Count != 1) throw new NotSupportedException();
 			var name = operand.Parameters[0].Name!;
 
-			var c = method.GetArgument<ConstantExpression>(0);
-			if (c?.Value is TableQuery tq)
+			if (ce?.Value is TableQuery tq)
 			{
 				info = new CommonTableInfo(tq.InnerQuery!.AsQueryable(), name);
 				return true;
 			}
+			throw new NotSupportedException();
 		}
 		else if (body.Method.Name == nameof(CommonTable))
 		{
 			if (operand.Parameters.Count != 1) throw new NotSupportedException();
-
 			var name = operand.Parameters[0].Name!;
 
-			if (Queryable.TryParse(commonTableQuery, out var query))
+			if (Queryable.TryParse(ce, out var query))
 			{
 				info = new CommonTableInfo(query, name);
 				return true;
 			}
+			throw new NotSupportedException();
 		}
 
-		throw new NotSupportedException();
+		return false;
 	}
 
 	private static bool TryParseAsNestedCommonTable(Expression exp, out CommonTableInfo info)
@@ -89,21 +89,22 @@ public static class CommonTableInfoParser
 		info = null!;
 
 		/*
-			arg1 Query
-			arg2 Parameter of alias name.
+			arg0 any
+			arg1 CommonTable function
+			arg2 Alias
 		 */
 		if (exp is not MethodCallExpression) return false;
 
 		var root = (MethodCallExpression)exp;
 		if (root.Arguments.Count != 3) return false;
 
-		var commonTable = root.GetArgument<UnaryExpression>(1).GetOperand<LambdaExpression>().GetBody<MethodCallExpression>();
-		if (commonTable == null || commonTable.Method.Name != nameof(CommonTable)) return false;
+		var method = root.GetArgument<UnaryExpression>(1).GetOperand<LambdaExpression>().GetBody<MethodCallExpression>();
+		if (method == null || method.Method.Name != nameof(CommonTable)) return false;
 
 		var parameter = root.GetArgument<UnaryExpression>(2).GetOperand<LambdaExpression>().GetParameter<ParameterExpression>(1);
-		if (parameter == null) return false;
+		if (parameter == null) throw new NotSupportedException();
 
-		if (Queryable.TryParse(commonTable, out var query))
+		if (Queryable.TryParse(method, out var query))
 		{
 			info = new CommonTableInfo(query, parameter.Name!);
 			return true;
