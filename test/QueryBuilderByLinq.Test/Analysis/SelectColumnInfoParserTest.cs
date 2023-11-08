@@ -56,24 +56,35 @@ public class SelectColumnInfoParserTest
 	[Fact]
 	public void Alias()
 	{
+		var pai = 3.14;
+
 		var query = from a in FromTable<table_a>()
 					select new
 					{
 						ID = a.a_id,
 						TEXT = a.text,
-						VALUE = a.value
+						VALUE = a.value,
+						V1 = 1,
+						V2 = 1 + 1,
+						V3 = pai
 					};
 
 		Monitor.Log(query);
 
 		var items = SelectableItemParser.Parse(query.Expression);
-		Assert.Equal(3, items.Count);
+		Assert.Equal(6, items.Count);
 		Assert.Equal("ID", items[0].Alias);
 		Assert.Equal("a.a_id", items[0].Value.ToText());
 		Assert.Equal("TEXT", items[1].Alias);
 		Assert.Equal("a.text", items[1].Value.ToText());
 		Assert.Equal("VALUE", items[2].Alias);
 		Assert.Equal("a.value", items[2].Value.ToText());
+		Assert.Equal("V1", items[3].Alias);
+		Assert.Equal("1", items[3].Value.ToText());
+		Assert.Equal("V2", items[4].Alias);
+		Assert.Equal("2", items[4].Value.ToText());
+		Assert.Equal("V3", items[5].Alias);
+		Assert.Equal(":member_pai", items[5].Value.ToText());
 	}
 
 	[Fact]
