@@ -34,6 +34,10 @@ internal static class MemberExpressionExtension
 
 		if (exp.Expression is ParameterExpression prm)
 		{
+			if (prm.Name!.StartsWith("<>h__TransparentIdentifier"))
+			{
+				return new ColumnValue(exp.Member.Name, "*");
+			}
 			var table = prm.Name!;
 			var column = exp.Member.Name;
 			return new ColumnValue(table, column);

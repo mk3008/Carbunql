@@ -17,6 +17,24 @@ public class SelectColumnInfoParserTest
 	private ITestOutputHelper Output { get; set; }
 
 	[Fact]
+	public void SelectAll()
+	{
+		var query = from a in FromTable<table_a>()
+					select a;
+
+		Monitor.Log(query);
+
+		var items = SelectableItemParser.Parse(query.Expression);
+		Assert.Equal(3, items.Count);
+		Assert.Equal("a_id", items[0].Alias);
+		Assert.Equal("a.a_id", items[0].Value.ToText());
+		Assert.Equal("text", items[1].Alias);
+		Assert.Equal("a.text", items[1].Value.ToText());
+		Assert.Equal("value", items[2].Alias);
+		Assert.Equal("a.value", items[2].Value.ToText());
+	}
+
+	[Fact]
 	public void SelectColumn()
 	{
 		var query = from a in FromTable<table_a>()
@@ -88,7 +106,7 @@ public class SelectColumnInfoParserTest
 	}
 
 	[Fact]
-	public void Join()
+	public void JoinSelectColumns()
 	{
 		var query = from a in FromTable<table_a>()
 					from b in CrossJoinTable<table_a>()
@@ -107,6 +125,46 @@ public class SelectColumnInfoParserTest
 		Assert.Equal("a.a_id", items[0].Value.ToText());
 		Assert.Equal("text", items[1].Alias);
 		Assert.Equal("b.text", items[1].Value.ToText());
+	}
+
+	[Fact]
+	public void JoinSelectAll()
+	{
+		var query = from a in FromTable<table_a>()
+					from b in CrossJoinTable<table_a>()
+					where a.a_id == 1 && b.text == "test"
+					select a;
+
+		Monitor.Log(query);
+
+		var items = SelectableItemParser.Parse(query.Expression);
+		Assert.Equal(3, items.Count);
+		Assert.Equal("a_id", items[0].Alias);
+		Assert.Equal("a.a_id", items[0].Value.ToText());
+		Assert.Equal("text", items[1].Alias);
+		Assert.Equal("a.text", items[1].Value.ToText());
+		Assert.Equal("value", items[2].Alias);
+		Assert.Equal("a.value", items[2].Value.ToText());
+	}
+
+	[Fact]
+	public void JoinSelectAll_2()
+	{
+		var query = from a in FromTable<table_a>()
+					from b in CrossJoinTable<table_a>()
+					where a.a_id == 1 && b.text == "test"
+					select b;
+
+		Monitor.Log(query);
+
+		var items = SelectableItemParser.Parse(query.Expression);
+		Assert.Equal(3, items.Count);
+		Assert.Equal("a_id", items[0].Alias);
+		Assert.Equal("b.a_id", items[0].Value.ToText());
+		Assert.Equal("text", items[1].Alias);
+		Assert.Equal("b.text", items[1].Value.ToText());
+		Assert.Equal("value", items[2].Alias);
+		Assert.Equal("b.value", items[2].Value.ToText());
 	}
 
 	public record struct table_a(int a_id, string text, int value);

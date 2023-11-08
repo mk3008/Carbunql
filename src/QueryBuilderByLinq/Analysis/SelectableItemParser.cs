@@ -32,13 +32,40 @@ public class SelectableItemParser
 		var operand = me.GetArgument<UnaryExpression>(1).GetOperand<LambdaExpression>();
 		if (operand == null) return results;
 
-		var body = operand.GetBody<NewExpression>();
-		if (body == null) return results;
+		if (operand.Body is NewExpression)
+		{
+			//select custom column pattern.
+			var body = (NewExpression)operand.Body;
+			var val = body.ToValue(aliases);
+			results = Parse(val).ToList();
+			return results;
+		}
+		if (operand.Body is ParameterExpression)
+		{
+			//select all pattern.
+			var body = (ParameterExpression)operand.Body;
+			var val = body.ToValue(aliases);
+			results = Parse(val).ToList();
+			return results;
+		}
+		if (operand.Body is MemberExpression)
+		{
+			//join and select all pattern.
+			var body = (MemberExpression)operand.Body;
+			if (body == null) throw new NotSupportedException();
+			var val = body.ToValue(aliases);
 
-		var val = body.ToValue(aliases);
+			if (val is ColumnValue c && c.Column == "*")
+			{
+				return DecodeWildCard(exp, c).ToList();
+			}
 
-		results = Parse(val).ToList();
-		return results;
+			results = Parse(val).ToList();
+			return results;
+
+		}
+
+		throw new NotSupportedException();
 	}
 
 	internal static IEnumerable<SelectableItem> Parse(ValueBase value)
@@ -68,4 +95,29 @@ public class SelectableItemParser
 		}
 	}
 
+	private static IEnumerable<SelectableItem> DecodeWildCard(Expression exp, ColumnValue v)
+	{
+		var tableinfo = TableInfoParser.Parse(exp);
+
+		if (tableinfo!.Alias == v.TableAlias)
+		{
+			foreach (var item in tableinfo!.Table!.GetColumnNames())
+			{
+				yield return new SelectableItem(new ColumnValue(v.TableAlias, item), item);
+			}
+			yield break;
+		}
+
+		var joinInfo = JoinTableInfoParser.Parse(exp).Where(x => x.TableInfo!.Alias == v.TableAlias).FirstOrDefault();
+		if (joinInfo != null)
+		{
+			foreach (var item in joinInfo.TableInfo.Table!.GetColumnNames())
+			{
+				yield return new SelectableItem(new ColumnValue(v.TableAlias, item), item);
+			}
+			yield break;
+		}
+
+		throw new NotSupportedException();
+	}
 }
