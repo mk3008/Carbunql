@@ -24,7 +24,7 @@ public class SelectColumnInfoParserTest
 
 		Monitor.Log(query);
 
-		var items = SelectColumnInfoParser.Parse(query.Expression);
+		var items = SelectableItemParser.Parse(query.Expression);
 		Assert.Single(items);
 		Assert.Equal("a_id", items[0].Alias);
 		Assert.Equal("a.a_id", items[0].Value.ToText());
@@ -43,7 +43,7 @@ public class SelectColumnInfoParserTest
 
 		Monitor.Log(query);
 
-		var items = SelectColumnInfoParser.Parse(query.Expression);
+		var items = SelectableItemParser.Parse(query.Expression);
 		Assert.Equal(3, items.Count);
 		Assert.Equal("a_id", items[0].Alias);
 		Assert.Equal("a.a_id", items[0].Value.ToText());
@@ -66,7 +66,7 @@ public class SelectColumnInfoParserTest
 
 		Monitor.Log(query);
 
-		var items = SelectColumnInfoParser.Parse(query.Expression);
+		var items = SelectableItemParser.Parse(query.Expression);
 		Assert.Equal(3, items.Count);
 		Assert.Equal("ID", items[0].Alias);
 		Assert.Equal("a.a_id", items[0].Value.ToText());
@@ -90,7 +90,7 @@ public class SelectColumnInfoParserTest
 
 		Monitor.Log(query);
 
-		var items = SelectColumnInfoParser.Parse(query.Expression);
+		var items = SelectableItemParser.Parse(query.Expression);
 		Assert.Equal(2, items.Count);
 		Assert.Equal("a_id", items[0].Alias);
 		Assert.Equal("a.a_id", items[0].Value.ToText());

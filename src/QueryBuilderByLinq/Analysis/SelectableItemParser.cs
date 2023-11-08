@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace QueryBuilderByLinq.Analysis;
 
-public class SelectColumnInfoParser
+public class SelectableItemParser
 {
 	public static List<SelectableItem> Parse(Expression exp)
 	{

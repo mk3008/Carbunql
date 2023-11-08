@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 
 namespace QueryBuilderByLinq.Analysis;
 
-public class WhereInfoParser
+public class WhereValueParser
 {
 	public static ValueBase? Parse(Expression exp)
 	{

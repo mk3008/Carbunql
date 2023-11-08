@@ -25,7 +25,7 @@ public class WhereParserTest
 
 		Monitor.Log(query);
 
-		var where = WhereInfoParser.Parse(query.Expression);
+		var where = WhereValueParser.Parse(query.Expression);
 		Assert.Null(where);
 	}
 
@@ -38,7 +38,7 @@ public class WhereParserTest
 
 		Monitor.Log(query);
 
-		var where = WhereInfoParser.Parse(query.Expression);
+		var where = WhereValueParser.Parse(query.Expression);
 		Assert.Equal("a.a_id = 1", where!.ToOneLineText());
 	}
 
@@ -54,7 +54,7 @@ public class WhereParserTest
 
 		Monitor.Log(query);
 
-		var where = WhereInfoParser.Parse(query.Expression);
+		var where = WhereValueParser.Parse(query.Expression);
 		Assert.Equal("a.a_id = 1", where!.ToOneLineText());
 	}
 
@@ -68,7 +68,7 @@ public class WhereParserTest
 
 		Monitor.Log(query);
 
-		var where = WhereInfoParser.Parse(query.Expression);
+		var where = WhereValueParser.Parse(query.Expression);
 		Assert.Equal("(a.a_id = 1 and b.text = 'test')", where!.ToOneLineText());
 	}
 
