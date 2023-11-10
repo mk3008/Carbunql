@@ -67,7 +67,7 @@ public static class TableInfoParser
 		if (method.Arguments.Count != 3) return null;
 
 		var ce = method.GetArgument<ConstantExpression>(0);
-		var body = method.GetArgument<UnaryExpression>(1).GetOperand<LambdaExpression>().GetBody<MethodCallExpression>(); ;
+		var body = method.GetArgument<UnaryExpression>(1).GetOperand<LambdaExpression>().GetBody<MethodCallExpression>();
 		if (body == null) return null;
 
 		if (body.Method.Name == nameof(Sql.FromTable))
@@ -107,7 +107,7 @@ public static class TableInfoParser
 			if (provider.InnerQuery != null)
 			{
 				// subquery pattern.
-				from = new TableInfo(provider.InnerQuery.ToQueryAsPostgres(), parameter.Name!);
+				from = new TableInfo(provider.InnerQuery.ToSelectQuery(), parameter.Name!);
 				return true;
 			}
 			else
@@ -145,8 +145,16 @@ public static class TableInfoParser
 		{
 			// single common table pattern.
 			// ex.From(IQueryable)
-			var table = body.GetArgument<ParameterExpression>(0)!.Name!;
-			return new TableInfo(table, alias);
+			var prm = body.GetArgument<ParameterExpression>(0);
+			if (prm == null) throw new InvalidProgramException();
+
+			var table = prm.Name!;
+			var props = prm.Type.GetProperties().Select(x => x.Name).ToList();
+
+			//var t = new TableInfo(table, alias);
+			var pt = new PhysicalTable(table) { ColumnNames = props };
+			var st = new SelectableTable(pt, alias);
+			return new TableInfo(st, alias);
 		}
 		else if (body.Arguments[0] is MemberExpression)
 		{
@@ -192,7 +200,7 @@ public static class TableInfoParser
 		}
 		if (value is IQueryable q)
 		{
-			return new TableInfo(q.AsQueryable().ToQueryAsPostgres(), alias);
+			return new TableInfo(q.AsQueryable().ToSelectQuery(), alias);
 		}
 		return null;
 	}

@@ -43,7 +43,7 @@ public class WhereTest
 		var query = from a in FromTable<table_a>()
 					where a.a_id == 1
 					select a;
-		SelectQuery sq = query.ToQueryAsPostgres();
+		SelectQuery sq = query.ToSelectQuery();
 
 		Monitor.Log(sq);
 
@@ -67,7 +67,7 @@ WHERE
 		var query = from a in FromTable<table_a>()
 					where a.a_id == 1 && a.text == "test"
 					select a;
-		SelectQuery sq = query.ToQueryAsPostgres();
+		SelectQuery sq = query.ToSelectQuery();
 
 		Monitor.Log(sq);
 
@@ -91,7 +91,7 @@ WHERE
 		var query = from a in FromTable<table_a>()
 					where a.a_id == 1 || a.text == "test"
 					select a;
-		SelectQuery sq = query.ToQueryAsPostgres();
+		SelectQuery sq = query.ToSelectQuery();
 
 		Monitor.Log(sq);
 
@@ -116,7 +116,7 @@ WHERE
 		var query = from a in FromTable<table_a>()
 					where a.a_id == id
 					select a;
-		SelectQuery sq = query.ToQueryAsPostgres();
+		SelectQuery sq = query.ToSelectQuery();
 
 		Monitor.Log(sq);
 
@@ -143,7 +143,7 @@ WHERE
 		var query = from a in FromTable<table_a>()
 					where new[] { 1, 2, 3 }.Contains(a.a_id)
 					select a;
-		SelectQuery sq = query.ToQueryAsPostgres();
+		SelectQuery sq = query.ToSelectQuery();
 
 		Monitor.Log(sq);
 
@@ -168,7 +168,7 @@ WHERE
 		var query = from a in FromTable<table_a>()
 					where ids.Contains(a.a_id)
 					select a;
-		SelectQuery sq = query.ToQueryAsPostgres();
+		SelectQuery sq = query.ToSelectQuery();
 
 		Monitor.Log(sq);
 

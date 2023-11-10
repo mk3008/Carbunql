@@ -30,7 +30,7 @@ public class DualTest
 						v6 = 3.14,
 						v7 = 1 + 2 + 3
 					};
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(sq);
 

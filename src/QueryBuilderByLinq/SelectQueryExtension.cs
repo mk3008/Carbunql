@@ -162,7 +162,7 @@ internal static class SelectQueryExtension
 
 			if (Queryable.TryParse(me, out var subq))
 			{
-				f.InnerJoin(subq.ToQueryAsPostgres()).As(joinAlias.Name!).On((_) => condition);
+				f.InnerJoin(subq.ToSelectQuery()).As(joinAlias.Name!).On((_) => condition);
 			}
 			else if (me.GetJoinTableName(out var name))
 			{
@@ -204,7 +204,7 @@ internal static class SelectQueryExtension
 
 			if (Queryable.TryParse(me, out var subq))
 			{
-				f.LeftJoin(subq.ToQueryAsPostgres()).As(joinAlias.Name!).On((_) => condition);
+				f.LeftJoin(subq.ToSelectQuery()).As(joinAlias.Name!).On((_) => condition);
 			}
 			else if (me.GetJoinTableName(out var name))
 			{
@@ -234,7 +234,7 @@ internal static class SelectQueryExtension
 		{
 			if (Queryable.TryParse(me, out var subq))
 			{
-				f.CrossJoin(subq.ToQueryAsPostgres()).As(joinAlias.Name!);
+				f.CrossJoin(subq.ToSelectQuery()).As(joinAlias.Name!);
 			}
 			else if (me.GetJoinTableName(out var name))
 			{

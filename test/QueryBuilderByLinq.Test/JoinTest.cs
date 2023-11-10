@@ -28,7 +28,7 @@ public class JoinTest
 						b.text,
 						b.value
 					};
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(sq);
 
@@ -58,7 +58,7 @@ FROM
 						b.text,
 						b.value
 					};
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(sq);
 
@@ -89,7 +89,7 @@ FROM
 						b.text,
 						b.value
 					};
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(sq);
 
@@ -121,7 +121,7 @@ WHERE
 						b.text,
 						b.value
 					};
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(sq);
 
@@ -151,7 +151,7 @@ FROM
 						b.text,
 						b.value
 					};
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(sq);
 
@@ -183,7 +183,7 @@ FROM
 						c.c_id,
 						d.d_id
 					};
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(sq);
 
@@ -217,7 +217,7 @@ FROM
 						c.c_id,
 						d.d_id
 					};
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(sq);
 
@@ -251,7 +251,7 @@ FROM
 						c,
 						d
 					};
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(sq);
 
@@ -297,7 +297,7 @@ FROM
 						c,
 						d
 					};
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(sq);
 

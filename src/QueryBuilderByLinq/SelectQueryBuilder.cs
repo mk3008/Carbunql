@@ -107,7 +107,7 @@ public class SelectQueryBuilder
 		{
 			if (Queryable.TryParse(cte, out var cte1))
 			{
-				sq.With(cte1.ToQueryAsPostgres()).As(fromAlias.Name!);
+				sq.With(cte1.ToSelectQuery()).As(fromAlias.Name!);
 			}
 			else
 			{
@@ -116,7 +116,7 @@ public class SelectQueryBuilder
 
 			if (from.Body is MethodCallExpression fromBody && Queryable.TryParse(fromBody, out var cte2))
 			{
-				sq.With(cte2.ToQueryAsPostgres()).As(joinAlias!.Name!);
+				sq.With(cte2.ToSelectQuery()).As(joinAlias!.Name!);
 			}
 		}
 
@@ -147,7 +147,7 @@ public class SelectQueryBuilder
 			{
 				if (tq.InnerQuery != null)
 				{
-					sq.From(tq.InnerQuery.ToQueryAsPostgres()).As(fromAlias.Name!);
+					sq.From(tq.InnerQuery.ToSelectQuery()).As(fromAlias.Name!);
 				}
 				else
 				{
@@ -192,7 +192,7 @@ public class SelectQueryBuilder
 			{
 				if (tq.InnerQuery != null)
 				{
-					sq.From(tq.InnerQuery.ToQueryAsPostgres()).As(fromAlias.Name!);
+					sq.From(tq.InnerQuery.ToSelectQuery()).As(fromAlias.Name!);
 				}
 				else
 				{
@@ -275,7 +275,7 @@ public class SelectQueryBuilder
 			var body = method.GetBody<MethodCallExpression>()!;
 			if (Queryable.TryParse(body, out var cte))
 			{
-				sq.With(cte.ToQueryAsPostgres()).As(alias!.Name!);
+				sq.With(cte.ToSelectQuery()).As(alias!.Name!);
 				return sq;
 			}
 		}

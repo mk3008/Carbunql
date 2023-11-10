@@ -23,7 +23,7 @@ public class SelectTest
 		var query = from a in FromTable<table_a>() select a.a_id;
 		//WriteLog(query);
 
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(query);
 		Monitor.Log(sq);
@@ -42,7 +42,7 @@ FROM
 	public void SelectFrom()
 	{
 		var query = from a in FromTable<table_a>("sales") select a.a_id;
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(query);
 		Monitor.Log(sq);
@@ -61,7 +61,7 @@ FROM
 	public void SelectAll()
 	{
 		var query = from a in FromTable<table_a>() select a;
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(query);
 		Monitor.Log(sq);
@@ -87,7 +87,7 @@ FROM
 						a.a_id,
 						a.text
 					};
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(query);
 		Monitor.Log(sq);
@@ -113,7 +113,7 @@ FROM
 						ID = a.a_id,
 						Text = a.text
 					};
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(query);
 		Monitor.Log(sq);
@@ -137,7 +137,7 @@ FROM
 					{
 						val = Greatest(a.a_id, a.value)
 					};
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(query);
 		Monitor.Log(sq);
@@ -160,7 +160,7 @@ FROM
 					{
 						val = Least(a.a_id, a.value)
 					};
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(query);
 		Monitor.Log(sq);
@@ -183,7 +183,7 @@ FROM
 					{
 						val = RowNumber()
 					};
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(query);
 		Monitor.Log(sq);
@@ -206,7 +206,7 @@ FROM
 					{
 						val = RowNumber(new { a.text, a.a_id })
 					};
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(query);
 		Monitor.Log(sq);
@@ -233,7 +233,7 @@ FROM
 					{
 						val = RowNumber(new { a.text, a.a_id }, null)
 					};
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(query);
 		Monitor.Log(sq);
@@ -260,7 +260,7 @@ FROM
 					{
 						val = RowNumber(new { a.text }, new { a.value, a.a_id })
 					};
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(query);
 		Monitor.Log(sq);

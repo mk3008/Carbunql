@@ -25,8 +25,21 @@ public class WhereParserTest
 
 		Monitor.Log(query);
 
+		var sq = query.ToSelectQuery();
+		Monitor.Log(sq);
+
 		var where = WhereValueParser.Parse(query.Expression);
 		Assert.Null(where);
+
+		var sql = @"
+SELECT
+    a.a_id,
+    a.text,
+    a.value
+FROM
+    table_a AS a
+";
+		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
 	}
 
 	[Fact]
@@ -38,8 +51,23 @@ public class WhereParserTest
 
 		Monitor.Log(query);
 
+		var sq = query.ToSelectQuery();
+		Monitor.Log(sq);
+
 		var where = WhereValueParser.Parse(query.Expression);
 		Assert.Equal("a.a_id = 1", where!.ToOneLineText());
+
+		var sql = @"
+SELECT
+    a.a_id,
+    a.text,
+    a.value
+FROM
+    table_a AS a
+WHERE
+    a.a_id = 1
+";
+		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
 	}
 
 	[Fact]
@@ -54,8 +82,28 @@ public class WhereParserTest
 
 		Monitor.Log(query);
 
+		var sq = query.ToSelectQuery();
+		Monitor.Log(sq);
+
 		var where = WhereValueParser.Parse(query.Expression);
 		Assert.Equal("a.a_id = 1", where!.ToOneLineText());
+
+		var sql = @"
+WITH
+    cte AS (
+        SELECT
+            a.a_id
+        FROM
+            table_a AS a
+    )
+SELECT
+    a.a_id
+FROM
+    cte AS a
+WHERE
+    a.a_id = 1
+";
+		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
 	}
 
 	[Fact]
@@ -68,8 +116,23 @@ public class WhereParserTest
 
 		Monitor.Log(query);
 
+		var sq = query.ToSelectQuery();
+		Monitor.Log(sq);
+
 		var where = WhereValueParser.Parse(query.Expression);
 		Assert.Equal("(a.a_id = 1 and b.text = 'test')", where!.ToOneLineText());
+
+		var sql = @"
+SELECT
+    a.a_id,
+    b.text
+FROM
+    table_a AS a
+    CROSS JOIN table_a AS b
+WHERE
+    (a.a_id = 1 AND b.text = 'test')
+";
+		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
 	}
 
 

@@ -1,3 +1,4 @@
+using Carbunql;
 using QueryBuilderByLinq.Analysis;
 using Xunit.Abstractions;
 using static QueryBuilderByLinq.Sql;
@@ -24,6 +25,9 @@ public class SelectColumnInfoParserTest
 
 		Monitor.Log(query);
 
+		var sq = query.ToSelectQuery();
+		Monitor.Log(sq);
+
 		var items = SelectableItemParser.Parse(query.Expression);
 		Assert.Equal(3, items.Count);
 		Assert.Equal("a_id", items[0].Alias);
@@ -32,6 +36,16 @@ public class SelectColumnInfoParserTest
 		Assert.Equal("a.text", items[1].Value.ToText());
 		Assert.Equal("value", items[2].Alias);
 		Assert.Equal("a.value", items[2].Value.ToText());
+
+		var sql = @"
+SELECT
+    a.a_id,
+    a.text,
+    a.value
+FROM
+    table_a AS a
+";
+		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
 	}
 
 	[Fact]
@@ -42,10 +56,20 @@ public class SelectColumnInfoParserTest
 
 		Monitor.Log(query);
 
+		var sq = query.ToSelectQuery();
+		Monitor.Log(sq);
+
 		var items = SelectableItemParser.Parse(query.Expression);
 		Assert.Single(items);
 		Assert.Equal("a_id", items[0].Alias);
 		Assert.Equal("a.a_id", items[0].Value.ToText());
+
+		var sql = @"
+SELECT
+    a.a_id
+FROM
+    table_a AS a";
+		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
 	}
 
 	[Fact]
@@ -61,6 +85,9 @@ public class SelectColumnInfoParserTest
 
 		Monitor.Log(query);
 
+		var sq = query.ToSelectQuery();
+		Monitor.Log(sq);
+
 		var items = SelectableItemParser.Parse(query.Expression);
 		Assert.Equal(3, items.Count);
 		Assert.Equal("a_id", items[0].Alias);
@@ -69,6 +96,16 @@ public class SelectColumnInfoParserTest
 		Assert.Equal("a.text", items[1].Value.ToText());
 		Assert.Equal("value", items[2].Alias);
 		Assert.Equal("a.value", items[2].Value.ToText());
+
+		var sql = @"
+SELECT
+    a.a_id,
+    a.text,
+    a.value
+FROM
+    table_a AS a
+";
+		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
 	}
 
 	[Fact]
@@ -89,6 +126,9 @@ public class SelectColumnInfoParserTest
 
 		Monitor.Log(query);
 
+		var sq = query.ToSelectQuery();
+		Monitor.Log(sq);
+
 		var items = SelectableItemParser.Parse(query.Expression);
 		Assert.Equal(6, items.Count);
 		Assert.Equal("ID", items[0].Alias);
@@ -103,6 +143,21 @@ public class SelectColumnInfoParserTest
 		Assert.Equal("2", items[4].Value.ToText());
 		Assert.Equal("V3", items[5].Alias);
 		Assert.Equal(":member_pai", items[5].Value.ToText());
+
+		var sql = @"
+/*
+  :member_pai = 3.14
+*/
+SELECT
+    a.a_id AS ID,
+    a.text AS TEXT,
+    a.value AS VALUE,
+    1 AS V1,
+    2 AS V2,
+    :member_pai AS V3
+FROM
+    table_a AS a";
+		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
 	}
 
 	[Fact]
@@ -119,12 +174,26 @@ public class SelectColumnInfoParserTest
 
 		Monitor.Log(query);
 
+		var sq = query.ToSelectQuery();
+		Monitor.Log(sq);
+
 		var items = SelectableItemParser.Parse(query.Expression);
 		Assert.Equal(2, items.Count);
 		Assert.Equal("a_id", items[0].Alias);
 		Assert.Equal("a.a_id", items[0].Value.ToText());
 		Assert.Equal("text", items[1].Alias);
 		Assert.Equal("b.text", items[1].Value.ToText());
+
+		var sql = @"
+SELECT
+    a.a_id,
+    b.text
+FROM
+    table_a AS a
+    CROSS JOIN table_a as b
+WHERE
+    (a.a_id = 1 AND b.text = 'test')";
+		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
 	}
 
 	[Fact]
@@ -137,6 +206,9 @@ public class SelectColumnInfoParserTest
 
 		Monitor.Log(query);
 
+		var sq = query.ToSelectQuery();
+		Monitor.Log(sq);
+
 		var items = SelectableItemParser.Parse(query.Expression);
 		Assert.Equal(3, items.Count);
 		Assert.Equal("a_id", items[0].Alias);
@@ -145,6 +217,18 @@ public class SelectColumnInfoParserTest
 		Assert.Equal("a.text", items[1].Value.ToText());
 		Assert.Equal("value", items[2].Alias);
 		Assert.Equal("a.value", items[2].Value.ToText());
+
+		var sql = @"
+SELECT
+    a.a_id,
+    a.text,
+    a.value
+FROM
+    table_a AS a
+    CROSS JOIN table_a as b
+WHERE
+    (a.a_id = 1 AND b.text = 'test')";
+		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
 	}
 
 	[Fact]
@@ -157,6 +241,9 @@ public class SelectColumnInfoParserTest
 
 		Monitor.Log(query);
 
+		var sq = query.ToSelectQuery();
+		Monitor.Log(sq);
+
 		var items = SelectableItemParser.Parse(query.Expression);
 		Assert.Equal(3, items.Count);
 		Assert.Equal("a_id", items[0].Alias);
@@ -165,6 +252,18 @@ public class SelectColumnInfoParserTest
 		Assert.Equal("b.text", items[1].Value.ToText());
 		Assert.Equal("value", items[2].Alias);
 		Assert.Equal("b.value", items[2].Value.ToText());
+
+		var sql = @"
+SELECT
+    b.a_id,
+    b.text,
+    b.value
+FROM
+    table_a AS a
+    CROSS JOIN table_a as b
+WHERE
+    (a.a_id = 1 AND b.text = 'test')";
+		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
 	}
 
 	public record struct table_a(int a_id, string text, int value);

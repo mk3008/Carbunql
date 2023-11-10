@@ -47,7 +47,7 @@ public class CommonTableTest
 					from b in FromTable(cte)
 					select b;
 
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(sq);
 
@@ -80,7 +80,7 @@ FROM
 					where b.ID == 1
 					select b;
 
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(sq);
 
@@ -116,7 +116,7 @@ WHERE
 					where b.ID == 1
 					select new { b, c };
 
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(sq);
 
@@ -157,7 +157,7 @@ WHERE
 					where b.a_id == 1
 					select new { b, c };
 
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(sq);
 
@@ -209,7 +209,7 @@ WHERE
 					where b.a_id == 1
 					select new { b, c, d, e };
 
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(query);
 		Monitor.Log(sq);

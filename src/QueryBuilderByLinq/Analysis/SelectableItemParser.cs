@@ -27,43 +27,96 @@ public class SelectableItemParser
 		if (exp is not MethodCallExpression) return results;
 
 		var me = (MethodCallExpression)exp;
-		if (me.Arguments.Count != 2) return results;
-
-		var operand = me.GetArgument<UnaryExpression>(1).GetOperand<LambdaExpression>();
-		if (operand == null) return results;
-
-		if (operand.Body is NewExpression)
+		if (me.Arguments.Count == 2)
 		{
-			//select custom column pattern.
-			var body = (NewExpression)operand.Body;
-			var val = body.ToValue(aliases);
-			results = Parse(val).ToList();
-			return results;
-		}
-		if (operand.Body is ParameterExpression)
-		{
-			//select all pattern.
-			var body = (ParameterExpression)operand.Body;
-			var val = body.ToValue(aliases);
-			results = Parse(val).ToList();
-			return results;
-		}
-		if (operand.Body is MemberExpression)
-		{
-			//join and select all pattern.
-			var body = (MemberExpression)operand.Body;
-			if (body == null) throw new NotSupportedException();
-			var val = body.ToValue(aliases);
+			var operand = me.GetArgument<UnaryExpression>(1).GetOperand<LambdaExpression>();
+			if (operand == null) return results;
 
-			if (val is ColumnValue c && c.Column == "*")
+			if (operand.Body is NewExpression)
 			{
-				return DecodeWildCard(exp, c).ToList();
+				//select custom column pattern.
+				var body = (NewExpression)operand.Body;
+				var val = body.ToValue(aliases);
+				results = Parse(val).ToList();
+				return results;
+			}
+			if (operand.Body is ParameterExpression)
+			{
+				//select all pattern.
+				var body = (ParameterExpression)operand.Body;
+				var val = body.ToValue(aliases);
+				results = Parse(val).ToList();
+				return results;
+			}
+			if (operand.Body is MemberExpression)
+			{
+				//join and select all pattern.
+				var body = (MemberExpression)operand.Body;
+				if (body == null) throw new NotSupportedException();
+				var val = body.ToValue(aliases);
+
+				if (val is ColumnValue c && c.Column == "*")
+				{
+					return DecodeWildCard(exp, c).ToList();
+				}
+
+				results = Parse(val).ToList();
+				return results;
+			}
+			if (operand.ReturnType == typeof(bool) && operand.Parameters.Count == 1)
+			{
+				//select and where pattern.
+				var prm = operand.GetParameter<ParameterExpression>(0);
+				if (prm == null) throw new NotSupportedException();
+
+				var val = prm.ToValue(aliases);
+				results = Parse(val).ToList();
+				return results;
 			}
 
-			results = Parse(val).ToList();
-			return results;
-
+			throw new NotSupportedException();
 		}
+
+		if (me.Arguments.Count == 3)
+		{
+			var operand = me.GetArgument<UnaryExpression>(2).GetOperand<LambdaExpression>();
+			if (operand == null) return results;
+
+			if (operand.Body is NewExpression)
+			{
+				//select custom column pattern.
+				var body = (NewExpression)operand.Body;
+				var val = body.ToValue(aliases);
+				results = Parse(val).ToList();
+				return results;
+			}
+			if (operand.Body is ParameterExpression)
+			{
+				//select all pattern.
+				var body = (ParameterExpression)operand.Body;
+				var val = body.ToValue(aliases);
+				results = Parse(val).ToList();
+				return results;
+			}
+			if (operand.Body is MemberExpression)
+			{
+				//join and select all pattern.
+				var body = (MemberExpression)operand.Body;
+				if (body == null) throw new NotSupportedException();
+				var val = body.ToValue(aliases);
+
+				if (val is ColumnValue c && c.Column == "*")
+				{
+					return DecodeWildCard(exp, c).ToList();
+				}
+
+				results = Parse(val).ToList();
+				return results;
+			}
+
+			throw new NotSupportedException();
+		}
+
 
 		throw new NotSupportedException();
 	}

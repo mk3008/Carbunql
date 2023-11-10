@@ -22,7 +22,7 @@ public class SubQueryTest
 		var subq = from a in FromTable<table_a>() select new { ID = a.a_id, Text = a.text };
 		var query = from x in FromTable(subq) select new { x.ID, x.Text };
 
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(sq);
 
@@ -57,7 +57,7 @@ FROM
 					from z in CrossJoinTable(subz)
 					select new { a, x, y, z };
 
-		var sq = query.ToQueryAsPostgres();
+		var sq = query.ToSelectQuery();
 
 		Monitor.Log(sq);
 

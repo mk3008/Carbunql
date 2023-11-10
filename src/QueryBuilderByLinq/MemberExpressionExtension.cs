@@ -46,7 +46,10 @@ internal static class MemberExpressionExtension
 		if (exp.Expression is MemberExpression mem)
 		{
 			var table = tables.Where(x => x == mem.Member.Name).FirstOrDefault();
-			if (mem.Member.Name.StartsWith("<>h__TransparentIdentifier")) table = mem.Member.Name;
+			if (mem.Member.Name.StartsWith("<>h__TransparentIdentifier"))
+			{
+				return new ColumnValue(exp.Member.Name, "*");
+			}
 
 			if (!string.IsNullOrEmpty(table))
 			{

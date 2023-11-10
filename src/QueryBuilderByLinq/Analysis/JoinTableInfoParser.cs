@@ -15,6 +15,7 @@ public class JoinTableInfoParser
 				joins.Add(j);
 			}
 		}
+		joins.Reverse();
 		return joins;
 	}
 
