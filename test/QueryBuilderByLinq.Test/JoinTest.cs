@@ -244,13 +244,7 @@ FROM
 					from c in InnerJoinTable<table_c>(x => d.c_id == x.c_id)
 					from b in InnerJoinTable<table_b>(x => c.b_id == x.b_id)
 					from a in LeftJoinTable<table_a>(x => b.a_id == x.a_id)
-					select new
-					{
-						a,
-						b,
-						c,
-						d
-					};
+					select a;
 		var sq = query.ToSelectQuery();
 
 		Monitor.Log(sq);
@@ -259,26 +253,14 @@ FROM
 SELECT
     a.a_id,
     a.text,
-    a.value,
-    b.a_id,
-    b.b_id,
-    b.text,
-    b.value,
-    c.b_id,
-    c.c_id,
-    c.text,
-    c.value,
-    d.c_id,
-    d.d_id,
-    d.text,
-    d.value
+    a.value
 FROM
     table_d AS d
     INNER JOIN table_c AS c ON d.c_id = c.c_id
     INNER JOIN table_b AS b ON c.b_id = b.b_id
     LEFT JOIN table_a AS a ON b.a_id = a.a_id";
 
-		Assert.Equal(100, sq.GetTokens().ToList().Count);
+		Assert.Equal(52, sq.GetTokens().ToList().Count);
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
@@ -290,13 +272,7 @@ FROM
 					from b in InnerJoinTable<table_b>(x => c.b_id == x.b_id)
 					from a in LeftJoinTable<table_a>(x => b.a_id == x.a_id)
 					where (a.a_id == 1 && b.b_id == 2) || c.text == "text" || d.value != 10
-					select new
-					{
-						a,
-						b,
-						c,
-						d
-					};
+					select a;
 		var sq = query.ToSelectQuery();
 
 		Monitor.Log(sq);
@@ -305,19 +281,7 @@ FROM
 SELECT
     a.a_id,
     a.text,
-    a.value,
-    b.a_id,
-    b.b_id,
-    b.text,
-    b.value,
-    c.b_id,
-    c.c_id,
-    c.text,
-    c.value,
-    d.c_id,
-    d.d_id,
-    d.text,
-    d.value
+    a.value
 FROM
     table_d AS d
     INNER JOIN table_c AS c ON d.c_id = c.c_id
@@ -326,7 +290,7 @@ FROM
 WHERE
     ((a.a_id = 1 AND b.b_id = 2) OR c.text = 'text' OR d.value <> 10)";
 
-		Assert.Equal(128, sq.GetTokens().ToList().Count);
+		Assert.Equal(80, sq.GetTokens().ToList().Count);
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 

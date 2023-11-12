@@ -13,7 +13,7 @@ public static class IQueryableExtension
 		var exp = (MethodCallExpression)source.Expression;
 
 		var ctes = CommonTableInfoParser.Parse(exp);
-		var table = TableInfoParser.Parse(exp);
+		TableInfoParser.TryParse(exp, out var table);
 		var joins = JoinTableInfoParser.Parse(exp);
 		var aliases = GetAliases(table, joins);
 

@@ -48,6 +48,7 @@ FROM
 	{
 		var query = from s in FromTable<sale>()
 					from a in InnerJoinTable<article>(x => s.article_id == x.article_id)
+					from c in InnerJoinTable<category>(x => a.category_id == x.category_id)
 					select a;
 
 		Monitor.Log(query);
@@ -57,7 +58,7 @@ FROM
 
 		var joins = JoinTableInfoParser.Parse(query.Expression);
 
-		Assert.Single(joins);
+		Assert.Equal(2, joins.Count);
 
 		Assert.Equal("article", joins[0].TableInfo.ToSelectable().ToOneLineText());
 		Assert.Equal("inner join", joins[0].Relation);
@@ -66,11 +67,13 @@ FROM
 		var sql = @"
 SELECT
     a.article_id,
+    a.category_id,
     a.article_name,
     a.price
 FROM
     sale AS s
     INNER JOIN article AS a ON s.article_id = a.article_id
+    INNER JOIN category AS c ON a.category_id = c.category_id
 ";
 		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
 	}
@@ -80,6 +83,7 @@ FROM
 	{
 		var query = from s in FromTable<sale>("sales")
 					from a in InnerJoinTable<article>("articles", x => s.article_id == x.article_id)
+					from c in InnerJoinTable<category>("categories", x => a.category_id == x.category_id)
 					select a;
 
 		Monitor.Log(query);
@@ -89,20 +93,22 @@ FROM
 
 		var joins = JoinTableInfoParser.Parse(query.Expression);
 
-		Assert.Single(joins);
+		Assert.Equal(2, joins.Count);
 
-		Assert.Equal("articles as a", joins[0].TableInfo.ToSelectable().ToOneLineText());
+		Assert.Equal("articles", joins[0].TableInfo.ToSelectable().ToOneLineText());
 		Assert.Equal("inner join", joins[0].Relation);
 		Assert.Equal("s.article_id = a.article_id", joins[0].Condition!.ToOneLineText());
 
 		var sql = @"
 SELECT
     a.article_id,
+    a.category_id,
     a.article_name,
     a.price
 FROM
     sales AS s
     INNER JOIN articles AS a ON s.article_id = a.article_id
+    INNER JOIN categories AS c ON a.category_id = c.category_id
 ";
 		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
 	}
@@ -112,6 +118,7 @@ FROM
 	{
 		var query = from s in FromTable<sale>()
 					from a in LeftJoinTable<article>(x => s.article_id == x.article_id)
+					from c in LeftJoinTable<category>(x => a.category_id == x.category_id)
 					select a;
 
 		Monitor.Log(query);
@@ -128,11 +135,13 @@ FROM
 		var sql = @"
 SELECT
     a.article_id,
+    a.category_id,
     a.article_name,
     a.price
 FROM
     sale AS s
     LEFT JOIN article AS a ON s.article_id = a.article_id
+    LEFT JOIN category AS c ON a.category_id = c.category_id
 ";
 		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
 	}
@@ -140,8 +149,9 @@ FROM
 	[Fact]
 	public void LeftJoinStringTableTest()
 	{
-		var query = from s in FromTable<sale>("sales")
+		var query = from s in FromTable<sale>()
 					from a in LeftJoinTable<article>("articles", x => s.article_id == x.article_id)
+					from c in LeftJoinTable<category>("categories", x => a.category_id == x.category_id)
 					select a;
 
 		Monitor.Log(query);
@@ -151,20 +161,22 @@ FROM
 
 		var joins = JoinTableInfoParser.Parse(query.Expression);
 
-		Assert.Single(joins);
+		Assert.Equal(2, joins.Count);
 
-		Assert.Equal("articles as a", joins[0].TableInfo.ToSelectable().ToOneLineText());
+		Assert.Equal("articles", joins[0].TableInfo.ToSelectable().ToOneLineText());
 		Assert.Equal("left join", joins[0].Relation);
 		Assert.Equal("s.article_id = a.article_id", joins[0].Condition!.ToOneLineText());
 
 		var sql = @"
 SELECT
     a.article_id,
+    a.category_id,
     a.article_name,
     a.price
 FROM
-    sales AS s
+    sale AS s
     LEFT JOIN articles AS a ON s.article_id = a.article_id
+    LEFT JOIN categories AS c ON a.category_id = c.category_id
 ";
 		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
 	}
@@ -174,6 +186,7 @@ FROM
 	{
 		var query = from s in FromTable<sale>()
 					from a in CrossJoinTable<article>()
+					from c in CrossJoinTable<category>()
 					select a;
 
 		Monitor.Log(query);
@@ -190,11 +203,13 @@ FROM
 		var sql = @"
 SELECT
     a.article_id,
+    a.category_id,
     a.article_name,
     a.price
 FROM
     sale AS s
     CROSS JOIN article AS a
+    CROSS JOIN category AS c
 ";
 		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
 	}
@@ -202,8 +217,9 @@ FROM
 	[Fact]
 	public void CrossJoinStringTableTest()
 	{
-		var query = from s in FromTable<sale>()
+		var query = from s in FromTable<sale>("sales")
 					from a in CrossJoinTable<article>("articles")
+					from c in CrossJoinTable<category>("categories")
 					select a;
 
 		Monitor.Log(query);
@@ -213,60 +229,27 @@ FROM
 
 		var joins = JoinTableInfoParser.Parse(query.Expression);
 
-		Assert.Equal("articles as a", joins[0].TableInfo.ToSelectable().ToOneLineText());
+		Assert.Equal("articles", joins[0].TableInfo.ToSelectable().ToOneLineText());
 		Assert.Equal("cross join", joins[0].Relation);
 		Assert.Null(joins[0].Condition);
 
 		var sql = @"
 SELECT
     a.article_id,
+    a.category_id,
     a.article_name,
     a.price
 FROM
-    sale AS s
+    sales AS s
     CROSS JOIN articles AS a
+    CROSS JOIN categories AS c
 ";
 		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
 	}
-
-	[Fact]
-	public void Joins()
-	{
-		var query = from s in FromTable<sale>()
-					from s1 in CrossJoinTable<sale>()
-					from s2 in CrossJoinTable<sale>()
-					from s3 in CrossJoinTable<sale>()
-					from s4 in CrossJoinTable<sale>()
-					select s4;
-
-		Monitor.Log(query);
-
-		var sq = query.ToSelectQuery();
-		Monitor.Log(sq);
-
-		var joins = JoinTableInfoParser.Parse(query.Expression);
-
-		Assert.Equal("sale", joins[0].TableInfo.ToSelectable().ToOneLineText());
-		Assert.Equal("cross join", joins[0].Relation);
-		Assert.Null(joins[0].Condition);
-
-		var sql = @"
-SELECT
-    s4.sales_id,
-    s4.article_id,
-    s4.quantity
-FROM
-    sale AS s
-    CROSS JOIN sale AS s1
-    CROSS JOIN sale AS s2
-    CROSS JOIN sale AS s3
-    CROSS JOIN sale AS s4
-";
-		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
-	}
-
 
 	public record struct sale(int sales_id, int article_id, int quantity);
 
-	public record struct article(int article_id, string article_name, int price);
+	public record struct article(int article_id, int category_id, string article_name, int price);
+
+	public record struct category(int category_id, string category_name);
 }

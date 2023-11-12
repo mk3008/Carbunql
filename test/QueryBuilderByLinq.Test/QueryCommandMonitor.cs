@@ -15,8 +15,7 @@ public class QueryCommandMonitor
 
 	public void Log(IQueryable query)
 	{
-		var from = TableInfoParser.Parse(query.Expression);
-		if (from != null)
+		if (TableInfoParser.TryParse(query.Expression, out var from))
 		{
 			Output.WriteLine("From");
 			if (!string.IsNullOrEmpty(from.PhysicalName)) Output.WriteLine($"   PhysicalName : {from.PhysicalName}");

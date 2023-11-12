@@ -1,5 +1,4 @@
-﻿using Carbunql.Clauses;
-using Carbunql.Tables;
+﻿using Carbunql.Tables;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -7,95 +6,90 @@ namespace QueryBuilderByLinq.Analysis;
 
 public static class TableInfoParser
 {
-	public static TableInfo? Parse(Expression exp)
+	public static TableInfo Parse(Expression exp)
 	{
+		if (TryParse(exp, out TableInfo tableInfo))
+		{
+			return tableInfo;
+		}
+		throw new NotSupportedException();
+	}
+
+	public static bool TryParse(Expression exp, out TableInfo info)
+	{
+		info = null!;
+
 		foreach (var item in exp.GetExpressions().ToList())
 		{
-			var info = ParseCore(item);
-			if (info != null)
+			if (TryParseCore(item, out info))
 			{
-				return info;
+				return true;
 			}
 		}
-		return null;
+		return false;
 	}
 
-	private static TableInfo? ParseCore(Expression exp)
+	private static bool TryParseCore(Expression exp, out TableInfo info)
 	{
-		var from = ParseCore2Arguments(exp);
-		if (from != null) return from;
-		from = ParseCore3Arguments(exp);
-		return from;
-	}
+		info = null!;
 
-	private static TableInfo? ParseCore2Arguments(Expression exp)
-	{
-		if (exp is not MethodCallExpression) return null;
+		if (exp is not MethodCallExpression) return false;
 
 		var method = (MethodCallExpression)exp;
-		if (method.Arguments.Count != 2) return null;
-
-		var ce = method.GetArgument<ConstantExpression>(0);
-		if (ce == null) return null;
-
-		var operand = method.GetArgument<UnaryExpression>(1).GetOperand<LambdaExpression>();
-		if (operand == null) return null;
-		if (operand.Parameters.Count != 1) return null;
-
-		var parameter = operand.Parameters[0];
-		if (parameter.Type == typeof(DualTable)) return null;
-
-		if (TryParse(ce, parameter, out var f))
+		if (method.Arguments.Count == 2)
 		{
-			return f;
-		}
-		// nest sytax
-		return Parse(parameter);
-	}
+			var ce = method.GetArgument<ConstantExpression>(0);
+			if (ce == null) return false;
 
-	/// <summary>
-	/// Parsing process when the argument is 3.
-	/// Analysis processing when using CTE.
-	/// </summary>
-	/// <param name="exp"></param>
-	/// <returns></returns>
-	private static TableInfo? ParseCore3Arguments(Expression exp)
-	{
-		if (exp is not MethodCallExpression) return null;
-
-		var method = (MethodCallExpression)exp;
-		if (method.Arguments.Count != 3) return null;
-
-		var ce = method.GetArgument<ConstantExpression>(0);
-		var body = method.GetArgument<UnaryExpression>(1).GetOperand<LambdaExpression>().GetBody<MethodCallExpression>();
-		if (body == null) return null;
-
-		if (body.Method.Name == nameof(Sql.FromTable))
-		{
-			// no relation pattern.
-			var operand = method.GetArgument<UnaryExpression>(2).GetOperand<LambdaExpression>();
-			if (operand == null) return null;
-			if (operand.Parameters.Count != 2) return null;
-
-			var parameter = operand.Parameters[1];
-			return ParseAsFromTable(body, parameter);
-		}
-		else if (ce != null && (body.Method.Name == nameof(Sql.InnerJoinTable) || body.Method.Name == nameof(Sql.LeftJoinTable) || body.Method.Name == nameof(Sql.CrossJoinTable)))
-		{
-			// has relation pattern.
-			var operand = method.GetArgument<UnaryExpression>(2).GetOperand<LambdaExpression>();
-			if (operand == null || operand.Parameters.Count != 2) return null;
+			var operand = method.GetArgument<UnaryExpression>(1).GetOperand<LambdaExpression>();
+			if (operand == null) return false;
+			if (operand.Parameters.Count != 1) return false;
 
 			var parameter = operand.Parameters[0];
+			if (parameter.Type == typeof(DualTable)) return false;
 
-			if (TryParse(ce, parameter, out var f))
+			if (TryParse(ce, parameter, out info))
 			{
-				return f;
+				return true;
 			}
-			return Parse(parameter);
+			// nest sytax
+			info = Parse(parameter);
+			return true;
 		}
+		if (method.Arguments.Count == 3)
+		{
+			var ce = method.GetArgument<ConstantExpression>(0);
+			var body = method.GetArgument<UnaryExpression>(1).GetOperand<LambdaExpression>().GetBody<MethodCallExpression>();
+			if (body == null) return false;
 
-		return null;
+			if (body.Method.Name == nameof(Sql.FromTable))
+			{
+				// no relation pattern.
+				var operand = method.GetArgument<UnaryExpression>(2).GetOperand<LambdaExpression>();
+				if (operand == null) return false;
+				if (operand.Parameters.Count != 2) return false;
+
+				var parameter = operand.Parameters[1];
+				if (TryParseAsFromTable(body, parameter, out info)) return true;
+				return false;
+			}
+			else if (ce != null && (body.Method.Name == nameof(Sql.InnerJoinTable) || body.Method.Name == nameof(Sql.LeftJoinTable) || body.Method.Name == nameof(Sql.CrossJoinTable)))
+			{
+				// has relation pattern.
+				var operand = method.GetArgument<UnaryExpression>(2).GetOperand<LambdaExpression>();
+				if (operand == null || operand.Parameters.Count != 2) return false;
+
+				var parameter = operand.Parameters[0];
+
+				if (TryParse(ce, parameter, out info))
+				{
+					return true;
+				}
+				info = Parse(parameter);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static bool TryParse(ConstantExpression methodBody, ParameterExpression parameter, out TableInfo from)
@@ -113,20 +107,17 @@ public static class TableInfoParser
 			else
 			{
 				// override table name pattern.
-				from = new TableInfo(provider.TableName, parameter.Name!);
+				from = Parse(parameter, provider.TableName);
 				return true;
 			}
 		}
 		return false;
 	}
 
-	public static TableInfo Parse(ParameterExpression parameter)
+	private static bool TryParseAsFromTable(MethodCallExpression body, ParameterExpression parameter, out TableInfo info)
 	{
-		return new TableInfo(parameter.ToTypeTable(), parameter.Name!);
-	}
+		info = null!;
 
-	private static TableInfo? ParseAsFromTable(MethodCallExpression body, ParameterExpression parameter)
-	{
 		if (body.Method.Name != nameof(Sql.FromTable)) throw new InvalidProgramException();
 
 		var alias = parameter.Name!;
@@ -136,25 +127,21 @@ public static class TableInfoParser
 		{
 			// type table pattern.
 			// ex.From<T>()
-			return new TableInfo(parameter.ToTypeTable(), alias);
+			info = Parse(parameter);
+			return true;
 		}
 
-		if (body.Arguments.Count != 1) return null;
+		if (body.Arguments.Count != 1) return false;
 
 		if (body.Arguments[0] is ParameterExpression)
 		{
 			// single common table pattern.
 			// ex.From(IQueryable)
-			var prm = body.GetArgument<ParameterExpression>(0);
-			if (prm == null) throw new InvalidProgramException();
+			//return Parse((ParameterExpression)body.Arguments[0]);
 
-			var table = prm.Name!;
-			var props = prm.Type.GetProperties().Select(x => x.Name).ToList();
-
-			//var t = new TableInfo(table, alias);
-			var pt = new PhysicalTable(table) { ColumnNames = props };
-			var st = new SelectableTable(pt, alias);
-			return new TableInfo(st, alias);
+			var table = body.GetArgument<ParameterExpression>(0)!;
+			info = Parse(table, parameter);
+			return true;
 		}
 		else if (body.Arguments[0] is MemberExpression)
 		{
@@ -162,29 +149,88 @@ public static class TableInfoParser
 			if (m.Expression is ConstantExpression)// && lambda.Parameters.Count == 1
 			{
 				// subquery pattern.
-				return ParseAsSubQuery(m, alias);
+				if (TryParse(m, alias, out info)) return true;
+				return false;
 			}
-			else
+			else if (m.Expression is ParameterExpression)
 			{
 				// many common tables pattern.
 				// ex.From(IQueryable)
-				return new TableInfo(m.Member!.Name!, alias);
+				info = Parse(cte: m, alias: parameter);
+				return true;
 			}
 		}
-		else if (body.Arguments[0] is ConstantExpression)
+		else if (body.Arguments[0] is ConstantExpression ce && ce.Type == typeof(string))
 		{
 			// string table pattern.
 			// ex.From<T>("TableName")
-			var table = body.GetArgument<ConstantExpression>(0)?.Value?.ToString()!;
-			return new TableInfo(table, alias);
+			var tablename = (string)ce.Value!;
+			info = Parse(parameter, tablename);
+			return true;
 		}
 
-		return null;
+		return false;
 	}
 
-	private static TableInfo? ParseAsSubQuery(MemberExpression m, string alias)
+	/// <summary>
+	/// Parse types as table information
+	/// </summary>
+	/// <param name="parameter"></param>
+	/// <returns></returns>
+	public static TableInfo Parse(ParameterExpression parameter)
 	{
-		if (m.Expression is not ConstantExpression) return null;
+		return Parse(parameter, parameter.Type.ToTableName());
+	}
+
+	/// <summary>
+	/// Parse types as table information
+	/// </summary>
+	/// <param name="parameter"></param>
+	/// <returns></returns>
+	public static TableInfo Parse(ParameterExpression parameter, string tablenaem)
+	{
+		var pt = new PhysicalTable(tablenaem)
+		{
+			ColumnNames = parameter.Type.GetProperties().Select(x => x.Name).ToList()
+		};
+		var info = new TableInfo(pt.ToSelectable(), parameter.Name!);
+		return info;
+	}
+
+	/// <summary>
+	/// Parse subquery as table information
+	/// </summary>
+	/// <param name="table"></param>
+	/// <param name="alias"></param>
+	/// <returns></returns>
+	public static TableInfo Parse(ParameterExpression table, ParameterExpression alias)
+	{
+		var pt = new PhysicalTable(table.Name!)
+		{
+			ColumnNames = table.Type.GetProperties().Select(x => x.Name).ToList()
+		};
+		var info = new TableInfo(pt.ToSelectable(), alias.Name!);
+		return info;
+	}
+
+	public static TableInfo Parse(MemberExpression cte, ParameterExpression alias)
+	{
+		// many common tables pattern.
+		// ex.From(IQueryable)
+		//return new TableInfo(m.Member!.Name!, alias);
+		var pt = new PhysicalTable(cte.Member!.Name!)
+		{
+			ColumnNames = cte.Type.GetProperties().Select(p => p.Name).ToList()
+		};
+		var info = new TableInfo(pt.ToSelectable(), alias.Name!);
+		return info;
+	}
+
+	public static bool TryParse(MemberExpression m, string alias, out TableInfo info)
+	{
+		info = null!;
+
+		if (m.Expression is not ConstantExpression) return false;
 
 		var instance = ((ConstantExpression)m.Expression).Value;
 		var member = m.Member;
@@ -200,18 +246,9 @@ public static class TableInfoParser
 		}
 		if (value is IQueryable q)
 		{
-			return new TableInfo(q.AsQueryable().ToSelectQuery(), alias);
+			info = new TableInfo(q.AsQueryable().ToSelectQuery(), alias);
+			return true;
 		}
-		return null;
-	}
-
-	public static SelectableTable ToTypeTable(this ParameterExpression prm)
-	{
-		var t = new PhysicalTable()
-		{
-			Table = prm.Type.ToTableName(),
-			ColumnNames = prm.Type.GetProperties().ToList().Select(x => x.Name).ToList()
-		};
-		return t.ToSelectable();
+		return false;
 	}
 }

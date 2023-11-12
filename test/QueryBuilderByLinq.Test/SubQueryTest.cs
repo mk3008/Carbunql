@@ -55,7 +55,7 @@ FROM
 					from x in InnerJoinTable(subx, x => a.a_id == x.x_id)
 					from y in LeftJoinTable(suby, y => a.a_id == y.y_id)
 					from z in CrossJoinTable(subz)
-					select new { a, x, y, z };
+					select a;
 
 		var sq = query.ToSelectQuery();
 

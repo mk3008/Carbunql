@@ -36,7 +36,7 @@ public class TableInfoParserTest
 		var sq = query.ToSelectQuery();
 		Monitor.Log(sq);
 
-		var from = TableInfoParser.Parse(query.Expression);
+		TableInfoParser.TryParse(query.Expression, out var from);
 
 		Assert.Null(from);
 
@@ -87,7 +87,7 @@ FROM
 
 		var from = TableInfoParser.Parse(query.Expression);
 
-		Assert.Equal("TABLE_A", from?.PhysicalName);
+		Assert.Equal("TABLE_A", from?.ToSelectable().ToOneLineText());
 		Assert.Equal("a", from?.Alias);
 
 		var sql = @"
@@ -149,7 +149,7 @@ from
 
 		var from = TableInfoParser.Parse(query.Expression);
 
-		Assert.Equal("cte as x", from?.ToSelectable().ToOneLineText());
+		Assert.Equal("cte", from?.ToSelectable().ToOneLineText());
 		Assert.Equal("x", from?.Alias);
 
 		var sql = @"
@@ -185,7 +185,7 @@ FROM
 
 		var from = TableInfoParser.Parse(query.Expression);
 
-		Assert.Equal("cte1", from?.PhysicalName);
+		Assert.Equal("cte1", from?.ToSelectable().ToOneLineText());
 		Assert.Equal("x", from?.Alias);
 
 		var sql = @"
@@ -230,7 +230,7 @@ FROM
 
 		var from = TableInfoParser.Parse(query.Expression);
 
-		Assert.Equal("cte5", from?.PhysicalName);
+		Assert.Equal("cte5", from?.ToSelectable().ToOneLineText());
 		Assert.Equal("x", from?.Alias);
 
 		var sql = @"
@@ -285,7 +285,7 @@ FROM
 
 		Monitor.Log(query);
 
-		var from = TableInfoParser.Parse(query.Expression);
+		TableInfoParser.TryParse(query.Expression, out var from);
 
 		Assert.Null(from);
 	}
@@ -328,7 +328,7 @@ FROM
 
 		var from = TableInfoParser.Parse(query.Expression);
 
-		Assert.Equal("sales", from?.PhysicalName);
+		Assert.Equal("sales", from?.ToSelectable().ToOneLineText());
 		Assert.Equal("x", from?.Alias);
 
 		var sql = @"
@@ -417,7 +417,7 @@ FROM
 
 		var from = TableInfoParser.Parse(query.Expression);
 		Assert.Equal("s", from?.Alias);
-		Assert.Equal("sales AS s", from?.ToSelectable().ToText());
+		Assert.Equal("sales", from?.ToSelectable().ToText());
 
 		var sql = @"
 SELECT
