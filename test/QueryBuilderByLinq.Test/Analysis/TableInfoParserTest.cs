@@ -60,7 +60,7 @@ SELECT
 
 		var from = TableInfoParser.Parse(query.Expression);
 
-		Assert.Equal("table_a", from?.Table?.Alias);
+		Assert.Equal("table_a as a", from?.ToSelectable().ToOneLineText());
 		Assert.Equal("a", from?.Alias);
 
 		var sql = @"
@@ -87,7 +87,7 @@ FROM
 
 		var from = TableInfoParser.Parse(query.Expression);
 
-		Assert.Equal("TABLE_A", from?.ToSelectable().ToOneLineText());
+		Assert.Equal("TABLE_A as a", from?.ToSelectable().ToOneLineText());
 		Assert.Equal("a", from?.Alias);
 
 		var sql = @"
@@ -149,7 +149,7 @@ from
 
 		var from = TableInfoParser.Parse(query.Expression);
 
-		Assert.Equal("cte", from?.ToSelectable().ToOneLineText());
+		Assert.Equal("cte as x", from?.ToSelectable().ToOneLineText());
 		Assert.Equal("x", from?.Alias);
 
 		var sql = @"
@@ -185,7 +185,7 @@ FROM
 
 		var from = TableInfoParser.Parse(query.Expression);
 
-		Assert.Equal("cte1", from?.ToSelectable().ToOneLineText());
+		Assert.Equal("cte1 as x", from?.ToSelectable().ToOneLineText());
 		Assert.Equal("x", from?.Alias);
 
 		var sql = @"
@@ -230,7 +230,7 @@ FROM
 
 		var from = TableInfoParser.Parse(query.Expression);
 
-		Assert.Equal("cte5", from?.ToSelectable().ToOneLineText());
+		Assert.Equal("cte5 as x", from?.ToSelectable().ToOneLineText());
 		Assert.Equal("x", from?.Alias);
 
 		var sql = @"
@@ -307,7 +307,7 @@ FROM
 
 		var from = TableInfoParser.Parse(query.Expression);
 
-		Assert.Equal("table_a", from?.Table?.Alias);
+		Assert.Equal("table_a as x", from?.Table?.ToOneLineText());
 		Assert.Equal("x", from?.Alias);
 	}
 
@@ -328,7 +328,7 @@ FROM
 
 		var from = TableInfoParser.Parse(query.Expression);
 
-		Assert.Equal("sales", from?.ToSelectable().ToOneLineText());
+		Assert.Equal("sales as x", from?.ToSelectable().ToOneLineText());
 		Assert.Equal("x", from?.Alias);
 
 		var sql = @"
@@ -388,7 +388,7 @@ FROM
 		Monitor.Log(sq);
 
 		var from = TableInfoParser.Parse(query.Expression);
-		Assert.Equal("sale", from?.ToSelectable().ToText());
+		Assert.Equal("sale as s", from?.ToSelectable().ToOneLineText());
 		Assert.Equal("s", from?.Alias);
 
 		var sql = @"
@@ -417,7 +417,7 @@ FROM
 
 		var from = TableInfoParser.Parse(query.Expression);
 		Assert.Equal("s", from?.Alias);
-		Assert.Equal("sales", from?.ToSelectable().ToText());
+		Assert.Equal("sales as s", from?.ToSelectable().ToOneLineText());
 
 		var sql = @"
 SELECT

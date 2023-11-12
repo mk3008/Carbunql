@@ -193,7 +193,7 @@ public static class TableInfoParser
 		{
 			ColumnNames = parameter.Type.GetProperties().Select(x => x.Name).ToList()
 		};
-		var info = new TableInfo(pt.ToSelectable(), parameter.Name!);
+		var info = new TableInfo(pt.ToSelectable(parameter.Name!));
 		return info;
 	}
 
@@ -209,7 +209,7 @@ public static class TableInfoParser
 		{
 			ColumnNames = table.Type.GetProperties().Select(x => x.Name).ToList()
 		};
-		var info = new TableInfo(pt.ToSelectable(), alias.Name!);
+		var info = new TableInfo(pt.ToSelectable(alias.Name!));
 		return info;
 	}
 
@@ -222,7 +222,7 @@ public static class TableInfoParser
 		{
 			ColumnNames = cte.Type.GetProperties().Select(p => p.Name).ToList()
 		};
-		var info = new TableInfo(pt.ToSelectable(), alias.Name!);
+		var info = new TableInfo(pt.ToSelectable(alias.Name!));
 		return info;
 	}
 

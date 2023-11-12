@@ -12,9 +12,9 @@ public class TableInfo
 		Query = query;
 	}
 
-	public TableInfo(SelectableTable table, string alias)
+	public TableInfo(SelectableTable table)
 	{
-		Alias = alias;
+		Alias = table.Alias;
 		Table = table;
 	}
 

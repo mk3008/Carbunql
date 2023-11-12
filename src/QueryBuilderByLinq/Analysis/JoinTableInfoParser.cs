@@ -191,7 +191,7 @@ public class JoinTableInfoParser
 	private static TableInfo CreateTableInfo(string tableName, ParameterExpression alias)//, ParameterExpression parameter)
 	{
 		var pt = new PhysicalTable(tableName) { ColumnNames = alias.Type.GetProperties().Select(x => x.Name).ToList() };
-		var table = new TableInfo(pt.ToSelectable(), alias.Name!);
+		var table = new TableInfo(pt.ToSelectable(alias.Name!));
 		return table;
 	}
 }

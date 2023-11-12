@@ -60,7 +60,7 @@ FROM
 
 		Assert.Equal(2, joins.Count);
 
-		Assert.Equal("article", joins[0].TableInfo.ToSelectable().ToOneLineText());
+		Assert.Equal("article as a", joins[0].TableInfo.ToSelectable().ToOneLineText());
 		Assert.Equal("inner join", joins[0].Relation);
 		Assert.Equal("s.article_id = a.article_id", joins[0].Condition!.ToOneLineText());
 
@@ -95,7 +95,7 @@ FROM
 
 		Assert.Equal(2, joins.Count);
 
-		Assert.Equal("articles", joins[0].TableInfo.ToSelectable().ToOneLineText());
+		Assert.Equal("articles as a", joins[0].TableInfo.ToSelectable().ToOneLineText());
 		Assert.Equal("inner join", joins[0].Relation);
 		Assert.Equal("s.article_id = a.article_id", joins[0].Condition!.ToOneLineText());
 
@@ -128,7 +128,7 @@ FROM
 
 		var joins = JoinTableInfoParser.Parse(query.Expression);
 
-		Assert.Equal("article", joins[0].TableInfo.ToSelectable().ToOneLineText());
+		Assert.Equal("article as a", joins[0].TableInfo.ToSelectable().ToOneLineText());
 		Assert.Equal("left join", joins[0].Relation);
 		Assert.Equal("s.article_id = a.article_id", joins[0].Condition!.ToOneLineText());
 
@@ -163,7 +163,7 @@ FROM
 
 		Assert.Equal(2, joins.Count);
 
-		Assert.Equal("articles", joins[0].TableInfo.ToSelectable().ToOneLineText());
+		Assert.Equal("articles as a", joins[0].TableInfo.ToSelectable().ToOneLineText());
 		Assert.Equal("left join", joins[0].Relation);
 		Assert.Equal("s.article_id = a.article_id", joins[0].Condition!.ToOneLineText());
 
@@ -196,7 +196,7 @@ FROM
 
 		var joins = JoinTableInfoParser.Parse(query.Expression);
 
-		Assert.Equal("article", joins[0].TableInfo.ToSelectable().ToOneLineText());
+		Assert.Equal("article as a", joins[0].TableInfo.ToSelectable().ToOneLineText());
 		Assert.Equal("cross join", joins[0].Relation);
 		Assert.Null(joins[0].Condition);
 
@@ -229,7 +229,7 @@ FROM
 
 		var joins = JoinTableInfoParser.Parse(query.Expression);
 
-		Assert.Equal("articles", joins[0].TableInfo.ToSelectable().ToOneLineText());
+		Assert.Equal("articles as a", joins[0].TableInfo.ToSelectable().ToOneLineText());
 		Assert.Equal("cross join", joins[0].Relation);
 		Assert.Null(joins[0].Condition);
 
