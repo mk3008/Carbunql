@@ -1,21 +1,22 @@
-﻿using Carbunql.Tables;
+﻿using Carbunql.Clauses;
+using Carbunql.Tables;
 using System.Linq.Expressions;
 using System.Reflection;
 
 namespace QueryBuilderByLinq.Analysis;
 
-public static class TableInfoParser
+public static class SelectableTableParser
 {
-	public static TableInfo Parse(Expression exp)
+	public static SelectableTable Parse(Expression exp)
 	{
-		if (TryParse(exp, out TableInfo tableInfo))
+		if (TryParse(exp, out SelectableTable tableInfo))
 		{
 			return tableInfo;
 		}
 		throw new NotSupportedException();
 	}
 
-	public static bool TryParse(Expression exp, out TableInfo info)
+	public static bool TryParse(Expression exp, out SelectableTable info)
 	{
 		info = null!;
 
@@ -29,7 +30,7 @@ public static class TableInfoParser
 		return false;
 	}
 
-	private static bool TryParseCore(Expression exp, out TableInfo info)
+	private static bool TryParseCore(Expression exp, out SelectableTable info)
 	{
 		info = null!;
 
@@ -92,7 +93,7 @@ public static class TableInfoParser
 		return false;
 	}
 
-	public static bool TryParse(ConstantExpression methodBody, ParameterExpression parameter, out TableInfo from)
+	public static bool TryParse(ConstantExpression methodBody, ParameterExpression parameter, out SelectableTable from)
 	{
 		from = null!;
 
@@ -102,7 +103,7 @@ public static class TableInfoParser
 			{
 				// subquery pattern.
 				var sq = provider.InnerQuery.ToSelectQuery();
-				from = new TableInfo(new VirtualTable(sq).ToSelectable(parameter.Name!));
+				from = new VirtualTable(sq).ToSelectable(parameter.Name!);
 				return true;
 			}
 			else
@@ -115,7 +116,7 @@ public static class TableInfoParser
 		return false;
 	}
 
-	private static bool TryParseAsFromTable(MethodCallExpression body, ParameterExpression parameter, out TableInfo info)
+	private static bool TryParseAsFromTable(MethodCallExpression body, ParameterExpression parameter, out SelectableTable info)
 	{
 		info = null!;
 
@@ -178,7 +179,7 @@ public static class TableInfoParser
 	/// </summary>
 	/// <param name="parameter"></param>
 	/// <returns></returns>
-	public static TableInfo Parse(ParameterExpression parameter)
+	public static SelectableTable Parse(ParameterExpression parameter)
 	{
 		return Parse(parameter, parameter.Type.ToTableName());
 	}
@@ -188,13 +189,13 @@ public static class TableInfoParser
 	/// </summary>
 	/// <param name="parameter"></param>
 	/// <returns></returns>
-	public static TableInfo Parse(ParameterExpression parameter, string tablenaem)
+	public static SelectableTable Parse(ParameterExpression parameter, string tablenaem)
 	{
 		var pt = new PhysicalTable(tablenaem)
 		{
 			ColumnNames = parameter.Type.GetProperties().Select(x => x.Name).ToList()
 		};
-		var info = new TableInfo(pt.ToSelectable(parameter.Name!));
+		var info = pt.ToSelectable(parameter.Name!);
 		return info;
 	}
 
@@ -204,17 +205,17 @@ public static class TableInfoParser
 	/// <param name="table"></param>
 	/// <param name="alias"></param>
 	/// <returns></returns>
-	public static TableInfo Parse(ParameterExpression table, ParameterExpression alias)
+	public static SelectableTable Parse(ParameterExpression table, ParameterExpression alias)
 	{
 		var pt = new PhysicalTable(table.Name!)
 		{
 			ColumnNames = table.Type.GetProperties().Select(x => x.Name).ToList()
 		};
-		var info = new TableInfo(pt.ToSelectable(alias.Name!));
+		var info = pt.ToSelectable(alias.Name!);
 		return info;
 	}
 
-	public static TableInfo Parse(MemberExpression cte, ParameterExpression alias)
+	public static SelectableTable Parse(MemberExpression cte, ParameterExpression alias)
 	{
 		// many common tables pattern.
 		// ex.From(IQueryable)
@@ -223,11 +224,11 @@ public static class TableInfoParser
 		{
 			ColumnNames = cte.Type.GetProperties().Select(p => p.Name).ToList()
 		};
-		var info = new TableInfo(pt.ToSelectable(alias.Name!));
+		var info = pt.ToSelectable(alias.Name!);
 		return info;
 	}
 
-	public static bool TryParse(MemberExpression m, string alias, out TableInfo info)
+	public static bool TryParse(MemberExpression m, string alias, out SelectableTable info)
 	{
 		info = null!;
 
@@ -248,7 +249,7 @@ public static class TableInfoParser
 		if (value is IQueryable q)
 		{
 			var sq = q.AsQueryable().ToSelectQuery();
-			info = new TableInfo(new VirtualTable(sq).ToSelectable(alias));
+			info = new VirtualTable(sq).ToSelectable(alias);
 			return true;
 		}
 		return false;

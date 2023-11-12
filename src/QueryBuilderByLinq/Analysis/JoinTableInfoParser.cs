@@ -1,4 +1,5 @@
-﻿using Carbunql.Tables;
+﻿using Carbunql.Clauses;
+using Carbunql.Tables;
 using Carbunql.Values;
 using System.Linq.Expressions;
 
@@ -9,7 +10,7 @@ public class JoinTableInfoParser
 	public static List<JoinTableInfo> Parse(Expression exp)
 	{
 		var tables = new List<string>();
-		if (TableInfoParser.TryParse(exp, out var t))
+		if (SelectableTableParser.TryParse(exp, out var t))
 		{
 			tables.Add(t.Alias);
 		}
@@ -20,7 +21,7 @@ public class JoinTableInfoParser
 			if (TryParse(item, tables, out var j))
 			{
 				joins.Add(j);
-				tables.Add(j.TableInfo.Alias);
+				tables.Add(j.Table.Alias);
 			}
 		}
 		return joins;
@@ -99,7 +100,7 @@ public class JoinTableInfoParser
 
 	private static JoinTableInfo ParseAsCrossJoinTable(MethodCallExpression body, ParameterExpression alias)
 	{
-		var table = TableInfoParser.Parse(alias);
+		var table = SelectableTableParser.Parse(alias);
 		return new JoinTableInfo(table, body.Method.Name);
 	}
 
@@ -128,7 +129,7 @@ public class JoinTableInfoParser
 			item.TableAlias = alias.Name!;
 		}
 
-		var table = TableInfoParser.Parse(alias);
+		var table = SelectableTableParser.Parse(alias);
 		return new JoinTableInfo(table, body.Method.Name, condition);
 	}
 
@@ -163,7 +164,7 @@ public class JoinTableInfoParser
 	private static JoinTableInfo Parse(MethodCallExpression body, MemberExpression arg0, ParameterExpression alias, List<string> tables)
 	{
 		//arg0
-		if (TableInfoParser.TryParse(arg0, alias.Name!, out var table))
+		if (SelectableTableParser.TryParse(arg0, alias.Name!, out var table))
 		{
 			return new JoinTableInfo(table, body.Method.Name);
 		}
@@ -173,7 +174,7 @@ public class JoinTableInfoParser
 	private static JoinTableInfo Parse(MethodCallExpression body, MemberExpression arg0, UnaryExpression arg1, ParameterExpression alias, List<string> tables)
 	{
 		//arg0
-		TableInfoParser.TryParse(arg0, alias.Name!, out var table);
+		SelectableTableParser.TryParse(arg0, alias.Name!, out var table);
 		if (table == null) throw new NotSupportedException();
 
 		//arg1
@@ -188,10 +189,10 @@ public class JoinTableInfoParser
 		return new JoinTableInfo(table, body.Method.Name, condition);
 	}
 
-	private static TableInfo CreateTableInfo(string tableName, ParameterExpression alias)//, ParameterExpression parameter)
+	private static SelectableTable CreateTableInfo(string tableName, ParameterExpression alias)//, ParameterExpression parameter)
 	{
 		var pt = new PhysicalTable(tableName) { ColumnNames = alias.Type.GetProperties().Select(x => x.Name).ToList() };
-		var table = new TableInfo(pt.ToSelectable(alias.Name!));
+		var table = pt.ToSelectable(alias.Name!);
 		return table;
 	}
 }

@@ -4,9 +4,9 @@ namespace QueryBuilderByLinq.Analysis;
 
 public class JoinTableInfo
 {
-	public JoinTableInfo(TableInfo tableInfo, string relation)
+	public JoinTableInfo(SelectableTable tableInfo, string relation)
 	{
-		TableInfo = tableInfo;
+		Table = tableInfo;
 		switch (relation)
 		{
 			case nameof(Sql.InnerJoinTable):
@@ -23,9 +23,9 @@ public class JoinTableInfo
 		}
 	}
 
-	public JoinTableInfo(TableInfo tableInfo, string relation, ValueBase condition)
+	public JoinTableInfo(SelectableTable tableInfo, string relation, ValueBase condition)
 	{
-		TableInfo = tableInfo;
+		Table = tableInfo;
 		switch (relation)
 		{
 			case nameof(Sql.InnerJoinTable):
@@ -43,7 +43,7 @@ public class JoinTableInfo
 		Condition = condition;
 	}
 
-	public TableInfo TableInfo { get; set; }
+	public SelectableTable Table { get; set; }
 
 	public string Relation { get; private set; }
 

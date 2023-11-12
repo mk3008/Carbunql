@@ -7,14 +7,14 @@ public class WhereValueParser
 {
 	public static ValueBase? Parse(Expression exp)
 	{
-		var tableinfo = TableInfoParser.Parse(exp);
+		var tableinfo = SelectableTableParser.Parse(exp);
 		var joinInfos = JoinTableInfoParser.Parse(exp);
 
 		var aliases = new List<string>();
 		if (tableinfo != null) aliases.Add(tableinfo.Alias);
 		foreach (var item in joinInfos)
 		{
-			aliases.Add(item.TableInfo.Alias);
+			aliases.Add(item.Table.Alias);
 		}
 
 		return Parse(exp, aliases);

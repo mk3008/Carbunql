@@ -15,7 +15,7 @@ public class QueryCommandMonitor
 
 	public void Log(IQueryable query)
 	{
-		if (TableInfoParser.TryParse(query.Expression, out var from))
+		if (SelectableTableParser.TryParse(query.Expression, out var from))
 		{
 			Output.WriteLine("From");
 			if (from.Table != null) Output.WriteLine($"   Table : {from.Table.ToText()}");

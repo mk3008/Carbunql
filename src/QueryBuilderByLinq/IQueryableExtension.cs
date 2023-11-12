@@ -13,7 +13,7 @@ public static class IQueryableExtension
 		var exp = (MethodCallExpression)source.Expression;
 
 		var ctes = CommonTableInfoParser.Parse(exp);
-		TableInfoParser.TryParse(exp, out var table);
+		SelectableTableParser.TryParse(exp, out var table);
 		var joins = JoinTableInfoParser.Parse(exp);
 		var aliases = GetAliases(table, joins);
 
@@ -27,11 +27,11 @@ public static class IQueryableExtension
 		}
 		if (table != null)
 		{
-			var (f, _) = sq.From(table.ToSelectable()).As(table.Alias);
+			var (f, _) = sq.From(table).As(table.Alias);
 
 			foreach (var join in joins)
 			{
-				var j = f.Join(join.TableInfo.ToSelectable(), join.Relation).As(join.TableInfo.Alias);
+				var j = f.Join(join.Table, join.Relation).As(join.Table.Alias);
 				if (join.Condition != null) j.On(_ => join.Condition);
 			}
 		}
@@ -47,13 +47,13 @@ public static class IQueryableExtension
 		return sq;
 	}
 
-	private static List<string> GetAliases(TableInfo? table, List<JoinTableInfo> joins)
+	private static List<string> GetAliases(SelectableTable? table, List<JoinTableInfo> joins)
 	{
 		var aliases = new List<string>();
 		if (table != null) aliases.Add(table.Alias);
 		foreach (var item in joins)
 		{
-			aliases.Add(item.TableInfo.Alias);
+			aliases.Add(item.Table.Alias);
 		}
 
 		return aliases;

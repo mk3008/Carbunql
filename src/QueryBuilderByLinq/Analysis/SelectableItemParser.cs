@@ -8,14 +8,14 @@ public class SelectableItemParser
 {
 	public static List<SelectableItem> Parse(Expression exp)
 	{
-		var tableinfo = TableInfoParser.Parse(exp);
+		var tableinfo = SelectableTableParser.Parse(exp);
 		var joinInfos = JoinTableInfoParser.Parse(exp);
 
 		var aliases = new List<string>();
 		if (tableinfo != null) aliases.Add(tableinfo.Alias);
 		foreach (var item in joinInfos)
 		{
-			aliases.Add(item.TableInfo.Alias);
+			aliases.Add(item.Table.Alias);
 		}
 
 		return Parse(exp, aliases);
@@ -150,7 +150,7 @@ public class SelectableItemParser
 
 	private static IEnumerable<SelectableItem> DecodeWildCard(Expression exp, ColumnValue v)
 	{
-		var tableinfo = TableInfoParser.Parse(exp);
+		var tableinfo = SelectableTableParser.Parse(exp);
 
 		if (tableinfo!.Alias == v.TableAlias)
 		{
@@ -161,10 +161,10 @@ public class SelectableItemParser
 			yield break;
 		}
 
-		var joinInfo = JoinTableInfoParser.Parse(exp).Where(x => x.TableInfo!.Alias == v.TableAlias).FirstOrDefault();
+		var joinInfo = JoinTableInfoParser.Parse(exp).Where(x => x.Table!.Alias == v.TableAlias).FirstOrDefault();
 		if (joinInfo != null)
 		{
-			foreach (var item in joinInfo.TableInfo.Table!.GetColumnNames())
+			foreach (var item in joinInfo.Table.Table!.GetColumnNames())
 			{
 				yield return new SelectableItem(new ColumnValue(v.TableAlias, item), item);
 			}
