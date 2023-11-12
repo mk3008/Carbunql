@@ -1,6 +1,4 @@
-﻿using Carbunql.Clauses;
-using Carbunql.Tables;
-using Carbunql.Values;
+﻿using Carbunql.Values;
 using System.Linq.Expressions;
 
 namespace QueryBuilderByLinq.Analysis;
@@ -109,7 +107,7 @@ public class JoinTableInfoParser
 		//arg0 : tablename, Type : strig, NodeType : ConstantExpression
 
 		var tableName = (string)body.GetArgument<ConstantExpression>(0)!.Value!;
-		var table = CreateTableInfo(tableName, alias);
+		var table = SelectableTableParser.Parse(alias, tableName);
 		return new JoinTableInfo(table, body.Method.Name);
 	}
 
@@ -157,7 +155,7 @@ public class JoinTableInfoParser
 			item.TableAlias = alias.Name!;
 		}
 
-		var table = CreateTableInfo(tableName, alias);//, paremeter);
+		var table = SelectableTableParser.Parse(alias, tableName);
 		return new JoinTableInfo(table, body.Method.Name, condition);
 	}
 
@@ -187,12 +185,5 @@ public class JoinTableInfoParser
 		var condition = lambda.ToValue(tables);
 
 		return new JoinTableInfo(table, body.Method.Name, condition);
-	}
-
-	private static SelectableTable CreateTableInfo(string tableName, ParameterExpression alias)//, ParameterExpression parameter)
-	{
-		var pt = new PhysicalTable(tableName) { ColumnNames = alias.Type.GetProperties().Select(x => x.Name).ToList() };
-		var table = pt.ToSelectable(alias.Name!);
-		return table;
 	}
 }
