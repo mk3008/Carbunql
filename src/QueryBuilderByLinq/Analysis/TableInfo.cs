@@ -18,15 +18,7 @@ public class TableInfo
 		Table = table;
 	}
 
-	public TableInfo(string physicalName, string alias)
-	{
-		Alias = alias;
-		PhysicalName = physicalName;
-	}
-
 	public string Alias { get; private set; }
-
-	public string? PhysicalName { get; private set; }
 
 	public SelectableTable? Table { get; private set; }
 
@@ -36,7 +28,6 @@ public class TableInfo
 	{
 		if (Table != null) return Table;
 		if (Query != null) return new VirtualTable(Query).ToSelectable(Alias);
-		if (!string.IsNullOrEmpty(PhysicalName)) return new PhysicalTable(PhysicalName).ToSelectable(Alias);
 		throw new InvalidProgramException();
 	}
 }

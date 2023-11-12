@@ -18,7 +18,6 @@ public class QueryCommandMonitor
 		if (TableInfoParser.TryParse(query.Expression, out var from))
 		{
 			Output.WriteLine("From");
-			if (!string.IsNullOrEmpty(from.PhysicalName)) Output.WriteLine($"   PhysicalName : {from.PhysicalName}");
 			if (from.Query != null) Output.WriteLine($"   Query : {from.Query.ToText()}");
 			if (from.Table != null) Output.WriteLine($"   Table : {from.Table.ToText()}");
 			Output.WriteLine($"   Alias : {from.Alias}");
