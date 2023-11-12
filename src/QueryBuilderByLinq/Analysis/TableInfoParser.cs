@@ -101,7 +101,8 @@ public static class TableInfoParser
 			if (provider.InnerQuery != null)
 			{
 				// subquery pattern.
-				from = new TableInfo(provider.InnerQuery.ToSelectQuery(), parameter.Name!);
+				var sq = provider.InnerQuery.ToSelectQuery();
+				from = new TableInfo(new VirtualTable(sq).ToSelectable(parameter.Name!));
 				return true;
 			}
 			else
@@ -246,7 +247,8 @@ public static class TableInfoParser
 		}
 		if (value is IQueryable q)
 		{
-			info = new TableInfo(q.AsQueryable().ToSelectQuery(), alias);
+			var sq = q.AsQueryable().ToSelectQuery();
+			info = new TableInfo(new VirtualTable(sq).ToSelectable(alias));
 			return true;
 		}
 		return false;

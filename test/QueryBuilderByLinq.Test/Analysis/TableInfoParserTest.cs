@@ -116,7 +116,7 @@ FROM
 
 		var from = TableInfoParser.Parse(query.Expression);
 
-		Assert.Equal("select a.a_id from table_a as a", from?.Query?.ToOneLineText());
+		Assert.Equal("(select a.a_id from table_a as a) as x", from?.ToSelectable()?.ToOneLineText());
 		Assert.Equal("x", from?.Alias);
 
 		var sql = @"
@@ -371,7 +371,7 @@ FROM
 
 		var from = TableInfoParser.Parse(query.Expression);
 
-		Assert.Equal("select a.a_id from table_a as a", from?.Query?.ToOneLineText());
+		Assert.Equal("(select a.a_id from table_a as a) as x", from?.ToSelectable()?.ToOneLineText());
 		Assert.Equal("x", from?.Alias);
 	}
 
@@ -447,7 +447,7 @@ FROM
 
 		var from = TableInfoParser.Parse(query.Expression);
 
-		Assert.Equal("select sales.sales_id, sales.article_id, sales.quantity from sale as sales", from?.Query?.ToOneLineText());
+		Assert.Equal("(select sales.sales_id, sales.article_id, sales.quantity from sale as sales) as s", from?.ToSelectable()?.ToOneLineText());
 		Assert.Equal("s", from?.Alias);
 
 		var sql = @"
