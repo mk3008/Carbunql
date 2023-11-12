@@ -63,14 +63,8 @@ FROM
 
 		var sql = @"
 SELECT
-    z.z_id,
-    z.z_text,
     a.a_id,
-    a.a_text,
-    x.x_id,
-    x.x_text,
-    y.y_id,
-    y.y_text
+    a.a_text
 FROM
     (
         SELECT
@@ -101,7 +95,7 @@ FROM
             table_a AS a
     ) AS z";
 
-		Assert.Equal(130, sq.GetTokens().ToList().Count);
+		Assert.Equal(106, sq.GetTokens().ToList().Count);
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
