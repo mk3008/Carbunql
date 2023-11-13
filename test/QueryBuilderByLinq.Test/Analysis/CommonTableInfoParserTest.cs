@@ -76,6 +76,10 @@ FROM
 		Assert.Equal("cte2", ctes[1].Alias);
 		Assert.Equal("select b.text from table_a as b", ctes[1].Query.ToSelectQuery().ToOneLineText());
 
+		//parse not working 
+		//  join
+		//  select item
+
 		var sql = @"
 WITH
     cte AS (

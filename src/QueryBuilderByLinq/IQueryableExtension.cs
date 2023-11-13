@@ -17,7 +17,7 @@ public static class IQueryableExtension
 		var joins = JoinTableInfoParser.Parse(exp);
 		var aliases = GetAliases(table, joins);
 
-		var wherevalue = WhereValueParser.Parse(exp, aliases);
+		var wherevalue = WhereValueParser.Parse(exp, aliases.Select(x => x.Alias).ToList());
 		var selectitems = SelectableItemParser.Parse(exp, aliases);
 
 		var sq = new SelectQuery();
@@ -47,13 +47,13 @@ public static class IQueryableExtension
 		return sq;
 	}
 
-	private static List<string> GetAliases(SelectableTable? table, List<JoinTableInfo> joins)
+	private static List<SelectableTable> GetAliases(SelectableTable? table, List<JoinTableInfo> joins)
 	{
-		var aliases = new List<string>();
-		if (table != null) aliases.Add(table.Alias);
+		var aliases = new List<SelectableTable>();
+		if (table != null) aliases.Add(table);
 		foreach (var item in joins)
 		{
-			aliases.Add(item.Table.Alias);
+			aliases.Add(item.Table);
 		}
 
 		return aliases;

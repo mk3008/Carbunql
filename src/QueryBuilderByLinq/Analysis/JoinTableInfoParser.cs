@@ -162,18 +162,24 @@ public class JoinTableInfoParser
 	private static JoinTableInfo Parse(MethodCallExpression body, MemberExpression arg0, ParameterExpression alias, List<string> tables)
 	{
 		//arg0
-		if (SelectableTableParser.TryParse(arg0, alias.Name!, out var table))
+		SelectableTableParser.TryParse(arg0, alias.Name!, out var table);
+		if (table == null)
 		{
-			return new JoinTableInfo(table, body.Method.Name);
+			//CTE
+			table = SelectableTableParser.Parse(cte: arg0, alias: alias);
 		}
-		throw new NotSupportedException();
+		return new JoinTableInfo(table, body.Method.Name);
 	}
 
 	private static JoinTableInfo Parse(MethodCallExpression body, MemberExpression arg0, UnaryExpression arg1, ParameterExpression alias, List<string> tables)
 	{
-		//arg0
+		//arg0 : MemberExpression
 		SelectableTableParser.TryParse(arg0, alias.Name!, out var table);
-		if (table == null) throw new NotSupportedException();
+		if (table == null)
+		{
+			//CTE
+			table = SelectableTableParser.Parse(cte: arg0, alias: alias);
+		}
 
 		//arg1
 		var lambda = arg1.GetOperand<LambdaExpression>();

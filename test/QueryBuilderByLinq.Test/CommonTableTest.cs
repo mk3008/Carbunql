@@ -114,7 +114,7 @@ WHERE
 					from b in FromTable(cte)
 					from c in InnerJoinTable(cte, x => b.ID == x.ID)
 					where b.ID == 1
-					select new { b, c };
+					select b;
 
 		var sq = query.ToSelectQuery();
 
@@ -131,16 +131,14 @@ WITH
     )
 SELECT
     b.ID,
-    b.Text,
-    c.ID,
-    c.Text
+    b.Text
 FROM
     cte AS b
-    INNER JOIN cte AS c ON b.ID = c.ID
+    INNER JOIN cte AS c ON b.ID = x.ID
 WHERE
     b.ID = 1";
 
-		Assert.Equal(59, sq.GetTokens().ToList().Count);
+		Assert.Equal(51, sq.GetTokens().ToList().Count);
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
@@ -155,7 +153,7 @@ WHERE
 					from b in FromTable(cte1)
 					from c in InnerJoinTable(cte2, x => b.a_id == x.a_id)
 					where b.a_id == 1
-					select new { b, c };
+					select b;
 
 		var sq = query.ToSelectQuery();
 
@@ -179,16 +177,14 @@ WITH
     )
 SELECT
     b.a_id,
-    b.text,
-    c.a_id,
-    c.value
+    b.text
 FROM
     cte1 AS b
-    INNER JOIN cte2 AS c ON b.a_id = c.a_id
+    INNER JOIN cte2 AS c ON b.a_id = x.a_id
 WHERE
     b.a_id = 1";
 
-		Assert.Equal(72, sq.GetTokens().ToList().Count);
+		Assert.Equal(64, sq.GetTokens().ToList().Count);
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
@@ -202,16 +198,17 @@ WHERE
 		var query = from cte1 in CommonTable(sub_a1)
 					from cte2 in CommonTable(sub_a2)
 					from cte3 in CommonTable(sub_a3)
-					from b in FromTable(cte1)
-					from c in InnerJoinTable(cte2, x => b.a_id == x.a_id)
-					from d in LeftJoinTable(cte3, x => b.a_id == x.a_id)
-					from e in CrossJoinTable(cte3)
-					where b.a_id == 1
-					select new { b, c, d, e };
+					from bb in FromTable(cte1)
+					from cc in InnerJoinTable(cte2, x => bb.a_id == x.a_id)
+					from dd in LeftJoinTable(cte3, x => bb.a_id == x.a_id)
+					from ee in CrossJoinTable(cte3)
+					where cc.a_id == 1
+					select cc;
+
+		Monitor.Log(query);
 
 		var sq = query.ToSelectQuery();
 
-		Monitor.Log(query);
 		Monitor.Log(sq);
 
 		var sql = @"

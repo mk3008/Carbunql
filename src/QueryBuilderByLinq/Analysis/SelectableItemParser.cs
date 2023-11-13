@@ -11,17 +11,17 @@ public class SelectableItemParser
 		var tableinfo = SelectableTableParser.Parse(exp);
 		var joinInfos = JoinTableInfoParser.Parse(exp);
 
-		var aliases = new List<string>();
-		if (tableinfo != null) aliases.Add(tableinfo.Alias);
+		var aliases = new List<SelectableTable>();
+		if (tableinfo != null) aliases.Add(tableinfo);
 		foreach (var item in joinInfos)
 		{
-			aliases.Add(item.Table.Alias);
+			aliases.Add(item.Table);
 		}
 
 		return Parse(exp, aliases);
 	}
 
-	public static List<SelectableItem> Parse(Expression exp, List<string> aliases)
+	public static List<SelectableItem> Parse(Expression exp, List<SelectableTable> aliases)
 	{
 		var results = new List<SelectableItem>();
 		if (exp is not MethodCallExpression) return results;
@@ -36,7 +36,7 @@ public class SelectableItemParser
 			{
 				//select custom column pattern.
 				var body = (NewExpression)operand.Body;
-				var val = body.ToValue(aliases);
+				var val = body.ToValue(aliases.Select(x => x.Alias).ToList());
 				results = Parse(val).ToList();
 				return results;
 			}
@@ -44,7 +44,7 @@ public class SelectableItemParser
 			{
 				//select all pattern.
 				var body = (ParameterExpression)operand.Body;
-				var val = body.ToValue(aliases);
+				var val = body.ToValue(aliases.Select(x => x.Alias).ToList());
 				results = Parse(val).ToList();
 				return results;
 			}
@@ -53,11 +53,11 @@ public class SelectableItemParser
 				//join and select all pattern.
 				var body = (MemberExpression)operand.Body;
 				if (body == null) throw new NotSupportedException();
-				var val = body.ToValue(aliases);
+				var val = body.ToValue(aliases.Select(x => x.Alias).ToList());
 
 				if (val is ColumnValue c && c.Column == "*")
 				{
-					return DecodeWildCard(exp, c).ToList();
+					return DecodeWildCard(aliases, c).ToList();
 				}
 
 				results = Parse(val).ToList();
@@ -69,7 +69,7 @@ public class SelectableItemParser
 				var prm = operand.GetParameter<ParameterExpression>(0);
 				if (prm == null) throw new NotSupportedException();
 
-				var val = prm.ToValue(aliases);
+				var val = prm.ToValue(aliases.Select(x => x.Alias).ToList());
 				results = Parse(val).ToList();
 				return results;
 			}
@@ -86,7 +86,7 @@ public class SelectableItemParser
 			{
 				//select custom column pattern.
 				var body = (NewExpression)operand.Body;
-				var val = body.ToValue(aliases);
+				var val = body.ToValue(aliases.Select(x => x.Alias).ToList());
 				results = Parse(val).ToList();
 				return results;
 			}
@@ -94,7 +94,7 @@ public class SelectableItemParser
 			{
 				//select all pattern.
 				var body = (ParameterExpression)operand.Body;
-				var val = body.ToValue(aliases);
+				var val = body.ToValue(aliases.Select(x => x.Alias).ToList());
 				results = Parse(val).ToList();
 				return results;
 			}
@@ -103,11 +103,11 @@ public class SelectableItemParser
 				//join and select all pattern.
 				var body = (MemberExpression)operand.Body;
 				if (body == null) throw new NotSupportedException();
-				var val = body.ToValue(aliases);
+				var val = body.ToValue(aliases.Select(x => x.Alias).ToList());
 
 				if (val is ColumnValue c && c.Column == "*")
 				{
-					return DecodeWildCard(exp, c).ToList();
+					return DecodeWildCard(aliases, c).ToList();
 				}
 
 				results = Parse(val).ToList();
@@ -148,29 +148,14 @@ public class SelectableItemParser
 		}
 	}
 
-	private static IEnumerable<SelectableItem> DecodeWildCard(Expression exp, ColumnValue v)
+	private static IEnumerable<SelectableItem> DecodeWildCard(List<SelectableTable> aliases, ColumnValue v)
 	{
-		var tableinfo = SelectableTableParser.Parse(exp);
+		var t = aliases.Where(x => x.Alias == v.TableAlias).FirstOrDefault();
+		if (t == null) throw new NotSupportedException();
 
-		if (tableinfo!.Alias == v.TableAlias)
+		foreach (var item in t.GetColumnNames())
 		{
-			foreach (var item in tableinfo!.Table!.GetColumnNames())
-			{
-				yield return new SelectableItem(new ColumnValue(v.TableAlias, item), item);
-			}
-			yield break;
+			yield return new SelectableItem(new ColumnValue(v.TableAlias, item), item);
 		}
-
-		var joinInfo = JoinTableInfoParser.Parse(exp).Where(x => x.Table!.Alias == v.TableAlias).FirstOrDefault();
-		if (joinInfo != null)
-		{
-			foreach (var item in joinInfo.Table.Table!.GetColumnNames())
-			{
-				yield return new SelectableItem(new ColumnValue(v.TableAlias, item), item);
-			}
-			yield break;
-		}
-
-		throw new NotSupportedException();
 	}
 }

@@ -37,14 +37,15 @@ public static class SelectableTableParser
 		if (exp is not MethodCallExpression) return false;
 
 		var method = (MethodCallExpression)exp;
-		if (method.Arguments.Count == 2)
+
+		if (method.Arguments.Count == 2 && method.Arguments[0] is ConstantExpression && (method.Method.Name == "Select" || method.Method.Name == "Where"))
 		{
-			var ce = method.GetArgument<ConstantExpression>(0);
-			if (ce == null) return false;
+			//root from pattern.
+			var ce = (ConstantExpression)method.Arguments[0];
 
 			var operand = method.GetArgument<UnaryExpression>(1).GetOperand<LambdaExpression>();
-			if (operand == null) return false;
-			if (operand.Parameters.Count != 1) return false;
+			if (operand == null) throw new NotSupportedException();
+			if (operand.Parameters.Count != 1) throw new NotSupportedException();
 
 			var parameter = operand.Parameters[0];
 			if (parameter.Type == typeof(DualTable)) return false;
@@ -57,9 +58,9 @@ public static class SelectableTableParser
 			info = Parse(parameter);
 			return true;
 		}
+
 		if (method.Arguments.Count == 3)
 		{
-			var ce = method.GetArgument<ConstantExpression>(0);
 			var body = method.GetArgument<UnaryExpression>(1).GetOperand<LambdaExpression>().GetBody<MethodCallExpression>();
 			if (body == null) return false;
 
@@ -68,14 +69,19 @@ public static class SelectableTableParser
 				// no relation pattern.
 				var operand = method.GetArgument<UnaryExpression>(2).GetOperand<LambdaExpression>();
 				if (operand == null) return false;
-				if (operand.Parameters.Count != 2) return false;
-
-				var parameter = operand.Parameters[1];
-				if (TryParseAsFromTable(body, parameter, out info)) return true;
+				if (operand.Parameters.Count == 2)
+				{
+					var parameter = operand.Parameters[1];
+					if (TryParseAsFromTable(body, parameter, out info)) return true;
+					return false;
+				}
 				return false;
 			}
-			else if (ce != null && (body.Method.Name == nameof(Sql.InnerJoinTable) || body.Method.Name == nameof(Sql.LeftJoinTable) || body.Method.Name == nameof(Sql.CrossJoinTable)))
+
+			//isRootOnly == false &&
+			if (method.Arguments[0] is ConstantExpression ce && (body.Method.Name == nameof(Sql.InnerJoinTable) || body.Method.Name == nameof(Sql.LeftJoinTable) || body.Method.Name == nameof(Sql.CrossJoinTable)))
 			{
+				//root
 				// has relation pattern.
 				var operand = method.GetArgument<UnaryExpression>(2).GetOperand<LambdaExpression>();
 				if (operand == null || operand.Parameters.Count != 2) return false;
@@ -89,6 +95,26 @@ public static class SelectableTableParser
 				info = Parse(parameter);
 				return true;
 			}
+
+			//if (method.Arguments[0] is MethodCallExpression me && (body.Method.Name == nameof(Sql.InnerJoinTable) || body.Method.Name == nameof(Sql.LeftJoinTable) || body.Method.Name == nameof(Sql.CrossJoinTable)))
+			//{
+			//	var m = body.GetArgument<MemberExpression>(0)!;
+			//	var parameter = method.GetArgument<UnaryExpression>(2).GetOperand<LambdaExpression>().GetParameter<ParameterExpression>(1)!;
+			//	info = Parse(cte: m, alias: parameter);
+			//	return true;
+			//	var x = 1;
+			//}
+
+			//else if (method.Arguments[2] is UnaryExpression)
+			//{
+			//	//CTE???
+			//	var lambda = method.GetArgument<UnaryExpression>(2).GetOperand<LambdaExpression>();
+			//	var parameter = lambda.GetParameter<ParameterExpression>(1);
+			//	if (parameter == null) return false;
+			//	info = Parse(parameter);
+			//	return true;
+			//}
+			return false;
 		}
 		return false;
 	}
