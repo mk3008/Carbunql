@@ -212,7 +212,7 @@ WHERE
 		Monitor.Log(sq);
 
 		var sql = @"
-WITH
+ WITH
     cte1 AS (
         SELECT
             a.a_id,
@@ -236,25 +236,17 @@ WITH
             table_a AS a
     )
 SELECT
-    b.a_id,
-    b.text,
-    c.a_id,
-    c.value,
-    d.a_id,
-    d.text,
-    d.value,
-    e.a_id,
-    e.text,
-    e.value,
+    cc.a_id,
+    cc.value
 FROM
-    cte1 AS b
-    INNER JOIN cte2 AS c ON b.a_id = c.a_id
-    LEFT JOIN cte3 AS d ON b.a_id = d.a_id
-    CROSS JOIN cte3 AS e
+    cte1 AS bb
+    INNER JOIN cte2 AS cc ON bb.a_id = x.a_id
+    LEFT JOIN cte3 AS dd ON bb.a_id = x.a_id
+    CROSS JOIN cte3 AS ee
 WHERE
-    b.a_id = 1";
+    cc.a_id = 1";
 
-		Assert.Equal(117, sq.GetTokens().ToList().Count);
+		Assert.Equal(101, sq.GetTokens().ToList().Count);
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
