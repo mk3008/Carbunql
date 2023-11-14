@@ -630,4 +630,15 @@ public class ValueParserTest
 		var lst = v.GetTokens().ToList();
 		Assert.Equal(5, lst.Count);
 	}
+
+	[Fact]
+	public void PostgresArray()
+	{
+		var text = "array[1,2]";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(6, lst.Count);
+	}
 }
