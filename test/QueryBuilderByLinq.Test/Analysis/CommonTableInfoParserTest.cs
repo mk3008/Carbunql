@@ -55,8 +55,8 @@ FROM
 	[Fact]
 	public void TwoCommonTablesTest()
 	{
-		var sub1 = from a in FromTable<table_a>() select a.a_id;
-		var sub2 = from b in FromTable<table_a>() select b.text;
+		var sub1 = from a in FromTable<table_a>() select new { a.a_id };
+		var sub2 = from b in FromTable<table_a>() select new { b.text };
 
 		var query = from cte1 in CommonTable(sub1)
 					from cte2 in CommonTable(sub2)
@@ -76,29 +76,31 @@ FROM
 		Assert.Equal("cte2", ctes[1].Alias);
 		Assert.Equal("select b.text from table_a as b", ctes[1].Query.ToSelectQuery().ToOneLineText());
 
-		//parse not working 
-		//  join
-		//  select item
-
 		var sql = @"
 WITH
-    cte AS (
+    cte1 AS (
         SELECT
             a.a_id
         FROM
             table_a AS a
+    ),
+    cte2 AS (
+        SELECT
+            b.text
+        FROM
+            table_a AS b
     )
 SELECT
     x.a_id
 FROM
-    cte AS x";
+    cte1 AS x";
 		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
 	}
 
 	[Fact]
 	public void ManyCommonTablesTest()
 	{
-		var subquery = from a in FromTable<table_a>() select a.a_id;
+		var subquery = from a in FromTable<table_a>() select new { a.a_id };
 
 		var query = from cte1 in CommonTable(subquery)
 					from cte2 in CommonTable(subquery)
@@ -124,7 +126,31 @@ FROM
 
 		var sql = @"
 WITH
-    cte AS (
+    cte1 AS (
+        SELECT
+            a.a_id
+        FROM
+            table_a AS a
+    ),
+    cte2 AS (
+        SELECT
+            a.a_id
+        FROM
+            table_a AS a
+    ),
+    cte3 AS (
+        SELECT
+            a.a_id
+        FROM
+            table_a AS a
+    ),
+    cte4 AS (
+        SELECT
+            a.a_id
+        FROM
+            table_a AS a
+    ),
+    cte5 AS (
         SELECT
             a.a_id
         FROM
@@ -133,7 +159,7 @@ WITH
 SELECT
     x.a_id
 FROM
-    cte AS x";
+    cte1 AS x";
 		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
 	}
 

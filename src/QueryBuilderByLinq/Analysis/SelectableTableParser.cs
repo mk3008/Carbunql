@@ -73,12 +73,12 @@ public static class SelectableTableParser
 				{
 					var parameter = operand.Parameters[1];
 					if (TryParseAsFromTable(body, parameter, out info)) return true;
-					return false;
+					throw new NotSupportedException();
+
 				}
-				return false;
+				throw new NotSupportedException();
 			}
 
-			//isRootOnly == false &&
 			if (method.Arguments[0] is ConstantExpression ce && (body.Method.Name == nameof(Sql.InnerJoinTable) || body.Method.Name == nameof(Sql.LeftJoinTable) || body.Method.Name == nameof(Sql.CrossJoinTable)))
 			{
 				//root
@@ -183,6 +183,12 @@ public static class SelectableTableParser
 			else if (m.Expression is ParameterExpression)
 			{
 				// many common tables pattern.
+				// ex.From(IQueryable)
+				info = Parse(cte: m, alias: parameter);
+				return true;
+			}else if (m.Expression is MemberExpression)
+			{
+				// many common tables pattern.(There are 3 or more common tables)
 				// ex.From(IQueryable)
 				info = Parse(cte: m, alias: parameter);
 				return true;
