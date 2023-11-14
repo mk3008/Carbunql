@@ -1,4 +1,6 @@
-﻿using Xunit.Abstractions;
+﻿using Carbunql;
+using Carbunql.Postgres.Analysis;
+using Xunit.Abstractions;
 
 namespace Carbunql.Postgres.Test;
 
@@ -9,6 +11,32 @@ public class QueryCommandMonitor
 	public QueryCommandMonitor(ITestOutputHelper output)
 	{
 		Output = output;
+	}
+
+	public void Log(IQueryable query)
+	{
+		if (SelectableTableParser.TryParse(query.Expression, out var from))
+		{
+			Output.WriteLine("From");
+			if (from.Table != null) Output.WriteLine($"   Table : {from.Table.ToText()}");
+			Output.WriteLine($"   Alias : {from.Alias}");
+		}
+		else
+		{
+			Output.WriteLine($"From : [NULL]");
+		}
+		Output.WriteLine("--------------------");
+
+		var ctes = CommonTableInfoParser.Parse(query.Expression);
+		foreach (var cte in ctes)
+		{
+			Output.WriteLine($"CTE[{ctes.IndexOf(cte)}] : {cte.Alias}");
+		}
+		Output.WriteLine("--------------------");
+
+		var text = ExpressionReader.Analyze(query.Expression);
+		Output.WriteLine(text);
+		Output.WriteLine("--------------------");
 	}
 
 	public void Log(IQueryCommandable arg)
