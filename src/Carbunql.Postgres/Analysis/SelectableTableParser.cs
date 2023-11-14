@@ -96,24 +96,6 @@ public static class SelectableTableParser
 				return true;
 			}
 
-			//if (method.Arguments[0] is MethodCallExpression me && (body.Method.Name == nameof(Sql.InnerJoinTable) || body.Method.Name == nameof(Sql.LeftJoinTable) || body.Method.Name == nameof(Sql.CrossJoinTable)))
-			//{
-			//	var m = body.GetArgument<MemberExpression>(0)!;
-			//	var parameter = method.GetArgument<UnaryExpression>(2).GetOperand<LambdaExpression>().GetParameter<ParameterExpression>(1)!;
-			//	info = Parse(cte: m, alias: parameter);
-			//	return true;
-			//	var x = 1;
-			//}
-
-			//else if (method.Arguments[2] is UnaryExpression)
-			//{
-			//	//CTE???
-			//	var lambda = method.GetArgument<UnaryExpression>(2).GetOperand<LambdaExpression>();
-			//	var parameter = lambda.GetParameter<ParameterExpression>(1);
-			//	if (parameter == null) return false;
-			//	info = Parse(parameter);
-			//	return true;
-			//}
 			return false;
 		}
 		return false;

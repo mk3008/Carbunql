@@ -1,5 +1,4 @@
-﻿using Carbunql.Clauses;
-using System.Collections;
+﻿using System.Collections;
 using System.Linq.Expressions;
 
 namespace Carbunql.Postgres.Analysis;
