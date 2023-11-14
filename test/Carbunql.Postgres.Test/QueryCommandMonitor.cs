@@ -1,5 +1,5 @@
 ﻿using Carbunql;
-using Carbunql.Postgres.Analysis;
+using Carbunql.Postgres.Linq;
 using Xunit.Abstractions;
 
 namespace Carbunql.Postgres.Test;
