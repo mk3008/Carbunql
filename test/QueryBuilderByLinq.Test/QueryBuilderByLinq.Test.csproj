@@ -23,7 +23,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Carbunql\Carbunql.csproj" />
-    <ProjectReference Include="..\..\src\QueryBuilderByLinq\QueryBuilderByLinq.csproj" />
   </ItemGroup>
 
 </Project>
