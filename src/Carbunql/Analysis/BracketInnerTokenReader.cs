@@ -1,12 +1,25 @@
-﻿using Carbunql.Extensions;
-
-namespace Carbunql.Analysis;
+﻿namespace Carbunql.Analysis;
 
 public class BracketInnerTokenReader : ITokenReader, IDisposable
 {
+	private string StartSymbol { get; init; } = "(";
+
+	private string EndSymbol { get; init; } = ")";
+
+	public BracketInnerTokenReader(ITokenReader r, string startSymbol, string endSymbol)
+	{
+		StartSymbol = startSymbol;
+		EndSymbol = endSymbol;
+
+		r.Read(StartSymbol);
+
+		Reader = r;
+		RootBracketLevel = r.CurrentBracketLevel;
+	}
+
 	public BracketInnerTokenReader(ITokenReader r)
 	{
-		r.Read("(");
+		r.Read(StartSymbol);
 
 		Reader = r;
 		RootBracketLevel = r.CurrentBracketLevel;
@@ -32,7 +45,7 @@ public class BracketInnerTokenReader : ITokenReader, IDisposable
 		if (IsTerminated) return string.Empty;
 
 		var token = Reader.Read();
-		if (token == ")" && RootBracketLevel > Reader.CurrentBracketLevel)
+		if (token == EndSymbol && RootBracketLevel > Reader.CurrentBracketLevel)
 		{
 			IsTerminated = true;
 		}
@@ -41,6 +54,6 @@ public class BracketInnerTokenReader : ITokenReader, IDisposable
 
 	public void Dispose()
 	{
-		Reader.Read(")");
+		Reader.Read(EndSymbol);
 	}
 }

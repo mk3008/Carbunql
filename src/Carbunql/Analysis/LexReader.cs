@@ -11,7 +11,7 @@ public class LexReader : CharReader
 
 	private IEnumerable<char> SpaceChars { get; set; } = " \r\n\t".ToArray();
 
-	private IEnumerable<char> ForceBreakSymbols { get; set; } = ".,();".ToArray();
+	private IEnumerable<char> ForceBreakSymbols { get; set; } = ".,();[]".ToArray();
 
 	private IEnumerable<char> BitwiseOperatorSymbols { get; set; } = "&|^#~".ToArray();
 

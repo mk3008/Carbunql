@@ -94,6 +94,11 @@ public static class ValueParser
 			return v;
 		}
 
+		if (item.IsEqualNoCase("array"))
+		{
+			return ArrayValueParser.Parse(r);
+		}
+
 		if (BracketValueParser.IsBracketValue(item))
 		{
 			return BracketValueParser.Parse(r);
