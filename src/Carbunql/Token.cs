@@ -61,11 +61,14 @@ public class Token
 	{
 		if (prev == null) return false;
 
+		if (prev!.Text.Equals("[")) return false;
 		if (prev!.Text.Equals("(")) return false;
 		if (prev!.Text.Equals(".")) return false;
 		if (prev!.Text.Equals("::")) return false;
 		if (prev!.Text.Equals("as")) return true;
 
+		if (Text.Equals("[")) return false;
+		if (Text.Equals("]")) return false;
 		if (Text.Equals(")")) return false;
 		if (Text.Equals(",")) return false;
 		if (Text.Equals(".")) return false;

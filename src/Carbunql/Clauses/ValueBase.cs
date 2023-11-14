@@ -39,6 +39,8 @@ public abstract class ValueBase : IQueryCommandable
 		return value;
 	}
 
+	public string RecommendedName { get; set; } = string.Empty;
+
 	public ValueBase AddOperatableValue(string @operator, string value)
 	{
 		return AddOperatableValue(@operator, ValueParser.Parse(value));
@@ -97,6 +99,19 @@ public abstract class ValueBase : IQueryCommandable
 		if (OperatableValue != null)
 		{
 			foreach (var item in OperatableValue.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+	}
+
+	public IEnumerable<ValueBase> GetValues()
+	{
+		yield return this;
+
+		if (OperatableValue != null)
+		{
+			foreach (var item in OperatableValue.Value.GetValues())
 			{
 				yield return item;
 			}
