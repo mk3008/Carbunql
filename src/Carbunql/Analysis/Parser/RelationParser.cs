@@ -26,6 +26,7 @@ public static class RelationParser
 		}
 		else if (r.Peek().IsEqualNoCase((x) =>
 		{
+			if (x.IsEqualNoCase(ReservedText.Join)) return true;
 			if (x.IsEqualNoCase(ReservedText.Inner)) return true;
 			if (x.IsEqualNoCase(ReservedText.Left)) return true;
 			if (x.IsEqualNoCase(ReservedText.Right)) return true;
@@ -33,6 +34,7 @@ public static class RelationParser
 		}))
 		{
 			var join = r.Read();
+
 			var table = SelectableTableParser.Parse(r);
 			r.Read("on");
 			var val = ValueParser.Parse(r);

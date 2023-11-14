@@ -27,6 +27,7 @@ public static class ReservedText
 	public static string And => "and";
 	public static string Or => "or";
 	public static string On => "on";
+	public static string Join => "join";
 	public static string Inner => "inner join";
 	public static string Left => "left join";
 	public static string Right => "right join";
