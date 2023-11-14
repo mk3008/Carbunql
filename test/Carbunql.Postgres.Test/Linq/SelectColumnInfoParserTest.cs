@@ -111,7 +111,7 @@ FROM
 	[Fact]
 	public void Alias()
 	{
-		var pai = 3.14;
+		var pi = 3.14;
 
 		var query = from a in FromTable<table_a>()
 					select new
@@ -121,7 +121,7 @@ FROM
 						VALUE = a.value,
 						V1 = 1,
 						V2 = 1 + 1,
-						V3 = pai
+						V3 = pi
 					};
 
 		Monitor.Log(query);
