@@ -16,9 +16,9 @@ public class Demo
 
 	private ITestOutputHelper Output { get; set; }
 
-	public record struct sale(int sales_id, int article_id, int quantity);
-	public record struct article(int article_id, int category_id, string article_name, int price);
-	public record struct category(int category_id, string category_name);
+	public record class sale(int sales_id, int article_id, int quantity);
+	public record class article(int article_id, int category_id, string article_name, int price);
+	public record class category(int category_id, string category_name);
 
 	[Fact]
 	public void Test()
