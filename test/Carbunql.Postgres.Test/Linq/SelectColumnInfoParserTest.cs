@@ -142,11 +142,11 @@ FROM
 		Assert.Equal("V2", items[4].Alias);
 		Assert.Equal("2", items[4].Value.ToText());
 		Assert.Equal("V3", items[5].Alias);
-		Assert.Equal(":member_pai", items[5].Value.ToText());
+		Assert.Equal(":member_pi", items[5].Value.ToText());
 
 		var sql = @"
 /*
-  :member_pai = 3.14
+  :member_pi = 3.14
 */
 SELECT
     a.a_id AS ID,
@@ -154,7 +154,7 @@ SELECT
     a.value AS VALUE,
     1 AS V1,
     2 AS V2,
-    :member_pai AS V3
+    :member_pi AS V3
 FROM
     table_a AS a";
 		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
@@ -266,5 +266,33 @@ WHERE
 		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
 	}
 
+	[Fact]
+	public void MemberInit()
+	{
+		var query = from a in FromTable<table_a>()
+					select new table_b
+					(
+						a.a_id,
+						a.text,
+						a.a_id * 10
+					);
+
+		Monitor.Log(query);
+
+		var sq = query.ToSelectQuery();
+		Monitor.Log(sq);
+
+		var sql = @"
+SELECT
+    a.a_id AS b_id,
+    a.text,
+    a.a_id * 10 AS value
+FROM
+    table_a AS a";
+		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
+	}
+
 	public record struct table_a(int a_id, string text, int value);
+
+	public record class table_b(int b_id, string text, int value);
 }

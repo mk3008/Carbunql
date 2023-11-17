@@ -77,6 +77,10 @@ public static class ExpressionReader
 		{
 			return Analyze(p);
 		}
+		else if (exp is MemberInitExpression mi)
+		{
+			return Analyze(mi);
+		}
 		return $"not support : {exp.NodeType}";
 	}
 
@@ -253,6 +257,23 @@ public static class ExpressionReader
 		else
 		{
 			sb.AppendLine($"Members.Count\r\n    0");
+		}
+
+		return sb.ToString().RemoveLastReturn();
+	}
+
+	internal static string Analyze(MemberInitExpression exp)
+	{
+		var sb = new StringBuilder();
+
+		sb.AppendLine($"* MemberInitExpression");
+		sb.AppendLine($"NodeType\r\n    {exp.NodeType}");
+		sb.AppendLine($"Type\r\n    {exp.Type.Name}");
+
+		if (exp.NewExpression != null)
+		{
+			sb.AppendLine($"NewExpression");
+			sb.AppendLine(Analyze(exp.NewExpression).InsertIndent());
 		}
 
 		return sb.ToString().RemoveLastReturn();
