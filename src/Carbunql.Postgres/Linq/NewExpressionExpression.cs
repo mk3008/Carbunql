@@ -21,12 +21,24 @@ internal static class NewExpressionExpression
 			}
 			return new ValueCollection(lst);
 		}
-
 		else if (exp.Type == typeof(DateTime))
 		{
 			var args = exp.Arguments.Select(x => x.ToObject()).ToArray();
 			var d = exp.Constructor!.Invoke(args);
 			return ((DateTime)d).ToValue();
+		}
+		else if (exp.Arguments.Select(x => x is MemberExpression || x is BinaryExpression).Any())
+		{
+			var lst = new List<ValueBase>();
+			var prms = exp.Constructor!.GetParameters().Select(p => p.Name).ToArray();
+
+			for (var i = 0; i < exp.Arguments.Count; i++)
+			{
+				var v = exp.Arguments[i].ToValue(tables);
+				v.RecommendedName = prms[i]!;
+				lst.Add(v);
+			}
+			return new ValueCollection(lst);
 		}
 		else
 		{
