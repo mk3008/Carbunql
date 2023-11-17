@@ -19,6 +19,11 @@ public static class Sql
 		return new Table<T>(subquery);
 	}
 
+	public static IQueryable<T> CommonTable<T>(SelectQuery selectQuery)
+	{
+		return new Table<T>(selectQuery);
+	}
+
 	public static IQueryable<T> FromTable<T>(T rangeVariable)
 	{
 		return Enumerable.Empty<T>().AsQueryable();
@@ -37,6 +42,11 @@ public static class Sql
 	public static IQueryable<T> FromTable<T>(IQueryable<T> subquery)
 	{
 		return new Table<T>(subquery);
+	}
+
+	public static IQueryable<T> FromTable<T>(SelectQuery selectQuery)
+	{
+		return new Table<T>(selectQuery);
 	}
 
 	public static IQueryable<T> InnerJoinTable<T>(Expression<Predicate<T>> condition)
@@ -59,6 +69,11 @@ public static class Sql
 		return Enumerable.Empty<T>().AsQueryable();
 	}
 
+	public static IQueryable<T> InnerJoinTable<T>(SelectQuery selectQuery, Expression<Predicate<T>> condition)
+	{
+		return new Table<T>(selectQuery);
+	}
+
 	public static IQueryable<T> LeftJoinTable<T>(Expression<Predicate<T>> condition)
 	{
 		return new Table<T>();
@@ -79,6 +94,11 @@ public static class Sql
 		return Enumerable.Empty<T>().AsQueryable();
 	}
 
+	public static IQueryable<T> LeftJoinTable<T>(SelectQuery selectQuery, Expression<Predicate<T>> condition)
+	{
+		return new Table<T>(selectQuery);
+	}
+
 	public static IQueryable<T> CrossJoinTable<T>()
 	{
 		return Enumerable.Empty<T>().AsQueryable();
@@ -97,6 +117,11 @@ public static class Sql
 	public static IQueryable<T> CrossJoinTable<T>(T rangeVariable)
 	{
 		return Enumerable.Empty<T>().AsQueryable();
+	}
+
+	public static IQueryable<T> CrossJoinTable<T>(SelectQuery selectQuery)
+	{
+		return new Table<T>(selectQuery);
 	}
 
 	private static string ERROR = "Definition methods must not be executed.";

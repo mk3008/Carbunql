@@ -79,6 +79,114 @@ FROM
 	}
 
 	[Fact]
+	public void InnerJoinSubQueryTest()
+	{
+		var articleQuery = from sub_a in FromTable<article>() select sub_a;
+		var categoryQuery = from sub_c in FromTable<category>() select sub_c;
+
+		var query = from s in FromTable<sale>()
+					from a in InnerJoinTable(articleQuery, x => s.article_id == x.article_id)
+					from c in InnerJoinTable(categoryQuery, x => a.category_id == x.category_id)
+					select a;
+
+		Monitor.Log(query);
+
+		var sq = query.ToSelectQuery();
+		Monitor.Log(sq);
+
+		var joins = JoinTableInfoParser.Parse(query.Expression);
+
+		Assert.Equal(2, joins.Count);
+
+		Assert.Equal("(select sub_a.article_id, sub_a.category_id, sub_a.article_name, sub_a.price from article as sub_a) as a", joins[0].Table.ToOneLineText());
+		Assert.Equal("inner join", joins[0].Relation);
+		Assert.Equal("s.article_id = a.article_id", joins[0].Condition!.ToOneLineText());
+
+		var sql = @"
+SELECT
+    a.article_id,
+    a.category_id,
+    a.article_name,
+    a.price
+FROM
+    sale AS s
+    INNER JOIN (
+        SELECT
+            sub_a.article_id,
+            sub_a.category_id,
+            sub_a.article_name,
+            sub_a.price
+        FROM
+            article AS sub_a
+    ) AS a ON s.article_id = a.article_id
+    INNER JOIN (
+        SELECT
+            sub_c.category_id,
+            sub_c.category_name
+        FROM
+            category AS sub_c
+    ) AS c ON a.category_id = c.category_id
+";
+		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
+	}
+
+	[Fact]
+	public void InnerJoinSelectQueryTest()
+	{
+		var articleQuery = new SelectQuery("select x.article_id, x.category_id, x.article_name, x.price from table_x as x where x.article_id = 1");
+		var categoryQuery = new SelectQuery("select y.category_id, y.category_name from table_y as y where y.category_id = 2");
+
+		var query = from s in FromTable<sale>()
+					from a in InnerJoinTable<article>(articleQuery, x => s.article_id == x.article_id)
+					from c in InnerJoinTable<category>(categoryQuery, x => a.category_id == x.category_id)
+					select a;
+
+		Monitor.Log(query);
+
+		var sq = query.ToSelectQuery();
+		Monitor.Log(sq);
+
+		var joins = JoinTableInfoParser.Parse(query.Expression);
+
+		Assert.Equal(2, joins.Count);
+
+		Assert.Equal("(select x.article_id, x.category_id, x.article_name, x.price from table_x as x where x.article_id = 1) as a", joins[0].Table.ToOneLineText());
+		Assert.Equal("inner join", joins[0].Relation);
+		Assert.Equal("s.article_id = a.article_id", joins[0].Condition!.ToOneLineText());
+
+		var sql = @"
+SELECT
+    a.article_id,
+    a.category_id,
+    a.article_name,
+    a.price
+FROM
+    sale AS s
+    INNER JOIN (
+        SELECT
+            x.article_id,
+            x.category_id,
+            x.article_name,
+            x.price
+        FROM
+            table_x AS x
+        WHERE
+            x.article_id = 1
+    ) AS a ON s.article_id = a.article_id
+    INNER JOIN (
+        SELECT
+            y.category_id,
+            y.category_name
+        FROM
+            table_y AS y
+        WHERE
+            y.category_id = 2
+    ) AS c ON a.category_id = c.category_id
+";
+		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
+	}
+
+	[Fact]
 	public void InnerJoinStringTableTest()
 	{
 		var query = from s in FromTable<sale>("sales")

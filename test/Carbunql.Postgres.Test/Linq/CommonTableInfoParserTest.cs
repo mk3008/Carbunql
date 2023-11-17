@@ -35,7 +35,7 @@ public class CommonTableInfoParserTest
 
 		Assert.Single(ctes);
 		Assert.Equal("cte", ctes[0].Alias);
-		Assert.Equal("select a.a_id from table_a as a", ctes[0].Query.ToSelectQuery().ToOneLineText());
+		Assert.Equal("select a.a_id from table_a as a", ctes[0].Query.ToOneLineText());
 
 		var sql = @"
 WITH
@@ -47,6 +47,48 @@ WITH
     )
 SELECT
     x.a_id
+FROM
+    cte AS x";
+		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
+	}
+
+
+	[Fact]
+	public void SelectQueryCommonTableTest()
+	{
+		var preset = new SelectQuery("select x.a_id, x.value, x.text from table_x as x where x.a_id = 1");
+
+		var query = from cte in CommonTable<table_a>(preset)
+					from x in FromTable(cte)
+					select x;
+
+		Monitor.Log(query);
+
+		var sq = query.ToSelectQuery();
+		Monitor.Log(sq);
+
+		var ctes = CommonTableInfoParser.Parse(query.Expression);
+
+		Assert.Single(ctes);
+		Assert.Equal("cte", ctes[0].Alias);
+		Assert.Equal("select x.a_id, x.value, x.text from table_x as x where x.a_id = 1", ctes[0].Query.ToOneLineText());
+
+		var sql = @"
+WITH
+    cte AS (
+        SELECT
+            x.a_id,
+            x.value,
+            x.text
+        FROM
+            table_x AS x
+        WHERE
+            x.a_id = 1
+    )
+SELECT
+    x.a_id,
+    x.text,
+    x.value
 FROM
     cte AS x";
 		Assert.Equal(sql.RemoveControlChar(), sq.ToText().RemoveControlChar());
@@ -72,9 +114,9 @@ FROM
 
 		Assert.Equal(2, ctes.Count);
 		Assert.Equal("cte1", ctes[0].Alias);
-		Assert.Equal("select a.a_id from table_a as a", ctes[0].Query.ToSelectQuery().ToOneLineText());
+		Assert.Equal("select a.a_id from table_a as a", ctes[0].Query.ToOneLineText());
 		Assert.Equal("cte2", ctes[1].Alias);
-		Assert.Equal("select b.text from table_a as b", ctes[1].Query.ToSelectQuery().ToOneLineText());
+		Assert.Equal("select b.text from table_a as b", ctes[1].Query.ToOneLineText());
 
 		var sql = @"
 WITH

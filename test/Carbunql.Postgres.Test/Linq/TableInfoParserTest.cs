@@ -134,6 +134,45 @@ from
 	}
 
 	[Fact]
+	public void SelectQueryClassTest()
+	{
+		var preset = new SelectQuery("select x.a_id, x.value, x.text from table_x as x where x.a_id = 1");
+
+		var query = from a in FromTable<table_a>(preset)
+					select a;
+
+		Monitor.Log(query);
+
+		var sq = query.ToSelectQuery();
+		Monitor.Log(sq);
+
+		var from = SelectableTableParser.Parse(query.Expression);
+
+		Assert.Equal("(select x.a_id, x.value, x.text from table_x as x where x.a_id = 1) as a", from?.ToOneLineText());
+		Assert.Equal("a", from?.Alias);
+
+		var sql = @"
+SELECT
+    a.a_id,
+    a.text,
+    a.value
+FROM
+    (
+        SELECT
+            x.a_id,
+            x.value,
+            x.text
+        FROM
+            table_x AS x
+        WHERE
+            x.a_id = 1
+    ) AS a
+";
+		Assert.Equal(TruncateControlString(sql), TruncateControlString(sq.ToText()));
+	}
+
+
+	[Fact]
 	public void CommonTableTest()
 	{
 		var subquery = from a in FromTable<table_a>() select new { a.a_id };
