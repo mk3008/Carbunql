@@ -63,8 +63,16 @@ public static class CommonTableInfoParser
 
 			if (ce?.Value is TableQuery tq)
 			{
-				info = new CommonTableInfo(tq.InnerQuery!.AsQueryable(), name);
-				return true;
+				if (tq.InnerQuery != null)
+				{
+					info = new CommonTableInfo(tq.InnerQuery!.AsQueryable(), name);
+					return true;
+				}
+				else if (tq.InnerSelectQuery != null)
+				{
+					info = new CommonTableInfo(tq.InnerSelectQuery, name);
+					return true;
+				}
 			}
 			throw new NotSupportedException();
 		}

@@ -1,4 +1,5 @@
-﻿using Carbunql.Clauses;
+﻿using Carbunql.Building;
+using Carbunql.Clauses;
 using Carbunql.Postgres;
 using Carbunql.Tables;
 using System.Linq.Expressions;
@@ -112,6 +113,13 @@ public static class SelectableTableParser
 			{
 				// subquery pattern.
 				var sq = provider.InnerQuery.ToSelectQuery();
+				from = new VirtualTable(sq).ToSelectable(parameter.Name!);
+				return true;
+			}
+			else if (provider.InnerSelectQuery != null)
+			{
+				// selectquery pattern.
+				var sq = provider.InnerSelectQuery;
 				from = new VirtualTable(sq).ToSelectable(parameter.Name!);
 				return true;
 			}
@@ -233,6 +241,13 @@ public static class SelectableTableParser
 
 	public static SelectableTable Parse(MemberExpression cte, ParameterExpression alias)
 	{
+		if (cte.Type == typeof(SelectQuery))
+		{
+			//select qurey
+			var sq = (SelectQuery)Expression.Lambda(cte).Compile().DynamicInvoke()!;
+			return sq.ToSelectableTable(alias.Name!);
+		}
+
 		// many common tables pattern.
 		// ex.From(IQueryable)
 		//return new TableInfo(m.Member!.Name!, alias);

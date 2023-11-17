@@ -22,7 +22,7 @@ public static class IQueryableExtension
 		var sq = new SelectQuery();
 		foreach (var item in ctes)
 		{
-			sq.With(item.Query.ToSelectQuery()).As(item.Alias);
+			sq.With(item.Query).As(item.Alias);
 		}
 		if (table != null)
 		{

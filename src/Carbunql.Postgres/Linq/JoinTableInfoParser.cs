@@ -186,11 +186,19 @@ public class JoinTableInfoParser
 		var lambda = arg1.GetOperand<LambdaExpression>();
 		if (lambda == null || lambda.Parameters.Count != 1) throw new NotSupportedException();
 
-		var paremeter = lambda.GetParameter<ParameterExpression>(0);
-		if (paremeter == null) throw new NotSupportedException();
-
+		var prm = lambda.GetParameter<ParameterExpression>(0);
+		if (prm == null) throw new NotSupportedException();
+		var tmp = prm.Name!;
 		var condition = lambda.ToValue(tables);
 
+		//rewrite alias
+		condition.GetValues().ToList().ForEach(v =>
+		{
+			if (v is ColumnValue c)
+			{
+				if (c.TableAlias == tmp) c.TableAlias = table.Alias;
+			}
+		});
 		return new JoinTableInfo(table, body.Method.Name, condition);
 	}
 }

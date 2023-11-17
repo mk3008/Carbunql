@@ -20,6 +20,11 @@ public class Table<T> : IQueryable<T>
 		Query = new TableQuery<T>() { InnerQuery = subquery.AsQueryable() };
 	}
 
+	public Table(SelectQuery selectQuery)
+	{
+		Query = new TableQuery<T>() { InnerSelectQuery = selectQuery };
+	}
+
 	private IQueryable<T> Query { get; set; }
 
 	public Type ElementType => Query.ElementType;
