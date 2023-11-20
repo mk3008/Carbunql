@@ -68,7 +68,7 @@ public static class ReservedText
 
 	public static IEnumerable<string> GetRelationTexts()
 	{
-        yield return Join;
+		yield return Join;
 		yield return Inner;
 		yield return Left;
 		yield return Right;
