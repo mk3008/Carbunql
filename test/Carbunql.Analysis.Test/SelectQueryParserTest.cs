@@ -17,13 +17,13 @@ public class SelectQueryParserTest
 	{
 		var text = @"
 select
-    *
+	*
 from 
-    table_a a
+	table_a a
 order by 
-    a.name nulls first,
-    a.val desc,
-    a.table_a_id";
+	a.name nulls first,
+	a.val desc,
+	a.table_a_id";
 
 		var item = QueryParser.Parse(text) as SelectQuery;
 		if (item == null) throw new Exception();
@@ -53,11 +53,11 @@ order by
 	{
 		var text = @"
 select
-    1 as v1,
-    -1 as v2,
-    1-1 as v3,
-    -1 * 1 as v4,
-    +1 * 1 as v5
+	1 as v1,
+	-1 as v2,
+	1-1 as v3,
+	-1 * 1 as v4,
+	+1 * 1 as v5
 ";
 
 		var item = QueryParser.Parse(text) as SelectQuery;
@@ -95,20 +95,20 @@ select
 	{
 		var text = @"
 select
-    1 as v0
-    , case a.id when 1 then 'a' when 2 then 'b' end as v1
-    , case a.id when 1 then 'a' when 2 then 'b' else null end as v2
-    , case when a.id = 1 then 'a' when a.id = 2 then 'b' end as v3
-    , case when a.id = 1 then 'a' when a.id = 2 then 'b' else null end as v4
-    , concat( 
-        case a.id when 1 then 'a' when 2 then 'b' end,
-        'test', 
-        '123', 
-        case when a.id = 1 then 'a' when a.id = 2 then 'b' end
-      ) as text
-    , 9 as v9
+	1 as v0
+	, case a.id when 1 then 'a' when 2 then 'b' end as v1
+	, case a.id when 1 then 'a' when 2 then 'b' else null end as v2
+	, case when a.id = 1 then 'a' when a.id = 2 then 'b' end as v3
+	, case when a.id = 1 then 'a' when a.id = 2 then 'b' else null end as v4
+	, concat( 
+		case a.id when 1 then 'a' when 2 then 'b' end,
+		'test', 
+		'123', 
+		case when a.id = 1 then 'a' when a.id = 2 then 'b' end
+	  ) as text
+	, 9 as v9
 from 
-    table_a a";
+	table_a a";
 
 		var item = QueryParser.Parse(text) as SelectQuery;
 		if (item == null) throw new Exception();
@@ -125,16 +125,16 @@ from
 	{
 		var text = @"
 select
-    a.table_a_id as id,
-    3.14 as val,
-    (a.val + b.val) * 2 as calc, 
-    b.table_b_id,
-    c.table_c_id
+	a.table_a_id as id,
+	3.14 as val,
+	(a.val + b.val) * 2 as calc, 
+	b.table_b_id,
+	c.table_c_id
 from 
-    table_a a
-    inner join table_b b on a.table_a_id = b.table_a_id and b.visible = true
-    left join table_c c on a.table_a_id = c.table_a_id
-    right outer join table_d d on a.table_a_id = d.table_a_id";
+	table_a a
+	inner join table_b b on a.table_a_id = b.table_a_id and b.visible = true
+	left join table_c c on a.table_a_id = c.table_a_id
+	right outer join table_d d on a.table_a_id = d.table_a_id";
 
 		var item = QueryParser.Parse(text) as SelectQuery;
 		if (item == null) throw new Exception();
@@ -196,17 +196,17 @@ select * from a inner join b on a.id = b.id";
 	{
 		var text = @"
 select
-    a.name,
-    a.sub_name,
-    sum(a.val) as val
+	a.name,
+	a.sub_name,
+	sum(a.val) as val
 from 
-    table_a a
+	table_a a
 group by
-    a.name,
-    a.sub_name
+	a.name,
+	a.sub_name
 having
-    sum(a.val) > 0
-    and sum(a.val) < 10";
+	sum(a.val) > 0
+	and sum(a.val) < 10";
 
 		var item = QueryParser.Parse(text) as SelectQuery;
 		if (item == null) throw new Exception();
@@ -227,19 +227,19 @@ having
 	{
 		var text = @"
 select
-    a.id
+	a.id
 from
-    table_a as a
+	table_a as a
 union
 select
-    b.id
+	b.id
 from
-    table_b as b
+	table_b as b
 union all
 select
-    c.id
+	c.id
 from
-    table_c as c";
+	table_c as c";
 
 		var item = QueryParser.Parse(text) as SelectQuery;
 		if (item == null) throw new Exception();
@@ -272,21 +272,21 @@ from
 		var text = @"
 with
 a as (
-    select
-        a.id
-    from
-        table_a as a
+	select
+		a.id
+	from
+		table_a as a
 ), 
 b as (
-    select
-        a.id
-    from
-        a
+	select
+		a.id
+	from
+		a
 )
 select
-    *
+	*
 from
-    b";
+	b";
 
 		var item = new SelectQuery(text);
 		Monitor.Log(item);
@@ -319,9 +319,9 @@ from
 	{
 		var text = @"
 select
-    a.id
+	a.id
 from
-    table_a as a
+	table_a as a
 limit 10";
 
 		var item = QueryParser.Parse(text) as SelectQuery;
@@ -337,9 +337,9 @@ limit 10";
 	{
 		var text = @"
 select
-    a.id
+	a.id
 from
-    table_a
+	table_a
 limit 10";
 
 		var item = QueryParser.Parse(text) as SelectQuery;
@@ -360,9 +360,9 @@ limit 10";
 	{
 		var text = @"
 select
-    a.id
+	a.id
 from
-    table_a as a
+	table_a as a
 limit 10 offset 3";
 
 		var item = QueryParser.Parse(text) as SelectQuery;
@@ -378,9 +378,9 @@ limit 10 offset 3";
 	{
 		var text = @"
 select
-    a.id
+	a.id
 from
-    table_a as a
+	table_a as a
 limit 3, 10";
 
 		var item = QueryParser.Parse(text) as SelectQuery;
@@ -410,76 +410,76 @@ limit 3, 10";
 		var text = @"
 with
 dat(line_id, name, unit_price, amount, tax_rate) as ( 
-    values
-    (1, 'apple' , 105, 5, 0.07),
-    (2, 'orange', 203, 3, 0.07),
-    (3, 'banana', 233, 9, 0.07),
-    (4, 'tea'   , 309, 7, 0.08),
-    (5, 'coffee', 555, 9, 0.08),
-    (6, 'cola'  , 456, 2, 0.08)
+	values
+	(1, 'apple' , 105, 5, 0.07),
+	(2, 'orange', 203, 3, 0.07),
+	(3, 'banana', 233, 9, 0.07),
+	(4, 'tea'   , 309, 7, 0.08),
+	(5, 'coffee', 555, 9, 0.08),
+	(6, 'cola'  , 456, 2, 0.08)
 ),
 detail as (
-    select  
-        q.*,
-        trunc(q.price * (1 + q.tax_rate)) - q.price as tax,
-        q.price * (1 + q.tax_rate) - q.price as raw_tax
-    from
-        (
-            select
-                dat.*,
-                (dat.unit_price * dat.amount) as price
-            from
-                dat
-        ) q
+	select  
+		q.*,
+		trunc(q.price * (1 + q.tax_rate)) - q.price as tax,
+		q.price * (1 + q.tax_rate) - q.price as raw_tax
+	from
+		(
+			select
+				dat.*,
+				(dat.unit_price * dat.amount) as price
+			from
+				dat
+		) q
 ), 
 tax_summary as (
-    select
-        d.tax_rate,
-        trunc(sum(raw_tax)) as total_tax
-    from
-        detail d
-    group by
-        d.tax_rate
+	select
+		d.tax_rate,
+		trunc(sum(raw_tax)) as total_tax
+	from
+		detail d
+	group by
+		d.tax_rate
 )
 select 
    line_id,
-    name,
-    unit_price,
-    amount,
-    tax_rate,
-    price,
-    price + tax as tax_included_price,
-    tax
+	name,
+	unit_price,
+	amount,
+	tax_rate,
+	price,
+	price + tax as tax_included_price,
+	tax
 from
-    (
-        select
-            line_id,
-            name,
-            unit_price,
-            amount,
-            tax_rate,
-            price,
-            tax + adjust_tax as tax
-        from
-            (
-                select
-                    q.*,
-                    case when q.total_tax - q.cumulative >= q.priority then 1 else 0 end as adjust_tax
-                from
-                    (
-                        select  
-                            d.*, 
-                            s.total_tax,
-                            sum(d.tax) over (partition by d.tax_rate) as cumulative,
-                            row_number() over (partition by d.tax_rate order by d.raw_tax % 1 desc, d.line_id) as priority
-                        from
-                            detail d
-                            inner join tax_summary s on d.tax_rate = s.tax_rate
-                    ) q
-            ) q
-    ) q
+	(
+		select
+			line_id,
+			name,
+			unit_price,
+			amount,
+			tax_rate,
+			price,
+			tax + adjust_tax as tax
+		from
+			(
+				select
+					q.*,
+					case when q.total_tax - q.cumulative >= q.priority then 1 else 0 end as adjust_tax
+				from
+					(
+						select  
+							d.*, 
+							s.total_tax,
+							sum(d.tax) over (partition by d.tax_rate) as cumulative,
+							row_number() over (partition by d.tax_rate order by d.raw_tax % 1 desc, d.line_id) as priority
+						from
+							detail d
+							inner join tax_summary s on d.tax_rate = s.tax_rate
+					) q
+			) q
+	) q
 order by 
-    line_id";
+	line_id";
 
 		var item = QueryParser.Parse(text);
 		Monitor.Log(item);
@@ -495,9 +495,9 @@ order by
 	{
 		var text = @"
 select
-    a.id
+	a.id
 from
-    table_a; as a
+	table_a; as a
 limit 10";
 
 		var item = QueryParser.Parse(text) as SelectQuery;
@@ -514,18 +514,18 @@ limit 10";
 		var text = @"
 with
 v (id, name, value) as (
-    values
-    (1, 'a', 10)
-    , (2, 'a', 20)
-    , (3, 'b', 50)
-    , (4, 'c', 70)
+	values
+	(1, 'a', 10)
+	, (2, 'a', 20)
+	, (3, 'b', 50)
+	, (4, 'c', 70)
 )
 select  
-    sum(value) filter (where v.name = 'a') as value_a
-    , sum(value) filter (where v.name = 'b') as value_b
-    , sum(value) filter (where v.name = 'c') as value_b
+	sum(value) filter (where v.name = 'a') as value_a
+	, sum(value) filter (where v.name = 'b') as value_b
+	, sum(value) filter (where v.name = 'c') as value_b
 from
-    v
+	v
 ";
 
 		var item = QueryParser.Parse(text) as SelectQuery;
@@ -542,19 +542,19 @@ from
 		var text = @"
 with
 v (id, name, value) as (
-    values
-    (1, 'a', 10)
-    , (2, 'a', 20)
-    , (3, 'b', 50)
-    , (4, 'c', 70)
+	values
+	(1, 'a', 10)
+	, (2, 'a', 20)
+	, (3, 'b', 50)
+	, (4, 'c', 70)
 )
 select  
-    id
-    , name
-    , value
-    , string_agg(id::text, ',') filter (where v.name = 'a') over (partition by name order by value) as text
+	id
+	, name
+	, value
+	, string_agg(id::text, ',') filter (where v.name = 'a') over (partition by name order by value) as text
 from
-    v
+	v
 ";
 
 		var item = QueryParser.Parse(text) as SelectQuery;
@@ -587,14 +587,14 @@ SELECT sum(salary) OVER w as v1, avg(salary) OVER w as v2
 	{
 		var text = @"
 select 
-    null is not distinct from null
-    , 1 is not distinct from null
-    , null is not distinct from 1
-    , 1 is not distinct from 1
-    , null is distinct from null
-    , 1 is distinct from null
-    , null is distinct from 1
-    , 1 is distinct from 1
+	null is not distinct from null
+	, 1 is not distinct from null
+	, null is not distinct from 1
+	, 1 is not distinct from 1
+	, null is distinct from null
+	, 1 is distinct from null
+	, null is distinct from 1
+	, 1 is distinct from 1
 ";
 
 		var item = QueryParser.Parse(text) as SelectQuery;
@@ -641,5 +641,22 @@ select
 
 		var lst = item.GetTokens().ToList();
 		Assert.Equal(66, lst.Count);
+	}
+
+	[Fact]
+	public void Issue270()
+	{
+		var text = @"
+select *
+from TableA
+join TableB
+  on TableA.Id = TableB.FK";
+
+		var item = QueryParser.Parse(text) as SelectQuery;
+		if (item == null) throw new Exception();
+		Monitor.Log(item);
+
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(14, lst.Count);
 	}
 }
