@@ -642,4 +642,21 @@ select
 		var lst = item.GetTokens().ToList();
 		Assert.Equal(66, lst.Count);
 	}
+
+	[Fact]
+	public void Issue270()
+	{
+		var text = @"
+select *
+from TableA
+join TableB
+  on TableA.Id = TableB.FK";
+
+		var item = QueryParser.Parse(text) as SelectQuery;
+		if (item == null) throw new Exception();
+		Monitor.Log(item);
+
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(14, lst.Count);
+	}
 }

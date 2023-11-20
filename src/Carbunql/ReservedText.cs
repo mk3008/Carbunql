@@ -59,6 +59,7 @@ public static class ReservedText
 		yield return And;
 		yield return Or;
 		yield return On;
+		yield return Join;
 		yield return Inner;
 		yield return Left;
 		yield return Right;
@@ -67,6 +68,7 @@ public static class ReservedText
 
 	public static IEnumerable<string> GetRelationTexts()
 	{
+		yield return Join;
 		yield return Inner;
 		yield return Left;
 		yield return Right;
