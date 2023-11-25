@@ -13,6 +13,7 @@ public class TokenFormatLogic
 	{
 		if (token.Text.IsEqualNoCase("with")) return true;
 		if (token.Text.IsEqualNoCase("window")) return true;
+		if (token.Text.IsEqualNoCase("select")) return true;
 
 		if (token.Text.Equals("/*")) return true;
 
