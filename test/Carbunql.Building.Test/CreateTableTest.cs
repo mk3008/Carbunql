@@ -27,6 +27,18 @@ public class CreateTableTest
 		var lst = ctq.GetTokens().ToList();
 
 		Assert.Equal(15, lst.Count());
+
+		var expect = @"
+CREATE TABLE
+    new_table
+AS
+SELECT
+    a.id,
+    a.value
+FROM
+    table AS a";
+
+		Assert.Equal(expect.ToValidateText(), ctq.ToText().ToValidateText());
 	}
 
 	[Fact]
