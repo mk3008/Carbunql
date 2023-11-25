@@ -1,4 +1,5 @@
-﻿using Carbunql.Clauses;
+﻿using Carbunql.Building;
+using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Tables;
 
@@ -12,6 +13,8 @@ public class CreateTableQuery : IQueryCommandable
 	}
 
 	public CreateTableClause CreateTableClause { get; init; }
+
+	public string TableFullName => CreateTableClause.Table.GetTableFullName();
 
 	public IReadQuery? Query { get; set; }
 
@@ -57,5 +60,20 @@ public class CreateTableQuery : IQueryCommandable
 	{
 		if (Query == null) yield break;
 		foreach (var item in Query.GetCommonTables()) yield return item;
+	}
+
+	public SelectQuery ToSelectQuery()
+	{
+		if (Query == null) throw new NullReferenceException(nameof(Query));
+
+		var sq = new SelectQuery();
+		var (_, t) = sq.From(TableFullName).As("t");
+
+		foreach (var item in Query.GetColumnNames())
+		{
+			sq.Select(t, item);
+		}
+
+		return sq;
 	}
 }

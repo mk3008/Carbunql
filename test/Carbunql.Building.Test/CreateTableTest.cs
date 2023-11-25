@@ -6,11 +6,11 @@ namespace Carbunql.Building.Test;
 
 public class CreateTableTest
 {
-	private readonly QueryCommandMonitor Monitor;
+	private readonly QueryCommandMonitor sq;
 
 	public CreateTableTest(ITestOutputHelper output)
 	{
-		Monitor = new QueryCommandMonitor(output);
+		sq = new QueryCommandMonitor(output);
 	}
 
 	[Fact]
@@ -22,7 +22,7 @@ public class CreateTableTest
 		var ctq = q.ToCreateTableQuery("new_table");
 		ctq.CreateTableClause.IsTemporary = false;
 
-		Monitor.Log(ctq);
+		sq.Log(ctq);
 
 		var lst = ctq.GetTokens().ToList();
 
@@ -36,10 +36,34 @@ public class CreateTableTest
 		var q = QueryParser.Parse(sql);
 
 		var ctq = q.ToCreateTableQuery("new_table");
-		Monitor.Log(ctq);
+		sq.Log(ctq);
 
 		var lst = ctq.GetTokens().ToList();
 
 		Assert.Equal(15, lst.Count());
+	}
+
+	[Fact]
+	public void SelectQuery()
+	{
+		var sql = "select a.id, 'test' as value from table as a";
+		var q = QueryParser.Parse(sql);
+
+		var sq = q.ToCreateTableQuery("new_table").ToSelectQuery();
+		this.sq.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+
+		Assert.Equal(12, lst.Count());
+
+		var expect = @"
+SELECT
+    t.id,
+    t.value
+FROM
+    new_table AS t";
+
+		Assert.Equal(expect.ToValidateText(), sq.ToText().ToValidateText());
+
 	}
 }

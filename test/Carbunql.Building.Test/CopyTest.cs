@@ -12,18 +12,13 @@ public class CopyTest
 		Output = output;
 	}
 
-	private string TruncateControlString(string text)
-	{
-		return text.Replace("\r", "").Replace("\n", "").Replace(" ", "").ToLower();
-	}
-
 	[Fact]
 	public void DeepCopy()
 	{
 		var sq = new SelectQuery("select a.column_1 as c1 from table_a as a");
 		var actual = sq.DeepCopy();
 
-		Assert.Equal(TruncateControlString(sq.ToText()), TruncateControlString(actual!.ToText()));
+		Assert.Equal(sq.ToText().ToValidateText(), actual!.ToText().ToValidateText());
 		Assert.NotEqual(sq, actual);
 	}
 
@@ -34,7 +29,7 @@ public class CopyTest
 		var json = Serializer.Serialize(sq);
 		var actual = Serializer.Deserialize<SelectQuery>(json);
 
-		Assert.Equal(TruncateControlString(sq.ToText()), TruncateControlString(actual!.ToText()));
+		Assert.Equal(sq.ToText().ToValidateText(), actual!.ToText().ToValidateText());
 		Assert.NotEqual(sq, actual);
 	}
 
@@ -45,7 +40,7 @@ public class CopyTest
 		var json = Serializer.Serialize(sq);
 		var actual = Serializer.Deserialize(json);
 
-		Assert.Equal(TruncateControlString(sq.ToText()), TruncateControlString(actual!.ToText()));
+		Assert.Equal(sq.ToText().ToValidateText(), actual!.ToText().ToValidateText());
 		Assert.NotEqual(sq, actual);
 	}
 

@@ -16,7 +16,7 @@ public class CreateTableClause : IQueryCommandable
 
 	public bool IsTemporary { get; set; } = true;
 
-	public TableBase? Table { get; set; }
+	public TableBase Table { get; set; } = null!;
 
 	public IEnumerable<CommonTable> GetCommonTables()
 	{
