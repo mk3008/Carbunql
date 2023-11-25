@@ -64,6 +64,27 @@ FROM
     new_table AS t";
 
 		Assert.Equal(expect.ToValidateText(), sq.ToText().ToValidateText());
+	}
 
+	[Fact]
+	public void CountQuery()
+	{
+		var sql = "select a.id, 'test' as value from table as a";
+		var q = QueryParser.Parse(sql);
+
+		var sq = q.ToCreateTableQuery("new_table").ToCountQuery();
+		this.sq.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+
+		Assert.Equal(11, lst.Count());
+
+		var expect = @"
+SELECT
+    COUNT(*) AS row_count
+FROM
+    new_table AS q";
+
+		Assert.Equal(expect.ToValidateText(), sq.ToText().ToValidateText());
 	}
 }

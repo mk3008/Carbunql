@@ -71,6 +71,7 @@ public class CreateTableQuery : IQueryCommandable, ICommentable
 	public SelectQuery ToSelectQuery()
 	{
 		if (Query == null) throw new NullReferenceException(nameof(Query));
+		if (string.IsNullOrEmpty(TableFullName)) throw new NullReferenceException(nameof(TableFullName));
 
 		var sq = new SelectQuery();
 		var (_, t) = sq.From(TableFullName).As("t");
@@ -80,6 +81,16 @@ public class CreateTableQuery : IQueryCommandable, ICommentable
 			sq.Select(t, item);
 		}
 
+		return sq;
+	}
+
+	public SelectQuery ToCountQuery(string alias = "row_count")
+	{
+		if (string.IsNullOrEmpty(TableFullName)) throw new NullReferenceException(nameof(TableFullName));
+
+		var sq = new SelectQuery();
+		sq.From(TableFullName).As("q");
+		sq.Select("count(*)").As(alias);
 		return sq;
 	}
 }
