@@ -1,10 +1,12 @@
-﻿using Carbunql.Clauses;
+﻿using Carbunql.Building;
+using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Tables;
+using MessagePack;
 
 namespace Carbunql;
 
-public class UpdateQuery : IQueryCommandable, IReturning
+public class UpdateQuery : IQueryCommandable, IReturning, ICommentable
 {
 	public UpdateClause? UpdateClause { get; set; }
 
@@ -17,6 +19,9 @@ public class UpdateQuery : IQueryCommandable, IReturning
 	public WhereClause? WhereClause { get; set; }
 
 	public ReturningClause? ReturningClause { get; set; }
+
+	[IgnoreMember]
+	public CommentClause? CommentClause { get; set; }
 
 	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
@@ -183,6 +188,8 @@ public class UpdateQuery : IQueryCommandable, IReturning
 	{
 		if (UpdateClause == null) throw new NullReferenceException(nameof(UpdateClause));
 		if (SetClause == null) throw new NullReferenceException(nameof(SetClause));
+
+		if (CommentClause != null) foreach (var item in CommentClause.GetTokens(parent)) yield return item;
 
 		if (parent == null && WithClause != null)
 		{

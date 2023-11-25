@@ -1,4 +1,5 @@
 ﻿using Carbunql.Analysis;
+using Carbunql.Building;
 using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Tables;
@@ -7,7 +8,7 @@ using MessagePack;
 namespace Carbunql;
 
 [MessagePackObject(keyAsPropertyName: true)]
-public class SelectQuery : ReadQuery, IQueryCommandable
+public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
 {
 	public SelectQuery() { }
 
