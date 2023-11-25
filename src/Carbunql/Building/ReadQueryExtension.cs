@@ -167,6 +167,7 @@ public static class ReadQueryExtension
 
 		return new UpdateQuery()
 		{
+			WithClause = source.GetWithClause(),
 			UpdateClause = new UpdateClause(table),
 			SetClause = source.ToSetClause(keys, queryAlias),
 			Parameters = source.GetParameters(),
