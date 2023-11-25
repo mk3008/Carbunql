@@ -2,10 +2,11 @@
 using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Tables;
+using MessagePack;
 
 namespace Carbunql;
 
-public class CreateTableQuery : IQueryCommandable
+public class CreateTableQuery : IQueryCommandable, ICommentable
 {
 	public CreateTableQuery(CreateTableClause createTableClause)
 	{
@@ -13,6 +14,9 @@ public class CreateTableQuery : IQueryCommandable
 	}
 
 	public CreateTableClause CreateTableClause { get; init; }
+
+	[IgnoreMember]
+	public CommentClause? CommentClause { get; set; }
 
 	public string TableFullName => CreateTableClause.Table.GetTableFullName();
 
@@ -47,7 +51,9 @@ public class CreateTableQuery : IQueryCommandable
 
 	public IEnumerable<Token> GetTokens(Token? parent)
 	{
-		if (Query == null) yield break;
+		if (Query == null) throw new NullReferenceException(nameof(Query));
+
+		if (CommentClause != null) foreach (var item in CommentClause.GetTokens(parent)) yield return item;
 
 		foreach (var item in CreateTableClause.GetTokens(parent)) yield return item;
 		var t = new Token(this, parent, "as", isReserved: true);
