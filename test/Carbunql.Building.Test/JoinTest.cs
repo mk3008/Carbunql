@@ -114,4 +114,42 @@ public class JoinTest
 		Assert.Equal(">=", lst[24].Text);
 		Assert.Equal("10", lst[25].Text);
 	}
+
+	[Fact]
+	public void ShorthandExpression()
+	{
+		var sq = new SelectQuery();
+		var (f, a) = sq.From("table_a").As("a");
+		var b = f.InnerJoin("table_b").As("b").On(r =>
+		{
+			r.Condition(f.Root, "id").Equal(r.Table, "a_id");
+			r.Condition(r.Table, "value").Expression(">=", new LiteralValue("10"));
+		});
+
+		sq.Select(f.Root, "a_id");
+
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+
+		Assert.Equal(26, lst.Count());
+
+		Assert.Equal("on", lst[12].Text);
+
+		Assert.Equal("a", lst[13].Text);
+		Assert.Equal(".", lst[14].Text);
+		Assert.Equal("id", lst[15].Text);
+		Assert.Equal("=", lst[16].Text);
+		Assert.Equal("b", lst[17].Text);
+		Assert.Equal(".", lst[18].Text);
+		Assert.Equal("a_id", lst[19].Text);
+
+		Assert.Equal("and", lst[20].Text);
+
+		Assert.Equal("b", lst[21].Text);
+		Assert.Equal(".", lst[22].Text);
+		Assert.Equal("value", lst[23].Text);
+		Assert.Equal(">=", lst[24].Text);
+		Assert.Equal("10", lst[25].Text);
+	}
 }
