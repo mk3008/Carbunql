@@ -12,9 +12,14 @@ public class SelectableItem : IQueryCommandable, ISelectable
 		Alias = alias;
 	}
 
-	public ValueBase Value { get; init; }
+	public ValueBase Value { get; private set; }
 
 	public string Alias { get; private set; }
+
+	public void SetValue(ValueBase value)
+	{
+		Value = value;
+	}
 
 	public void SetAlias(string alias)
 	{
