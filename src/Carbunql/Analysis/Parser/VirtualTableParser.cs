@@ -1,6 +1,5 @@
 ﻿using Carbunql.Extensions;
 using Carbunql.Tables;
-using System.ComponentModel.DataAnnotations;
 
 namespace Carbunql.Analysis.Parser;
 
@@ -12,7 +11,7 @@ public class VirtualTableParser
 
 		var first = r.Peek();
 
-		if (first == null) throw new NotSupportedException();
+		if (string.IsNullOrEmpty(first)) throw new NotSupportedException();
 
 		//virtualTable
 		if (first.IsEqualNoCase("select"))
@@ -27,6 +26,14 @@ public class VirtualTableParser
 			r.Read(")");
 			return t;
 		}
-		throw new NotSupportedException();
+		else if (first == "(")
+		{
+			//empty bracket pattern
+			var t = new VirtualTable(Parse(r));
+			r.Read(")");
+			return t;
+		}
+
+		throw new NotSupportedException($"token:{first}");
 	}
 }
