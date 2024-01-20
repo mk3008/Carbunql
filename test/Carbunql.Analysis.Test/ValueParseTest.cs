@@ -211,6 +211,32 @@ public class ValueParserTest
 	}
 
 	[Fact]
+	public void WithoutTimeZone()
+	{
+		//Postgres
+		var text = "now() without time zone";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(4, lst.Count);
+
+		Assert.Equal("now() without time zone", v.ToText());
+	}
+
+	[Fact]
+	public void AtTimeZone()
+	{
+		var text = "now() at time zone 'Asia/Tokyo'";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(5, lst.Count);
+		Assert.Equal("now() at time zone 'Asia/Tokyo'", v.ToText());
+	}
+
+	[Fact]
 	public void In()
 	{
 		var text = "1 in (1)";

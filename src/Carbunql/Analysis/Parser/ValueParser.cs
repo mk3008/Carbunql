@@ -33,6 +33,15 @@ public static class ValueParser
 
 		var item = r.Peek();
 
+		if (item.IsEqualNoCase("at time zone"))
+		{
+			return AtTimeZoneClauseParser.Parse(v, r);
+		}
+		else if (item.IsEqualNoCase("without time zone"))
+		{
+			return WithoutTImeZoneClauseParser.Parse(v, r);
+		}
+
 		var isNegative = false;
 		if (item.IsEqualNoCase("not"))
 		{

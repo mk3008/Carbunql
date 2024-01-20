@@ -671,4 +671,37 @@ join TableB
 
 		Assert.Equal("Parsing terminated despite the presence of unparsed tokens.(token:'c')", e.Message);
 	}
+  
+　[Fact]
+	public void TimeZone()
+	{
+		var text = @"
+SELECT
+	--Postgers
+	now()::timestamp without time zone as t1
+	, now() at time zone 'Asia/Tokyo' as t2
+	--SQLServer
+	, SYSDATETIMEOFFSET() AT TIME ZONE 'UTC' AS t3
+	, GETDATE() AT TIME ZONE 'Tokyo Standard Time' AS t4
+	--MySQL
+	--, CONVERT_TZ(NOW(), @@session.time_zone, '+00:00') AS t5
+	, CONVERT_TZ(NOW(), 'UTC', 'Asia/Tokyo') as t6
+";
+
+		var item = QueryParser.Parse(text);
+		if (item == null) throw new Exception();
+		Monitor.Log(item);
+
+		var lst = item.GetTokens().ToList();
+		Assert.Equal(46, lst.Count);
+
+		var sql = @"SELECT
+    NOW()::timestamp WITHOUT TIME ZONE AS t1,
+    NOW() AT TIME ZONE 'Asia/Tokyo' AS t2,
+    SYSDATETIMEOFFSET() AT TIME ZONE 'UTC' AS t3,
+    GETDATE() AT TIME ZONE 'Tokyo Standard Time' AS t4,
+    CONVERT_TZ(NOW(), 'UTC', 'Asia/Tokyo') AS t6";
+
+		Assert.Equal(sql, item.ToText(), true, true, true);
+	}
 }

@@ -207,8 +207,14 @@ public class VanillaTokenReader : LexReader
 		if (token.IsEqualNoCase("double"))
 		{
 			return ReadAndJoinOrDefault(token, "precision");
-
 		}
+
+		if (token.IsEqualNoCase("at") || token.IsEqualNoCase("without"))
+		{
+			token = ReadAndJoin(token, "time");
+			return ReadAndJoin(token, "zone");
+		}
+
 		return token;
 	}
 }
