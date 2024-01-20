@@ -704,4 +704,31 @@ SELECT
 
 		Assert.Equal(sql, item.ToText(), true, true, true);
 	}
+
+	[Fact]
+	public void EmptyBracket()
+	{
+		var text = @"
+select 
+    v1
+from
+    ((select 1 as v1)) d
+";
+
+		var item = QueryParser.Parse(text);
+		if (item == null) throw new Exception();
+		Monitor.Log(item);
+
+		var sql = @"SELECT
+    v1
+FROM
+    (
+        (
+            SELECT
+                1 AS v1
+        )
+    ) AS d";
+
+		Assert.Equal(sql, item.ToText(), true, true, true);
+	}
 }
