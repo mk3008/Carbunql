@@ -39,6 +39,12 @@ public static class StringExtension
 		return source.First().IsInteger();
 	}
 
+	public static bool IsEndToken(this string source)
+	{
+		if (string.IsNullOrEmpty(source)) return true;
+		return (source == ";") ? true : false;
+	}
+
 	public static string InsertIndent(this string source, string separator = "\r\n", int spaceCount = 4)
 	{
 		if (string.IsNullOrEmpty(source)) return source;

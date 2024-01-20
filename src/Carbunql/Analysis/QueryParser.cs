@@ -8,7 +8,14 @@ public static class QueryParser
 	public static IReadQuery Parse(string text)
 	{
 		using var r = new TokenReader(text);
-		return Parse(r);
+		var q = Parse(r);
+
+		if (!r.Peek().IsEndToken())
+		{
+			throw new NotSupportedException($"Parsing terminated despite the presence of unparsed tokens.(token:'{r.Peek()}')");
+		}
+
+		return q;
 	}
 
 	public static IReadQuery Parse(ITokenReader r)

@@ -11,7 +11,14 @@ public static class SelectQueryParser
 		using var r = new TokenReader(text);
 
 		if (r.Peek().IsEqualNoCase("with")) return CTEQueryParser.Parse(r);
-		return Parse(r);
+		var sq = Parse(r);
+
+		if (!r.Peek().IsEndToken())
+		{
+			throw new NotSupportedException($"Parsing terminated despite the presence of unparsed tokens.(token:'{r.Peek()}')");
+		}
+
+		return sq;
 	}
 
 	public static SelectQuery ParseAsInner(ITokenReader r)
@@ -43,6 +50,7 @@ public static class SelectQueryParser
 		}
 
 		sq.LimitClause = ParseLimitOrDefault(r);
+
 		return sq;
 	}
 

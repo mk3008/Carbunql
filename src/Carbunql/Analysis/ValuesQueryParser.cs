@@ -9,7 +9,14 @@ public static class ValuesQueryParser
 	public static ValuesQuery Parse(string text)
 	{
 		using var r = new TokenReader(text);
-		return Parse(r);
+		var q = Parse(r);
+
+		if (!r.Peek().IsEndToken())
+		{
+			throw new NotSupportedException($"Parsing terminated despite the presence of unparsed tokens.(token:'{r.Peek()}')");
+		}
+
+		return q;
 	}
 
 	internal static ValuesQuery Parse(ITokenReader r)

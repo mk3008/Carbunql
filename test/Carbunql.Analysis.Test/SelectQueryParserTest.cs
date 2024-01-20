@@ -659,4 +659,16 @@ join TableB
 		var lst = item.GetTokens().ToList();
 		Assert.Equal(14, lst.Count);
 	}
+
+	[Fact]
+	public void ParserError()
+	{
+		var e = Assert.Throws<NotSupportedException>(() =>
+		{
+			var text = "SELECT a b c";
+			var item = QueryParser.Parse(text) as SelectQuery;
+		});
+
+		Assert.Equal("Parsing terminated despite the presence of unparsed tokens.(token:'c')", e.Message);
+	}
 }
