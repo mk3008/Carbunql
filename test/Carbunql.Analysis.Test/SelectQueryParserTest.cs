@@ -671,8 +671,8 @@ join TableB
 
 		Assert.Equal("Parsing terminated despite the presence of unparsed tokens.(token:'c')", e.Message);
 	}
-  
-　[Fact]
+
+	[Fact]
 	public void TimeZone()
 	{
 		var text = @"
