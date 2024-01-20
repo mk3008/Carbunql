@@ -2,7 +2,6 @@
 using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Values;
-using System.Linq.Expressions;
 
 namespace Carbunql.Building;
 
@@ -163,15 +162,16 @@ public static class SelectClauseExtension
 		source.Order(table.Alias, column);
 	}
 
+	public static void Order(this SelectQuery source, SelectableItem item)
+	{
+		source.OrderClause ??= new();
+		source.OrderClause.Add(item.Value);
+	}
+
 	public static void Order(this SelectQuery source, string table, string column)
 	{
 		var item = new ColumnValue(table, column);
-		source.Order(item);
-	}
-
-	public static void Order(this SelectQuery source, IQueryCommandable value)
-	{
-		source.OrderClause ??= new OrderClause();
-		source.OrderClause.Add(value);
+		source.OrderClause ??= new();
+		source.OrderClause.Add(item);
 	}
 }
