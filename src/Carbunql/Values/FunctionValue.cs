@@ -1,4 +1,5 @@
-﻿using Carbunql.Clauses;
+﻿using Carbunql.Building;
+using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Tables;
 using MessagePack;
@@ -11,32 +12,32 @@ public class FunctionValue : ValueBase
 	public FunctionValue()
 	{
 		Name = null!;
-		Argument = null!;
+		Arguments = null!;
 	}
 
 	public FunctionValue(string name)
 	{
 		Name = name;
-		Argument = new ValueCollection();
+		Arguments = new ValueCollection();
 	}
 
 	public FunctionValue(string name, OverClause winfn)
 	{
 		Name = name;
-		Argument = new ValueCollection();
+		Arguments = new ValueCollection();
 		Over = winfn;
 	}
 
 	public FunctionValue(string name, string arg)
 	{
 		Name = name;
-		Argument = new ValueCollection(arg);
+		Arguments = new ValueCollection(arg);
 	}
 
 	public FunctionValue(string name, ValueBase args)
 	{
 		Name = name;
-		Argument = new ValueCollection
+		Arguments = new ValueCollection
 		{
 			args
 		};
@@ -45,7 +46,7 @@ public class FunctionValue : ValueBase
 	public FunctionValue(string name, Func<ValueBase> builder)
 	{
 		Name = name;
-		Argument = new ValueCollection
+		Arguments = new ValueCollection
 		{
 			builder()
 		};
@@ -54,14 +55,14 @@ public class FunctionValue : ValueBase
 	public FunctionValue(string name, Func<OverClause> wfbuiilder)
 	{
 		Name = name;
-		Argument = new ValueCollection();
+		Arguments = new ValueCollection();
 		Over = wfbuiilder();
 	}
 
 	public FunctionValue(string name, ValueBase args, OverClause winfn)
 	{
 		Name = name;
-		Argument = new ValueCollection
+		Arguments = new ValueCollection
 		{
 			args
 		};
@@ -71,7 +72,7 @@ public class FunctionValue : ValueBase
 	public FunctionValue(string name, ValueBase args, Func<OverClause> wfbuiilder)
 	{
 		Name = name;
-		Argument = new ValueCollection
+		Arguments = new ValueCollection
 		{
 			args
 		};
@@ -81,16 +82,31 @@ public class FunctionValue : ValueBase
 	public FunctionValue(string name, Func<ValueBase> builder, Func<OverClause> wfbuiilder)
 	{
 		Name = name;
-		Argument = new ValueCollection
+		Arguments = new ValueCollection
 		{
 			builder()
 		};
 		Over = wfbuiilder();
 	}
 
+	public FunctionValue(string name, params ValueBase[] values)
+	{
+		Name = name;
+		Arguments = new ValueCollection(values.ToList());
+	}
+
+	public FunctionValue(string name, ValueCollection argument)
+	{
+		Name = name;
+		Arguments = argument;
+	}
+
 	public string Name { get; init; }
 
-	public ValueCollection Argument { get; set; }
+	[Obsolete("use Arguments")]
+	public ValueCollection Argument => Arguments;
+
+	public ValueCollection Arguments { get; set; }
 
 	public OverClause? Over { get; set; }
 
@@ -98,7 +114,7 @@ public class FunctionValue : ValueBase
 
 	protected override IEnumerable<SelectQuery> GetInternalQueriesCore()
 	{
-		foreach (var item in Argument.GetInternalQueries())
+		foreach (var item in Arguments.GetInternalQueries())
 		{
 			yield return item;
 		}
@@ -124,7 +140,7 @@ public class FunctionValue : ValueBase
 
 		var bracket = Token.ReservedBracketStart(this, parent);
 		yield return bracket;
-		foreach (var item in Argument.GetTokens(bracket)) yield return item;
+		foreach (var item in Arguments.GetTokens(bracket)) yield return item;
 		yield return Token.ReservedBracketEnd(this, parent);
 
 		if (Filter != null)
@@ -140,7 +156,7 @@ public class FunctionValue : ValueBase
 
 	protected override IDictionary<string, object?> GetParametersCore()
 	{
-		var prm = Argument.GetParameters();
+		var prm = Arguments.GetParameters();
 		prm = prm.Merge(Filter?.GetParameters());
 		prm = prm.Merge(Over?.GetParameters());
 		return prm;
@@ -148,7 +164,7 @@ public class FunctionValue : ValueBase
 
 	protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()
 	{
-		foreach (var item in Argument.GetPhysicalTables())
+		foreach (var item in Arguments.GetPhysicalTables())
 		{
 			yield return item;
 		}
@@ -170,7 +186,7 @@ public class FunctionValue : ValueBase
 
 	protected override IEnumerable<CommonTable> GetCommonTablesCore()
 	{
-		foreach (var item in Argument.GetCommonTables())
+		foreach (var item in Arguments.GetCommonTables())
 		{
 			yield return item;
 		}

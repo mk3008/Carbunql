@@ -474,7 +474,7 @@ public static class ExpressionExtension
 
 		if (right is FunctionValue lst && lst.Name == "coalesce")
 		{
-			foreach (var item in lst.Argument)
+			foreach (var item in lst.Arguments)
 			{
 				vc.Add(item);
 			}

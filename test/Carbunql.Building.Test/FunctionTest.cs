@@ -74,4 +74,80 @@ public class FunctionTest
 		Assert.Equal("id", lst[13].Text);
 		Assert.Equal(")", lst[14].Text);
 	}
+
+	[Fact]
+	public void CoalesceTest()
+	{
+		var sq = new SelectQuery();
+		var f = sq.From("table_a").As("a");
+		sq.Select(() =>
+		{
+			var v = new ValueCollection();
+			v.Add(new LiteralValue("'a'"));
+			v.Add(new LiteralValue("'b'"));
+			v.Add(new LiteralValue("'c'"));
+			return new FunctionValue("coalesce", v);
+		}).As("val");
+
+		Monitor.Log(sq);
+
+		var sql = @"SELECT
+    COALESCE('a', 'b', 'c') AS val
+FROM
+    table_a AS a";
+
+		Assert.Equal(sql, sq.ToText(), true, true, true);
+	}
+
+	[Fact]
+	public void CoalesceTest_ValueCollection()
+	{
+		var sq = new SelectQuery();
+		var (f, a) = sq.From("table_a").As("a");
+
+		var args = new ValueCollection
+		{
+			"'a'",
+			1,
+			3.14,
+			{ a, "column1" }
+		};
+
+		sq.Select(new FunctionValue("coalesce", args)).As("val");
+
+		Monitor.Log(sq);
+
+		var sql = @"SELECT
+    COALESCE('a', 1, 3.14, a.column1) AS val
+FROM
+    table_a AS a";
+
+		Assert.Equal(sql, sq.ToText(), true, true, true);
+	}
+
+	[Fact]
+	public void CoalesceTest_Params()
+	{
+
+		var sq = new SelectQuery();
+		var (f, a) = sq.From("table_a").As("a");
+
+		ValueBase[] args = {
+			new LiteralValue("'a'"),
+			new LiteralValue("1"),
+			new LiteralValue("3.14"),
+			new ColumnValue(a, "column1")
+		};
+
+		sq.Select(new FunctionValue("coalesce", args)).As("val");
+
+		Monitor.Log(sq);
+
+		var sql = @"SELECT
+    COALESCE('a', 1, 3.14, a.column1) AS val
+FROM
+    table_a AS a";
+
+		Assert.Equal(sql, sq.ToText(), true, true, true);
+	}
 }
