@@ -282,7 +282,7 @@ public class ValueParserTest
 		Assert.IsType<FunctionValue>(v);
 		var lv = (FunctionValue)v;
 		Assert.Equal("concat", lv.Name);
-		Assert.NotNull(lv.Argument);
+		Assert.NotNull(lv.Arguments);
 	}
 
 	[Fact]
@@ -298,7 +298,7 @@ public class ValueParserTest
 		Assert.IsType<FunctionValue>(v);
 		var lv = (FunctionValue)v;
 		Assert.Equal("concat", lv.Name);
-		Assert.NotNull(lv.Argument);
+		Assert.NotNull(lv.Arguments);
 	}
 
 	[Fact]

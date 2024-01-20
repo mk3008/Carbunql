@@ -85,8 +85,6 @@ public static class SelectClauseExtension
 		return item;
 	}
 
-
-
 	public static SelectableItem Select(this SelectQuery source, int value)
 	{
 		var item = new LiteralValue(value.ToString()).ToSelectable();

@@ -115,6 +115,51 @@ public class ValueCollection : ValueBase, IList<ValueBase>, IQueryCommandable
 		Add(ValueParser.Parse(value));
 	}
 
+	public void Add(FromClause from, string column)
+	{
+		Add(from.Root.Alias, column);
+	}
+
+	public void Add(SelectableTable table, string column)
+	{
+		Add(table.Alias, column);
+	}
+
+	public void Add(string table, string column)
+	{
+		var v = new ColumnValue(table, column);
+		Add(v);
+	}
+
+	public void Add(int value)
+	{
+		var v = new LiteralValue(value.ToString());
+		Add(v);
+	}
+
+	public void Add(long value)
+	{
+		var v = new LiteralValue(value.ToString());
+		Add(v);
+	}
+
+	public void Add(decimal value)
+	{
+		var v = new LiteralValue(value.ToString());
+		Add(v);
+	}
+
+	public void Add(double value)
+	{
+		var v = new LiteralValue(value.ToString());
+		Add(v);
+	}
+
+	public void Add(DateTime value, string sufix = "::timestamp")
+	{
+		Add("'" + value.ToString() + "'" + sufix);
+	}
+
 	#region implements IList<ValueBase>
 	public ValueBase this[int index]
 	{ get => ((IList<ValueBase>)Collection)[index]; set => ((IList<ValueBase>)Collection)[index] = value; }
