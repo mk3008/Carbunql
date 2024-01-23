@@ -269,4 +269,20 @@ public class SelectItemTest
 		if (val == null) throw new NullReferenceException();
 		Assert.Equal("1", val.ToString());
 	}
+
+	[Fact]
+	public void CastValue()
+	{
+		var sq = new SelectQuery();
+		sq.Select(new CastValue(new LiteralValue("1"), "as", "int")).As("cast_function");
+		sq.Select(new CastValue(new LiteralValue("1"), "::", "int")).As("postgres_cast");
+
+		Monitor.Log(sq);
+
+		var expect = @"SELECT
+    CAST(1 AS int) AS cast_function,
+    1::int AS postgres_cast";
+
+		Assert.Equal(expect, sq.ToText(), true, true, true);
+	}
 }

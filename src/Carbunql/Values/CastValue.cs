@@ -50,9 +50,23 @@ public class CastValue : ValueBase
 
 	public override IEnumerable<Token> GetCurrentTokens(Token? parent)
 	{
-		foreach (var item in Inner.GetTokens(parent)) yield return item;
-		yield return Token.Reserved(this, parent, Symbol);
-		foreach (var item in Type.GetTokens(parent)) yield return item;
+		if (Symbol.IsEqualNoCase("as"))
+		{
+			yield return Token.Reserved(this, parent, "cast");
+
+			var bracket = Token.ExpressionBracketStart(this, parent);
+			yield return bracket;
+			foreach (var item in Inner.GetTokens(bracket)) yield return item;
+			yield return Token.Reserved(this, bracket, Symbol);
+			foreach (var item in Type.GetTokens(bracket)) yield return item;
+			yield return Token.ExpressionBracketEnd(this, parent);
+		}
+		else
+		{
+			foreach (var item in Inner.GetTokens(parent)) yield return item;
+			yield return Token.Reserved(this, parent, Symbol);
+			foreach (var item in Type.GetTokens(parent)) yield return item;
+		}
 	}
 
 	protected override IDictionary<string, object?> GetParametersCore()
