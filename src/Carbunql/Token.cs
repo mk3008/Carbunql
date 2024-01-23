@@ -77,6 +77,7 @@ public class Token
 			if (Sender is VirtualTable) return true;
 			if (Sender is FunctionTable) return false;
 			if (Sender is FunctionValue) return false;
+			if (Sender is CastValue) return false;
 			if (Sender is Filter) return false;
 			if (Sender is WindowDefinition) return false;
 			return true;

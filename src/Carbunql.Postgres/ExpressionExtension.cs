@@ -22,49 +22,49 @@ public static class ExpressionExtension
 		switch (Type.GetTypeCode(type))
 		{
 			case TypeCode.Boolean:
-				dbType = "boolean";
+				dbType = DbmsConfiguration.BooleanDbType;
 				return true;
 			case TypeCode.Char:
-				dbType = "character";
+				dbType = DbmsConfiguration.CharDbType;
 				return true;
 			case TypeCode.SByte:
-				dbType = "smallint";
+				dbType = DbmsConfiguration.SByteDbType;
 				return true;
 			case TypeCode.Byte:
-				dbType = "smallint"; // PostgreSQLにはbyteに相当する型がないためsmallintにマッピング
+				dbType = DbmsConfiguration.ByteDbType;
 				return true;
 			case TypeCode.Int16:
-				dbType = "smallint";
+				dbType = DbmsConfiguration.Int16DbType;
 				return true;
 			case TypeCode.UInt16:
-				dbType = "integer"; // PostgreSQLにはushortに相当する型がないためintegerにマッピング
+				dbType = DbmsConfiguration.UInt16DbType;
 				return true;
 			case TypeCode.Int32:
-				dbType = "integer";
+				dbType = DbmsConfiguration.Int32DbType;
 				return true;
 			case TypeCode.UInt32:
-				dbType = "bigint"; // PostgreSQLにはuintに相当する型がないためbigintにマッピング
+				dbType = DbmsConfiguration.UInt32DbType;
 				return true;
 			case TypeCode.Int64:
-				dbType = "bigint";
+				dbType = DbmsConfiguration.Int64DbType;
 				return true;
 			case TypeCode.UInt64:
-				dbType = "numeric"; // PostgreSQLにはulongに相当する型がないためnumericにマッピング
+				dbType = DbmsConfiguration.UInt64DbType;
 				return true;
 			case TypeCode.Single:
-				dbType = "real";
+				dbType = DbmsConfiguration.SingleDbType;
 				return true;
 			case TypeCode.Double:
-				dbType = "double precision";
+				dbType = DbmsConfiguration.DoubleDbType;
 				return true;
 			case TypeCode.Decimal:
-				dbType = "numeric";
+				dbType = DbmsConfiguration.DecimalDbType;
 				return true;
 			case TypeCode.DateTime:
-				dbType = "timestamp";
+				dbType = DbmsConfiguration.DateTimeDbType;
 				return true;
 			case TypeCode.String:
-				dbType = "text";
+				dbType = DbmsConfiguration.StringDbType;
 				return true;
 			default:
 				dbType = string.Empty;
@@ -415,7 +415,7 @@ public static class ExpressionExtension
 
 		if (exp.Type.ToTryDbType(out var dbType))
 		{
-			return new CastValue(v, "::", dbType);
+			return new CastValue(v, "as", dbType);
 		}
 		return v;
 	}
@@ -460,7 +460,7 @@ public static class ExpressionExtension
 	{
 		var vc = exp.ToValueCollection(tables);
 
-		return new FunctionValue("coalesce", vc);
+		return new FunctionValue(DbmsConfiguration.CoalesceFunctionName, vc);
 	}
 
 	internal static ValueCollection ToValueCollection(this BinaryExpression exp, List<string> tables)
@@ -472,7 +472,7 @@ public static class ExpressionExtension
 			exp.Left.ToValue(tables)
 		};
 
-		if (right is FunctionValue lst && lst.Name == "coalesce")
+		if (right is FunctionValue lst && lst.Name.IsEqualNoCase(DbmsConfiguration.CoalesceFunctionName))
 		{
 			foreach (var item in lst.Arguments)
 			{
@@ -893,7 +893,7 @@ public static class ExpressionExtension
 
 		if (exp.Operand.Type.ToTryDbType(out var dbType))
 		{
-			return new CastValue(v, "::", dbType);
+			return new CastValue(v, "as", dbType);
 		}
 		return v;
 	}
@@ -1035,7 +1035,7 @@ public static class ExpressionExtension
 
 	internal static ValueBase ToValue(this DateTime d)
 	{
-		return new FunctionValue("cast", new CastValue(new LiteralValue($"'{d}'"), "as", new LiteralValue("timestamp")));
+		return new CastValue(new LiteralValue($"'{d}'"), "as", DbmsConfiguration.DateTimeDbType);
 	}
 
 	internal static object ToObject(this Expression exp)

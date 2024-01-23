@@ -21,7 +21,7 @@ internal static class StringExtension
 			name = prefix.ToSnakeCase() + "_" + name;
 		}
 
-		name = ':' + name;
+		name = DbmsConfiguration.PlaceholderIdentifier + name;
 		if (name.Length > 60)
 		{
 			name = name.Substring(0, 60);

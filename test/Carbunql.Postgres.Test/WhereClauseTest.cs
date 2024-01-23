@@ -138,6 +138,27 @@ public class WhereClauseTest
 		Monitor.Log(sq);
 
 		Assert.Equal(81, sq.GetTokens().ToList().Count);
+
+		var expect = @"SELECT
+    *
+FROM
+    table_a AS a
+WHERE
+    True
+    AND False
+    AND 1 <= a.a_id
+    AND a.a_id <= 10
+    AND 0 < a.a_id
+    AND a.a_id < 11
+    AND a.a_id <> 5
+    AND a.text = 'a'
+    AND a.text <> 'b'
+    AND a.rate = 0.1
+    AND a.is_enabled = True
+    AND a.is_enabled <> False
+    AND a.timestamp >= CAST('2000/01/01 0:00:00' AS timestamp)";
+
+		Assert.Equal(expect, sq.ToText());
 	}
 
 	[Fact]

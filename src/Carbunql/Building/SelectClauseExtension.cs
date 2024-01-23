@@ -132,6 +132,16 @@ public static class SelectClauseExtension
 		return item;
 	}
 
+	public static SelectableItem SelectParameter(this SelectQuery source, string key, object? value)
+	{
+		var name = DbmsConfiguration.PlaceholderIdentifier + key;
+		source.AddParameter(name, value);
+
+		var item = source.Select(name);
+		item.As(key);
+		return item;
+	}
+
 	public static SelectableItem Select(this SelectQuery source, Func<ValueBase> builder)
 	{
 		return source.Select(builder());

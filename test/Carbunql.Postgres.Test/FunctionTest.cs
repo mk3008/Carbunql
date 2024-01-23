@@ -1,8 +1,6 @@
 ﻿using Carbunql.Building;
 using Carbunql.Clauses;
 using Carbunql.Values;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.ObjectiveC;
 using Xunit.Abstractions;
 
 namespace Carbunql.Postgres.Test;
@@ -447,36 +445,36 @@ FROM
 
 		var sql = @"
 SELECT
-    a.a_id::character AS to_char,
-    a.a_id::text AS to_string,
-    a.a_id::smallint AS to_byte,
-    a.a_id::smallint AS to_sbyte,
-    a.a_id::boolean AS to_boolean,
-    a.a_id::timestamp AS to_datetime,
-    a.a_id::smallint AS to_int16,
-    a.a_id::integer AS to_uint16,
-    a.a_id::integer AS to_int32,
-    a.a_id::bigint AS to_uint32,
-    a.a_id::bigint AS to_int64,
-    a.a_id::numeric AS to_uint64,
-    a.a_id::real AS to_single,
-    a.a_id::double precision AS to_double,
-    a.a_id::numeric AS to_decimal,
-    a.a_id::smallint AS cast_byte,
-    a.a_id::smallint AS cast_sbyte,
-    a.a_id::smallint AS cast_short,
-    a.a_id::integer AS cast_ushort,
-    a.a_id::integer AS cast_int,
-    a.a_id::bigint AS cast_uint,
-    a.a_id::bigint AS cast_long,
-    a.a_id::numeric AS cast_ulong,
-    a.a_id::real AS cast_float,
-    a.a_id::double precision AS cast_double,
-    a.a_id::numeric AS cast_decimal
+    CAST(a.a_id AS character) AS to_char,
+    CAST(a.a_id AS text) AS to_string,
+    CAST(a.a_id AS smallint) AS to_byte,
+    CAST(a.a_id AS smallint) AS to_sbyte,
+    CAST(a.a_id AS boolean) AS to_boolean,
+    CAST(a.a_id AS timestamp) AS to_datetime,
+    CAST(a.a_id AS smallint) AS to_int16,
+    CAST(a.a_id AS integer) AS to_uint16,
+    CAST(a.a_id AS integer) AS to_int32,
+    CAST(a.a_id AS bigint) AS to_uint32,
+    CAST(a.a_id AS bigint) AS to_int64,
+    CAST(a.a_id AS numeric) AS to_uint64,
+    CAST(a.a_id AS real) AS to_single,
+    CAST(a.a_id AS double precision) AS to_double,
+    CAST(a.a_id AS numeric) AS to_decimal,
+    CAST(a.a_id AS smallint) AS cast_byte,
+    CAST(a.a_id AS smallint) AS cast_sbyte,
+    CAST(a.a_id AS smallint) AS cast_short,
+    CAST(a.a_id AS integer) AS cast_ushort,
+    CAST(a.a_id AS integer) AS cast_int,
+    CAST(a.a_id AS bigint) AS cast_uint,
+    CAST(a.a_id AS bigint) AS cast_long,
+    CAST(a.a_id AS numeric) AS cast_ulong,
+    CAST(a.a_id AS real) AS cast_float,
+    CAST(a.a_id AS double precision) AS cast_double,
+    CAST(a.a_id AS numeric) AS cast_decimal
 FROM
     table_a AS a";
 
-		Assert.Equal(212, sq.GetTokens().ToList().Count);
+		Assert.Equal(290, sq.GetTokens().ToList().Count);
 		Assert.Equal(sql.ToValidateText(), sq.ToText().ToValidateText());
 	}
 
