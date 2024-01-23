@@ -112,7 +112,7 @@ internal static class BinaryExpressionExtension
 	{
 		var vc = exp.ToValueCollection(tables);
 
-		return new FunctionValue("coalesce", vc);
+		return new FunctionValue(DbmsConfiguration.CoalesceFunctionName, vc);
 	}
 
 	private static ValueCollection ToValueCollection(this BinaryExpression exp, List<string> tables)
@@ -124,7 +124,7 @@ internal static class BinaryExpressionExtension
 			exp.Left.ToValue(tables)
 		};
 
-		if (right is FunctionValue lst && lst.Name == "coalesce")
+		if (right is FunctionValue lst && lst.Name.IsEqualNoCase(DbmsConfiguration.CoalesceFunctionName))
 		{
 			foreach (var item in lst.Arguments)
 			{
