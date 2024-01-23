@@ -246,4 +246,27 @@ public class SelectItemTest
 		if (val == null) throw new NullReferenceException();
 		Assert.Equal("1", val.ToString());
 	}
+
+	[Fact]
+	public void Parameter_Short()
+	{
+		//use DbmsConfiguration
+		var sq = new SelectQuery();
+		sq.SelectParameter("val", 1);
+
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+
+		Assert.Equal(4, lst.Count());
+		Assert.Equal("select", lst[0].Text);
+		Assert.Equal(":val", lst[1].Text);
+		Assert.Equal("as", lst[2].Text);
+		Assert.Equal("val", lst[3].Text);
+
+		Assert.Single(sq.Parameters);
+		var val = sq.Parameters[":val"];
+		if (val == null) throw new NullReferenceException();
+		Assert.Equal("1", val.ToString());
+	}
 }
