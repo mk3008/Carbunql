@@ -120,6 +120,17 @@ public class LexReader : CharReader
 			return sb.ToString();
 		}
 
+		// ex. @@ (MySQL system variable)
+		if (fc == '@')
+		{
+			var isFirst = true;
+			foreach (var item in ReadChars(x => isFirst && x == '@'))
+			{
+				sb.Append(item);
+				isFirst = false;
+			}
+		}
+
 		// ex. . or , or (
 		if (SingleSymbols.Contains(fc)) return sb.ToString();
 
@@ -144,7 +155,7 @@ public class LexReader : CharReader
 		// ex. 123.45
 		if (fc.IsInteger())
 		{
-			foreach (var item in ReadChars((x) => "0123456789.".ToArray().Contains(x)))
+			foreach (var item in ReadChars(x => "0123456789.".ToArray().Contains(x)))
 			{
 				sb.Append(item);
 			}

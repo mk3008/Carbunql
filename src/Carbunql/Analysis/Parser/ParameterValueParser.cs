@@ -7,6 +7,7 @@ public static class ParameterValueParser
 {
 	public static bool IsParameterValue(string text)
 	{
+		if (text.StartsWith("@@")) return false;
 		return text.StartsWith(new string[] { ":", "@", "?" });
 	}
 

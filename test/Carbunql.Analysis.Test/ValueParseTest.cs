@@ -667,4 +667,19 @@ public class ValueParserTest
 		var lst = v.GetTokens().ToList();
 		Assert.Equal(6, lst.Count);
 	}
+
+	[Fact]
+	public void MySqlSystemVariable()
+	{
+		var text = "@@session.time_zone";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(3, lst.Count);
+
+		var expect = "@@session.time_zone";
+
+		Assert.Equal(expect, v.ToText());
+	}
 }
