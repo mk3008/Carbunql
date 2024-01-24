@@ -682,4 +682,20 @@ public class ValueParserTest
 
 		Assert.Equal(expect, v.ToText());
 	}
+
+	[Fact]
+	public void PostgresOperator_1()
+	{
+		var text = "'((0,0),1)'::circle <-> '((5,0),1)'::circle";
+
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(7, lst.Count);
+
+		var expect = "'((0,0),1)'::circle <-> '((5,0),1)'::circle";
+
+		Assert.Equal(expect, v.ToText());
+	}
 }

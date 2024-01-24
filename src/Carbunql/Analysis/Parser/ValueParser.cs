@@ -13,13 +13,24 @@ public static class ValueParser
 		return Parse(r);
 	}
 
+	private static string[] ArithmeticOperators = new[]
+	{
+		"+", "-", "*", "/", "%", "=", "!", ">", "<", "|", "&", "^", "#", "~"
+	};
+
+	private static string[] LogicalOperators = new[]
+	{
+		"and", "is", "is distinct from", "is not", "is not distinct from", "or"
+	};
+
+	private static string[] Operators => ArithmeticOperators.Concat(LogicalOperators).ToArray();
+
 	public static ValueBase Parse(ITokenReader r)
 	{
-		var operatorTokens = new string[] { "+", "-", "*", "/", "%", "=", "!=", ">", "<", "<>", ">=", "<=", "||", "&", "|", "^", "#", "~", "~*", "!~", "!~*", "and", "or", "is", "is not", "is distinct from", "is not distinct from", "->", "->>", "#>", "#>>" };
 
 		ValueBase value = ParseMain(r);
 
-		if (r.Peek().IsEqualNoCase(operatorTokens))
+		if (r.Peek().StartsWith(ArithmeticOperators) || r.Peek().IsEqualNoCase(LogicalOperators))
 		{
 			var op = r.Read();
 			value.AddOperatableValue(op, Parse(r));

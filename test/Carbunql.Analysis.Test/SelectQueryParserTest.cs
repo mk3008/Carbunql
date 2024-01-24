@@ -1,4 +1,5 @@
-﻿using Carbunql.Tables;
+﻿using Carbunql.Analysis.Parser;
+using Carbunql.Tables;
 using Xunit.Abstractions;
 
 namespace Carbunql.Analysis.Test;
@@ -730,5 +731,21 @@ FROM
     ) AS d";
 
 		Assert.Equal(sql, item.ToText(), true, true, true);
+	}
+
+
+	[Fact]
+	public void PostgresOperator()
+	{
+		var text = @"select
+	'((0,0),1)'::circle <-> '((5,0),1)'::circle";
+
+		var sq = QueryParser.Parse(text);
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+		Assert.Equal(8, lst.Count);
+
+		Assert.Equal(text, sq.ToText(), true, true, true);
 	}
 }
