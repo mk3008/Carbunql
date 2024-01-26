@@ -33,10 +33,10 @@ public abstract class ValueBase : IQueryCommandable
 		if (OperatableValue != null)
 		{
 			OperatableValue.Value.AddOperatableValue(@operator, value);
-			return value;
+			return this;
 		}
 		OperatableValue = new OperatableValue(@operator, value);
-		return value;
+		return this;
 	}
 
 	public string RecommendedName { get; set; } = string.Empty;
