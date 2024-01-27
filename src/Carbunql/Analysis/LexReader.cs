@@ -3,49 +3,69 @@ using Cysharp.Text;
 
 namespace Carbunql.Analysis;
 
-public class LexReader : CharReader
+/// <summary>
+/// Class for reading text on a Lexeme (Lex) basis.
+/// Reading can only be performed in the forward direction and cannot be reversed.
+/// </summary>
+public class LexReader : IDisposable
 {
-	public LexReader(string text) : base(text)
+	private bool disposedValue;
+
+	/// <summary>
+	/// Constructor.
+	/// </summary>
+	/// <param name="text">The text to be read.</param>
+	public LexReader(string text)
 	{
+		Reader = new CharReader(text);
 	}
 
-	private IEnumerable<char> SpaceChars { get; set; } = " \r\n\t".ToArray();
+	private CharReader Reader { get; init; }
 
-	private IEnumerable<char> ForceBreakSymbols { get; set; } = ".,();[]".ToArray();
+	private static IEnumerable<char> NumericSymbols { get; set; } = "0123456789.".ToArray();
 
-	private IEnumerable<char> BitwiseOperatorSymbols { get; set; } = "&|^#~".ToArray();
+	private static IEnumerable<char> SpaceChars { get; set; } = " \r\n\t".ToArray();
 
-	private IEnumerable<char> ArithmeticOperatorSymbols { get; set; } = "+-*/%".ToArray();
+	private static IEnumerable<char> ForceBreakSymbols { get; set; } = ".,();[]".ToArray();
 
-	private IEnumerable<char> RegexOperatorSymbols { get; set; } = "!~*".ToArray();
+	private static IEnumerable<char> BitwiseOperatorSymbols { get; set; } = "&|^#~".ToArray();
 
-	private IEnumerable<char> ComparisonOperatorSymbols { get; set; } = "<>!=".ToArray();
+	private static IEnumerable<char> ArithmeticOperatorSymbols { get; set; } = "+-*/%".ToArray();
 
-	private IEnumerable<char> PrefixSymbols { get; set; } = "?:@".ToArray();
+	private static IEnumerable<char> RegexOperatorSymbols { get; set; } = "!~*".ToArray();
 
-	private IEnumerable<char> TypeConvertSymbols { get; set; } = ":".ToArray();
+	private static IEnumerable<char> ComparisonOperatorSymbols { get; set; } = "<>!=".ToArray();
 
-	private IEnumerable<char> SingleSymbols => ForceBreakSymbols.Union(BitwiseOperatorSymbols);
+	private static IEnumerable<char> PrefixSymbols { get; set; } = "?:@".ToArray();
 
-	private IEnumerable<char> MultipleSymbols => ArithmeticOperatorSymbols.Union(ComparisonOperatorSymbols).Union(RegexOperatorSymbols);
+	private static IEnumerable<char> TypeConvertSymbols { get; set; } = ":".ToArray();
 
-	private IEnumerable<char> AllSymbols => SingleSymbols.Union(MultipleSymbols).Union(PrefixSymbols).Union(SpaceChars).Union(RegexOperatorSymbols).Union(TypeConvertSymbols);
+	private static IEnumerable<char> SingleSymbols => ForceBreakSymbols.Union(BitwiseOperatorSymbols);
 
-	public string ReadLex(bool skipSpace = true)
+	private static IEnumerable<char> MultipleSymbols => ArithmeticOperatorSymbols.Union(ComparisonOperatorSymbols).Union(RegexOperatorSymbols);
+
+	private static IEnumerable<char> AllSymbols => SingleSymbols.Union(MultipleSymbols).Union(PrefixSymbols).Union(SpaceChars).Union(RegexOperatorSymbols).Union(TypeConvertSymbols);
+
+	private string Read(bool skipSpace = true)
 	{
 		if (skipSpace) SkipSpace();
 
 		using var sb = ZString.CreateStringBuilder();
 
-		var fc = ReadChars().FirstOrDefault();
-		if (fc == '\0') return string.Empty;
+		if (!Reader.TryRead(out var fc))
+		{
+			return string.Empty;
+		};
 
 		sb.Append(fc);
 
 		// ex. space
 		if (fc == ' ')
 		{
-			sb.Append(ReadWhileSpace());
+			foreach (var item in Reader.Reads(x => SpaceChars.Contains(x)))
+			{
+				sb.Append(item);
+			}
 			return sb.ToString();
 		}
 
@@ -59,7 +79,10 @@ public class LexReader : CharReader
 		// ex. | or ||
 		if (fc == '|')
 		{
-			sb.Append(ReadCharOrDefault('|'));
+			if (Reader.TryRead('|', out var c))
+			{
+				sb.Append(c);
+			}
 			return sb.ToString();
 		}
 
@@ -67,19 +90,19 @@ public class LexReader : CharReader
 		if (fc == '-')
 		{
 			// --
-			if (PeekOrDefaultChar() == '-')
+			if (Reader.TryRead('-', out var hyphen))
 			{
-				sb.Append(ReadChar());
+				sb.Append(hyphen);
 				return sb.ToString();
 			}
 
 			// -> or ->>
-			if (PeekOrDefaultChar() == '>')
+			if (Reader.TryRead('>', out var geaterThan))
 			{
-				sb.Append(ReadChar());
-				if (PeekOrDefaultChar() == '>')
+				sb.Append(geaterThan);
+				if (Reader.TryRead('>', out geaterThan))
 				{
-					sb.Append(ReadChar());
+					sb.Append(geaterThan);
 				}
 				return sb.ToString();
 			}
@@ -92,12 +115,12 @@ public class LexReader : CharReader
 		if (fc == '#')
 		{
 			// #> or #>>
-			if (PeekOrDefaultChar() == '>')
+			if (Reader.TryRead('>', out var greaterThan))
 			{
-				sb.Append(ReadChar());
-				if (PeekOrDefaultChar() == '>')
+				sb.Append(greaterThan);
+				if (Reader.TryRead('>', out greaterThan))
 				{
-					sb.Append(ReadChar());
+					sb.Append(greaterThan);
 				}
 				return sb.ToString();
 			}
@@ -109,43 +132,48 @@ public class LexReader : CharReader
 		// ex. / or /*
 		if (fc == '/')
 		{
-			sb.Append(ReadCharOrDefault('*'));
+			if (Reader.TryRead('*', out var asterisk))
+			{
+				sb.Append(asterisk);
+			}
 			return sb.ToString();
 		}
 
 		// ex. * or */
 		if (fc == '*')
 		{
-			sb.Append(ReadCharOrDefault('/'));
+			if (Reader.TryRead('/', out var slash))
+			{
+				sb.Append(slash);
+			}
 			return sb.ToString();
 		}
 
 		// ex. @@ (MySQL system variable)
 		if (fc == '@')
 		{
-			var isFirst = true;
-			foreach (var item in ReadChars(x => isFirst && x == '@'))
+			if (Reader.TryRead('@', out var atmark))
 			{
-				sb.Append(item);
-				isFirst = false;
+				sb.Append(atmark);
 			}
+			// continue
 		}
 
+		var x = SingleSymbols;
 		// ex. . or , or (
 		if (SingleSymbols.Contains(fc)) return sb.ToString();
 
 		// ::
-		if (fc == ':' && PeekOrDefaultChar() == ':')
+		if (fc == ':' && Reader.TryRead(':', out var colon))
 		{
-			sb.Append(ReadCharOrDefault(':'));
+			sb.Append(colon);
 			return sb.ToString();
 		}
 
 		// ex. + or != 
-		// ignore ::
-		if ((fc != ':' && MultipleSymbols.Contains(fc)) || (fc == ':' && PeekOrDefaultChar() == ':'))
+		if (MultipleSymbols.Contains(fc))
 		{
-			foreach (var item in ReadChars((x) => x != '/' && MultipleSymbols.Contains(x)))
+			foreach (var item in Reader.Reads((x) => x != '/' && MultipleSymbols.Contains(x)))
 			{
 				sb.Append(item);
 			}
@@ -155,7 +183,7 @@ public class LexReader : CharReader
 		// ex. 123.45
 		if (fc.IsInteger())
 		{
-			foreach (var item in ReadChars(x => "0123456789.".ToArray().Contains(x)))
+			foreach (var item in Reader.Reads(x => NumericSymbols.Contains(x)))
 			{
 				sb.Append(item);
 			}
@@ -168,39 +196,43 @@ public class LexReader : CharReader
 			return true;
 		};
 
-		foreach (var item in ReadChars(whileFn))
+		foreach (var item in Reader.Reads(whileFn))
 		{
 			sb.Append(item);
 		}
 		return sb.ToString();
 	}
 
-	public IEnumerable<string> ReadLexs(bool skipSpace = true)
+	/// <summary>
+	/// Continuously reads until the end.
+	/// </summary>
+	/// <param name="skipSpace">Indicates whether to ignore spaces at the beginning of the reading. If true, spaces will be ignored.</param>
+	/// <returns>The read Lexemes.</returns>
+	public IEnumerable<string> Reads(bool skipSpace = true)
 	{
-		var w = ReadLex(skipSpace);
+		var w = Read(skipSpace);
 		while (!string.IsNullOrEmpty(w))
 		{
 			yield return w;
-			w = ReadLex(skipSpace);
+			w = Read(skipSpace);
 		}
 	}
 
-	private string ReadWhileSpace()
+	private void SkipSpace()
 	{
-		using var sb = ZString.CreateStringBuilder();
-		foreach (var item in ReadChars(x => SpaceChars.Contains(x)))
+		foreach (var _ in Reader.Reads(x => SpaceChars.Contains(x)))
 		{
-			sb.Append(item);
 		}
-		return sb.ToString();
 	}
 
-	public void SkipSpace() => ReadWhileSpace();
-
+	/// <summary>
+	/// Reads until the end of the line. Primarily used for obtaining line comments.
+	/// </summary>
+	/// <returns>The read string.</returns>
 	public string ReadUntilLineEnd()
 	{
 		using var sb = ZString.CreateStringBuilder();
-		foreach (var item in ReadChars())
+		foreach (var item in Reader.Reads())
 		{
 			if (item != '\n' && item != '\r')
 			{
@@ -210,8 +242,7 @@ public class LexReader : CharReader
 
 			if (item == '\r')
 			{
-				var c = PeekOrDefaultChar();
-				if (c != null && c.Value == '\n') ReadChar();
+				Reader.TryRead('\n', out _);
 			}
 			break;
 		}
@@ -221,19 +252,49 @@ public class LexReader : CharReader
 	private string ReadUntilSingleQuote()
 	{
 		using var sb = ZString.CreateStringBuilder();
-		foreach (var item in ReadChars())
+		foreach (var item in Reader.Reads())
 		{
 			sb.Append(item);
 			if (item == '\'')
 			{
-				if (PeekOrDefaultChar() == '\'')
+				if (Reader.TryRead('\'', out var c))
 				{
-					sb.Append(ReadChar());
+					sb.Append(c);
 					continue;
 				}
 				return sb.ToString();
 			}
 		}
 		throw new SyntaxException("single quote is not closed.");
+	}
+
+	protected virtual void Dispose(bool disposing)
+	{
+		if (!disposedValue)
+		{
+			if (disposing)
+			{
+				// TODO: マネージド状態を破棄します (マネージド オブジェクト)
+				Reader.Dispose();
+			}
+
+			// TODO: アンマネージド リソース (アンマネージド オブジェクト) を解放し、ファイナライザーをオーバーライドします
+			// TODO: 大きなフィールドを null に設定します
+			disposedValue = true;
+		}
+	}
+
+	// // TODO: 'Dispose(bool disposing)' にアンマネージド リソースを解放するコードが含まれる場合にのみ、ファイナライザーをオーバーライドします
+	// ~CharReader()
+	// {
+	//     // このコードを変更しないでください。クリーンアップ コードを 'Dispose(bool disposing)' メソッドに記述します
+	//     Dispose(disposing: false);
+	// }
+
+	public void Dispose()
+	{
+		// このコードを変更しないでください。クリーンアップ コードを 'Dispose(bool disposing)' メソッドに記述します
+		Dispose(disposing: true);
+		GC.SuppressFinalize(this);
 	}
 }

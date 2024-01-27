@@ -25,7 +25,7 @@ public class VanillaTokenReader : LexReader
 	{
 		if (!string.IsNullOrEmpty(TokenCache)) return;
 
-		var token = ReadLexs(skipSpace: true).FirstOrDefault();
+		var token = Reads(skipSpace: true).FirstOrDefault();
 
 		if (token == null) return;
 
@@ -42,7 +42,7 @@ public class VanillaTokenReader : LexReader
 				//block comment
 				ReadUntilCloseBlockComment();
 			}
-			token = ReadLexs(skipSpace: true).FirstOrDefault();
+			token = Reads(skipSpace: true).FirstOrDefault();
 		}
 
 		if (token == null) return;
@@ -125,7 +125,7 @@ public class VanillaTokenReader : LexReader
 	{
 		using var inner = ZString.CreateStringBuilder();
 
-		foreach (var word in ReadLexs(skipSpace: false))
+		foreach (var word in Reads(skipSpace: false))
 		{
 			if (word == null) break;
 

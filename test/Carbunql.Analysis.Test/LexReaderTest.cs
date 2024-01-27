@@ -26,7 +26,7 @@ public class LexReaderTest
 		var text = "";
 		using var r = new LexReader(text);
 
-		foreach (var item in r.ReadLexs())
+		foreach (var item in r.Reads())
 		{
 			throw new Exception();
 		}
@@ -37,7 +37,7 @@ public class LexReaderTest
 	{
 		var text = "  1  2";
 		using var r = new LexReader(text);
-		var lst = r.ReadLexs().ToList();
+		var lst = r.Reads().ToList();
 		LogOutput(lst);
 
 		Assert.Equal(2, lst.Count);
@@ -51,7 +51,7 @@ public class LexReaderTest
 	{
 		var text = ":val val::text";
 		using var r = new LexReader(text);
-		var lst = r.ReadLexs().ToList();
+		var lst = r.Reads().ToList();
 		LogOutput(lst);
 
 		Assert.Equal(4, lst.Count);
@@ -66,7 +66,7 @@ public class LexReaderTest
 	{
 		var text = "123 1.23";
 		using var r = new LexReader(text);
-		var lst = r.ReadLexs().ToList();
+		var lst = r.Reads().ToList();
 		LogOutput(lst);
 
 		Assert.Equal(2, lst.Count);
@@ -79,7 +79,7 @@ public class LexReaderTest
 	{
 		var text = "tbl.col1 tbl.col2";
 		using var r = new LexReader(text);
-		var lst = r.ReadLexs().ToList();
+		var lst = r.Reads().ToList();
 		LogOutput(lst);
 
 		Assert.Equal(6, lst.Count);
@@ -96,7 +96,7 @@ public class LexReaderTest
 	{
 		var text = "'a b' '   '";
 		using var r = new LexReader(text);
-		var lst = r.ReadLexs().ToList();
+		var lst = r.Reads().ToList();
 		LogOutput(lst);
 
 		Assert.Equal(2, lst.Count);
@@ -109,7 +109,7 @@ public class LexReaderTest
 	{
 		var text = "'a b''c'";
 		using var r = new LexReader(text);
-		var lst = r.ReadLexs().ToList();
+		var lst = r.Reads().ToList();
 		LogOutput(lst);
 
 		Assert.Single(lst);
@@ -121,7 +121,7 @@ public class LexReaderTest
 	{
 		var text = "1+1!=3";
 		using var r = new LexReader(text);
-		var lst = r.ReadLexs().ToList();
+		var lst = r.Reads().ToList();
 		LogOutput(lst);
 
 		Assert.Equal(5, lst.Count);
@@ -137,7 +137,7 @@ public class LexReaderTest
 	{
 		var text = "'a' || 'b'";
 		using var r = new LexReader(text);
-		var lst = r.ReadLexs().ToList();
+		var lst = r.Reads().ToList();
 		LogOutput(lst);
 
 		Assert.Equal(3, lst.Count);
@@ -151,7 +151,7 @@ public class LexReaderTest
 	{
 		var text = "a---b";
 		using var r = new LexReader(text);
-		var lst = r.ReadLexs().ToList();
+		var lst = r.Reads().ToList();
 		LogOutput(lst);
 
 		Assert.Equal(4, lst.Count);
@@ -166,7 +166,7 @@ public class LexReaderTest
 	{
 		var text = "a//*b**/";
 		using var r = new LexReader(text);
-		var lst = r.ReadLexs().ToList();
+		var lst = r.Reads().ToList();
 		LogOutput(lst);
 
 		Assert.Equal(6, lst.Count);
@@ -183,7 +183,7 @@ public class LexReaderTest
 	{
 		var text = "sum(a.price)";
 		using var r = new LexReader(text);
-		var lst = r.ReadLexs().ToList();
+		var lst = r.Reads().ToList();
 		LogOutput(lst);
 
 		Assert.Equal(6, lst.Count);
