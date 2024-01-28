@@ -1,5 +1,6 @@
 ﻿using Carbunql.Extensions;
 using Cysharp.Text;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Analysis;
 
@@ -9,8 +10,6 @@ namespace Carbunql.Analysis;
 /// </summary>
 public class LexReader : IDisposable
 {
-	private bool disposedValue;
-
 	/// <summary>
 	/// Constructor.
 	/// </summary>
@@ -46,9 +45,33 @@ public class LexReader : IDisposable
 
 	private static IEnumerable<char> AllSymbols => SingleSymbols.Union(MultipleSymbols).Union(PrefixSymbols).Union(SpaceChars).Union(RegexOperatorSymbols).Union(TypeConvertSymbols);
 
-	private string Read(bool skipSpace = true)
+	/// <summary>
+	/// Cache of the peeked Lexeme. This value is used to differentiate between Peek and Read operations.
+	/// </summary>
+	private string Cache { get; set; } = string.Empty;
+
+	/// <summary>
+	/// Peek method allows you to preview the next available Lexeme without advancing the reading position.
+	/// </summary>
+	/// <returns>The next Lexeme to be obtained.</returns>
+	public string Peek()
 	{
-		if (skipSpace) SkipSpace();
+		if (string.IsNullOrEmpty(Cache))
+		{
+			Cache = ReadCore();
+		}
+		return Cache;
+	}
+
+	/// <summary>
+	/// Reads characters using the CharReader and retrieves Lexemes.
+	/// Since this function directly reads the text, peeking is not possible.
+	/// It is recommended to obtain Lexemes through the Peek or Read functions.
+	/// </summary>
+	/// <returns>The retrieved Lexeme.</returns>
+	protected virtual string ReadCore()
+	{
+		SkipSpace();
 
 		using var sb = ZString.CreateStringBuilder();
 
@@ -204,17 +227,109 @@ public class LexReader : IDisposable
 	}
 
 	/// <summary>
-	/// Continuously reads until the end.
+	/// Reads the peeked Lexeme and finalizes its retrieval.
 	/// </summary>
-	/// <param name="skipSpace">Indicates whether to ignore spaces at the beginning of the reading. If true, spaces will be ignored.</param>
-	/// <returns>The read Lexemes.</returns>
-	public IEnumerable<string> Reads(bool skipSpace = true)
+	private void Commit()
 	{
-		var w = Read(skipSpace);
+		Cache = string.Empty;
+	}
+
+	/// <summary>
+	/// Method to read a single Lexeme.
+	/// </summary>
+	/// <returns>The read Lexeme.</returns>
+	public string Read()
+	{
+		var lex = Peek();
+		Commit();
+		return lex;
+	}
+
+	/// <summary>
+	/// Method to read a Lexeme, but an exception will be thrown if it does not match the expected value.
+	/// </summary>
+	/// <param name="expect">The expected Lexeme.</param>
+	/// <returns>The read Lexeme.</returns>
+	/// <exception cref="Exception">Thrown when the actual Lexeme does not match the expected value.</exception>
+	public string Read(string expect)
+	{
+		var tmp = Peek();
+		if (tmp.IsEqualNoCase(expect))
+		{
+			Commit();
+			return tmp;
+		}
+		throw new Exception($"expect : '{expect}', actual : '{tmp}'");
+	}
+
+	/// <summary>
+	/// Method to read a Lexeme. However, an exception is thrown if the read Lexeme does not match any of the expected values in the list.
+	/// </summary>
+	/// <param name="expects">List of expected Lexemes.</param>
+	/// <returns>The read Lexeme.</returns>
+	/// <exception cref="Exception">Thrown when the actual Lexeme does not match any of the expected values.</exception>
+	public string Read(IEnumerable<string> expects)
+	{
+		var tmp = Peek();
+		if (tmp.IsEqualNoCase(expects))
+		{
+			Commit();
+			return tmp;
+		}
+		throw new Exception($"expect : '{expects}', actual : '{tmp}'");
+	}
+
+	/// <summary>
+	/// Attempts to read the specified Lexeme if it matches the expected value.
+	/// </summary>
+	/// <param name="expect">The expected Lexeme.</param>
+	/// <param name="lex">The read Lexeme.</param>
+	/// <returns>True if a match is found, false otherwise.</returns>
+	public bool TryRead(string expect, [MaybeNullWhen(false)] out string lex)
+	{
+		lex = default;
+
+		var tmp = Peek();
+		if (tmp.IsEqualNoCase(expect))
+		{
+			lex = tmp;
+			Commit();
+			return true;
+		}
+		return false;
+	}
+
+	/// <summary>
+	/// Attempts to read a Lexeme if it matches any of the expected values in the provided list.
+	/// </summary>
+	/// <param name="expects">List of expected Lexemes.</param>
+	/// <param name="lex">The read Lexeme.</param>
+	/// <returns>True if a match is found, false otherwise.</returns>
+	public bool TryRead(IEnumerable<string> expects, [MaybeNullWhen(false)] out string lex)
+	{
+		lex = default;
+
+		var tmp = Peek();
+		if (tmp.IsEqualNoCase(expects))
+		{
+			lex = tmp;
+			Commit();
+			return true;
+		}
+		return false;
+	}
+
+	/// <summary>
+	/// Method to read Lexemes. Enumerates the read Lexemes.
+	/// </summary>
+	/// <returns>Enumerable of the read Lexemes.</returns>
+	public IEnumerable<string> Reads()
+	{
+		var w = Read();
 		while (!string.IsNullOrEmpty(w))
 		{
 			yield return w;
-			w = Read(skipSpace);
+			w = Read();
 		}
 	}
 
@@ -229,7 +344,7 @@ public class LexReader : IDisposable
 	/// Reads until the end of the line. Primarily used for obtaining line comments.
 	/// </summary>
 	/// <returns>The read string.</returns>
-	public string ReadUntilLineEnd()
+	protected string ReadUntilLineEnd()
 	{
 		using var sb = ZString.CreateStringBuilder();
 		foreach (var item in Reader.Reads())
@@ -268,33 +383,8 @@ public class LexReader : IDisposable
 		throw new SyntaxException("single quote is not closed.");
 	}
 
-	protected virtual void Dispose(bool disposing)
-	{
-		if (!disposedValue)
-		{
-			if (disposing)
-			{
-				// TODO: マネージド状態を破棄します (マネージド オブジェクト)
-				Reader.Dispose();
-			}
-
-			// TODO: アンマネージド リソース (アンマネージド オブジェクト) を解放し、ファイナライザーをオーバーライドします
-			// TODO: 大きなフィールドを null に設定します
-			disposedValue = true;
-		}
-	}
-
-	// // TODO: 'Dispose(bool disposing)' にアンマネージド リソースを解放するコードが含まれる場合にのみ、ファイナライザーをオーバーライドします
-	// ~CharReader()
-	// {
-	//     // このコードを変更しないでください。クリーンアップ コードを 'Dispose(bool disposing)' メソッドに記述します
-	//     Dispose(disposing: false);
-	// }
-
 	public void Dispose()
 	{
-		// このコードを変更しないでください。クリーンアップ コードを 'Dispose(bool disposing)' メソッドに記述します
-		Dispose(disposing: true);
-		GC.SuppressFinalize(this);
+		((IDisposable)Reader).Dispose();
 	}
 }

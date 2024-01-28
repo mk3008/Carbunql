@@ -3,218 +3,136 @@ using Cysharp.Text;
 
 namespace Carbunql.Analysis;
 
-public class VanillaTokenReader : LexReader
+public class VanillaTokenReader : IDisposable
 {
-	public VanillaTokenReader(string text) : base(text)
+	public VanillaTokenReader(string text)
 	{
+		Reader = new SqlLexReader(text);
 	}
 
-	private IEnumerable<string> CommentTokens { get; set; } = new string[] { "--", "/*" };
+	private static IEnumerable<string> JoinLexs { get; set; } = new string[] { "inner", "cross" };
 
-	private IEnumerable<string> JoinTokens { get; set; } = new string[] { "inner", "cross" };
+	private static IEnumerable<string> ByLexs { get; set; } = new string[] { "group", "partition", "order" };
 
-	private IEnumerable<string> OuterJoinTokens { get; set; } = new string[] { "left", "right" };
+	private static IEnumerable<string> OuterJoinLexs { get; set; } = new string[] { "left", "right" };
 
-	private IEnumerable<string> NullsSortTokens { get; set; } = new string[] { "first", "last" };
+	private static IEnumerable<string> NullsSortTokens { get; set; } = new string[] { "first", "last" };
 
-	private string TokenCache { get; set; } = string.Empty;
+	private SqlLexReader Reader { get; set; }
 
 	public int CurrentBracketLevel { get; private set; } = 0;
 
-	private void RefreshTokenCache()
-	{
-		if (!string.IsNullOrEmpty(TokenCache)) return;
-
-		var token = Reads(skipSpace: true).FirstOrDefault();
-
-		if (token == null) return;
-
-		//skip comment block
-		while (token.IsEqualNoCase(CommentTokens))
-		{
-			if (token == "--")
-			{
-				//line comment
-				ReadUntilLineEnd();
-			}
-			else
-			{
-				//block comment
-				ReadUntilCloseBlockComment();
-			}
-			token = Reads(skipSpace: true).FirstOrDefault();
-		}
-
-		if (token == null) return;
-
-		TokenCache = token;
-	}
-
-	private string Peek()
-	{
-		RefreshTokenCache();
-		return TokenCache;
-	}
-
-	private void Commit()
-	{
-		TokenCache = string.Empty;
-	}
-
-	private string ReadSingleToken(string expect)
-	{
-		var token = Peek();
-		if (token.IsEqualNoCase(expect))
-		{
-			Commit();
-			return token;
-		}
-		throw new Exception($"expect : '{expect}', actual : '{token}'");
-	}
-
-	private string ReadSingleToken(IEnumerable<string> expects)
-	{
-		var token = Peek();
-		if (token.IsEqualNoCase(expects))
-		{
-			Commit();
-			return token;
-		}
-		var s = expects.ToList().ToString(", ", "'", "'");
-		throw new Exception($"expects : {expects}, actual : '{token}'");
-	}
-
-	private string? ReadSingleTokenOrDefault(string? expect)
-	{
-		var token = Peek();
-		if (expect != null && token.IsEqualNoCase(expect))
-		{
-			Commit();
-			return token;
-		}
-		return null;
-	}
-
-	private string ReadSingleToken()
-	{
-		var token = Peek();
-		Commit();
-		return token;
-	}
-
-	private string ReadAndJoinOrDefault(string basetoken, string expect)
-	{
-		var next = ReadSingleTokenOrDefault(expect);
-		if (next == null) return basetoken;
-		return basetoken + " " + next;
-	}
-
-	private string ReadAndJoin(string basetoken, string expect)
-	{
-		var next = ReadSingleToken(expect);
-		return basetoken + " " + next;
-	}
-
-	private string ReadAndJoin(string basetoken, IEnumerable<string> expects)
-	{
-		var next = ReadSingleToken(expects);
-		return basetoken + " " + next;
-	}
-
-	private string ReadUntilCloseBlockComment()
-	{
-		using var inner = ZString.CreateStringBuilder();
-
-		foreach (var word in Reads(skipSpace: false))
-		{
-			if (word == null) break;
-
-			inner.Append(word);
-			if (word.IsEqualNoCase("*/"))
-			{
-				return inner.ToString();
-			}
-			if (word.IsEqualNoCase("/*"))
-			{
-				inner.Append(ReadUntilCloseBlockComment());
-			}
-		}
-
-		throw new SyntaxException("block comment is not closed");
-	}
-
 	public virtual string Read()
 	{
-		var token = ReadSingleToken();
+		var lex = Reader.Read();
 
-		if (string.IsNullOrEmpty(token)) return string.Empty;
+		if (string.IsNullOrEmpty(lex)) return string.Empty;
 
-		if (token == "(")
+		if (lex == "(")
 		{
 			CurrentBracketLevel++;
-			return token;
+			return lex;
 		}
 
-		if (token == ")")
+		if (lex == ")")
 		{
 			CurrentBracketLevel--;
-			return token;
+			return lex;
 		}
+
+		using var sb = ZString.CreateStringBuilder();
+		sb.Append(lex);
 
 		// Explore possible two-word tokens
-		if (token.IsEqualNoCase("is"))
+		if (lex.IsEqualNoCase("is"))
 		{
-			var isToken = ReadAndJoinOrDefault(token, "not");
-			var isDistinctToken = ReadAndJoinOrDefault(isToken, "distinct");
-			if (isToken == isDistinctToken) return isToken;
-			return ReadAndJoin(isDistinctToken, "from");
+			var next = Reader.Peek();
+			if (next.IsEqualNoCase("not"))
+			{
+				sb.Append(" " + Reader.Read(next));
+			}
+
+			next = Reader.Peek();
+			if (next.IsEqualNoCase("distinct"))
+			{
+				// is distinct from, is not distinct from
+				sb.Append(" " + Reader.Read(next));
+				sb.Append(" " + Reader.Read("from"));
+				return sb.ToString();
+			}
+
+			// is, is not
+			return sb.ToString();
 		}
 
-		if (token.IsEqualNoCase(JoinTokens))
+		if (lex.IsEqualNoCase(JoinLexs))
 		{
-			return ReadAndJoin(token, "join");
+			sb.Append(" " + Reader.Read("join"));
+			return sb.ToString();
 		}
 
-		if (token.IsEqualNoCase(new string[] { "group", "partition", "order" }))
+		if (lex.IsEqualNoCase(ByLexs))
 		{
-			return ReadAndJoin(token, "by");
+			sb.Append(" " + Reader.Read("by"));
+			return sb.ToString();
 		}
 
-		if (token.IsEqualNoCase(OuterJoinTokens))
+		if (lex.IsEqualNoCase(OuterJoinLexs))
 		{
+			var next = Reader.Peek();
 			//left(), right() function
-			if (Peek().IsEqualNoCase("(")) return token;
+			if (next.IsEqualNoCase("(")) return lex;
 
-			ReadSingleTokenOrDefault("outer");
-			return ReadAndJoin(token, "join");
+			Reader.TryRead("outer", out _);
+			sb.Append(" " + Reader.Read("join"));
+			return sb.ToString();
 		}
 
-		if (token.IsEqualNoCase("nulls"))
+		if (lex.IsEqualNoCase("nulls"))
 		{
-			return ReadAndJoin(token, NullsSortTokens);
+			sb.Append(" " + Reader.Read(NullsSortTokens));
+			return sb.ToString();
 		}
 
-		if (token.IsEqualNoCase("union"))
+		if (lex.IsEqualNoCase("union"))
 		{
-			return ReadAndJoinOrDefault(token, "all");
+			if (Reader.TryRead("all", out var all))
+			{
+				sb.Append(" " + all);
+			}
+			return sb.ToString();
 		}
 
-		if (token.IsEqualNoCase("not"))
+		if (lex.IsEqualNoCase("not"))
 		{
-			return ReadAndJoinOrDefault(token, "materialized");
+			if (Reader.TryRead("materialized", out var materialized))
+			{
+				sb.Append(" " + materialized);
+			}
+			return sb.ToString();
 		}
 
-		if (token.IsEqualNoCase("double"))
+		if (lex.IsEqualNoCase("double"))
 		{
-			return ReadAndJoinOrDefault(token, "precision");
+			if (Reader.TryRead("precision", out var precision))
+			{
+				sb.Append(" " + precision);
+			}
+			return sb.ToString();
 		}
 
-		if (token.IsEqualNoCase("at") || token.IsEqualNoCase("without"))
+		if (lex.IsEqualNoCase("at") || lex.IsEqualNoCase("without"))
 		{
-			token = ReadAndJoin(token, "time");
-			return ReadAndJoin(token, "zone");
+			sb.Append(" " + Reader.Read("time"));
+			sb.Append(" " + Reader.Read("zone"));
+			return sb.ToString();
 		}
 
-		return token;
+		return lex;
+	}
+
+	public void Dispose()
+	{
+		((IDisposable)Reader).Dispose();
 	}
 }
