@@ -7,7 +7,7 @@ public static class FromArgumentParser
 {
 	public static FromArgument Parse(ValueBase unit, string argument)
 	{
-		using var r = new TokenReader(argument);
+		using var r = new SqlTokenReader(argument);
 		return Parse(unit, r);
 	}
 

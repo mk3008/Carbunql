@@ -12,7 +12,7 @@ public static class CastValueParser
 
 	public static CastValue Parse(ValueBase value, string symbol, string argument)
 	{
-		using var r = new TokenReader(argument);
+		using var r = new SqlTokenReader(argument);
 		return Parse(value, symbol, r);
 	}
 

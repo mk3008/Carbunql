@@ -6,7 +6,7 @@ public static class PartitionClauseParser
 {
 	public static PartitionClause Parse(string text)
 	{
-		using var r = new TokenReader(text);
+		using var r = new SqlTokenReader(text);
 		return new PartitionClause(ValueCollectionParser.ReadValues(r).ToList());
 	}
 

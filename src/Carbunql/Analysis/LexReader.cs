@@ -8,7 +8,7 @@ namespace Carbunql.Analysis;
 /// Class for reading text on a Lexeme (Lex) basis.
 /// Reading can only be performed in the forward direction and cannot be reversed.
 /// </summary>
-public class LexReader : IDisposable
+public abstract class LexReader : IDisposable
 {
 	/// <summary>
 	/// Constructor.

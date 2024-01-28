@@ -8,7 +8,7 @@ public static class FunctionTableParser
 {
 	public static FunctionTable Parse(string text, string functionName)
 	{
-		using var r = new TokenReader(text);
+		using var r = new SqlTokenReader(text);
 		return Parse(r, functionName);
 	}
 

@@ -8,7 +8,7 @@ public static class ValueCollectionParser
 {
 	public static ValueCollection Parse(string text)
 	{
-		using var r = new TokenReader(text);
+		using var r = new SqlTokenReader(text);
 		return new ValueCollection(ReadValues(r).ToList());
 	}
 

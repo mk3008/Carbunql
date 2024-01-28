@@ -8,7 +8,7 @@ public static class ArrayValueParser
 {
 	public static ArrayValue Parse(string argument)
 	{
-		using var r = new TokenReader(argument);
+		using var r = new SqlTokenReader(argument);
 		return Parse(r);
 	}
 

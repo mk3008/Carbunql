@@ -7,7 +7,7 @@ public static class RelationParser
 {
 	public static Relation Parse(string text)
 	{
-		using var r = new TokenReader(text);
+		using var r = new SqlTokenReader(text);
 		return Parse(r);
 	}
 
