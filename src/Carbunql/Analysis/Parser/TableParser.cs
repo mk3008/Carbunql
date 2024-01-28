@@ -14,6 +14,11 @@ public static class TableParser
 
 	public static TableBase Parse(ITokenReader r)
 	{
+		if (r.Peek().IsEqualNoCase("lateral"))
+		{
+			return LateralTableParser.Parse(r);
+		}
+
 		if (r.Peek().IsEqualNoCase("("))
 		{
 			return VirtualTableParser.Parse(r);
