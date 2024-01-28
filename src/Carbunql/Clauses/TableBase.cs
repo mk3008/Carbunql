@@ -11,6 +11,7 @@ namespace Carbunql.Clauses;
 [Union(0, typeof(FunctionTable))]
 [Union(1, typeof(PhysicalTable))]
 [Union(2, typeof(VirtualTable))]
+[Union(3, typeof(LateralTable))]
 public abstract class TableBase : IQueryCommandable
 {
 	public abstract IEnumerable<Token> GetTokens(Token? parent);

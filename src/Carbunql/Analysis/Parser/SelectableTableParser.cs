@@ -9,7 +9,7 @@ public static class SelectableTableParser
 
 	public static SelectableTable Parse(string text)
 	{
-		using var r = new TokenReader(text);
+		using var r = new SqlTokenReader(text);
 		return Parse(r);
 	}
 

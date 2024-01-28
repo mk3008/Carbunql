@@ -6,7 +6,7 @@ public static class NamedWindowDefinitionParser
 {
 	public static NamedWindowDefinition Parse(string text)
 	{
-		using var r = new TokenReader(text);
+		using var r = new SqlTokenReader(text);
 		return Parse(r);
 	}
 

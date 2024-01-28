@@ -7,7 +7,7 @@ public static class OverClauseParser
 {
 	public static OverClause Parse(string text)
 	{
-		using var r = new TokenReader(text);
+		using var r = new SqlTokenReader(text);
 		return Parse(r);
 	}
 

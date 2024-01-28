@@ -6,7 +6,7 @@ public static class ReadQueryParser
 {
 	public static ReadQuery Parse(string text)
 	{
-		using var r = new TokenReader(text);
+		using var r = new SqlTokenReader(text);
 		return Parse(r);
 	}
 

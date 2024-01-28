@@ -748,4 +748,49 @@ FROM
 
 		Assert.Equal(text, sq.ToText(), true, true, true);
 	}
+
+	[Fact]
+	public void JoinLateral()
+	{
+		var text = @"SELECT
+    m.name
+FROM
+    manufacturers AS m
+    LEFT JOIN LATERAL GET_PRODUCT_NAMES(m.id) AS pname ON true
+WHERE
+    pname IS NULL";
+
+		var sq = QueryParser.Parse(text);
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+		Assert.Equal(24, lst.Count);
+
+		Assert.Equal(text, sq.ToText(), true, true, true);
+	}
+
+	[Fact]
+	public void CommaLateral()
+	{
+		var text = @"SELECT
+    *
+FROM
+    foo,
+    LATERAL (
+        SELECT
+            *
+        FROM
+            bar
+        WHERE
+            bar.id = foo.bar_id
+    ) AS ss";
+
+		var sq = QueryParser.Parse(text);
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+		Assert.Equal(22, lst.Count);
+
+		Assert.Equal(text, sq.ToText(), true, true, true);
+	}
 }

@@ -8,12 +8,17 @@ public static class TableParser
 {
 	public static TableBase Parse(string text)
 	{
-		using var r = new TokenReader(text);
+		using var r = new SqlTokenReader(text);
 		return Parse(r);
 	}
 
 	public static TableBase Parse(ITokenReader r)
 	{
+		if (r.Peek().IsEqualNoCase("lateral"))
+		{
+			return LateralTableParser.Parse(r);
+		}
+
 		if (r.Peek().IsEqualNoCase("("))
 		{
 			return VirtualTableParser.Parse(r);

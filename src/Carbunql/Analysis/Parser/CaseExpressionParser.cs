@@ -12,7 +12,7 @@ public static class CaseExpressionParser
 
 	public static CaseExpression Parse(string text)
 	{
-		using var r = new TokenReader(text);
+		using var r = new SqlTokenReader(text);
 		return Parse(r);
 	}
 

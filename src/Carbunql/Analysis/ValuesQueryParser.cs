@@ -8,7 +8,7 @@ public static class ValuesQueryParser
 {
 	public static ValuesQuery Parse(string text)
 	{
-		using var r = new TokenReader(text);
+		using var r = new SqlTokenReader(text);
 		var q = Parse(r);
 
 		if (!r.Peek().IsEndToken())
