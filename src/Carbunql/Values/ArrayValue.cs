@@ -45,10 +45,9 @@ public class ArrayValue : ValueBase
 		yield return Token.Reserved(this, parent, "]");
 	}
 
-	protected override IDictionary<string, object?> GetParametersCore()
+	protected override IEnumerable<QueryParameter> GetParametersCore()
 	{
-		var prm = Argument.GetParameters();
-		return prm;
+		return Argument.GetParameters();
 	}
 
 	protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()

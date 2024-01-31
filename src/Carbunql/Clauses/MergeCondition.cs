@@ -46,7 +46,7 @@ public abstract class MergeCondition : IQueryCommandable
 		}
 	}
 
-	public abstract IDictionary<string, object?> GetParameters();
+	public abstract IEnumerable<QueryParameter> GetParameters();
 
 	public abstract IEnumerable<Token> GetTokens(Token? parent);
 }

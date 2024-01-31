@@ -24,7 +24,7 @@ public class LateralTable : TableBase
 		foreach (var item in Table.GetTokens(parent)) yield return item;
 	}
 
-	public override IDictionary<string, object?> GetParameters()
+	public override IEnumerable<QueryParameter> GetParameters()
 	{
 		return Table.GetParameters();
 	}

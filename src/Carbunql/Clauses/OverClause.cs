@@ -42,7 +42,7 @@ public class OverClause : IQueryCommandable
 		}
 	}
 
-	public IDictionary<string, object?> GetParameters()
+	public IEnumerable<QueryParameter> GetParameters()
 	{
 		return WindowDefinition.GetParameters();
 	}

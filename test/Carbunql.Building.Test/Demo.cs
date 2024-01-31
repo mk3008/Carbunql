@@ -24,7 +24,7 @@ public class Demo
 			Output.WriteLine("/*");
 			foreach (var prm in cmd.Parameters)
 			{
-				Output.WriteLine($"    {prm.Key} = {prm.Value}");
+				Output.WriteLine($"    {prm.ParameterName} = {prm.Value}");
 			}
 			Output.WriteLine("*/");
 		}
@@ -49,7 +49,7 @@ public class Demo
 		sq.Where(a, "id").Equal(":id").And(b, "is_visible").True().And(c, "table_b_id").IsNull();
 
 		// parameter
-		sq.Parameters.Add(":id", 1);
+		sq.Parameters.Add(new QueryParameter(":id", 1));
 
 		var cmd = sq.ToCommand();
 		DebugPrint(cmd);

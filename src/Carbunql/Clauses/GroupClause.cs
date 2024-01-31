@@ -74,11 +74,15 @@ public class GroupClause : IList<ValueBase>, IQueryCommandable
 		}
 	}
 
-	public IDictionary<string, object?> GetParameters()
+	public IEnumerable<QueryParameter> GetParameters()
 	{
-		var prm = EmptyParameters.Get();
-		foreach (var item in Items) prm = prm.Merge(item.GetParameters());
-		return prm;
+		foreach (var item in Items)
+		{
+			foreach (var p in item.GetParameters())
+			{
+				yield return p;
+			}
+		}
 	}
 
 	#region implements IList<ValueBase>

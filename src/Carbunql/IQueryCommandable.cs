@@ -58,7 +58,7 @@ public interface IQueryCommandable
 {
 	IEnumerable<Token> GetTokens(Token? parent);
 
-	IDictionary<string, object?> GetParameters();
+	IEnumerable<QueryParameter> GetParameters();
 
 	IEnumerable<SelectQuery> GetInternalQueries();
 
@@ -97,9 +97,12 @@ public static class IQueryCommandableExtension
 		cmd.CommandText = c.CommandText;
 		foreach (var item in c.Parameters)
 		{
+			if (cmd.Parameters.Contains(item.ParameterName)) continue;
+
 			var p = cmd.CreateParameter();
-			p.ParameterName = item.Key;
+			p.ParameterName = item.ParameterName;
 			p.Value = item.Value;
+			p.DbType = item.DbType;
 			cmd.Parameters.Add(p);
 		}
 		return cmd;
@@ -129,71 +132,31 @@ public static class IQueryCommandableExtension
 		return head + text;
 	}
 
-	/*
-		Even though it was parallelized,
-		the processing was too light,
-		so the performance deteriorated.
-		Since parallelization is not expected to improve speed,
-		comment out and leave a record so as not to do it again.
-	*/
-	//public async static Task<string> ToOneLineTextAsync(this IQueryCommandable source)
-	//{
-	//	var head = Task.Run(() => GetParameterText(source));
-	//	var body = Task.Run(() => source.GetTokens().ToText());
-
-	//	var results = await Task.WhenAll(new[] { head, body });
-
-	//	if (string.IsNullOrEmpty(results[0])) return results[1];
-	//	return results[0] + results[1];
-	//}
-
-	//private static string GetParameterText(this IQueryCommandable source)
-	//{
-	//	var prms = source.GetParameters().ToList();
-	//	if (!prms.Any()) return string.Empty;
-
-	//	var sb = ZString.CreateStringBuilder();
-	//	sb.AppendLine("/*");
-	//	foreach (var item in prms)
-	//	{
-	//		if (item.Value == null)
-	//		{
-	//			sb.AppendLine($"  {item.Key} is NULL");
-	//		}
-	//		else if (item.Value.GetType() == typeof(string))
-	//		{
-	//			sb.AppendLine($"  {item.Key} = '{item.Value}'");
-	//		}
-	//		else
-	//		{
-	//			sb.AppendLine($"  {item.Key} = {item.Value}");
-	//		}
-	//	}
-	//	sb.AppendLine("*/");
-
-	//	return sb.ToString();
-	//}
-
 	private static string GetParameterText(this QueryCommand source)
 	{
 		var prms = source.Parameters;
 		if (!prms.Any()) return string.Empty;
 
+		var names = new List<string>();
+
 		var sb = ZString.CreateStringBuilder();
 		sb.AppendLine("/*");
 		foreach (var item in prms)
 		{
+			if (names.Contains(item.ParameterName)) continue;
+
+			names.Add(item.ParameterName);
 			if (item.Value == null)
 			{
-				sb.AppendLine($"  {item.Key} is NULL");
+				sb.AppendLine($"  {item.ParameterName} is NULL");
 			}
 			else if (item.Value.GetType() == typeof(string))
 			{
-				sb.AppendLine($"  {item.Key} = '{item.Value}'");
+				sb.AppendLine($"  {item.ParameterName} = '{item.Value}'");
 			}
 			else
 			{
-				sb.AppendLine($"  {item.Key} = {item.Value}");
+				sb.AppendLine($"  {item.ParameterName} = {item.Value}");
 			}
 		}
 		sb.AppendLine("*/");

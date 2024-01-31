@@ -37,7 +37,7 @@ public class HavingClause : IQueryCommandable
 		}
 	}
 
-	public IDictionary<string, object?> GetParameters()
+	public IEnumerable<QueryParameter> GetParameters()
 	{
 		return Condition.GetParameters();
 	}

@@ -86,15 +86,22 @@ public class FromClause : IQueryCommandable
 		}
 	}
 
-	public IDictionary<string, object?> GetParameters()
+	public IEnumerable<QueryParameter> GetParameters()
 	{
-		var prm = EmptyParameters.Get();
-		prm = prm.Merge(Root.GetParameters());
+		foreach (var item in Root.GetParameters())
+		{
+			yield return item;
+		}
 		if (Relations != null)
 		{
-			foreach (var item in Relations) prm = prm.Merge(item.GetParameters());
+			foreach (var relation in Relations)
+			{
+				foreach (var item in relation.GetParameters())
+				{
+					yield return item;
+				}
+			}
 		}
-		return prm;
 	}
 
 	public IEnumerable<Token> GetTokens(Token? parent)

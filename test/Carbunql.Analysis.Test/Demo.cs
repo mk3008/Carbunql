@@ -18,7 +18,7 @@ public class Demo
 			Output.WriteLine("/*");
 			foreach (var prm in cmd.Parameters)
 			{
-				Output.WriteLine($"    {prm.Key} = {prm.Value}");
+				Output.WriteLine($"    {prm.ParameterName} = {prm.Value}");
 			}
 			Output.WriteLine("*/");
 		}

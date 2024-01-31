@@ -42,9 +42,9 @@ public class FunctionTable : TableBase
 		yield return Token.ReservedBracketEnd(this, parent);
 	}
 
-	public Dictionary<string, object?> Parameters { get; set; } = new();
+	public List<QueryParameter> Parameters { get; set; } = new();
 
-	public override IDictionary<string, object?> GetParameters()
+	public override IEnumerable<QueryParameter> GetParameters()
 	{
 		return Parameters;
 	}

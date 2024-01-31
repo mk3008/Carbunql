@@ -67,10 +67,15 @@ public class AsArgument : ValueBase
 		}
 	}
 
-	protected override IDictionary<string, object?> GetParametersCore()
+	protected override IEnumerable<QueryParameter> GetParametersCore()
 	{
-		var prm = Value.GetParameters();
-		prm = prm.Merge(Type.GetParameters());
-		return prm;
+		foreach (var item in Value.GetParameters())
+		{
+			yield return item;
+		}
+		foreach (var item in Type.GetParameters())
+		{
+			yield return item;
+		}
 	}
 }

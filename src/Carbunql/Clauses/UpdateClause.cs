@@ -42,7 +42,7 @@ public class UpdateClause : IQueryCommandable
 		}
 	}
 
-	public IDictionary<string, object?> GetParameters()
+	public IEnumerable<QueryParameter> GetParameters()
 	{
 		throw new NotImplementedException();
 	}

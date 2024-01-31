@@ -89,11 +89,21 @@ public class CaseExpression : ValueBase
 		yield return Token.Reserved(this, parent, "end");
 	}
 
-	protected override IDictionary<string, object?> GetParametersCore()
+	protected override IEnumerable<QueryParameter> GetParametersCore()
 	{
-		var prm = EmptyParameters.Get();
-		prm = prm.Merge(CaseCondition?.GetParameters());
-		foreach (var exp in WhenExpressions) prm = prm.Merge(exp.GetParameters());
-		return prm;
+		if (CaseCondition != null)
+		{
+			foreach (var item in CaseCondition.GetParameters())
+			{
+				yield return item;
+			}
+		}
+		foreach (var item in WhenExpressions)
+		{
+			foreach (var p in item.GetParameters())
+			{
+				yield return p;
+			}
+		}
 	}
 }

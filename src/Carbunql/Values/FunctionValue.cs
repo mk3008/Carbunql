@@ -154,12 +154,26 @@ public class FunctionValue : ValueBase
 		}
 	}
 
-	protected override IDictionary<string, object?> GetParametersCore()
+	protected override IEnumerable<QueryParameter> GetParametersCore()
 	{
-		var prm = Arguments.GetParameters();
-		prm = prm.Merge(Filter?.GetParameters());
-		prm = prm.Merge(Over?.GetParameters());
-		return prm;
+		foreach (var item in Arguments.GetParameters())
+		{
+			yield return item;
+		}
+		if (Filter != null)
+		{
+			foreach (var item in Filter.GetParameters())
+			{
+				yield return item;
+			}
+		}
+		if (Over != null)
+		{
+			foreach (var item in Over.GetParameters())
+			{
+				yield return item;
+			}
+		}
 	}
 
 	protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()

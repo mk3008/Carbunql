@@ -35,7 +35,7 @@ public class QueryContainer : ValueBase
 		yield return Token.ReservedBracketEnd(this, parent);
 	}
 
-	protected override IDictionary<string, object?> GetParametersCore()
+	protected override IEnumerable<QueryParameter> GetParametersCore()
 	{
 		return Query.GetParameters();
 	}

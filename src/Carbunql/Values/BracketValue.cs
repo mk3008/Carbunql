@@ -27,7 +27,7 @@ public class BracketValue : ValueBase
 		}
 	}
 
-	protected override IDictionary<string, object?> GetParametersCore()
+	protected override IEnumerable<QueryParameter> GetParametersCore()
 	{
 		return Inner.GetParameters();
 	}

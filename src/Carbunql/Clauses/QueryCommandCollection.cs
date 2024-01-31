@@ -35,11 +35,15 @@ public abstract class QueryCommandCollection<T> : IList<T> where T : IQueryComma
 		}
 	}
 
-	public virtual IDictionary<string, object?> GetParameters()
+	public virtual IEnumerable<QueryParameter> GetParameters()
 	{
-		var prm = EmptyParameters.Get();
-		foreach (var item in Items) prm = prm.Merge(item.GetParameters());
-		return prm;
+		foreach (var item in Items)
+		{
+			foreach (var prm in item.GetParameters())
+			{
+				yield return prm;
+			}
+		}
 	}
 
 	public List<T> Items { get; set; } = new();

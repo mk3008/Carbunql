@@ -21,21 +21,21 @@ public class ParameterValue : ValueBase
 	{
 		Key = key;
 		Value = value;
-		Parameters.Add(key, value);
+		Parameters.Add(new QueryParameter(key, value));
 	}
 
 	public string Key { get; set; }
 
 	public object? Value { get; set; } = null;
 
-	public Dictionary<string, object?> Parameters { get; set; } = new();
+	public List<QueryParameter> Parameters { get; set; } = new();
 
 	public override IEnumerable<Token> GetCurrentTokens(Token? parent)
 	{
 		yield return new Token(this, parent, Key);
 	}
 
-	protected override IDictionary<string, object?> GetParametersCore()
+	protected override IEnumerable<QueryParameter> GetParametersCore()
 	{
 		return Parameters;
 	}

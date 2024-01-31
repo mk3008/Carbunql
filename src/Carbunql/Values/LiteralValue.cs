@@ -68,9 +68,9 @@ public class LiteralValue : ValueBase
 		yield break;
 	}
 
-	protected override IDictionary<string, object?> GetParametersCore()
+	protected override IEnumerable<QueryParameter> GetParametersCore()
 	{
-		return EmptyParameters.Get();
+		yield break;
 	}
 
 	protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()

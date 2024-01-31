@@ -47,12 +47,20 @@ public class BetweenClause : ValueBase
 		}
 	}
 
-	protected override IDictionary<string, object?> GetParametersCore()
+	protected override IEnumerable<QueryParameter> GetParametersCore()
 	{
-		var prm = Value.GetParameters();
-		prm = prm.Merge(Start.GetParameters());
-		prm = prm.Merge(End.GetParameters());
-		return prm;
+		foreach (var item in Value.GetParameters())
+		{
+			yield return item;
+		}
+		foreach (var item in Start.GetParameters())
+		{
+			yield return item;
+		}
+		foreach (var item in End.GetParameters())
+		{
+			yield return item;
+		}
 	}
 
 	protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()

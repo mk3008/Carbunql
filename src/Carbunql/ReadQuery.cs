@@ -1,5 +1,4 @@
 ﻿using Carbunql.Clauses;
-using Carbunql.Extensions;
 using Carbunql.Tables;
 using MessagePack;
 
@@ -30,21 +29,67 @@ public abstract class ReadQuery : IReadQuery
 
 	public abstract IEnumerable<CommonTable> GetCommonTables();
 
-	public IDictionary<string, object?> Parameters { get; set; } = new Dictionary<string, object?>();
+	public List<QueryParameter> Parameters { get; set; } = new();
 
-	public virtual IDictionary<string, object?> GetInnerParameters() => EmptyParameters.Get();
-
-	public IDictionary<string, object?> GetParameters()
+	public virtual IEnumerable<QueryParameter> GetInnerParameters()
 	{
-		var prm = EmptyParameters.Get();
-		prm = prm.Merge(GetWithClause()?.GetParameters());
-		prm = prm.Merge(GetSelectClause()?.GetParameters());
-		prm = prm.Merge(GetInnerParameters());
-		prm = prm.Merge(OperatableQuery?.GetParameters());
-		prm = prm.Merge(OrderClause?.GetParameters());
-		prm = prm.Merge(LimitClause?.GetParameters());
-		prm = prm.Merge(Parameters);
-		return prm;
+		yield break;
+	}
+
+	public IEnumerable<QueryParameter> GetParameters()
+	{
+		var q = GetWithClause()?.GetParameters();
+		if (q != null)
+		{
+			foreach (var item in q)
+			{
+				yield return item;
+			}
+		};
+		q = GetSelectClause()?.GetParameters();
+		if (q != null)
+		{
+			foreach (var item in q)
+			{
+				yield return item;
+			}
+		};
+		q = GetInnerParameters();
+		if (q != null)
+		{
+			foreach (var item in q)
+			{
+				yield return item;
+			}
+		};
+		q = OperatableQuery?.GetParameters();
+		if (q != null)
+		{
+			foreach (var item in q)
+			{
+				yield return item;
+			}
+		};
+		q = OrderClause?.GetParameters();
+		if (q != null)
+		{
+			foreach (var item in q)
+			{
+				yield return item;
+			}
+		};
+		q = LimitClause?.GetParameters();
+		if (q != null)
+		{
+			foreach (var item in q)
+			{
+				yield return item;
+			}
+		};
+		foreach (var item in Parameters)
+		{
+			yield return item;
+		}
 	}
 
 	public abstract IEnumerable<Token> GetCurrentTokens(Token? parent);
@@ -72,7 +117,7 @@ public abstract class ReadQuery : IReadQuery
 
 	public string AddParameter(string name, object? Value)
 	{
-		Parameters.Add(name, Value);
+		Parameters.Add(new QueryParameter(name, Value));
 		return name;
 	}
 }

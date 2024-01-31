@@ -80,10 +80,20 @@ public class LimitClause : IQueryCommandable
 		}
 	}
 
-	public IDictionary<string, object?> GetParameters()
+	public IEnumerable<QueryParameter> GetParameters()
 	{
-		var prm = Condition.GetParameters();
-		return prm.Merge(Offset?.GetParameters());
+		foreach (var item in Condition.GetParameters())
+		{
+			yield return item;
+		}
+		var q = Offset?.GetParameters();
+		if (q != null)
+		{
+			foreach (var item in q)
+			{
+				yield return item;
+			}
+		}
 	}
 
 	public IEnumerable<Token> GetTokens(Token? parent)

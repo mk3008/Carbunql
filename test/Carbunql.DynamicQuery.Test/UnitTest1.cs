@@ -27,7 +27,7 @@ public class UnitTest1
 		if (parameter != null)
 		{
 			sq.Where(a, "val").Equal(":prm");
-			sq.Parameters.Add(":prm", parameter);
+			sq.Parameters.Add(new QueryParameter(":prm", parameter));
 		}
 
 		var printer = new DebugPrinter(Output);
@@ -62,7 +62,7 @@ WHERE
 		if (parameter != null)
 		{
 			sq.Where("a.val = :prm");
-			sq.Parameters.Add(":prm", parameter);
+			sq.Parameters.Add(new QueryParameter(":prm", parameter));
 		}
 
 		var printer = new DebugPrinter(Output);
@@ -126,8 +126,8 @@ WHERE
 		//add WHERE clause
 		sq.Where(() =>
 		{
-			sq.Parameters.Add(":prm1", prm1);
-			sq.Parameters.Add(":prm2", prm2);
+			sq.Parameters.Add(new QueryParameter(":prm1", prm1));
+			sq.Parameters.Add(new QueryParameter(":prm2", prm2));
 
 			//(a.val = :prm1)
 			var v1 = new ColumnValue(a, "val").Equal(":prm1").ToGroup();
@@ -264,7 +264,7 @@ from
 
 		//add WHERE clause
 		cteq.Where(a, "val").Equal(":prm");
-		cteq.Parameters.Add(":prm", 1);
+		cteq.Parameters.Add(new QueryParameter(":prm", 1));
 
 		var printer = new DebugPrinter(Output);
 		var actual = printer.Write(sq);

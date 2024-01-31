@@ -41,11 +41,16 @@ public class LikeClause : ValueBase
 		foreach (var item in Argument.GetTokens(parent)) yield return item;
 	}
 
-	protected override IDictionary<string, object?> GetParametersCore()
+	protected override IEnumerable<QueryParameter> GetParametersCore()
 	{
-		var prm = Value.GetParameters();
-		prm = prm.Merge(Argument.GetParameters());
-		return prm;
+		foreach (var item in Value.GetParameters())
+		{
+			yield return item;
+		}
+		foreach (var item in Argument.GetParameters())
+		{
+			yield return item;
+		}
 	}
 
 	protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()

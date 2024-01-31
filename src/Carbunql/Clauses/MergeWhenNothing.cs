@@ -1,6 +1,4 @@
-﻿using Carbunql.Extensions;
-
-namespace Carbunql.Clauses;
+﻿namespace Carbunql.Clauses;
 
 public class MergeWhenNothing : MergeCondition
 {
@@ -10,11 +8,15 @@ public class MergeWhenNothing : MergeCondition
 
 	public bool IsMatchCondition { get; set; }
 
-	public override IDictionary<string, object?> GetParameters()
+	public override IEnumerable<QueryParameter> GetParameters()
 	{
-		var prm = EmptyParameters.Get();
-		prm = prm.Merge(Condition?.GetParameters());
-		return prm;
+		if (Condition != null)
+		{
+			foreach (var item in Condition.GetParameters())
+			{
+				yield return item;
+			}
+		}
 	}
 
 	public override IEnumerable<Token> GetTokens(Token? parent)

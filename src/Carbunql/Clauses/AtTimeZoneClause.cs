@@ -1,6 +1,4 @@
-﻿using Carbunql.Extensions;
-using Carbunql.Tables;
-using Carbunql.Values;
+﻿using Carbunql.Tables;
 using MessagePack;
 
 namespace Carbunql.Clauses;
@@ -44,11 +42,16 @@ public class AtTimeZoneClause : ValueBase
 		foreach (var item in TimeZone.GetTokens(parent)) yield return item;
 	}
 
-	protected override IDictionary<string, object?> GetParametersCore()
+	protected override IEnumerable<QueryParameter> GetParametersCore()
 	{
-		var prm = Value.GetParameters();
-		prm = prm.Merge(TimeZone.GetParameters());
-		return prm;
+		foreach (var item in Value.GetParameters())
+		{
+			yield return item;
+		}
+		foreach (var item in TimeZone.GetParameters())
+		{
+			yield return item;
+		}
 	}
 
 	protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()

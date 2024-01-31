@@ -170,18 +170,52 @@ public class UpdateQuery : IQueryCommandable, IReturning, ICommentable
 		}
 	}
 
-	public IDictionary<string, object?>? Parameters { get; set; }
+	public IEnumerable<QueryParameter>? Parameters { get; set; }
 
-	public virtual IDictionary<string, object?> GetParameters()
+	public virtual IEnumerable<QueryParameter> GetParameters()
 	{
-		var prm = EmptyParameters.Get();
-		prm = prm.Merge(WithClause?.GetParameters());
-		prm = prm.Merge(SetClause?.GetParameters());
-		prm = prm.Merge(FromClause?.GetParameters());
-		prm = prm.Merge(WhereClause?.GetParameters());
-		prm = prm.Merge(Parameters);
-		prm = prm.Merge(ReturningClause?.GetParameters());
-		return prm;
+		if (WithClause != null)
+		{
+			foreach (var item in WithClause.GetParameters())
+			{
+				yield return item;
+			}
+		}
+		if (SetClause != null)
+		{
+			foreach (var item in SetClause.GetParameters())
+			{
+				yield return item;
+			}
+		}
+		if (FromClause != null)
+		{
+			foreach (var item in FromClause.GetParameters())
+			{
+				yield return item;
+			}
+		}
+		if (WhereClause != null)
+		{
+			foreach (var item in WhereClause.GetParameters())
+			{
+				yield return item;
+			}
+		}
+		if (ReturningClause != null)
+		{
+			foreach (var item in ReturningClause.GetParameters())
+			{
+				yield return item;
+			}
+		}
+		if (Parameters != null)
+		{
+			foreach (var item in Parameters)
+			{
+				yield return item;
+			}
+		}
 	}
 
 	public IEnumerable<Token> GetTokens(Token? parent)

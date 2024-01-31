@@ -60,7 +60,7 @@ public class SelectableItem : IQueryCommandable, ISelectable
 		}
 	}
 
-	public IDictionary<string, object?> GetParameters()
+	public IEnumerable<QueryParameter> GetParameters()
 	{
 		return Value.GetParameters();
 	}

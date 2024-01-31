@@ -2,13 +2,13 @@
 
 public class QueryCommand
 {
-    public QueryCommand(string command, IDictionary<string, object?> prm)
-    {
-        CommandText = command;
-        Parameters = prm;
-    }
+	public QueryCommand(string command, IEnumerable<QueryParameter> prm)
+	{
+		CommandText = command;
+		Parameters = prm;
+	}
 
-    public string CommandText { get; set; }
+	public string CommandText { get; set; }
 
-    public IDictionary<string, object?> Parameters { get; init; }
+	public IEnumerable<QueryParameter> Parameters { get; init; }
 }

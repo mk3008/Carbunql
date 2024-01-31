@@ -32,11 +32,15 @@ public class Filter : IQueryCommandable
 		}
 	}
 
-	public IDictionary<string, object?> GetParameters()
+	public IEnumerable<QueryParameter> GetParameters()
 	{
-		var prm = EmptyParameters.Get();
-		prm = prm.Merge(WhereClause?.GetParameters());
-		return prm;
+		if (WhereClause != null)
+		{
+			foreach (var item in WhereClause.GetParameters())
+			{
+				yield return item;
+			}
+		}
 	}
 
 	public IEnumerable<PhysicalTable> GetPhysicalTables()
