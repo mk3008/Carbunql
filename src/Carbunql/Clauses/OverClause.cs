@@ -16,6 +16,11 @@ public class OverClause : IQueryCommandable
 		WindowDefinition = definition;
 	}
 
+	public OverClause(NamedWindowDefinition definition)
+	{
+		WindowDefinition = new WindowDefinition(definition.Alias);
+	}
+
 	public WindowDefinition WindowDefinition { get; set; }
 
 	public IEnumerable<CommonTable> GetCommonTables()

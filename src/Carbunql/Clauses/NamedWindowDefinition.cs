@@ -12,6 +12,12 @@ public class NamedWindowDefinition : IQueryCommandable
 		WindowDefinition = null!;
 	}
 
+	public NamedWindowDefinition(string alias)
+	{
+		Alias = alias;
+		WindowDefinition = null!;
+	}
+
 	public NamedWindowDefinition(string alias, WindowDefinition definition)
 	{
 		Alias = alias;
