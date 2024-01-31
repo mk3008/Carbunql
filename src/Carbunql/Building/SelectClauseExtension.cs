@@ -182,4 +182,10 @@ public static class SelectClauseExtension
 		source.OrderClause ??= new();
 		source.OrderClause.Add(item);
 	}
+
+	public static void Window(this SelectQuery source, NamedWindowDefinition namedWindow)
+	{
+		source.WindowClause ??= new();
+		source.WindowClause.Add(namedWindow);
+	}
 }
