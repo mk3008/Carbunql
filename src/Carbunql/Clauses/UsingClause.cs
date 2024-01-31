@@ -55,12 +55,19 @@ public class UsingClause : IQueryCommandable
 		}
 	}
 
-	public IDictionary<string, object?> GetParameters()
+	public IEnumerable<QueryParameter> GetParameters()
 	{
-		var prm = EmptyParameters.Get();
-		prm = prm.Merge(Root.GetParameters());
-		if (Condition != null) prm = prm.Merge(Condition.GetParameters());
-		return prm;
+		foreach (var item in Root.GetParameters())
+		{
+			yield return item;
+		}
+		if (Condition != null)
+		{
+			foreach (var item in Condition.GetParameters())
+			{
+				yield return item;
+			}
+		}
 	}
 
 	private IEnumerable<Token> GetOnTokens(Token? parent)

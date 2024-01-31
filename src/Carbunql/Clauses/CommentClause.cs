@@ -48,9 +48,9 @@ public class CommentClause : IList<string>, IQueryCommandable
 		yield break;
 	}
 
-	public IDictionary<string, object?> GetParameters()
+	public IEnumerable<QueryParameter> GetParameters()
 	{
-		return EmptyParameters.Get();
+		yield break;
 	}
 
 	public IEnumerable<PhysicalTable> GetPhysicalTables()

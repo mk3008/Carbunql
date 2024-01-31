@@ -64,14 +64,15 @@ public class WithClause : IList<CommonTable>, IQueryCommandable
 		}
 	}
 
-	public IDictionary<string, object?> GetParameters()
+	public IEnumerable<QueryParameter> GetParameters()
 	{
-		var prm = EmptyParameters.Get();
-		foreach (var item in CommonTables)
+		foreach (var ct in CommonTables)
 		{
-			prm = prm.Merge(item.GetParameters());
+			foreach (var prm in ct.GetParameters())
+			{
+				yield return prm;
+			}
 		}
-		return prm;
 	}
 
 	public IEnumerable<SelectQuery> GetInternalQueries()

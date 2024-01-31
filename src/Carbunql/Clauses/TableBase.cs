@@ -35,9 +35,9 @@ public abstract class TableBase : IQueryCommandable
 		return new SelectableTable(this, alias, columnAliases);
 	}
 
-	public virtual IDictionary<string, object?> GetParameters()
+	public virtual IEnumerable<QueryParameter> GetParameters()
 	{
-		return EmptyParameters.Get();
+		yield break;
 	}
 
 	public virtual IList<string> GetColumnNames()

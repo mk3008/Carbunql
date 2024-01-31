@@ -53,11 +53,20 @@ public abstract class ValueBase : IQueryCommandable
 		foreach (var item in OperatableValue.Value.GetOperators()) yield return item;
 	}
 
-	public virtual IDictionary<string, object?> GetParameters()
+	public virtual IEnumerable<QueryParameter> GetParameters()
 	{
-		var prm = GetParametersCore();
-		prm = prm.Merge(OperatableValue?.GetParameters());
-		return prm;
+		foreach (var item in GetParametersCore())
+		{
+			yield return item;
+		};
+		var q = OperatableValue?.GetParameters();
+		if (q != null)
+		{
+			foreach (var item in q)
+			{
+				yield return item;
+			}
+		}
 	}
 
 	public IEnumerable<SelectQuery> GetInternalQueries()
@@ -118,7 +127,7 @@ public abstract class ValueBase : IQueryCommandable
 		}
 	}
 
-	protected abstract IDictionary<string, object?> GetParametersCore();
+	protected abstract IEnumerable<QueryParameter> GetParametersCore();
 
 	protected abstract IEnumerable<SelectQuery> GetInternalQueriesCore();
 

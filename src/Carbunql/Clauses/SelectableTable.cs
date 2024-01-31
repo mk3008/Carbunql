@@ -67,11 +67,20 @@ public class SelectableTable : IQueryCommandable, ISelectable
 		}
 	}
 
-	public virtual IDictionary<string, object?> GetParameters()
+	public virtual IEnumerable<QueryParameter> GetParameters()
 	{
-		var prm = Table.GetParameters();
-		prm = prm.Merge(ColumnAliases?.GetParameters());
-		return prm;
+		foreach (var item in Table.GetParameters())
+		{
+			yield return item;
+		}
+		var q = ColumnAliases?.GetParameters();
+		if (q != null)
+		{
+			foreach (var item in q)
+			{
+				yield return item;
+			}
+		}
 	}
 
 	public IEnumerable<string> GetColumnNames()

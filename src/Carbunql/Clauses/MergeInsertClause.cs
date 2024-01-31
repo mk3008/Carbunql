@@ -22,7 +22,7 @@ public class MergeInsertClause : IQueryCommandable
 		yield return Token.ReservedBracketEnd(this, parent);
 	}
 
-	public virtual IDictionary<string, object?> GetParameters()
+	public virtual IEnumerable<QueryParameter> GetParameters()
 	{
 		return ColumnAliases.GetParameters();
 	}

@@ -30,14 +30,16 @@ public class WindowClause : IList<NamedWindowDefinition>, IQueryCommandable
 		}
 	}
 
-	public IDictionary<string, object?> GetParameters()
+	public IEnumerable<QueryParameter> GetParameters()
 	{
 		var prm = EmptyParameters.Get();
 		foreach (var item in NamedWindowDefinitions)
 		{
-			prm = prm.Merge(item.GetParameters());
+			foreach (var p in item.GetParameters())
+			{
+				yield return p;
+			}
 		}
-		return prm;
 	}
 
 	public IEnumerable<PhysicalTable> GetPhysicalTables()

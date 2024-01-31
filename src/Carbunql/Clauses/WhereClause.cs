@@ -13,7 +13,7 @@ public class WhereClause : IQueryCommandable
 
 	public ValueBase Condition { get; init; }
 
-	public IDictionary<string, object?> GetParameters()
+	public IEnumerable<QueryParameter> GetParameters()
 	{
 		return Condition.GetParameters();
 	}

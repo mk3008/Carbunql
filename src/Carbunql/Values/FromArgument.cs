@@ -43,11 +43,16 @@ public class FromArgument : ValueBase
 		foreach (var item in Value.GetTokens(parent)) yield return item;
 	}
 
-	protected override IDictionary<string, object?> GetParametersCore()
+	protected override IEnumerable<QueryParameter> GetParametersCore()
 	{
-		var prm = Unit.GetParameters();
-		prm = prm.Merge(Value.GetParameters());
-		return prm;
+		foreach (var item in Unit.GetParameters())
+		{
+			yield return item;
+		}
+		foreach (var item in Value.GetParameters())
+		{
+			yield return item;
+		}
 	}
 
 	protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()

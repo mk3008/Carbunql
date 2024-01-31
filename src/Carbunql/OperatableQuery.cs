@@ -23,7 +23,7 @@ public class OperatableQuery : IQueryCommandable
 
 	public IReadQuery Query { get; init; }
 
-	public IDictionary<string, object?> GetParameters()
+	public IEnumerable<QueryParameter> GetParameters()
 	{
 		return Query.GetParameters();
 	}

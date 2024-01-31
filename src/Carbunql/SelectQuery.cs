@@ -69,15 +69,48 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
 
 	public override SelectQuery GetOrNewSelectQuery() => this;
 
-	public override IDictionary<string, object?> GetInnerParameters()
+	public override IEnumerable<QueryParameter> GetInnerParameters()
 	{
-		var prm = EmptyParameters.Get();
-		prm = prm.Merge(FromClause?.GetParameters());
-		prm = prm.Merge(WhereClause?.GetParameters());
-		prm = prm.Merge(GroupClause?.GetParameters());
-		prm = prm.Merge(HavingClause?.GetParameters());
-		prm = prm.Merge(WindowClause?.GetParameters());
-		return prm;
+		var q = FromClause?.GetParameters();
+		if (q != null)
+		{
+			foreach (var item in q)
+			{
+				yield return item;
+			}
+		}
+		q = WhereClause?.GetParameters();
+		if (q != null)
+		{
+			foreach (var item in q)
+			{
+				yield return item;
+			}
+		}
+		q = GroupClause?.GetParameters();
+		if (q != null)
+		{
+			foreach (var item in q)
+			{
+				yield return item;
+			}
+		}
+		q = HavingClause?.GetParameters();
+		if (q != null)
+		{
+			foreach (var item in q)
+			{
+				yield return item;
+			}
+		}
+		q = WindowClause?.GetParameters();
+		if (q != null)
+		{
+			foreach (var item in q)
+			{
+				yield return item;
+			}
+		}
 	}
 
 	public override SelectableTable ToSelectableTable(IEnumerable<string>? columnAliases)

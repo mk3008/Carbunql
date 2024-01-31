@@ -27,7 +27,7 @@ public class NamedWindowDefinition : IQueryCommandable
 		foreach (var item in WindowDefinition.GetInternalQueries()) yield return item;
 	}
 
-	public IDictionary<string, object?> GetParameters()
+	public IEnumerable<QueryParameter> GetParameters()
 	{
 		return WindowDefinition.GetParameters();
 	}

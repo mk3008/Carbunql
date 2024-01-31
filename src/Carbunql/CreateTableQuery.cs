@@ -22,7 +22,7 @@ public class CreateTableQuery : IQueryCommandable, ICommentable
 
 	public IReadQuery? Query { get; set; }
 
-	public IDictionary<string, object?>? Parameters { get; set; }
+	public IEnumerable<QueryParameter>? Parameters { get; set; }
 
 	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
@@ -42,11 +42,15 @@ public class CreateTableQuery : IQueryCommandable, ICommentable
 		}
 	}
 
-	public virtual IDictionary<string, object?> GetParameters()
+	public virtual IEnumerable<QueryParameter> GetParameters()
 	{
-		var prm = EmptyParameters.Get();
-		prm = prm.Merge(Parameters);
-		return prm;
+		if (Parameters != null)
+		{
+			foreach (var item in Parameters)
+			{
+				yield return item;
+			}
+		}
 	}
 
 	public IEnumerable<Token> GetTokens(Token? parent)

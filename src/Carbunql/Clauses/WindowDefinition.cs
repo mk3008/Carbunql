@@ -1,5 +1,4 @@
-﻿using Carbunql.Extensions;
-using Carbunql.Tables;
+﻿using Carbunql.Tables;
 using MessagePack;
 
 namespace Carbunql.Clauses;
@@ -58,22 +57,25 @@ public class WindowDefinition : IQueryCommandable
 		}
 	}
 
-	public IDictionary<string, object?> GetParameters()
+	public IEnumerable<QueryParameter> GetParameters()
 	{
-		var prm = EmptyParameters.Get();
-
-		if (!string.IsNullOrEmpty(Name)) return prm;
-		if (PartitionBy == null && OrderBy == null) return prm;
+		if (!string.IsNullOrEmpty(Name)) yield break;
+		if (PartitionBy == null && OrderBy == null) yield break;
 
 		if (PartitionBy != null)
 		{
-			prm = prm.Merge(PartitionBy.GetParameters());
+			foreach (var item in PartitionBy.GetParameters())
+			{
+				yield return item;
+			}
 		}
 		if (OrderBy != null)
 		{
-			prm = prm.Merge(OrderBy.GetParameters());
+			foreach (var item in OrderBy.GetParameters())
+			{
+				yield return item;
+			}
 		}
-		return prm;
 	}
 
 	public IEnumerable<PhysicalTable> GetPhysicalTables()
@@ -83,11 +85,17 @@ public class WindowDefinition : IQueryCommandable
 
 		if (PartitionBy != null)
 		{
-			foreach (var item in PartitionBy.GetPhysicalTables()) yield return item;
+			foreach (var item in PartitionBy.GetPhysicalTables())
+			{
+				yield return item;
+			}
 		}
 		if (OrderBy != null)
 		{
-			foreach (var item in OrderBy.GetPhysicalTables()) yield return item;
+			foreach (var item in OrderBy.GetPhysicalTables())
+			{
+				yield return item;
+			}
 		}
 	}
 
@@ -98,11 +106,17 @@ public class WindowDefinition : IQueryCommandable
 
 		if (PartitionBy != null)
 		{
-			foreach (var item in PartitionBy.GetCommonTables()) yield return item;
+			foreach (var item in PartitionBy.GetCommonTables())
+			{
+				yield return item;
+			}
 		}
 		if (OrderBy != null)
 		{
-			foreach (var item in OrderBy.GetCommonTables()) yield return item;
+			foreach (var item in OrderBy.GetCommonTables())
+			{
+				yield return item;
+			}
 		}
 	}
 
@@ -121,11 +135,17 @@ public class WindowDefinition : IQueryCommandable
 
 		if (PartitionBy != null)
 		{
-			foreach (var item in PartitionBy.GetTokens(bracket)) yield return item;
+			foreach (var item in PartitionBy.GetTokens(bracket))
+			{
+				yield return item;
+			}
 		}
 		if (OrderBy != null)
 		{
-			foreach (var item in OrderBy.GetTokens(bracket)) yield return item;
+			foreach (var item in OrderBy.GetTokens(bracket))
+			{
+				yield return item;
+			}
 		}
 
 		yield return Token.ReservedBracketEnd(this, parent);

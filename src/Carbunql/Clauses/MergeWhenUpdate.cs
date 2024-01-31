@@ -11,12 +11,19 @@ public class MergeWhenUpdate : MergeCondition
 
 	public MergeUpdateQuery Query { get; init; }
 
-	public override IDictionary<string, object?> GetParameters()
+	public override IEnumerable<QueryParameter> GetParameters()
 	{
-		var prm = EmptyParameters.Get();
-		prm = prm.Merge(Query.GetParameters());
-		prm = prm.Merge(Condition?.GetParameters());
-		return prm;
+		foreach (var item in Query.GetParameters())
+		{
+			yield return item;
+		}
+		if (Condition != null)
+		{
+			foreach (var item in Condition.GetParameters())
+			{
+				yield return item;
+			}
+		}
 	}
 
 	public override IEnumerable<Token> GetTokens(Token? parent)

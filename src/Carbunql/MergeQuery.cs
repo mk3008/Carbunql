@@ -40,7 +40,7 @@ public class MergeQuery : IQueryCommandable
 
 	public WhenClause? WhenClause { get; set; }
 
-	public IDictionary<string, object?>? Parameters { get; set; }
+	public IEnumerable<QueryParameter>? Parameters { get; set; }
 
 	public IReadQuery Datasource { get; init; }
 
@@ -124,15 +124,43 @@ public class MergeQuery : IQueryCommandable
 		}
 	}
 
-	public virtual IDictionary<string, object?> GetParameters()
+	public virtual IEnumerable<QueryParameter> GetParameters()
 	{
-		var prm = EmptyParameters.Get();
-		prm = prm.Merge(WithClause?.GetParameters());
-		prm = prm.Merge(MergeClause?.GetParameters());
-		prm = prm.Merge(UsingClause?.GetParameters());
-		prm = prm.Merge(WhenClause?.GetParameters());
-		prm = prm.Merge(Parameters);
-		return prm;
+		if (WithClause != null)
+		{
+			foreach (var item in WithClause.GetParameters())
+			{
+				yield return item;
+			}
+		}
+		if (MergeClause != null)
+		{
+			foreach (var item in MergeClause.GetParameters())
+			{
+				yield return item;
+			}
+		}
+		if (UsingClause != null)
+		{
+			foreach (var item in UsingClause.GetParameters())
+			{
+				yield return item;
+			}
+		}
+		if (WhenClause != null)
+		{
+			foreach (var item in WhenClause.GetParameters())
+			{
+				yield return item;
+			}
+		}
+		if (Parameters != null)
+		{
+			foreach (var item in Parameters)
+			{
+				yield return item;
+			}
+		}
 	}
 
 	public IEnumerable<Token> GetTokens(Token? parent)

@@ -105,7 +105,7 @@ public class WhereTest
 		Assert.Equal(":val", lst[11].Text);
 
 		Assert.Single(sq.Parameters);
-		var val = sq.Parameters[":val"];
+		var val = sq.Parameters.Where(x => x.ParameterName == ":val").Select(x => x.Value).FirstOrDefault();
 		if (val == null) throw new NullReferenceException();
 		Assert.Equal("1", val.ToString());
 	}

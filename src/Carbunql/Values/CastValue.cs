@@ -69,11 +69,16 @@ public class CastValue : ValueBase
 		}
 	}
 
-	protected override IDictionary<string, object?> GetParametersCore()
+	protected override IEnumerable<QueryParameter> GetParametersCore()
 	{
-		var prm = Inner.GetParameters();
-		prm = prm.Merge(Type.GetParameters());
-		return prm;
+		foreach (var item in Inner.GetParameters())
+		{
+			yield return item;
+		}
+		foreach (var item in Type.GetParameters())
+		{
+			yield return item;
+		}
 	}
 
 	protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()

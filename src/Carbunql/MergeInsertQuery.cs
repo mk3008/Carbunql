@@ -1,5 +1,4 @@
 ﻿using Carbunql.Clauses;
-using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
 
@@ -11,12 +10,22 @@ public class MergeInsertQuery : IQueryCommandable
 
 	public ValueCollection? Destination { get; set; }
 
-	public virtual IDictionary<string, object?> GetParameters()
+	public virtual IEnumerable<QueryParameter> GetParameters()
 	{
-		var prm = EmptyParameters.Get();
-		prm = prm.Merge(Destination?.GetParameters());
-		prm = prm.Merge(Datasource?.GetParameters());
-		return prm;
+		if (Destination != null)
+		{
+			foreach (var item in Destination.GetParameters())
+			{
+				yield return item;
+			}
+		}
+		if (Datasource != null)
+		{
+			foreach (var item in Datasource.GetParameters())
+			{
+				yield return item;
+			}
+		}
 	}
 
 	public IEnumerable<SelectQuery> GetInternalQueries()

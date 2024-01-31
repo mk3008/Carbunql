@@ -34,7 +34,7 @@ public class DeleteClause : IQueryCommandable
 		}
 	}
 
-	public IDictionary<string, object?> GetParameters()
+	public IEnumerable<QueryParameter> GetParameters()
 	{
 		return Table.GetParameters();
 	}

@@ -49,12 +49,12 @@ public class ValuesTest
 
 		foreach (var item in q.GetParameters())
 		{
-			Output.WriteLine($"{item.Key} : {item.Value}");
+			Output.WriteLine($"{item.ParameterName} : {item.Value}");
 		}
 
 		Monitor.Log(q);
 
-		Assert.Equal(6, q.GetParameters().Count);
+		Assert.Equal(6, q.GetParameters().ToList().Count);
 
 		var lst = q.GetTokens().ToList();
 		Assert.Equal(18, lst.Count());
@@ -82,12 +82,12 @@ public class ValuesTest
 
 		foreach (var item in q.GetParameters())
 		{
-			Output.WriteLine($"{item.Key} : {item.Value}");
+			Output.WriteLine($"{item.ParameterName} : {item.Value}");
 		}
 
 		Monitor.Log(q);
 
-		Assert.Equal(6, q.GetParameters().Count);
+		Assert.Equal(6, q.GetParameters().ToList().Count);
 
 		var lst = q.GetTokens().ToList();
 		Assert.Equal(18, lst.Count());
@@ -121,12 +121,12 @@ public class ValuesTest
 
 		foreach (var item in q.GetParameters())
 		{
-			Output.WriteLine($"{item.Key} : {item.Value}");
+			Output.WriteLine($"{item.ParameterName} : {item.Value}");
 		}
 
 		Monitor.Log(q);
 
-		Assert.Equal(6, q.GetParameters().Count);
+		Assert.Equal(6, q.GetParameters().ToList().Count);
 
 		var lst = q.GetTokens().ToList();
 		Assert.Equal(18, lst.Count());

@@ -59,12 +59,19 @@ public class WhenExpression : IQueryCommandable
 		}
 	}
 
-	public IDictionary<string, object?> GetParameters()
+	public IEnumerable<QueryParameter> GetParameters()
 	{
-		var prm = EmptyParameters.Get();
-		prm = prm.Merge(Condition?.GetParameters());
-		prm = prm.Merge(Value.GetParameters());
-		return prm;
+		if (Condition != null)
+		{
+			foreach (var item in Condition.GetParameters())
+			{
+				yield return item;
+			}
+		}
+		foreach (var item in Value.GetParameters())
+		{
+			yield return item;
+		}
 	}
 
 	public IEnumerable<PhysicalTable> GetPhysicalTables()

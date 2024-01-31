@@ -44,7 +44,7 @@ public class SortableItem : IQueryCommandable
 		}
 	}
 
-	public IDictionary<string, object?> GetParameters()
+	public IEnumerable<QueryParameter> GetParameters()
 	{
 		return Value.GetParameters();
 	}

@@ -33,10 +33,9 @@ public class WithoutTimeZoneClause : ValueBase
 		yield return Token.Reserved(this, parent, "without time zone");
 	}
 
-	protected override IDictionary<string, object?> GetParametersCore()
+	protected override IEnumerable<QueryParameter> GetParametersCore()
 	{
-		var prm = Value.GetParameters();
-		return prm;
+		return Value.GetParameters();
 	}
 
 	protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()

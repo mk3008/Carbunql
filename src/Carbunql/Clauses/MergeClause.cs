@@ -11,7 +11,7 @@ public class MergeClause : IQueryCommandable
 
 	public SelectableTable Table { get; init; }
 
-	public IDictionary<string, object?> GetParameters()
+	public IEnumerable<QueryParameter> GetParameters()
 	{
 		return Table.GetParameters();
 	}

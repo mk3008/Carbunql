@@ -33,7 +33,7 @@ public class VirtualTable : TableBase
 		yield return Token.ReservedBracketEnd(this, parent);
 	}
 
-	public override IDictionary<string, object?> GetParameters()
+	public override IEnumerable<QueryParameter> GetParameters()
 	{
 		return Query.GetParameters();
 	}

@@ -103,11 +103,15 @@ public class ValueCollection : ValueBase, IList<ValueBase>, IQueryCommandable
 		}
 	}
 
-	protected override IDictionary<string, object?> GetParametersCore()
+	protected override IEnumerable<QueryParameter> GetParametersCore()
 	{
-		var prm = EmptyParameters.Get();
-		Collection.ForEach(x => prm = prm.Merge(x.GetParameters()));
-		return prm;
+		foreach (var item in Collection)
+		{
+			foreach (var p in item.GetParameters())
+			{
+				yield return p;
+			}
+		}
 	}
 
 	public void Add(string value)

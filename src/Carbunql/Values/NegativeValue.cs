@@ -33,7 +33,7 @@ public class NegativeValue : ValueBase
 		foreach (var item in Inner.GetTokens(parent)) yield return item;
 	}
 
-	protected override IDictionary<string, object?> GetParametersCore()
+	protected override IEnumerable<QueryParameter> GetParametersCore()
 	{
 		return Inner.GetParameters();
 	}

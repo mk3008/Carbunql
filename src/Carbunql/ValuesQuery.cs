@@ -206,11 +206,15 @@ public class ValuesQuery : ReadQuery
 		return ToSelectQuery();
 	}
 
-	public override IDictionary<string, object?> GetInnerParameters()
+	public override IEnumerable<QueryParameter> GetInnerParameters()
 	{
-		var prm = EmptyParameters.Get();
-		Rows.ForEach(x => prm = prm.Merge(x.GetParameters()));
-		return prm;
+		foreach (var item in Rows)
+		{
+			foreach (var p in item.GetParameters())
+			{
+				yield return p;
+			}
+		}
 	}
 
 	public SelectQuery ToSelectQuery()

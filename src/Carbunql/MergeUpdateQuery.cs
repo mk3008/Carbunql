@@ -41,11 +41,15 @@ public class MergeUpdateQuery : IQueryCommandable
 		}
 	}
 
-	public virtual IDictionary<string, object?> GetParameters()
+	public virtual IEnumerable<QueryParameter> GetParameters()
 	{
-		var prm = EmptyParameters.Get();
-		prm = prm.Merge(SetClause?.GetParameters());
-		return prm;
+		if (SetClause != null)
+		{
+			foreach (var item in SetClause.GetParameters())
+			{
+				yield return item;
+			}
+		}
 	}
 
 	public IEnumerable<Token> GetTokens(Token? parent)
