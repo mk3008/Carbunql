@@ -58,8 +58,8 @@ WINDOW
 		var (_, a) = sq.From("table_a").As("a");
 
 		var w = new NamedWindowDefinition("w1");
-		w.AddPartition(new ColumnValue(a, "name"));
-		w.AddOrder(new ColumnValue(a, "a_id"));
+		w.Partition(new ColumnValue(a, "name"));
+		w.Order(new ColumnValue(a, "a_id"));
 
 		sq.Window(w);
 
@@ -78,6 +78,33 @@ WINDOW
         ORDER BY
             a.a_id
     )";
+
+		Assert.Equal(expect, sq.ToText().ToString(), true, true, true);
+	}
+
+	[Fact]
+	public void Window()
+	{
+		var sq = new SelectQuery();
+		var (_, a) = sq.From("table_a").As("a");
+
+		var w = new WindowDefinition();
+		w.Partition(new ColumnValue(a, "name"));
+		w.Order(new ColumnValue(a, "a_id"));
+
+		sq.Select(new FunctionValue("row_number", new OverClause(w))).As("row_num");
+
+		Monitor.Log(sq);
+
+		var expect = @"SELECT
+    ROW_NUMBER() OVER(
+        PARTITION BY
+            a.name
+        ORDER BY
+            a.a_id
+    ) AS row_num
+FROM
+    table_a AS a";
 
 		Assert.Equal(expect, sq.ToText().ToString(), true, true, true);
 	}

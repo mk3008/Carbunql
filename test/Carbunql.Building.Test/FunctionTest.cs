@@ -48,8 +48,8 @@ public class FunctionTest
 		sq.Select(() =>
 		{
 			var wf = new OverClause();
-			wf.AddPartition(new ColumnValue(a, "parent_id"));
-			wf.AddOrder(new ColumnValue(a, "id").ToSortable());
+			wf.Partition(new ColumnValue(a, "parent_id"));
+			wf.Order(new ColumnValue(a, "id").ToSortable());
 			return new FunctionValue("row_number", wf);
 		}).As("val");
 

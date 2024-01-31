@@ -231,8 +231,8 @@ public partial class SerializeTest
 	public void WindowFunction()
 	{
 		var win = new OverClause();
-		win.AddPartition(new ColumnValue("shop_id"));
-		win.AddOrder(new Clauses.SortableItem(new ColumnValue("order_id")));
+		win.Partition(new ColumnValue("shop_id"));
+		win.Order(new SortableItem(new ColumnValue("order_id")));
 
 		var sq = new FunctionValue("row_number", win);
 
