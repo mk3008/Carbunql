@@ -58,6 +58,8 @@ public class TokenFormatLogic
 	{
 		if (token.Sender is OperatableQuery) return false;
 
+		if (token.Text.Equals("(") && token.Sender is DistinctClause) return false;
+
 		if (token.Text.Equals("(") && token.IsReserved == false) return false;
 		if (token.Parent != null && token.Parent.Sender is ValuesQuery) return false;
 		if (token.Sender is FunctionValue) return false;

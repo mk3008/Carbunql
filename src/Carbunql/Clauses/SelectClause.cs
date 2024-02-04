@@ -1,5 +1,4 @@
-﻿using Carbunql.Extensions;
-using Carbunql.Tables;
+﻿using Carbunql.Tables;
 using MessagePack;
 
 namespace Carbunql.Clauses;
@@ -16,12 +15,40 @@ public class SelectClause : QueryCommandCollection<SelectableItem>, IQueryComman
 		Items.AddRange(collection);
 	}
 
-	public bool HasDistinctKeyword { get; set; } = false;
+	[Obsolete("Using Distinct property")]
+	public bool HasDistinctKeyword
+	{
+		get
+		{
+			return (Distinct != null);
+		}
+		set
+		{
+			if (value)
+			{
+				Distinct = new DistinctClause();
+			}
+			else
+			{
+				Distinct = null;
+			}
+		}
+	}
 
-	public ValueBase? Top { get; set; }
+	public DistinctClause? Distinct { get; set; }
+
+	public TopClause? Top { get; set; }
 
 	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
+		if (Distinct != null)
+		{
+			foreach (var item in Distinct.GetInternalQueries())
+			{
+				yield return item;
+			}
+		}
+
 		if (Top != null)
 		{
 			foreach (var item in Top.GetInternalQueries())
@@ -41,6 +68,14 @@ public class SelectClause : QueryCommandCollection<SelectableItem>, IQueryComman
 
 	public IEnumerable<PhysicalTable> GetPhysicalTables()
 	{
+		if (Distinct != null)
+		{
+			foreach (var item in Distinct.GetPhysicalTables())
+			{
+				yield return item;
+			}
+		}
+
 		if (Top != null)
 		{
 			foreach (var item in Top.GetPhysicalTables())
@@ -60,6 +95,14 @@ public class SelectClause : QueryCommandCollection<SelectableItem>, IQueryComman
 
 	public IEnumerable<CommonTable> GetCommonTables()
 	{
+		if (Distinct != null)
+		{
+			foreach (var item in Distinct.GetCommonTables())
+			{
+				yield return item;
+			}
+		}
+
 		if (Top != null)
 		{
 			foreach (var item in Top.GetCommonTables())
@@ -79,27 +122,26 @@ public class SelectClause : QueryCommandCollection<SelectableItem>, IQueryComman
 
 	public override IEnumerable<Token> GetTokens(Token? parent)
 	{
-		Token clause = GetClauseToken(parent);
+		var clause = Token.Reserved(this, parent, "select");
 		yield return clause;
 
-		foreach (var item in base.GetTokens(clause)) yield return item;
-	}
+		if (Distinct != null)
+		{
+			foreach (var item in Distinct.GetTokens(parent))
+			{
+				yield return item;
+			}
+		}
 
-	private Token GetClauseToken(Token? parent)
-	{
-		if (HasDistinctKeyword && Top != null)
+		if (Top != null)
 		{
-			return Token.Reserved(this, parent, "select distinct top " + Top.GetTokens(parent).ToText());
+			foreach (var item in Top.GetTokens(parent))
+			{
+				yield return item;
+			}
 		}
-		else if (HasDistinctKeyword)
-		{
-			return Token.Reserved(this, parent, "select distinct");
-		}
-		else if (Top != null)
-		{
-			return Token.Reserved(this, parent, "select top " + Top.GetTokens(parent).ToText());
-		}
-		return Token.Reserved(this, parent, "select");
+
+		foreach (var item in base.GetTokens(clause)) yield return item;
 	}
 
 	public void FilterInColumns(IEnumerable<string> columns)

@@ -793,4 +793,65 @@ FROM
 
 		Assert.Equal(text, sq.ToText(), true, true, true);
 	}
+
+	[Fact]
+	public void DistinctOn()
+	{
+		var text = @"SELECT DISTINCT ON (location)
+    location,
+    time,
+    report
+FROM
+    weather_reports
+ORDER BY
+    location,
+    time DESC";
+
+		var sq = QueryParser.Parse(text);
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+		Assert.Equal(18, lst.Count);
+
+		Assert.Equal(text, sq.ToText(), true, true, true);
+	}
+
+	[Fact]
+	public void Top()
+	{
+		var text = @"SELECT TOP 5
+    id,
+    value
+FROM
+    Table
+ORDER BY
+    id";
+
+		var sq = QueryParser.Parse(text);
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+		Assert.Equal(10, lst.Count);
+
+		Assert.Equal(text, sq.ToText(), true, true, true);
+	}
+
+	[Fact]
+	public void TopSelectAll()
+	{
+		var text = @"SELECT TOP 5
+    *
+FROM
+    Table
+ORDER BY
+    id";
+
+		var sq = QueryParser.Parse(text);
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+		Assert.Equal(8, lst.Count);
+
+		Assert.Equal(text, sq.ToText(), true, true, true);
+	}
 }

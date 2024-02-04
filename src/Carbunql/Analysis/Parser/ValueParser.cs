@@ -23,16 +23,19 @@ public static class ValueParser
 		"and", "is", "is distinct from", "is not", "is not distinct from", "or"
 	};
 
-	private static string[] Operators => ArithmeticOperators.Concat(LogicalOperators).ToArray();
-
 	public static ValueBase Parse(ITokenReader r)
 	{
-
 		ValueBase value = ParseMain(r);
 
 		if (r.Peek().StartsWith(ArithmeticOperators) || r.Peek().IsEqualNoCase(LogicalOperators))
 		{
 			var op = r.Read();
+			if (op == "*" && r.Peek().IsEqualNoCase("from"))
+			{
+				r.RollBack();
+				return value;
+			}
+
 			value.AddOperatableValue(op, Parse(r));
 		}
 		return value;

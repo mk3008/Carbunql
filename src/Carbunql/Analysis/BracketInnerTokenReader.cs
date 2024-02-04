@@ -56,4 +56,9 @@ public class BracketInnerTokenReader : ITokenReader, IDisposable
 	{
 		Reader.Read(EndSymbol);
 	}
+
+	public void RollBack()
+	{
+		throw new NotImplementedException();
+	}
 }

@@ -8,6 +8,8 @@ public interface ITokenReader
 
 	string Read();
 
+	void RollBack();
+
 	int CurrentBracketLevel { get; }
 }
 
