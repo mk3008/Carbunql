@@ -13,6 +13,10 @@ public class SqlTokenReader : TokenReader, ITokenReader
 
 	private string Cache { get; set; } = string.Empty;
 
+	private string RollBackCache { get; set; } = string.Empty;
+
+	private string ReadedCache { get; set; } = string.Empty;
+
 	/// <summary>
 	/// Method to peek at a token.
 	/// </summary>
@@ -23,14 +27,26 @@ public class SqlTokenReader : TokenReader, ITokenReader
 
 		if (string.IsNullOrEmpty(Cache))
 		{
-			Cache = base.Read();
+			if (!string.IsNullOrEmpty(ReadedCache))
+			{
+				Cache = ReadedCache;
+				ReadedCache = string.Empty;
+			}
+			else
+			{
+				Cache = base.Read();
+			}
 		}
 		return Cache;
 	}
 
 	private void Commit()
 	{
-		Cache = string.Empty;
+		if (!string.IsNullOrEmpty(Cache))
+		{
+			RollBackCache = Cache;
+			Cache = string.Empty;
+		}
 	}
 
 	/// <summary>
@@ -50,5 +66,14 @@ public class SqlTokenReader : TokenReader, ITokenReader
 		}
 
 		return token;
+	}
+
+	public void RollBack()
+	{
+		if (string.IsNullOrEmpty(RollBackCache)) throw new Exception("fail");
+		if (string.IsNullOrEmpty(Cache)) throw new Exception("fail");
+		ReadedCache = Cache;
+		Cache = RollBackCache;
+		RollBackCache = string.Empty;
 	}
 }

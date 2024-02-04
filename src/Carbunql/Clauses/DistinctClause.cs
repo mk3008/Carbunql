@@ -5,20 +5,21 @@ using System.Collections;
 namespace Carbunql.Clauses;
 
 [MessagePackObject(keyAsPropertyName: true)]
-public class GroupClause : IList<ValueBase>, IQueryCommandable
+public class DistinctClause : IList<ValueBase>, IQueryCommandable
 {
-	public GroupClause()
+	public DistinctClause()
 	{
 		Items = new();
 	}
 
-	public GroupClause(IList<ValueBase> items)
+	public DistinctClause(IList<ValueBase> items)
 	{
 		Items = new();
 		Items.AddRange(items);
 	}
 
 	private List<ValueBase> Items { get; init; }
+
 
 	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
@@ -55,8 +56,14 @@ public class GroupClause : IList<ValueBase>, IQueryCommandable
 
 	public IEnumerable<Token> GetTokens(Token? parent)
 	{
-		var clause = Token.Reserved(this, parent, "group by");
+		var clause = Token.Reserved(this, parent, "distinct");
 		yield return clause;
+
+		if (!Items.Any()) yield break;
+
+		yield return Token.Reserved(this, parent, "on");
+		var bracket = Token.ReservedBracketStart(this, parent);
+		yield return bracket;
 
 		var isFirst = true;
 		foreach (var item in Items)
@@ -67,9 +74,14 @@ public class GroupClause : IList<ValueBase>, IQueryCommandable
 			}
 			else
 			{
-				yield return Token.Comma(this, clause);
+				yield return Token.Comma(this, bracket);
 			}
-			foreach (var token in item.GetTokens(clause)) yield return token;
+			foreach (var token in item.GetTokens(bracket)) yield return token;
+		}
+
+		if (!isFirst)
+		{
+			yield return Token.ReservedBracketEnd(this, parent);
 		}
 	}
 
@@ -85,11 +97,26 @@ public class GroupClause : IList<ValueBase>, IQueryCommandable
 	}
 
 	#region implements IList<ValueBase>
-	public ValueBase this[int index] { get => ((IList<ValueBase>)Items)[index]; set => ((IList<ValueBase>)Items)[index] = value; }
-
 	public int Count => ((ICollection<ValueBase>)Items).Count;
 
 	public bool IsReadOnly => ((ICollection<ValueBase>)Items).IsReadOnly;
+
+	public ValueBase this[int index] { get => ((IList<ValueBase>)Items)[index]; set => ((IList<ValueBase>)Items)[index] = value; }
+
+	public int IndexOf(ValueBase item)
+	{
+		return ((IList<ValueBase>)Items).IndexOf(item);
+	}
+
+	public void Insert(int index, ValueBase item)
+	{
+		((IList<ValueBase>)Items).Insert(index, item);
+	}
+
+	public void RemoveAt(int index)
+	{
+		((IList<ValueBase>)Items).RemoveAt(index);
+	}
 
 	public void Add(ValueBase item)
 	{
@@ -111,29 +138,14 @@ public class GroupClause : IList<ValueBase>, IQueryCommandable
 		((ICollection<ValueBase>)Items).CopyTo(array, arrayIndex);
 	}
 
-	public IEnumerator<ValueBase> GetEnumerator()
-	{
-		return ((IEnumerable<ValueBase>)Items).GetEnumerator();
-	}
-
-	public int IndexOf(ValueBase item)
-	{
-		return ((IList<ValueBase>)Items).IndexOf(item);
-	}
-
-	public void Insert(int index, ValueBase item)
-	{
-		((IList<ValueBase>)Items).Insert(index, item);
-	}
-
 	public bool Remove(ValueBase item)
 	{
 		return ((ICollection<ValueBase>)Items).Remove(item);
 	}
 
-	public void RemoveAt(int index)
+	public IEnumerator<ValueBase> GetEnumerator()
 	{
-		((IList<ValueBase>)Items).RemoveAt(index);
+		return ((IEnumerable<ValueBase>)Items).GetEnumerator();
 	}
 
 	IEnumerator IEnumerable.GetEnumerator()

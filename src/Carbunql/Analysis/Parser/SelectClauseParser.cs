@@ -15,13 +15,21 @@ public static class SelectClauseParser
 	{
 		r.ReadOrDefault("select");
 
-		var distinct = r.ReadOrDefault("distinct") != null ? true : false;
-		if (r.ReadOrDefault("top") == null)
+		DistinctClause? distinct = null;
+		TopClause? top = null;
+		if (r.Peek().IsEqualNoCase("distinct"))
 		{
-			return new SelectClause(ParseItems(r).ToList()) { HasDistinctKeyword = distinct };
+			distinct = DistinctClauseParser.Parse(r);
 		}
-		var top = ValueParser.Parse(r);
-		return new SelectClause(ParseItems(r).ToList()) { HasDistinctKeyword = distinct, Top = top };
+		if (r.Peek().IsEqualNoCase("top"))
+		{
+			top = TopParser.Parse(r);
+		}
+		return new SelectClause(ParseItems(r).ToList())
+		{
+			Distinct = distinct,
+			Top = top
+		};
 	}
 
 	private static IEnumerable<SelectableItem> ParseItems(ITokenReader r)
