@@ -9,7 +9,7 @@ public static class ValueParser
 {
 	public static ValueBase Parse(string text)
 	{
-		using var r = new SqlTokenReader(text);
+		var r = new SqlTokenReader(text);
 		return Parse(r);
 	}
 

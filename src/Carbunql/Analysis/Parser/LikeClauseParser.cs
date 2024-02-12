@@ -7,7 +7,7 @@ public static class LikeClauseParser
 {
 	public static LikeClause Parse(ValueBase value, string argument)
 	{
-		using var r = new SqlTokenReader(argument);
+		var r = new SqlTokenReader(argument);
 		return Parse(value, r, false);
 	}
 

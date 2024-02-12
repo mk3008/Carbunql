@@ -7,7 +7,7 @@ public static class OrderClauseParser
 {
 	public static OrderClause Parse(string text)
 	{
-		using var r = new SqlTokenReader(text);
+		var r = new SqlTokenReader(text);
 		return new OrderClause(ReadItems(r).ToList());
 	}
 

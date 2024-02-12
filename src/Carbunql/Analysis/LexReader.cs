@@ -1,5 +1,4 @@
-﻿using Carbunql.Extensions;
-using Cysharp.Text;
+﻿using Cysharp.Text;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Analysis;
@@ -8,7 +7,7 @@ namespace Carbunql.Analysis;
 /// Class for reading text on a Lexeme (Lex) basis.
 /// Reading can only be performed in the forward direction and cannot be reversed.
 /// </summary>
-public abstract class LexReader : IDisposable
+public abstract class LexReader
 {
 	/// <summary>
 	/// Constructor.
@@ -16,51 +15,57 @@ public abstract class LexReader : IDisposable
 	/// <param name="text">The text to be read.</param>
 	public LexReader(string text)
 	{
-		Reader = new CharReader(text);
+		Text = text;
+		TextLength = Text.Length;
 	}
 
-	private CharReader Reader { get; init; }
+	private int Index { get; set; } = 0;
 
-	private static IEnumerable<char> NumericSymbols { get; set; } = "0123456789.".ToArray();
+	private string Text { get; init; }
 
-	private static IEnumerable<char> SpaceChars { get; set; } = " \r\n\t".ToArray();
+	private int TextLength { get; init; }
 
-	private static IEnumerable<char> ForceBreakSymbols { get; set; } = ".,();[]".ToArray();
+	//private bool IsEndOfText => TextLength <= Index;
 
-	private static IEnumerable<char> BitwiseOperatorSymbols { get; set; } = "&|^#~".ToArray();
-
-	private static IEnumerable<char> ArithmeticOperatorSymbols { get; set; } = "+-*/%".ToArray();
-
-	private static IEnumerable<char> RegexOperatorSymbols { get; set; } = "!~*".ToArray();
-
-	private static IEnumerable<char> ComparisonOperatorSymbols { get; set; } = "<>!=".ToArray();
-
-	private static IEnumerable<char> PrefixSymbols { get; set; } = "?:@".ToArray();
-
-	private static IEnumerable<char> TypeConvertSymbols { get; set; } = ":".ToArray();
-
-	private static IEnumerable<char> SingleSymbols => ForceBreakSymbols.Union(BitwiseOperatorSymbols);
-
-	private static IEnumerable<char> MultipleSymbols => ArithmeticOperatorSymbols.Union(ComparisonOperatorSymbols).Union(RegexOperatorSymbols);
-
-	private static IEnumerable<char> AllSymbols => SingleSymbols.Union(MultipleSymbols).Union(PrefixSymbols).Union(SpaceChars).Union(RegexOperatorSymbols).Union(TypeConvertSymbols);
-
-	/// <summary>
-	/// Cache of the peeked Lexeme. This value is used to differentiate between Peek and Read operations.
-	/// </summary>
-	private string Cache { get; set; } = string.Empty;
-
-	/// <summary>
-	/// Peek method allows you to preview the next available Lexeme without advancing the reading position.
-	/// </summary>
-	/// <returns>The next Lexeme to be obtained.</returns>
-	public string Peek()
+	public bool TryPeek(char expect)
 	{
-		if (string.IsNullOrEmpty(Cache))
+		if (TryPeekChar(0, out var c) && c == expect)
 		{
-			Cache = ReadCore();
+			return true;
 		}
-		return Cache;
+		return false;
+	}
+
+	private bool TryPeekChar([MaybeNullWhen(false)] out char c)
+	{
+		return TryPeekChar(0, out c);
+	}
+
+	private bool TryPeekChar(int shift, [MaybeNullWhen(false)] out char c)
+	{
+		c = default;
+		var s = Peek(shift, 1);
+		if (!string.IsNullOrEmpty(s))
+		{
+			c = s.First();
+			return true;
+		}
+		return false;
+	}
+
+	private string Peek(int shift, int length)
+	{
+		if (TextLength == 0) return string.Empty;
+
+		var len = Math.Min(TextLength - Index - shift, length);
+		if (len <= 0) return string.Empty;
+
+		return Text.Substring(Index + shift, len);
+	}
+
+	private string Peek(int length)
+	{
+		return Peek(0, length);
 	}
 
 	/// <summary>
@@ -69,180 +74,161 @@ public abstract class LexReader : IDisposable
 	/// It is recommended to obtain Lexemes through the Peek or Read functions.
 	/// </summary>
 	/// <returns>The retrieved Lexeme.</returns>
-	protected virtual string ReadCore()
+	protected virtual string ReadLex()
 	{
 		SkipSpace();
 
-		using var sb = ZString.CreateStringBuilder();
-
-		if (!Reader.TryRead(out var fc))
+		if (!TryPeekChar(out var fc))
 		{
 			return string.Empty;
-		};
-
-		sb.Append(fc);
-
-		// ex. space
-		if (fc == ' ')
-		{
-			foreach (var item in Reader.Reads(x => SpaceChars.Contains(x)))
-			{
-				sb.Append(item);
-			}
-			return sb.ToString();
 		}
 
 		// ex. 'text'
 		if (fc == '\'')
 		{
-			sb.Append(ReadUntilSingleQuote());
-			return sb.ToString();
+			return Read(1) + ReadUntilSingleQuote();
 		}
 
 		// ex. | or ||
 		if (fc == '|')
 		{
-			if (Reader.TryRead('|', out var c))
+			var lex = string.Empty;
+			if (TryRead("||", out lex))
 			{
-				sb.Append(c);
+				return lex;
 			}
-			return sb.ToString();
+			return Read(1);
 		}
 
 		// ex. - or -- or -> or ->>
 		if (fc == '-')
 		{
-			// --
-			if (Reader.TryRead('-', out var hyphen))
+			var lex = string.Empty;
+
+			if (TryRead("->>", out lex))
 			{
-				sb.Append(hyphen);
-				return sb.ToString();
+				return lex;
 			}
 
-			// -> or ->>
-			if (Reader.TryRead('>', out var geaterThan))
+			if (TryRead("->", out lex))
 			{
-				sb.Append(geaterThan);
-				if (Reader.TryRead('>', out geaterThan))
-				{
-					sb.Append(geaterThan);
-				}
-				return sb.ToString();
+				return lex;
 			}
 
-			// -
-			return sb.ToString();
+			if (TryRead("--", out lex))
+			{
+				return lex;
+			}
+			return Read(1);
 		}
 
 		// ex. # or #> or #>>
 		if (fc == '#')
 		{
-			// #> or #>>
-			if (Reader.TryRead('>', out var greaterThan))
+			var lex = string.Empty;
+
+			if (TryRead("#>>", out lex))
 			{
-				sb.Append(greaterThan);
-				if (Reader.TryRead('>', out greaterThan))
-				{
-					sb.Append(greaterThan);
-				}
-				return sb.ToString();
+				return lex;
 			}
 
-			// #
-			return sb.ToString();
+			if (TryRead("#>", out lex))
+			{
+				return lex;
+			}
+			return Read(1);
 		}
 
 		// ex. / or /*
 		if (fc == '/')
 		{
-			if (Reader.TryRead('*', out var asterisk))
+			var lex = string.Empty;
+			if (TryRead("/*", out lex))
 			{
-				sb.Append(asterisk);
+				return lex;
 			}
-			return sb.ToString();
+			return Read(1);
 		}
 
 		// ex. * or */
 		if (fc == '*')
 		{
-			if (Reader.TryRead('/', out var slash))
+			var lex = string.Empty;
+			if (TryRead("*/", out lex))
 			{
-				sb.Append(slash);
+				return lex;
 			}
-			return sb.ToString();
+			return Read(1);
 		}
 
-		// ex. @@ (MySQL system variable)
-		if (fc == '@')
+		// ex. :: (Postgres cast symbol)
+		if (fc == ':')
 		{
-			if (Reader.TryRead('@', out var atmark))
+			var lex = string.Empty;
+			if (TryRead("::", out lex))
 			{
-				sb.Append(atmark);
+				return lex;
 			}
 			// continue
 		}
 
-		var x = SingleSymbols;
-		// ex. . or , or (
-		if (SingleSymbols.Contains(fc)) return sb.ToString();
-
-		// ::
-		if (fc == ':' && Reader.TryRead(':', out var colon))
+		// ForceBreakSymbols
+		if (".,();[]".Contains(fc))
 		{
-			sb.Append(colon);
-			return sb.ToString();
+			return Read(1);
 		}
 
-		// ex. + or != 
-		if (MultipleSymbols.Contains(fc))
+		// BitwiseOperatorSymbols
+		if ("&|^#~".Contains(fc))
 		{
-			foreach (var item in Reader.Reads((x) => x != '/' && MultipleSymbols.Contains(x)))
-			{
-				sb.Append(item);
-			}
-			return sb.ToString();
+			return Read(1);
 		}
 
 		// ex. 123.45
-		if (fc.IsInteger())
+		if ("0123456789".Contains(fc))
 		{
-			foreach (var item in Reader.Reads(x => NumericSymbols.Contains(x)))
+			return ReadWhile("0123456789.");
+		}
+
+		// operator
+		if ("+-%<>!=".Contains(fc))
+		{
+			return ReadWhile("+-*/%<>!=?:@.&|^#~");
+		}
+
+		using var sb = ZString.CreateStringBuilder();
+
+		// ex. @@ (MySQL system variable prefix)
+		if (fc == '@')
+		{
+			var lex = string.Empty;
+			if (TryRead("@@", out lex))
 			{
-				sb.Append(item);
+				sb.Append(lex);
 			}
-			return sb.ToString();
+			else
+			{
+				sb.Append(Read(1));
+			}
 		}
-
-		var whileFn = (char c) =>
+		else
 		{
-			if (AllSymbols.Contains(c)) return false;
-			return true;
-		};
-
-		foreach (var item in Reader.Reads(whileFn))
-		{
-			sb.Append(item);
+			sb.Append(Read(1));
 		}
+		sb.Append(ReadNotWhile("+-*/%<>!=?:@.&|^#~ \r\n\t.,();[]|"));
+
 		return sb.ToString();
-	}
-
-	/// <summary>
-	/// Reads the peeked Lexeme and finalizes its retrieval.
-	/// </summary>
-	private void Commit()
-	{
-		Cache = string.Empty;
 	}
 
 	/// <summary>
 	/// Method to read a single Lexeme.
 	/// </summary>
 	/// <returns>The read Lexeme.</returns>
-	public string Read()
+	private string Read(int length)
 	{
-		var lex = Peek();
-		Commit();
-		return lex;
+		var s = Peek(length);
+		Index += length;
+		return s;
 	}
 
 	/// <summary>
@@ -253,13 +239,18 @@ public abstract class LexReader : IDisposable
 	/// <exception cref="Exception">Thrown when the actual Lexeme does not match the expected value.</exception>
 	public string Read(string expect)
 	{
-		var tmp = Peek();
-		if (tmp.IsEqualNoCase(expect))
+		SkipSpace();
+
+		var length = expect.Length;
+		var actual = Peek(length);
+
+		if (TryMatch(actual, expect, out var lex))
 		{
-			Commit();
-			return tmp;
+			Index += actual.Length;
+			return lex;
 		}
-		throw new Exception($"expect : '{expect}', actual : '{tmp}'");
+
+		throw new Exception($"expect : '{expect}', actual : '{actual.TrimEnd()}'");
 	}
 
 	/// <summary>
@@ -270,13 +261,19 @@ public abstract class LexReader : IDisposable
 	/// <exception cref="Exception">Thrown when the actual Lexeme does not match any of the expected values.</exception>
 	public string Read(IEnumerable<string> expects)
 	{
-		var tmp = Peek();
-		if (tmp.IsEqualNoCase(expects))
+		SkipSpace();
+
+		var length = expects.Max(x => x.Length);
+		var actual = Peek(length);
+
+		if (TryMatch(actual, expects, out var lex))
 		{
-			Commit();
-			return tmp;
+			Index += lex.Length;
+			return lex;
 		}
-		throw new Exception($"expect : '{expects}', actual : '{tmp}'");
+
+		//debug
+		throw new Exception($"expect : '{string.Join(",", expects)}', actual : '{actual.TrimEnd()}'");
 	}
 
 	/// <summary>
@@ -287,16 +284,7 @@ public abstract class LexReader : IDisposable
 	/// <returns>True if a match is found, false otherwise.</returns>
 	public bool TryRead(string expect, [MaybeNullWhen(false)] out string lex)
 	{
-		lex = default;
-
-		var tmp = Peek();
-		if (tmp.IsEqualNoCase(expect))
-		{
-			lex = tmp;
-			Commit();
-			return true;
-		}
-		return false;
+		return TryRead(new[] { expect }, out lex);
 	}
 
 	/// <summary>
@@ -309,15 +297,20 @@ public abstract class LexReader : IDisposable
 	{
 		lex = default;
 
-		var tmp = Peek();
-		if (tmp.IsEqualNoCase(expects))
+		SkipSpace();
+
+		var length = expects.Max(x => x.Length);
+		var actual = Peek(length);
+
+		if (TryMatch(actual, expects, out lex))
 		{
-			lex = tmp;
-			Commit();
+			Index += lex.Length;
 			return true;
 		}
 		return false;
 	}
+
+	public string Read() => Reads().First();
 
 	/// <summary>
 	/// Method to read Lexemes. Enumerates the read Lexemes.
@@ -325,18 +318,26 @@ public abstract class LexReader : IDisposable
 	/// <returns>Enumerable of the read Lexemes.</returns>
 	public IEnumerable<string> Reads()
 	{
-		var w = Read();
+		var w = ReadLex();
+		if (string.IsNullOrEmpty(w))
+		{
+			yield return string.Empty;
+			yield break;
+		}
 		while (!string.IsNullOrEmpty(w))
 		{
 			yield return w;
-			w = Read();
+			w = ReadLex();
 		}
 	}
 
 	private void SkipSpace()
 	{
-		foreach (var _ in Reader.Reads(x => SpaceChars.Contains(x)))
+		var s = Peek(1);
+		while ((s == " " || s == "\r" || s == "\n" || s == "\t"))
 		{
+			Index++;
+			s = Peek(1);
 		}
 	}
 
@@ -346,45 +347,138 @@ public abstract class LexReader : IDisposable
 	/// <returns>The read string.</returns>
 	protected string ReadUntilLineEnd()
 	{
-		using var sb = ZString.CreateStringBuilder();
-		foreach (var item in Reader.Reads())
-		{
-			if (item != '\n' && item != '\r')
-			{
-				sb.Append(item);
-				continue;
-			}
+		var shift = 0;
 
-			if (item == '\r')
-			{
-				Reader.TryRead('\n', out _);
-			}
-			break;
+		var s = Peek(shift, 1);
+		while (!(s == "\r" || s == "\n" || string.IsNullOrEmpty(s)))
+		{
+			shift++;
+			s = Peek(shift, 1);
 		}
-		return sb.ToString();
+
+		var lex = Read(shift);
+		Index++;
+
+		if (s == "\n")
+		{
+			Index++;
+		}
+
+		return lex;
 	}
 
 	private string ReadUntilSingleQuote()
 	{
-		using var sb = ZString.CreateStringBuilder();
-		foreach (var item in Reader.Reads())
+		var shift = 0;
+
+		var s = Peek(shift, 1);
+		while (!string.IsNullOrEmpty(s))
 		{
-			sb.Append(item);
-			if (item == '\'')
+			if (s != "'")
 			{
-				if (Reader.TryRead('\'', out var c))
-				{
-					sb.Append(c);
-					continue;
-				}
-				return sb.ToString();
+				shift++;
+				s = Peek(shift, 1);
+				continue;
+			}
+
+			if (s == "'" && Peek(shift + 1, 1) == "'")
+			{
+				shift += 2;
+				s = Peek(shift, 1);
+				continue;
+			}
+
+			break;
+		}
+
+		if (s != "'") throw new SyntaxException("single quote is not closed.");
+
+		shift++;
+		return Read(shift);
+	}
+
+	private string ReadWhile(string charArrayString)
+	{
+		var shift = 0;
+
+		var s = Peek(shift, 1);
+		while (!string.IsNullOrEmpty(s) && charArrayString.Contains(s.First()))
+		{
+			shift++;
+			s = Peek(shift, 1);
+		}
+
+		if (shift == 0) return string.Empty;
+		return Read(shift);
+	}
+
+	private string ReadNotWhile(string charArrayString)
+	{
+		var shift = 0;
+
+		var s = Peek(shift, 1);
+		while (!string.IsNullOrEmpty(s) && !charArrayString.Contains(s.First()))
+		{
+			shift++;
+			s = Peek(shift, 1);
+		}
+
+		if (shift == 0) return string.Empty;
+		return Read(shift);
+	}
+
+	private bool TryMatch(string actualLex, IEnumerable<string> expectLexs, [MaybeNullWhen(false)] out string lex)
+	{
+		lex = default;
+
+		foreach (var expectLex in expectLexs)
+		{
+			if (TryMatch(actualLex, expectLex, out lex))
+			{
+				return true;
 			}
 		}
-		throw new SyntaxException("single quote is not closed.");
+		return false;
+	}
+
+	private bool TryMatch(string actualLex, string expectLex, [MaybeNullWhen(false)] out string lex)
+	{
+		lex = default;
+
+		var specials = new[] { "--", "/*", "::", "@@" };
+		var symbols = " \r\r\n\t.,();[]'";
+		var numbers = "0123456789";
+
+		if (actualLex.StartsWith(expectLex, StringComparison.OrdinalIgnoreCase))
+		{
+			//NOTE
+			//It is necessary to evaluate whether the string simply obtained
+			//without passing through ReadLex is a lexeme.
+
+			//Adopt if it exactly matches a special lexeme
+			if (specials.Contains(actualLex))
+			{
+				lex = expectLex;
+				return true;
+			}
+
+			//Verify next occurrence of character
+			var c = Peek(expectLex.Length, 1);
+			if (string.IsNullOrEmpty(c) || symbols.Contains(c) || numbers.Contains(c))
+			{
+				lex = expectLex;
+				return true;
+			}
+
+			//build error message
+			var s = ReadLex();
+			throw new SyntaxException($"expect : '{expectLex}', actual : '{s}'");
+		}
+		return false;
 	}
 
 	public void Dispose()
 	{
-		((IDisposable)Reader).Dispose();
+		//((IDisposable)Reader).Dispose();
 	}
 }

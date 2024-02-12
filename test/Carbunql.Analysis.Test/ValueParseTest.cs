@@ -225,6 +225,20 @@ public class ValueParserTest
 	}
 
 	[Fact]
+	public void WithoutTimeZone_Cast()
+	{
+		//Postgres
+		var text = "now()::timestamp without time zone";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(6, lst.Count);
+
+		Assert.Equal("now()::timestamp without time zone", v.ToText());
+	}
+
+	[Fact]
 	public void AtTimeZone()
 	{
 		var text = "now() at time zone 'Asia/Tokyo'";

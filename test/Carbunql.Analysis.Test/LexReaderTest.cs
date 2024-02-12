@@ -24,19 +24,19 @@ public class LexReaderTest
 	public void Blank()
 	{
 		var text = "";
-		using var r = new SqlLexReader(text);
+		var r = new SqlLexReader(text);
+		var lst = r.Reads().ToList();
+		LogOutput(lst);
 
-		foreach (var item in r.Reads())
-		{
-			throw new Exception();
-		}
+		Assert.Single(lst);
+		Assert.Equal(string.Empty, lst[0]);
 	}
 
 	[Fact]
 	public void Space()
 	{
 		var text = "  1  2";
-		using var r = new SqlLexReader(text);
+		var r = new SqlLexReader(text);
 		var lst = r.Reads().ToList();
 		LogOutput(lst);
 
@@ -50,7 +50,7 @@ public class LexReaderTest
 	public void Colon()
 	{
 		var text = ":val val::text";
-		using var r = new SqlLexReader(text);
+		var r = new SqlLexReader(text);
 		var lst = r.Reads().ToList();
 		LogOutput(lst);
 
@@ -65,7 +65,7 @@ public class LexReaderTest
 	public void Numeric()
 	{
 		var text = "123 1.23";
-		using var r = new SqlLexReader(text);
+		var r = new SqlLexReader(text);
 		var lst = r.Reads().ToList();
 		LogOutput(lst);
 
@@ -78,7 +78,7 @@ public class LexReaderTest
 	public void TableColumn()
 	{
 		var text = "tbl.col1 tbl.col2";
-		using var r = new SqlLexReader(text);
+		var r = new SqlLexReader(text);
 		var lst = r.Reads().ToList();
 		LogOutput(lst);
 
@@ -95,7 +95,7 @@ public class LexReaderTest
 	public void SingleQuote()
 	{
 		var text = "'a b' '   '";
-		using var r = new SqlLexReader(text);
+		var r = new SqlLexReader(text);
 		var lst = r.Reads().ToList();
 		LogOutput(lst);
 
@@ -108,7 +108,7 @@ public class LexReaderTest
 	public void SingleQuoteEscape()
 	{
 		var text = "'a b''c'";
-		using var r = new SqlLexReader(text);
+		var r = new SqlLexReader(text);
 		var lst = r.Reads().ToList();
 		LogOutput(lst);
 
@@ -120,7 +120,7 @@ public class LexReaderTest
 	public void Operator()
 	{
 		var text = "1+1!=3";
-		using var r = new SqlLexReader(text);
+		var r = new SqlLexReader(text);
 		var lst = r.Reads().ToList();
 		LogOutput(lst);
 
@@ -136,7 +136,7 @@ public class LexReaderTest
 	public void Pipe()
 	{
 		var text = "'a' || 'b'";
-		using var r = new SqlLexReader(text);
+		var r = new SqlLexReader(text);
 		var lst = r.Reads().ToList();
 		LogOutput(lst);
 
@@ -150,7 +150,7 @@ public class LexReaderTest
 	public void LineComment()
 	{
 		var text = "a---b";
-		using var r = new SqlLexReader(text);
+		var r = new SqlLexReader(text);
 		var lst = r.Reads().ToList();
 		LogOutput(lst);
 
@@ -163,7 +163,7 @@ public class LexReaderTest
 	public void BlockComment()
 	{
 		var text = "a//*b**/";
-		using var r = new SqlLexReader(text);
+		var r = new SqlLexReader(text);
 		var lst = r.Reads().ToList();
 		LogOutput(lst);
 
@@ -177,7 +177,7 @@ public class LexReaderTest
 	public void Function()
 	{
 		var text = "sum(a.price)";
-		using var r = new SqlLexReader(text);
+		var r = new SqlLexReader(text);
 		var lst = r.Reads().ToList();
 		LogOutput(lst);
 
@@ -188,5 +188,16 @@ public class LexReaderTest
 		Assert.Equal(".", lst[3]);
 		Assert.Equal("price", lst[4]);
 		Assert.Equal(")", lst[5]);
+	}
+
+	[Fact]
+	public void Symbol()
+	{
+		var text = "!~*";
+		var r = new SqlLexReader(text);
+		var lst = r.Reads().ToList();
+		LogOutput(lst);
+
+		Assert.Single(lst);
 	}
 }

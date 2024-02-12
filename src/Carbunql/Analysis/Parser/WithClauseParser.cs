@@ -7,7 +7,7 @@ public static class WithClauseParser
 {
 	public static WithClause Parse(string text)
 	{
-		using var r = new SqlTokenReader(text);
+		var r = new SqlTokenReader(text);
 		return Parse(r);
 	}
 
