@@ -674,6 +674,17 @@ join TableB
 	}
 
 	[Fact]
+	public void TimeZone_Postgres()
+	{
+		var text = @"
+SELECT
+	--Postgers
+	now()::timestamp without time zone as t1
+";
+		var item = QueryParser.Parse(text);
+	}
+
+	[Fact]
 	public void TimeZone()
 	{
 		var text = @"
@@ -853,5 +864,19 @@ ORDER BY
 		Assert.Equal(8, lst.Count);
 
 		Assert.Equal(text, sq.ToText(), true, true, true);
+	}
+
+	[Fact]
+	public void ExceptLexemeError()
+	{
+		//outer
+		var text = @"select * from a left outeraaaa join b on 1 = 1";
+
+		var e = Assert.Throws<SyntaxException>(() =>
+		{
+			var sq = QueryParser.Parse(text);
+		});
+
+		Assert.Equal("expect : 'outer', actual : 'outeraaaa'", e.Message);
 	}
 }

@@ -20,9 +20,10 @@ public static class QueryParser
 
 	public static IReadQuery Parse(ITokenReader r)
 	{
-		if (r.Peek().IsEqualNoCase("with")) return CTEQueryParser.Parse(r);
-		if (r.Peek().IsEqualNoCase("select")) return SelectQueryParser.Parse(r);
-		if (r.Peek().IsEqualNoCase("values")) return ValuesQueryParser.Parse(r);
+		var token = r.Peek();
+		if (token.IsEqualNoCase("with")) return CTEQueryParser.Parse(r);
+		if (token.IsEqualNoCase("select")) return SelectQueryParser.Parse(r);
+		if (token.IsEqualNoCase("values")) return ValuesQueryParser.Parse(r);
 
 		throw new NotSupportedException();
 	}

@@ -25,11 +25,11 @@ public class LexReaderTest
 	{
 		var text = "";
 		using var r = new SqlLexReader(text);
+		var lst = r.Reads().ToList();
+		LogOutput(lst);
 
-		foreach (var item in r.Reads())
-		{
-			throw new Exception();
-		}
+		Assert.Single(lst);
+		Assert.Equal(string.Empty, lst[0]);
 	}
 
 	[Fact]
@@ -188,5 +188,16 @@ public class LexReaderTest
 		Assert.Equal(".", lst[3]);
 		Assert.Equal("price", lst[4]);
 		Assert.Equal(")", lst[5]);
+	}
+
+	[Fact]
+	public void Symbol()
+	{
+		var text = "!~*";
+		using var r = new SqlLexReader(text);
+		var lst = r.Reads().ToList();
+		LogOutput(lst);
+
+		Assert.Single(lst);
 	}
 }

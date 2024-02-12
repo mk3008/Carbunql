@@ -14,9 +14,9 @@ public class SqlLexReader : LexReader
 
 	private static IEnumerable<string> CommentTokens { get; set; } = new string[] { "--", "/*" };
 
-	protected override string ReadCore()
+	protected override string ReadLex()
 	{
-		var lex = base.ReadCore();
+		var lex = base.ReadLex();
 
 		//skip comment block
 		while (lex.IsEqualNoCase(CommentTokens))
@@ -31,7 +31,7 @@ public class SqlLexReader : LexReader
 				//block comment
 				ReadUntilCloseBlockComment();
 			}
-			lex = base.ReadCore();
+			lex = base.ReadLex();
 		}
 
 		return lex;

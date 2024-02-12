@@ -46,17 +46,17 @@ public abstract class TokenReader : IDisposable
 		// Explore possible two-word tokens
 		if (lex.IsEqualNoCase("is"))
 		{
-			var next = Reader.Peek();
-			if (next.IsEqualNoCase("not"))
+			var next = string.Empty;
+
+			if (Reader.TryRead("not", out next))
 			{
-				sb.Append(" " + Reader.Read(next));
+				sb.Append(" " + next);
 			}
 
-			next = Reader.Peek();
-			if (next.IsEqualNoCase("distinct"))
+			if (Reader.TryRead("distinct", out next))
 			{
 				// is distinct from, is not distinct from
-				sb.Append(" " + Reader.Read(next));
+				sb.Append(" " + next);
 				sb.Append(" " + Reader.Read("from"));
 				return sb.ToString();
 			}
@@ -79,11 +79,13 @@ public abstract class TokenReader : IDisposable
 
 		if (lex.IsEqualNoCase(OuterJoinLexs))
 		{
-			var next = Reader.Peek();
-			//left(), right() function
-			if (next.IsEqualNoCase("(")) return lex;
+			if (Reader.TryPeek('('))
+			{
+				return lex;
+			}
 
 			Reader.TryRead("outer", out _);
+
 			sb.Append(" " + Reader.Read("join"));
 			return sb.ToString();
 		}
