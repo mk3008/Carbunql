@@ -83,26 +83,21 @@ public abstract class LexReader : IDisposable
 			return string.Empty;
 		}
 
-		using var sb = ZString.CreateStringBuilder();
-
 		// ex. 'text'
 		if (fc == '\'')
 		{
-			sb.Append(Read(1));
-			sb.Append(ReadUntilSingleQuote());
-			return sb.ToString();
+			return Read(1) + ReadUntilSingleQuote();
 		}
 
 		// ex. | or ||
 		if (fc == '|')
 		{
-			if (TryRead("||", out var c))
+			var lex = string.Empty;
+			if (TryRead("||", out lex))
 			{
-				sb.Append(c);
-				return sb.ToString();
+				return lex;
 			}
-			sb.Append(Read(1));
-			return sb.ToString();
+			return Read(1);
 		}
 
 		// ex. - or -- or -> or ->>
@@ -112,25 +107,19 @@ public abstract class LexReader : IDisposable
 
 			if (TryRead("->>", out lex))
 			{
-				sb.Append(lex);
-				return sb.ToString();
+				return lex;
 			}
 
 			if (TryRead("->", out lex))
 			{
-				sb.Append(lex);
-				return sb.ToString();
+				return lex;
 			}
-
 
 			if (TryRead("--", out lex))
 			{
-				sb.Append(lex);
-				return sb.ToString();
+				return lex;
 			}
-
-			sb.Append(Read(1));
-			return sb.ToString();
+			return Read(1);
 		}
 
 		// ex. # or #> or #>>
@@ -140,18 +129,14 @@ public abstract class LexReader : IDisposable
 
 			if (TryRead("#>>", out lex))
 			{
-				sb.Append(lex);
-				return sb.ToString();
+				return lex;
 			}
 
 			if (TryRead("#>", out lex))
 			{
-				sb.Append(lex);
-				return sb.ToString();
+				return lex;
 			}
-
-			sb.Append(Read(1));
-			return sb.ToString();
+			return Read(1);
 		}
 
 		// ex. / or /*
@@ -160,12 +145,9 @@ public abstract class LexReader : IDisposable
 			var lex = string.Empty;
 			if (TryRead("/*", out lex))
 			{
-				sb.Append(lex);
-				return sb.ToString();
+				return lex;
 			}
-
-			sb.Append(Read(1));
-			return sb.ToString();
+			return Read(1);
 		}
 
 		// ex. * or */
@@ -174,12 +156,9 @@ public abstract class LexReader : IDisposable
 			var lex = string.Empty;
 			if (TryRead("*/", out lex))
 			{
-				sb.Append(lex);
-				return sb.ToString();
+				return lex;
 			}
-
-			sb.Append(Read(1));
-			return sb.ToString();
+			return Read(1);
 		}
 
 		// ex. :: (Postgres cast symbol)
@@ -188,8 +167,7 @@ public abstract class LexReader : IDisposable
 			var lex = string.Empty;
 			if (TryRead("::", out lex))
 			{
-				sb.Append(lex);
-				return sb.ToString();
+				return lex;
 			}
 			// continue
 		}
@@ -197,15 +175,13 @@ public abstract class LexReader : IDisposable
 		// ForceBreakSymbols
 		if (".,();[]".Contains(fc))
 		{
-			sb.Append(Read(1));
-			return sb.ToString();
+			return Read(1);
 		}
 
 		// BitwiseOperatorSymbols
 		if ("&|^#~".Contains(fc))
 		{
-			sb.Append(Read(1));
-			return sb.ToString();
+			return Read(1);
 		}
 
 		// ex. 123.45
@@ -219,6 +195,8 @@ public abstract class LexReader : IDisposable
 		{
 			return ReadWhile("+-*/%<>!=?:@.&|^#~");
 		}
+
+		using var sb = ZString.CreateStringBuilder();
 
 		// ex. @@ (MySQL system variable prefix)
 		if (fc == '@')
