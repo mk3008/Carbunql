@@ -13,7 +13,7 @@ Using this library allows for a more versatile use of existing selection queries
 
 This code adds an inner join expression to an existing select query and also adds a where condition.
 
-Note that no DBMS is required to run this demo.
+No DBMS is required to run this demo 😊
 
 ```cs
 using Carbunql;
@@ -93,8 +93,8 @@ Additionally, you can convert them to add, update, delete, and merge queries.
 ![demosite screenshot](https://user-images.githubusercontent.com/7686540/218080149-27085450-563a-4706-8ae4-5fb365c090f1.png)
 
 ## Features
-- Supports parsing select queries without using a DBMS
 - DBMS agnostic
+- Supports parsing select queries
 - Supports processing select queries
 
 ## Constraints
@@ -107,6 +107,8 @@ If you want to execute modified queries, please use the [Dapper](https://github.
 # Getting started
 
 > PM> Install-Package [Carbunql](https://www.nuget.org/packages/Carbunql/)
+
+The main usage is listed below. Please refer to [Wiki](https://github.com/mk3008/Carbunql/wiki) for detailed usage.
 
 ## Parse
 Just pass the select query string to the constructor of the SelectQuery class.
