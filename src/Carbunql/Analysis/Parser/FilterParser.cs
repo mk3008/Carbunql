@@ -6,7 +6,7 @@ public static class FilterParser
 {
 	public static Filter Parse(string text)
 	{
-		using var r = new SqlTokenReader(text);
+		var r = new SqlTokenReader(text);
 		return Parse(r);
 	}
 
@@ -25,6 +25,6 @@ public static class FilterParser
 
 		var filter = new Filter() { WhereClause = WhereClauseParser.Parse(r) };
 		r.ReadOrDefault(")");
-		return filter;	
+		return filter;
 	}
 }

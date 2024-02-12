@@ -7,7 +7,7 @@ public static class QueryParser
 {
 	public static IReadQuery Parse(string text)
 	{
-		using var r = new SqlTokenReader(text);
+		var r = new SqlTokenReader(text);
 		var q = Parse(r);
 
 		if (!r.Peek().IsEndToken())

@@ -8,7 +8,7 @@ public static class SelectQueryParser
 {
 	public static SelectQuery Parse(string text)
 	{
-		using var r = new SqlTokenReader(text);
+		var r = new SqlTokenReader(text);
 
 		if (r.Peek().IsEqualNoCase("with")) return CTEQueryParser.Parse(r);
 		var sq = Parse(r);

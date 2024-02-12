@@ -3,7 +3,7 @@ using Cysharp.Text;
 
 namespace Carbunql.Analysis;
 
-public abstract class TokenReader : IDisposable
+public abstract class TokenReader
 {
 	public TokenReader(string text)
 	{
@@ -131,10 +131,5 @@ public abstract class TokenReader : IDisposable
 		}
 
 		return lex;
-	}
-
-	public void Dispose()
-	{
-		((IDisposable)Reader).Dispose();
 	}
 }
