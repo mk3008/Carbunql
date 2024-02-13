@@ -5,7 +5,7 @@ public class QueryCommand
 	public QueryCommand(string command, IEnumerable<QueryParameter> prm)
 	{
 		CommandText = command;
-		Parameters = new();
+		Parameters = new Dictionary<string, object?>();
 		foreach (var item in prm)
 		{
 			if (Parameters.ContainsKey(item.ParameterName)) continue;
