@@ -1,10 +1,4 @@
-﻿using Carbunql.Analysis;
-using Carbunql.Clauses;
-using Carbunql.Extensions;
-using Carbunql.Values;
-using Microsoft.VisualStudio.CodeCoverage;
-using System;
-using Xunit.Abstractions;
+﻿using Xunit.Abstractions;
 
 namespace Carbunql.Building.Test;
 
@@ -24,7 +18,7 @@ public class DemoPivotSummary
 			Output.WriteLine("/*");
 			foreach (var prm in cmd.Parameters)
 			{
-				Output.WriteLine($"    {prm.ParameterName} = {prm.Value}");
+				Output.WriteLine($"    {prm.Key} = {prm.Value}");
 			}
 			Output.WriteLine("*/");
 		}

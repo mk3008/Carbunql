@@ -35,7 +35,7 @@ public class DebugPrinter
 			sb.AppendLine("/*");
 			foreach (var prm in cmd.Parameters)
 			{
-				sb.AppendLine($"    {prm.ParameterName} = {prm.Value}");
+				sb.AppendLine($"    {prm.Key} = {prm.Value}");
 			}
 			sb.AppendLine("*/");
 		}
