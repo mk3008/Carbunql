@@ -4,7 +4,6 @@ using Carbunql.Tables;
 using Carbunql.Values;
 using Cysharp.Text;
 using MessagePack;
-using System.Data;
 
 namespace Carbunql;
 
@@ -90,24 +89,6 @@ public static class IQueryCommandableExtension
 		return new QueryCommand(source.GetTokens().ToText(), source.GetParameters());
 	}
 
-	public static IDbCommand ToDbCommand(this IQueryCommandable source, IDbConnection cn)
-	{
-		var c = source.ToCommand();
-		var cmd = cn.CreateCommand();
-		cmd.CommandText = c.CommandText;
-		foreach (var item in c.Parameters)
-		{
-			if (cmd.Parameters.Contains(item.ParameterName)) continue;
-
-			var p = cmd.CreateParameter();
-			p.ParameterName = item.ParameterName;
-			p.Value = item.Value;
-			p.DbType = item.DbType;
-			cmd.Parameters.Add(p);
-		}
-		return cmd;
-	}
-
 	public static string ToText(this IQueryCommandable source)
 	{
 		var cmd = source.ToCommand();
@@ -143,20 +124,20 @@ public static class IQueryCommandableExtension
 		sb.AppendLine("/*");
 		foreach (var item in prms)
 		{
-			if (names.Contains(item.ParameterName)) continue;
+			if (names.Contains(item.Key)) continue;
 
-			names.Add(item.ParameterName);
+			names.Add(item.Key);
 			if (item.Value == null)
 			{
-				sb.AppendLine($"  {item.ParameterName} is NULL");
+				sb.AppendLine($"  {item.Key} is NULL");
 			}
 			else if (item.Value.GetType() == typeof(string))
 			{
-				sb.AppendLine($"  {item.ParameterName} = '{item.Value}'");
+				sb.AppendLine($"  {item.Key} = '{item.Value}'");
 			}
 			else
 			{
-				sb.AppendLine($"  {item.ParameterName} = {item.Value}");
+				sb.AppendLine($"  {item.Key} = {item.Value}");
 			}
 		}
 		sb.AppendLine("*/");
