@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>0.6.0</Version>
+    <Version>0.6.1</Version>
     <Authors>mk3008net</Authors>
     <Copyright>mk3008net</Copyright>
     <PackageProjectUrl>https://github.com/mk3008/Carbunql</PackageProjectUrl>
@@ -14,11 +14,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Carbunql" Version="0.6.1.1" />
     <PackageReference Include="Dapper" Version="2.0.123" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Carbunql\Carbunql.csproj" />
   </ItemGroup>
 
 </Project>
