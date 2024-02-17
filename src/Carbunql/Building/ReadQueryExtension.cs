@@ -82,8 +82,9 @@ public static class ReadQueryExtension
 
 	public static CreateTableQuery ToCreateTableQuery(this IReadQuery source, TableBase table, bool isTemporary)
 	{
-		return new CreateTableQuery(new CreateTableClause(table) { IsTemporary = isTemporary })
+		return new CreateTableQuery(table.GetTableFullName())
 		{
+			IsTemporary = isTemporary,
 			Parameters = source.GetParameters(),
 			Query = source,
 		};
