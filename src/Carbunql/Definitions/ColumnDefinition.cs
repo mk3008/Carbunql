@@ -1,7 +1,8 @@
 ﻿using Carbunql.Analysis.Parser;
+using Carbunql.Clauses;
 using Carbunql.Tables;
 
-namespace Carbunql.Clauses;
+namespace Carbunql.Definitions;
 
 public class ColumnDefinition : IQueryCommandable
 {
@@ -37,7 +38,7 @@ public class ColumnDefinition : IQueryCommandable
 
 	public ValueBase? CheckDefinition { get; set; } = null;
 
-	public bool IsAutoNumber => (AutoNumberDefinition != null) ? true : false;
+	public bool IsAutoNumber => AutoNumberDefinition != null ? true : false;
 
 	public ValueBase? DefaultValueDefinition { get; set; } = null;
 

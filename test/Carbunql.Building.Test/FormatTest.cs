@@ -26,8 +26,7 @@ public class FormatTest
 
 		var actual = q.ToText();
 		var expect =
-@"CREATE TEMPORARY TABLE
-    test
+@"CREATE TEMPORARY TABLE test
 AS
 SELECT
     x.id

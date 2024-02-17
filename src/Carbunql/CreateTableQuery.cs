@@ -1,5 +1,6 @@
 ﻿using Carbunql.Building;
 using Carbunql.Clauses;
+using Carbunql.Definitions;
 using Carbunql.Tables;
 using MessagePack;
 
@@ -28,7 +29,7 @@ public class CreateTableQuery : IQueryCommandable, ICommentable
 
 	public List<ColumnDefinition> Columns { get; set; } = new();
 
-	public List<ConstraintDefinition> Constraints { get; set; } = new();
+	public List<IConstraint> Constraints { get; set; } = new();
 
 	public IReadQuery? Query { get; set; }
 
@@ -96,13 +97,13 @@ public class CreateTableQuery : IQueryCommandable, ICommentable
 
 		var ct = GetCreateTableToken(parent);
 		yield return ct;
-		yield return new Token(this, ct, TableFullName);
-
-		var t = new Token(this, parent, "as", isReserved: true);
-		yield return t;
+		yield return new Token(this, parent, TableFullName);
 
 		if (Query != null)
 		{
+			var t = new Token(this, parent, "as", isReserved: true);
+			yield return t;
+
 			foreach (var item in Query.GetTokens())
 			{
 				yield return item;
@@ -110,10 +111,20 @@ public class CreateTableQuery : IQueryCommandable, ICommentable
 			yield break;
 		}
 
+
+		var isFirst = true;
 		var bracket = Token.ReservedBracketStart(this, parent);
 		yield return bracket;
 		foreach (var column in Columns)
 		{
+			if (isFirst)
+			{
+				isFirst = false;
+			}
+			else
+			{
+				yield return Token.Comma(this, bracket);
+			}
 			foreach (var item in column.GetTokens(bracket))
 			{
 				yield return item;
@@ -121,6 +132,7 @@ public class CreateTableQuery : IQueryCommandable, ICommentable
 		}
 		foreach (var constraint in Constraints)
 		{
+			yield return Token.Comma(this, bracket);
 			foreach (var item in constraint.GetTokens(bracket))
 			{
 				yield return item;
