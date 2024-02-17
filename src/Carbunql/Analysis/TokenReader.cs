@@ -155,6 +155,26 @@ public abstract class TokenReader
 			}
 		}
 
+		//if (lex.IsEqualNoCase("generated"))
+		//{
+		//	if (Reader.TryRead("always", out var always))
+		//	{
+		//		sb.Append(" " + always);
+		//		sb.Append(" " + Reader.Read("as"));
+		//		sb.Append(" " + Reader.Read("identity"));
+		//		return sb.ToString();
+		//	}
+		//	else if (Reader.TryRead("by", out var by))
+		//	{
+		//		sb.Append(" " + by);
+		//		sb.Append(" " + Reader.Read("default"));
+		//		sb.Append(" " + Reader.Read("as"));
+		//		sb.Append(" " + Reader.Read("identity"));
+		//		return sb.ToString();
+		//	}
+		//	return sb.ToString();
+		//}
+
 		if (lex.IsEqualNoCase(KeyLexs))
 		{
 			sb.Append(" " + Reader.Read("key"));

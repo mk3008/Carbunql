@@ -38,7 +38,7 @@ public class ColumnDefinition : IQueryCommandable
 
 	public ValueBase? CheckDefinition { get; set; } = null;
 
-	public bool IsAutoNumber => AutoNumberDefinition != null ? true : false;
+	public bool IsAutoNumber { get; set; } = false;
 
 	public ValueBase? DefaultValueDefinition { get; set; } = null;
 
