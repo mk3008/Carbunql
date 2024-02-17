@@ -18,6 +18,8 @@ public abstract class TokenReader
 
 	private static IEnumerable<string> NullsSortTokens { get; set; } = new string[] { "first", "last" };
 
+	private static IEnumerable<string> KeyLexs { get; set; } = new string[] { "primary", "foreign" };
+
 	private SqlLexReader Reader { get; set; }
 
 	public int CurrentBracketLevel { get; private set; } = 0;
@@ -110,7 +112,15 @@ public abstract class TokenReader
 			if (Reader.TryRead("materialized", out var materialized))
 			{
 				sb.Append(" " + materialized);
+				return sb.ToString();
 			}
+
+			if (Reader.TryRead("null", out var value))
+			{
+				sb.Append(" " + value);
+				return sb.ToString();
+			}
+
 			return sb.ToString();
 		}
 
@@ -130,6 +140,46 @@ public abstract class TokenReader
 			return sb.ToString();
 		}
 
+		if (lex.IsEqualNoCase("create"))
+		{
+			if (Reader.TryRead("temporary", out var precision))
+			{
+				sb.Append(" " + precision);
+				sb.Append(" " + Reader.Read("table"));
+				return sb.ToString();
+			}
+			else
+			{
+				sb.Append(" " + Reader.Read("table"));
+				return sb.ToString();
+			}
+		}
+
+		//if (lex.IsEqualNoCase("generated"))
+		//{
+		//	if (Reader.TryRead("always", out var always))
+		//	{
+		//		sb.Append(" " + always);
+		//		sb.Append(" " + Reader.Read("as"));
+		//		sb.Append(" " + Reader.Read("identity"));
+		//		return sb.ToString();
+		//	}
+		//	else if (Reader.TryRead("by", out var by))
+		//	{
+		//		sb.Append(" " + by);
+		//		sb.Append(" " + Reader.Read("default"));
+		//		sb.Append(" " + Reader.Read("as"));
+		//		sb.Append(" " + Reader.Read("identity"));
+		//		return sb.ToString();
+		//	}
+		//	return sb.ToString();
+		//}
+
+		if (lex.IsEqualNoCase(KeyLexs))
+		{
+			sb.Append(" " + Reader.Read("key"));
+			return sb.ToString();
+		}
 		return lex;
 	}
 }

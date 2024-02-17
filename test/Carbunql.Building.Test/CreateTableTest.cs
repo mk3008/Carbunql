@@ -20,7 +20,7 @@ public class CreateTableTest
 		var q = QueryParser.Parse(sql);
 
 		var ctq = q.ToCreateTableQuery("new_table");
-		ctq.CreateTableClause.IsTemporary = false;
+		ctq.IsTemporary = false;
 
 		sq.Log(ctq);
 

@@ -19,11 +19,11 @@ public class PhysicalTable : TableBase
 
 	public PhysicalTable(string schema, string table)
 	{
-		Schame = schema;
+		Schema = schema;
 		Table = table;
 	}
 
-	public string? Schame { get; init; }
+	public string? Schema { get; init; }
 
 	public string Table { get; init; }
 
@@ -31,9 +31,9 @@ public class PhysicalTable : TableBase
 
 	public override IEnumerable<Token> GetTokens(Token? parent)
 	{
-		if (!string.IsNullOrEmpty(Schame))
+		if (!string.IsNullOrEmpty(Schema))
 		{
-			yield return new Token(this, parent, Schame);
+			yield return new Token(this, parent, Schema);
 			yield return Token.Dot(this, parent);
 		}
 		yield return new Token(this, parent, Table);
@@ -41,7 +41,7 @@ public class PhysicalTable : TableBase
 
 	public override string GetDefaultName() => Table;
 
-	public override string GetTableFullName() => !string.IsNullOrEmpty(Schame) ? Schame + "." + Table : Table;
+	public override string GetTableFullName() => !string.IsNullOrEmpty(Schema) ? Schema + "." + Table : Table;
 
 	public override IList<string> GetColumnNames()
 	{

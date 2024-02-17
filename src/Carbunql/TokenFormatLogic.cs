@@ -19,6 +19,8 @@ public class TokenFormatLogic
 
 		if (token.Text.Equals(",") && token.Sender is Relation) return false;
 
+		if (token.Text.Equals("as") && token.Sender is CreateTableQuery) return true;
+
 		if (!token.Text.IsEqualNoCase("on") && token.Sender is Relation) return true;
 		if (token.Text.IsEqualNoCase("else") || token.Text.IsEqualNoCase("when")) return true;
 		if (token.Text.IsEqualNoCase("and"))
@@ -49,6 +51,7 @@ public class TokenFormatLogic
 			if (token.Sender is ValuesQuery) return true;
 			if (token.Sender is SetClause) return true;
 			if (token.Sender is PartitionClause) return true;
+			if (token.Sender is CreateTableQuery) return true;
 		}
 
 		return false;

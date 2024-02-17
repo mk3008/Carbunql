@@ -1,39 +1,41 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <Title></Title>
-    <Copyright>mk3008net</Copyright>
-    <Description>A lightweight library for parsing and building select queries. SQL can be rebuilt dynamically.</Description>
-    <Version>0.6.1.1</Version>
-    <Authors>mk3008net</Authors>
-    <PackageProjectUrl>https://github.com/mk3008/Carbunql</PackageProjectUrl>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <RepositoryUrl>https://github.com/mk3008/Carbunql.git</RepositoryUrl>
-    <PackageTags>SQL;SQLBuilder;SQLParser;SQLRebuilder</PackageTags>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<Title></Title>
+		<Copyright>mk3008net</Copyright>
+		<Description>A lightweight library for parsing and building select queries. SQL can be rebuilt dynamically.</Description>
+		<Version>0.6.1.1</Version>
+		<Authors>mk3008net</Authors>
+		<PackageProjectUrl>https://github.com/mk3008/Carbunql</PackageProjectUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<RepositoryUrl>https://github.com/mk3008/Carbunql.git</RepositoryUrl>
+		<PackageTags>SQL;SQLBuilder;SQLParser;SQLRebuilder</PackageTags>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Tables\ValuesRow.cs" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Remove="Clauses\CreateTableClause.cs" />
+		<Compile Remove="Clauses\TableDefinition.cs" />
+		<Compile Remove="Tables\ValuesRow.cs" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Include="..\..\README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="..\..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.0.123" />
-    <PackageReference Include="MessagePack" Version="2.5.124" />
-    <PackageReference Include="MessagePackAnalyzer" Version="2.5.124">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="ZString" Version="2.5.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Dapper" Version="2.0.123" />
+		<PackageReference Include="MessagePack" Version="2.5.124" />
+		<PackageReference Include="MessagePackAnalyzer" Version="2.5.124">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="ZString" Version="2.5.0" />
+	</ItemGroup>
 
 </Project>
