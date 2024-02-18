@@ -70,7 +70,6 @@ WHERE
 		Assert.Equal(text, v.ToCommand().CommandText, true, true, true);
 	}
 
-
 	[Fact]
 	public void Nameless()
 	{
@@ -82,6 +81,20 @@ WHERE
 
 		var lst = v.GetTokens().ToList();
 		Assert.Equal(6, lst.Count);
+		Assert.Equal(text, v.ToCommand().CommandText, true, true, true);
+	}
+
+	[Fact]
+	public void Using()
+	{
+		var text = @"CREATE UNIQUE INDEX i1_customer__key_m_corporate_customer ON interlink.customer__key_m_corporate_customer USING btree (
+	customer_id
+)";
+		var v = CreateIndexQueryParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(9, lst.Count);
 		Assert.Equal(text, v.ToCommand().CommandText, true, true, true);
 	}
 }

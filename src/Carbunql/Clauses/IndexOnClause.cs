@@ -21,6 +21,8 @@ public class IndexOnClause : QueryCommandCollection<SortableItem>
 
 	public string TableFullName => (string.IsNullOrEmpty(Schema)) ? Table : Schema + "." + Table;
 
+	public string? Using { get; set; } = null;
+
 	public override IEnumerable<Token> GetTokens(Token? parent)
 	{
 		if (!Items.Any()) yield break;
@@ -28,6 +30,12 @@ public class IndexOnClause : QueryCommandCollection<SortableItem>
 		var clause = Token.Reserved(this, parent, "on");
 		yield return clause;
 		yield return new Token(this, parent, TableFullName);
+
+		if (!string.IsNullOrEmpty(Using))
+		{
+			yield return new Token(this, parent, "using", isReserved: true);
+			yield return new Token(this, parent, Using);
+		}
 
 		yield return Token.ReservedBracketStart(this, parent);
 		foreach (var item in base.GetTokens(clause)) yield return item;
