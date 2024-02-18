@@ -148,9 +148,23 @@ public abstract class TokenReader
 				sb.Append(" " + Reader.Read("table"));
 				return sb.ToString();
 			}
-			else
+
+			if (Reader.TryRead("table", out var table))
 			{
-				sb.Append(" " + Reader.Read("table"));
+				sb.Append(" " + table);
+				return sb.ToString();
+			}
+
+			if (Reader.TryRead("unique", out var unique))
+			{
+				sb.Append(" " + unique);
+				sb.Append(" " + Reader.Read("index"));
+				return sb.ToString();
+			}
+
+			if (Reader.TryRead("index", out var index))
+			{
+				sb.Append(" " + index);
 				return sb.ToString();
 			}
 		}

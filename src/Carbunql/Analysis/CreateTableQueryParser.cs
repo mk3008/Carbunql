@@ -34,6 +34,7 @@ public static class CreateTableQueryParser
 		}
 		else if (token == "(")
 		{
+			t.DefinitionClause ??= new();
 			r.Read("(");
 			do
 			{
@@ -42,12 +43,12 @@ public static class CreateTableQueryParser
 				if (token.IsEqualNoCase(ConstraintTokens))
 				{
 					var c = ConstraintParser.Parse(r);
-					t.Constraints.Add(c);
+					t.DefinitionClause.Add(c);
 				}
 				else
 				{
 					var c = ColumnDefinitionParser.Parse(r);
-					t.Columns.Add(c);
+					t.DefinitionClause.Add(c);
 				}
 			} while (r.Peek() == ",");
 			r.Read(")");

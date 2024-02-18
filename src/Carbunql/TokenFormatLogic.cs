@@ -31,6 +31,8 @@ public class TokenFormatLogic
 			return false;
 		}
 
+		if (token.Text.Equals("where") && token.Parent == null) return true;
+
 		return false;
 	}
 
@@ -51,7 +53,8 @@ public class TokenFormatLogic
 			if (token.Sender is ValuesQuery) return true;
 			if (token.Sender is SetClause) return true;
 			if (token.Sender is PartitionClause) return true;
-			if (token.Sender is CreateTableQuery) return true;
+			if (token.Sender is TableDefinitionClause) return true;
+			if (token.Sender is IndexOnClause) return true;
 		}
 
 		return false;
