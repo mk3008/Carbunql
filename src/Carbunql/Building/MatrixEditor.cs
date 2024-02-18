@@ -2,7 +2,6 @@
 using Carbunql.Clauses;
 using Carbunql.Tables;
 using Carbunql.Values;
-using System.Windows.Markup;
 
 namespace Carbunql.Building;
 

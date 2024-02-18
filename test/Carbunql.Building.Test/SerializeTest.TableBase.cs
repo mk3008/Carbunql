@@ -11,8 +11,8 @@ public partial class SerializeTest
 		var sq = new PhysicalTable("table_a");
 
 		var json = MessagePackSerializer.Serialize(sq);
-		Output.WriteLine(MessagePackSerializer.ConvertToJson(json)); 
-		
+		Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
+
 		var actual = MessagePackSerializer.Deserialize<PhysicalTable>(json);
 		Output.WriteLine(actual.ToText());
 

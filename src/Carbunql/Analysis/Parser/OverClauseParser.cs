@@ -1,5 +1,4 @@
 ﻿using Carbunql.Clauses;
-using Carbunql.Extensions;
 
 namespace Carbunql.Analysis.Parser;
 

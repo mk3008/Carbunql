@@ -1,5 +1,4 @@
-﻿using Carbunql.Analysis.Parser;
-using Carbunql.Tables;
+﻿using Carbunql.Tables;
 using Xunit.Abstractions;
 
 namespace Carbunql.Analysis.Test;

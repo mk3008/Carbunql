@@ -1,5 +1,4 @@
-﻿using Carbunql.Extensions;
-using MessagePack;
+﻿using MessagePack;
 using System.Collections;
 
 namespace Carbunql.Clauses;

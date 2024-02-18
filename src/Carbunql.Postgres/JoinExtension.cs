@@ -1,9 +1,6 @@
 ﻿using Carbunql.Building;
 using Carbunql.Clauses;
-using System;
 using System.Linq.Expressions;
-using System.Text.RegularExpressions;
-using System.Xml.Linq;
 
 namespace Carbunql.Postgres;
 

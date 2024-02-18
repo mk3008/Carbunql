@@ -1,7 +1,4 @@
-﻿using Carbunql.Values;
-using System.Linq.Expressions;
-
-namespace Carbunql.Postgres.Test;
+﻿namespace Carbunql.Postgres.Test;
 
 public static class Extension
 {

@@ -47,7 +47,7 @@ internal class ForeignKeyConstraint : IConstraint
 		}
 		yield return Token.ExpressionBracketEnd(this, parent);
 
-		foreach(var item in Reference.GetTokens(parent)) 
+		foreach (var item in Reference.GetTokens(parent))
 		{
 			yield return item;
 		}

@@ -1,5 +1,4 @@
-﻿using Carbunql.Analysis;
-using Xunit.Abstractions;
+﻿using Xunit.Abstractions;
 
 namespace Carbunql.Building.Test;
 
