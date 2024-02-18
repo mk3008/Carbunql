@@ -2,7 +2,7 @@
 
 public class InlineQuery : QueryContainer
 {
-    public InlineQuery(IQueryCommandable query) : base(query)
-    {
-    }
+	public InlineQuery(IQueryCommandable query) : base(query)
+	{
+	}
 }

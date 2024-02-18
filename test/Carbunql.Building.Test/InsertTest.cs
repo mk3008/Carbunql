@@ -1,6 +1,5 @@
 using Carbunql.Analysis;
 using Carbunql.Extensions;
-using Carbunql.Values;
 using Xunit.Abstractions;
 
 

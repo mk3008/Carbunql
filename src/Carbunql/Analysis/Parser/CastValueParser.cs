@@ -7,7 +7,7 @@ public static class CastValueParser
 {
 	public static bool IsCastValue(string text)
 	{
-		return text ==  "::";
+		return text == "::";
 	}
 
 	public static CastValue Parse(ValueBase value, string symbol, string argument)

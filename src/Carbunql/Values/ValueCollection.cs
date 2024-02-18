@@ -1,6 +1,5 @@
 ﻿using Carbunql.Analysis.Parser;
 using Carbunql.Clauses;
-using Carbunql.Extensions;
 using Carbunql.Tables;
 using MessagePack;
 using System.Collections;

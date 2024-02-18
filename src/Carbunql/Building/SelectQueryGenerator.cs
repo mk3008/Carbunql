@@ -1,6 +1,4 @@
-﻿using Carbunql.Values;
-
-namespace Carbunql.Building;
+﻿namespace Carbunql.Building;
 
 public static class SelectQueryGenerator
 {

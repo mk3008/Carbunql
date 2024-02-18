@@ -1,6 +1,5 @@
 ﻿using Carbunql.Analysis.Parser;
 using Carbunql.Extensions;
-using System.Data;
 
 namespace Carbunql.Analysis;
 

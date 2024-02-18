@@ -1,6 +1,4 @@
-﻿using System.Collections.Immutable;
-
-namespace Carbunql.Extensions;
+﻿namespace Carbunql.Extensions;
 
 internal static class IDictionaryExtension
 {

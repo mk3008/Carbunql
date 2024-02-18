@@ -1,6 +1,6 @@
 ﻿using Carbunql.Clauses;
-using Carbunql.Values;
 using Carbunql.Extensions;
+using Carbunql.Values;
 
 namespace Carbunql.Building;
 

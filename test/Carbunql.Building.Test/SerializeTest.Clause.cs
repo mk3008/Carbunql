@@ -175,8 +175,8 @@ public partial class SerializeTest
 	[Fact]
 	public void SortableItem()
 	{
-		var sq = new SortableItem(new LiteralValue(1), isAscending:false, nullSort: NullSort.Last);
-		
+		var sq = new SortableItem(new LiteralValue(1), isAscending: false, nullSort: NullSort.Last);
+
 		var json = MessagePackSerializer.Serialize(sq);
 		Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
 

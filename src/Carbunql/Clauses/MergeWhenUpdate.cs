@@ -1,6 +1,4 @@
-﻿using Carbunql.Extensions;
-
-namespace Carbunql.Clauses;
+﻿namespace Carbunql.Clauses;
 
 public class MergeWhenUpdate : MergeCondition
 {
