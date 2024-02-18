@@ -64,6 +64,12 @@ public static class CreateIndexQueryParser
 		var table = ParseAsTableName(r);
 		var clause = new IndexOnClause(table.schema, table.name);
 
+		if (r.Peek().IsEqualNoCase("using"))
+		{
+			r.Read();
+			clause.Using = r.Read();
+		}
+
 		r.Read("(");
 		do
 		{
