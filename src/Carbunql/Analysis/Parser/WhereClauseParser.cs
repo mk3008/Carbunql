@@ -12,6 +12,8 @@ public class WhereClauseParser
 
 	public static WhereClause Parse(ITokenReader r)
 	{
+		r.ReadOrDefault("where");
+
 		var val = ValueParser.Parse(r);
 		var where = new WhereClause(val);
 		return where;
