@@ -51,7 +51,7 @@ public class TokenFormatLogic
 			if (token.Sender is ValuesQuery) return true;
 			if (token.Sender is SetClause) return true;
 			if (token.Sender is PartitionClause) return true;
-			if (token.Sender is CreateTableQuery) return true;
+			if (token.Sender is TableDefinitionClause) return true;
 		}
 
 		return false;

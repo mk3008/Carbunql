@@ -2,11 +2,11 @@
 
 namespace Carbunql.Analysis.Test;
 
-public class CreateTableParseTest
+public class CreateTableParserTest
 {
 	private readonly QueryCommandMonitor Monitor;
 
-	public CreateTableParseTest(ITestOutputHelper output)
+	public CreateTableParserTest(ITestOutputHelper output)
 	{
 		Monitor = new QueryCommandMonitor(output);
 	}

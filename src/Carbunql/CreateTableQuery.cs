@@ -27,9 +27,7 @@ public class CreateTableQuery : IQueryCommandable, ICommentable
 
 	public string TableFullName => (string.IsNullOrEmpty(Schema)) ? Table : Schema + "." + Table;
 
-	public List<ColumnDefinition> Columns { get; set; } = new();
-
-	public List<IConstraint> Constraints { get; set; } = new();
+	public TableDefinitionClause? DefinitionClause { get; set; } = null;
 
 	public IReadQuery? Query { get; set; }
 
@@ -111,34 +109,16 @@ public class CreateTableQuery : IQueryCommandable, ICommentable
 			yield break;
 		}
 
+		if (DefinitionClause != null)
+		{
+			foreach (var item in DefinitionClause.GetTokens(parent))
+			{
+				yield return item;
+			}
+			yield break;
+		}
 
-		var isFirst = true;
-		var bracket = Token.ReservedBracketStart(this, parent);
-		yield return bracket;
-		foreach (var column in Columns)
-		{
-			if (isFirst)
-			{
-				isFirst = false;
-			}
-			else
-			{
-				yield return Token.Comma(this, bracket);
-			}
-			foreach (var item in column.GetTokens(bracket))
-			{
-				yield return item;
-			}
-		}
-		foreach (var constraint in Constraints)
-		{
-			yield return Token.Comma(this, bracket);
-			foreach (var item in constraint.GetTokens(bracket))
-			{
-				yield return item;
-			}
-		}
-		yield return Token.ReservedBracketEnd(this, parent);
+		throw new InvalidOperationException();
 	}
 
 	public IEnumerable<CommonTable> GetCommonTables()
@@ -170,14 +150,17 @@ public class CreateTableQuery : IQueryCommandable, ICommentable
 			return sq;
 		}
 
-		if (Columns.Any())
+		if (DefinitionClause != null)
 		{
 			var sq = new SelectQuery();
 			var (_, t) = sq.From(TableFullName).As("t");
 
-			foreach (var item in Columns)
+			foreach (var item in DefinitionClause)
 			{
-				sq.Select(t, item.ColumnName);
+				if (item is ColumnDefinition column)
+				{
+					sq.Select(t, column.ColumnName);
+				}
 			}
 
 			return sq;

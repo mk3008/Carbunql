@@ -4,7 +4,7 @@ using Carbunql.Tables;
 
 namespace Carbunql.Definitions;
 
-public class ColumnDefinition : IQueryCommandable
+public class ColumnDefinition : ITableDefinition
 {
 	public ColumnDefinition(string columnName, string columnType)
 	{
