@@ -191,7 +191,7 @@ public abstract class LexReader
 		}
 
 		// operator
-		if ("+-%<>!=".Contains(fc))
+		if ("+-*/%<>!=".Contains(fc))
 		{
 			return ReadWhile("+-*/%<>!=?:@.&|^#~");
 		}
@@ -401,11 +401,17 @@ public abstract class LexReader
 	{
 		var shift = 0;
 
-		var s = Peek(shift, 1);
-		while (!string.IsNullOrEmpty(s) && charArrayString.Contains(s.First()))
+		var current = Peek(shift, 1);
+		while (!string.IsNullOrEmpty(current) && charArrayString.Contains(current.First()))
 		{
+			var next = Peek(shift + 1, 1);
+			// If a comment start symbol is found, force a stop.
+			if ((current == "-" && next == "-") || (current == "/" && next == "*"))
+			{
+				break;
+			}
 			shift++;
-			s = Peek(shift, 1);
+			current = next;
 		}
 
 		if (shift == 0) return string.Empty;

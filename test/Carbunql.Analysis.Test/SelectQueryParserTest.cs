@@ -878,4 +878,38 @@ ORDER BY
 
 		Assert.Equal("expect : 'outer', actual : 'outeraaaa'", e.Message);
 	}
+
+	[Fact]
+	public void LineCommentBreak()
+	{
+		var text = @"select 1+--
+2";
+		var expect = @"SELECT
+    1 + 2";
+
+		var sq = QueryParser.Parse(text);
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+		Assert.Equal(4, lst.Count);
+
+		Assert.Equal(expect, sq.ToText(), true, true, true);
+	}
+
+	[Fact]
+	public void BlockCommentBreak()
+	{
+		var text = @"select 1+/**/
+2";
+		var expect = @"SELECT
+    1 + 2";
+
+		var sq = QueryParser.Parse(text);
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+		Assert.Equal(4, lst.Count);
+
+		Assert.Equal(expect, sq.ToText(), true, true, true);
+	}
 }
