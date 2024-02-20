@@ -912,4 +912,52 @@ ORDER BY
 
 		Assert.Equal(expect, sq.ToText(), true, true, true);
 	}
+
+	[Fact]
+	public void ReturnTest_n()
+	{
+		var text = "select\n--comment\n1";
+		var expect = @"SELECT
+    1";
+
+		var sq = QueryParser.Parse(text);
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+		Assert.Equal(2, lst.Count);
+
+		Assert.Equal(expect, sq.ToText(), true, true, true);
+	}
+
+	[Fact]
+	public void ReturnTest_r()
+	{
+		var text = "select\r--comment\r1";
+		var expect = @"SELECT
+    1";
+
+		var sq = QueryParser.Parse(text);
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+		Assert.Equal(2, lst.Count);
+
+		Assert.Equal(expect, sq.ToText(), true, true, true);
+	}
+
+	[Fact]
+	public void ReturnTest_rn()
+	{
+		var text = "select\r\n--comment\r\n1";
+		var expect = @"SELECT
+    1";
+
+		var sq = QueryParser.Parse(text);
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+		Assert.Equal(2, lst.Count);
+
+		Assert.Equal(expect, sq.ToText(), true, true, true);
+	}
 }

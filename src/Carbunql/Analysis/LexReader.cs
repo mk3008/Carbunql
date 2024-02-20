@@ -349,17 +349,20 @@ public abstract class LexReader
 	{
 		var shift = 0;
 
-		var s = Peek(shift, 1);
-		while (!(s == "\r" || s == "\n" || string.IsNullOrEmpty(s)))
+		var next = Peek(shift, 1);
+
+		//Terminates when a newline code appears or when it reads to the end
+		while (!(next == "\r" || next == "\n" || string.IsNullOrEmpty(next)))
 		{
 			shift++;
-			s = Peek(shift, 1);
+			next = Peek(shift, 1);
 		}
 
 		var lex = Read(shift);
 		Index++;
 
-		if (s == "\n")
+		// Processing when the line feed code is "\r\n"
+		if (next == "\r" && Peek(shift + 1, 1) == "\n")
 		{
 			Index++;
 		}
