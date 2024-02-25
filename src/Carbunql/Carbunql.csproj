@@ -7,7 +7,7 @@
 		<Title></Title>
 		<Copyright>mk3008net</Copyright>
 		<Description>A lightweight library for parsing and building select queries. SQL can be rebuilt dynamically.</Description>
-		<Version>0.6.3</Version>
+		<Version>0.6.4</Version>
 		<Authors>mk3008net</Authors>
 		<PackageProjectUrl>https://github.com/mk3008/Carbunql</PackageProjectUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
