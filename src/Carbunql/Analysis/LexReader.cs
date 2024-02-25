@@ -1,4 +1,5 @@
 ﻿using Cysharp.Text;
+using MessagePack;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Analysis;
@@ -215,7 +216,9 @@ public abstract class LexReader
 		{
 			sb.Append(Read(1));
 		}
-		sb.Append(ReadNotWhile("+-*/%<>!=?:@.&|^#~ \r\n\t.,();[]|"));
+
+		//The symbol "&" is sometimes used as a Postgres literal string prefix, so it will not break if detected.
+		sb.Append(ReadUntil("+-*/%<>!=?:@.|^#~ \r\n\t.,();[]|"));
 
 		return sb.ToString();
 	}
@@ -370,10 +373,8 @@ public abstract class LexReader
 		return lex;
 	}
 
-	private string ReadUntilSingleQuote()
+	private int FindIndexOfSingleQuoteEnd(int shift)
 	{
-		var shift = 0;
-
 		var s = Peek(shift, 1);
 		while (!string.IsNullOrEmpty(s))
 		{
@@ -397,6 +398,12 @@ public abstract class LexReader
 		if (s != "'") throw new SyntaxException("single quote is not closed.");
 
 		shift++;
+		return shift;
+	}
+
+	private string ReadUntilSingleQuote()
+	{
+		var shift = FindIndexOfSingleQuoteEnd(0);
 		return Read(shift);
 	}
 
@@ -421,14 +428,20 @@ public abstract class LexReader
 		return Read(shift);
 	}
 
-	private string ReadNotWhile(string charArrayString)
+	private string ReadUntil(IEnumerable<char> terminateChars)
 	{
 		var shift = 0;
 
 		var s = Peek(shift, 1);
-		while (!string.IsNullOrEmpty(s) && !charArrayString.Contains(s.First()))
+		while (!string.IsNullOrEmpty(s) && !terminateChars.Contains(s.First()))
 		{
 			shift++;
+			if (s == "'")
+			{
+				// If a single quote is encountered, the terminating character array is ignored.
+				// Force reading until the end of the single quote.
+				shift = FindIndexOfSingleQuoteEnd(shift);
+			}
 			s = Peek(shift, 1);
 		}
 
