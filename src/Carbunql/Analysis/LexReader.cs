@@ -1,5 +1,4 @@
 ﻿using Cysharp.Text;
-using MessagePack;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Analysis;
@@ -198,27 +197,41 @@ public abstract class LexReader
 		}
 
 		using var sb = ZString.CreateStringBuilder();
+		sb.Append(Read(1));
+
+		if (fc == '$')
+		{
+			// '${'
+			if (Peek(1) == "{")
+			{
+				//Doller varibale. ex.${variable}'
+				sb.Append(Read(1));
+				sb.Append(ReadUntilAnyChar("}", includeTerminateChar: true));
+				return sb.ToString();
+			}
+			else
+			{
+				//Postgres doller. ex.'$tag$'
+				sb.Append(ReadUntilAnyChar("$", includeTerminateChar: true));
+				var tag = sb.ToString();
+				var text = ReadUntilWord(tag, includeTerminateChar: true);
+				sb.Append(text);
+				return sb.ToString();
+			}
+		}
 
 		// ex. @@ (MySQL system variable prefix)
 		if (fc == '@')
 		{
-			var lex = string.Empty;
-			if (TryRead("@@", out lex))
-			{
-				sb.Append(lex);
-			}
-			else
+			// '@@'
+			if (Peek(1) == "@")
 			{
 				sb.Append(Read(1));
 			}
 		}
-		else
-		{
-			sb.Append(Read(1));
-		}
 
 		//The symbol "&" is sometimes used as a Postgres literal string prefix, so it will not break if detected.
-		sb.Append(ReadUntil("+-*/%<>!=?:@.|^#~ \r\n\t.,();[]|"));
+		sb.Append(ReadUntilAnyChar("+-*/%<>!=?:@.|^#~ \r\n\t.,();[]|"));
 
 		return sb.ToString();
 	}
@@ -428,7 +441,13 @@ public abstract class LexReader
 		return Read(shift);
 	}
 
-	private string ReadUntil(IEnumerable<char> terminateChars)
+	/// <summary>
+	/// Reads characters from the input buffer until any character from the specified set of termination characters is encountered, or until the end of the input buffer is reached.
+	/// </summary>
+	/// <param name="terminateChars">The set of characters that, if encountered, will terminate the reading process.</param>
+	/// <param name="includeTerminateChar">Flag indicating whether the terminating character should be included in the returned string.</param>
+	/// <returns>A string containing the characters read from the input buffer.</returns>
+	private string ReadUntilAnyChar(IEnumerable<char> terminateChars, bool includeTerminateChar = false)
 	{
 		var shift = 0;
 
@@ -446,6 +465,31 @@ public abstract class LexReader
 		}
 
 		if (shift == 0) return string.Empty;
+		if (includeTerminateChar) shift++;
+		return Read(shift);
+	}
+
+	/// <summary>
+	/// Reads characters from the input buffer until the specified termination word is encountered, or until the end of the input buffer is reached.
+	/// </summary>
+	/// <param name="terminateWord">The word that, if encountered, will terminate the reading process.</param>
+	/// <param name="includeTerminateChar">Flag indicating whether the termination word should be included in the returned string.</param>
+	/// <returns>A string containing the characters read from the input buffer.</returns>
+	private string ReadUntilWord(string terminateWord, bool includeTerminateChar = false)
+	{
+		var shift = 0;
+		var length = terminateWord.Length;
+
+		var s = Peek(shift, length);
+		while (!string.IsNullOrEmpty(s) && s != terminateWord)
+		{
+			shift++;
+			s = Peek(shift, length);
+		}
+
+		if (shift == 0) return string.Empty;
+		if (includeTerminateChar) shift += length;
+
 		return Read(shift);
 	}
 

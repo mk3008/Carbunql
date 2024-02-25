@@ -1044,4 +1044,36 @@ ORDER BY
 
 		Assert.Equal(expect, sq.ToText(), true, true, true);
 	}
+
+	[Fact]
+	public void StringLiteralPrefix_Doller()
+	{
+		var text = @"SELECT $some_tag$This is a 'string' with ""quotes"" and \backslashes.$some_tag$ AS string;";
+		var expect = @"SELECT
+    $some_tag$This is a 'string' with ""quotes"" and \backslashes.$some_tag$ AS string";
+
+		var sq = QueryParser.Parse(text);
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+		Assert.Equal(4, lst.Count);
+
+		Assert.Equal(expect, sq.ToText(), true, true, true);
+	}
+
+	[Fact]
+	public void DollerVariable()
+	{
+		var text = @"SELECT ${variable} as val";
+		var expect = @"SELECT
+    ${variable} as val";
+
+		var sq = QueryParser.Parse(text);
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+		Assert.Equal(4, lst.Count);
+
+		Assert.Equal(expect, sq.ToText(), true, true, true);
+	}
 }
