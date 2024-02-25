@@ -960,4 +960,120 @@ ORDER BY
 
 		Assert.Equal(expect, sq.ToText(), true, true, true);
 	}
+
+	[Fact]
+	public void StringLiteralPrefix_E()
+	{
+		var text = @"SELECT E'\\' AS backslash, E'\n' AS newline, E'\x41' AS hex, e'a\r\nb' as crnl";
+		var expect = @"SELECT
+    E'\\' AS backslash,
+    E'\n' AS newline,
+    E'\x41' AS hex,
+    e'a\r\nb' AS crnl";
+
+		var sq = QueryParser.Parse(text);
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+		Assert.Equal(16, lst.Count);
+
+		Assert.Equal(expect, sq.ToText(), true, true, true);
+	}
+
+	[Fact]
+	public void StringLiteralPrefix_B()
+	{
+		var text = @"SELECT B'1001'::bit(4) AS bitstring";
+		var expect = @"SELECT
+    B'1001'::BIT(4) AS bitstring";
+
+		var sq = QueryParser.Parse(text);
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+		Assert.Equal(9, lst.Count);
+
+		Assert.Equal(expect, sq.ToText(), true, true, true);
+	}
+
+	[Fact]
+	public void StringLiteralPrefix_X()
+	{
+		var text = @"SELECT X'7a'::text AS text";
+		var expect = @"SELECT
+    X'7a'::text AS text";
+
+		var sq = QueryParser.Parse(text);
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+		Assert.Equal(6, lst.Count);
+
+		Assert.Equal(expect, sq.ToText(), true, true, true);
+	}
+
+	[Fact]
+	public void StringLiteralPrefix_U()
+	{
+		var text = @"SELECT U&'\00E9' AS eacute, U&'\00E9'::bytea AS bytea";
+		var expect = @"SELECT
+    U&'\00E9' AS eacute,
+    U&'\00E9'::bytea AS bytea";
+
+		var sq = QueryParser.Parse(text);
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+		Assert.Equal(10, lst.Count);
+
+		Assert.Equal(expect, sq.ToText(), true, true, true);
+	}
+
+	[Fact]
+	public void StringLiteralPrefix_UEscape()
+	{
+		var text = @"SELECT U&'d!0061t!0061' UESCAPE '!' AS data";
+		var expect = @"SELECT
+    U&'d!0061t!0061' UESCAPE '!' AS data";
+
+		var sq = QueryParser.Parse(text);
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+		Assert.Equal(6, lst.Count);
+
+		Assert.Equal(expect, sq.ToText(), true, true, true);
+	}
+
+	[Fact]
+	public void StringLiteralPrefix_Doller()
+	{
+		var text = @"SELECT $some_tag$This is a 'string' with ""quotes"" and \backslashes.$some_tag$ AS string;";
+		var expect = @"SELECT
+    $some_tag$This is a 'string' with ""quotes"" and \backslashes.$some_tag$ AS string";
+
+		var sq = QueryParser.Parse(text);
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+		Assert.Equal(4, lst.Count);
+
+		Assert.Equal(expect, sq.ToText(), true, true, true);
+	}
+
+	[Fact]
+	public void DollerVariable()
+	{
+		var text = @"SELECT ${variable} as val";
+		var expect = @"SELECT
+    ${variable} as val";
+
+		var sq = QueryParser.Parse(text);
+		Monitor.Log(sq);
+
+		var lst = sq.GetTokens().ToList();
+		Assert.Equal(4, lst.Count);
+
+		Assert.Equal(expect, sq.ToText(), true, true, true);
+	}
 }

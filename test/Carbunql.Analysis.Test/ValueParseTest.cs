@@ -712,4 +712,20 @@ public class ValueParserTest
 
 		Assert.Equal(expect, v.ToText());
 	}
+
+	[Fact]
+	public void PrefixOfStringLiterals()
+	{
+		var text = @"e'a\r\nb'";
+
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Single(lst);
+
+		var expect = @"e'a\r\nb'";
+
+		Assert.Equal(expect, v.ToText());
+	}
 }

@@ -20,7 +20,7 @@ public static class ValueParser
 
 	private static string[] LogicalOperators = new[]
 	{
-		"and", "is", "is distinct from", "is not", "is not distinct from", "or"
+		"and", "is", "is distinct from", "is not", "is not distinct from", "or", "uescape"
 	};
 
 	public static ValueBase Parse(ITokenReader r)
