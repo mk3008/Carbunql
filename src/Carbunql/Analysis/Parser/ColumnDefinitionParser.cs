@@ -94,7 +94,7 @@ public static class ColumnDefinitionParser
 			token = r.Peek();
 		}
 
-		if (token == "," || token == ")") return c;
+		if (token == "," || token == ")" || token.IsEndToken()) return c;
 		throw new NotSupportedException($"Token : {token}");
 	}
 }
