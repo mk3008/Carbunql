@@ -169,6 +169,21 @@ public abstract class TokenReader
 			}
 		}
 
+		if (lex.IsEqualNoCase("alter"))
+		{
+			if (Reader.TryRead("table", out var table))
+			{
+				sb.Append(" " + table);
+				return sb.ToString();
+			}
+			if (Reader.TryRead("column", out var column))
+			{
+				sb.Append(" " + column);
+				return sb.ToString();
+			}
+			throw new NotSupportedException(Reader.Read());
+		}
+
 		//if (lex.IsEqualNoCase("generated"))
 		//{
 		//	if (Reader.TryRead("always", out var always))
