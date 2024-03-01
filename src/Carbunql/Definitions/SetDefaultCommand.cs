@@ -1,5 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
+using Carbunql.Values;
 
 namespace Carbunql.Definitions;
 
@@ -8,12 +9,18 @@ public class SetDefaultCommand : IAlterCommand
 	public SetDefaultCommand(string columnName, string defaultValue)
 	{
 		ColumnName = columnName;
+		DefaultValue = new LiteralValue(defaultValue);
+	}
+
+	public SetDefaultCommand(string columnName, ValueBase defaultValue)
+	{
+		ColumnName = columnName;
 		DefaultValue = defaultValue;
 	}
 
 	public string ColumnName { get; set; }
 
-	public string DefaultValue { get; set; }
+	public ValueBase DefaultValue { get; set; }
 
 	public IEnumerable<CommonTable> GetCommonTables()
 	{
@@ -41,6 +48,9 @@ public class SetDefaultCommand : IAlterCommand
 		yield return new Token(this, parent, ColumnName);
 		yield return new Token(this, parent, "set", isReserved: true);
 		yield return new Token(this, parent, "default", isReserved: true);
-		yield return new Token(this, parent, DefaultValue);
+		foreach (var item in DefaultValue.GetTokens(parent))
+		{
+			yield return item;
+		}
 	}
 }

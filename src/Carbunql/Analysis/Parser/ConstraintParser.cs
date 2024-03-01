@@ -73,6 +73,6 @@ public static class ConstraintParser
 			};
 		}
 
-		throw new NotSupportedException();
+		throw new NotSupportedException($"Token : {token}");
 	}
 }

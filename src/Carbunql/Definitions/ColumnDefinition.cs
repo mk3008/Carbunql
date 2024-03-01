@@ -1,6 +1,7 @@
 ﻿using Carbunql.Analysis.Parser;
 using Carbunql.Clauses;
 using Carbunql.Tables;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Definitions;
 
@@ -107,5 +108,30 @@ public class ColumnDefinition : ITableDefinition
 				yield return item;
 			}
 		}
+	}
+
+	public IEnumerable<AlterTableQuery> ToAlterTableQueries(ITable t)
+	{
+		if (IsNullable == false)
+		{
+			var constraint = new NotNullConstraint() { ColumnName = ColumnName };
+			yield return new AlterTableQuery(t, constraint.ToAddCommand());
+		}
+		if (CheckDefinition != null)
+		{
+			var constraint = new CheckConstraint() { Value = CheckDefinition };
+			yield return new AlterTableQuery(t, constraint.ToAddCommand());
+		}
+		if (DefaultValueDefinition != null)
+		{
+			var command = new SetDefaultCommand(ColumnName, DefaultValueDefinition.ToText());
+			yield return new AlterTableQuery(t, command);
+		}
+	}
+
+	public bool TryToPlainColumn(ITable t, [MaybeNullWhen(false)] out ColumnDefinition column)
+	{
+		column = new ColumnDefinition(ColumnName, ColumnType) { AutoNumberDefinition = AutoNumberDefinition };
+		return true;
 	}
 }

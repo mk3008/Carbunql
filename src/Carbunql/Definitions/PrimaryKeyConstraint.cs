@@ -1,5 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Definitions;
 
@@ -45,5 +46,16 @@ public class PrimaryKeyConstraint : IConstraint
 			yield return new Token(this, parent, item);
 		}
 		yield return Token.ReservedBracketEnd(this, parent);
+	}
+
+	public IEnumerable<AlterTableQuery> ToAlterTableQueries(ITable t)
+	{
+		yield return new AlterTableQuery(t) { AlterColumnCommand = this.ToAddCommand() };
+	}
+
+	public bool TryToPlainColumn(ITable t, [MaybeNullWhen(false)] out ColumnDefinition column)
+	{
+		column = null;
+		return false;
 	}
 }

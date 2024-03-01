@@ -1,4 +1,6 @@
-﻿namespace Carbunql.Analysis;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Carbunql.Analysis;
 
 /// <summary>
 /// Class for reading tokens. Reading concludes when an SQL terminator is encountered.
@@ -7,6 +9,23 @@ public class SqlTokenReader : TokenReader, ITokenReader
 {
 	public SqlTokenReader(string text) : base(text)
 	{
+	}
+
+	public bool TryReadNextQuery([MaybeNullWhen(false)] out string peekToken)
+	{
+		peekToken = null;
+		if (Peek() != ";")
+		{
+			return false;
+		}
+		Read();
+		IsTeminated = false;
+		peekToken = Peek();
+		if (string.IsNullOrEmpty(peekToken))
+		{
+			return false;
+		}
+		return true;
 	}
 
 	private bool IsTeminated { get; set; } = false;

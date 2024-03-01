@@ -6,8 +6,21 @@ using MessagePack;
 
 namespace Carbunql;
 
-public class AlterTableQuery : IQueryCommandable, ICommentable
+public class AlterTableQuery : IQueryCommandable, ICommentable, ITable
 {
+	public AlterTableQuery(ITable t)
+	{
+		Schema = t.Schema;
+		Table = t.Table;
+	}
+
+	public AlterTableQuery(ITable t, IAlterCommand command)
+	{
+		Schema = t.Schema;
+		Table = t.Table;
+		AlterColumnCommand = command;
+	}
+
 	public AlterTableQuery(string schema, string table)
 	{
 		Schema = schema;

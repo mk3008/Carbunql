@@ -6,7 +6,7 @@ using MessagePack;
 
 namespace Carbunql;
 
-public class CreateTableQuery : IQueryCommandable, ICommentable
+public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
 {
 	public CreateTableQuery(string schema, string table)
 	{
@@ -17,6 +17,12 @@ public class CreateTableQuery : IQueryCommandable, ICommentable
 	public CreateTableQuery(string table)
 	{
 		Table = table;
+	}
+
+	public CreateTableQuery(ITable t)
+	{
+		Schema = t.Schema;
+		Table = t.Table;
 	}
 
 	public bool IsTemporary { get; set; } = false;
@@ -177,5 +183,53 @@ public class CreateTableQuery : IQueryCommandable, ICommentable
 		sq.From(TableFullName).As("q");
 		sq.Select("count(*)").As(alias);
 		return sq;
+	}
+
+	public DefinitionQuerySet ToDefinitionQuerySet()
+	{
+		if (IsTemporary) throw new Exception();
+		if (Query != null) throw new Exception();
+		if (DefinitionClause == null) throw new Exception();
+
+
+		//create table
+		var ct = new CreateTableQuery(this);
+		ct.DefinitionClause ??= new();
+		foreach (var def in DefinitionClause)
+		{
+			if (def.TryToPlainColumn(this, out var column))
+			{
+				ct.DefinitionClause.Add(column);
+			}
+		}
+
+		var queryset = new DefinitionQuerySet(ct);
+
+		//unknown name primary key
+		var pkeys = DefinitionClause.Where(x => x is ColumnDefinition c && c.IsPrimaryKey).Select(x => ((ColumnDefinition)x).ColumnName).ToList();
+		if (pkeys.Any())
+		{
+			var c = new PrimaryKeyConstraint() { ColumnNames = pkeys };
+			queryset.AlterTableQueries.Add(new AlterTableQuery(this, c.ToAddCommand()));
+		}
+
+		//unknown name unique key
+		var ukeys = DefinitionClause.Where(x => x is ColumnDefinition c && c.IsUniqueKey).Select(x => ((ColumnDefinition)x).ColumnName).ToList();
+		if (ukeys.Any())
+		{
+			var c = new UniqueConstraint() { ColumnNames = pkeys };
+			queryset.AlterTableQueries.Add(new AlterTableQuery(this, c.ToAddCommand()));
+		}
+
+		//other unknown name constraint
+		foreach (var def in DefinitionClause)
+		{
+			foreach (var item in def.ToAlterTableQueries(this))
+			{
+				queryset.AlterTableQueries.Add(item);
+			}
+		}
+
+		return queryset;
 	}
 }

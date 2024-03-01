@@ -1,5 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Definitions;
 
@@ -14,6 +15,8 @@ public class ReferenceDefinition : IConstraint
 	public string TableName { get; set; }
 
 	public List<string> ColumnNames { get; set; } = new();
+
+	public string Option { get; set; }
 
 	public IEnumerable<CommonTable> GetCommonTables()
 	{
@@ -46,5 +49,22 @@ public class ReferenceDefinition : IConstraint
 			yield return new Token(this, parent, item);
 		}
 		yield return Token.ExpressionBracketEnd(this, parent);
+
+		if (!string.IsNullOrEmpty(Option))
+		{
+			yield return new Token(this, parent, "on", isReserved: true);
+			yield return new Token(this, parent, Option, isReserved: true);
+		}
+	}
+
+	public IEnumerable<AlterTableQuery> ToAlterTableQueries(ITable t)
+	{
+		yield return new AlterTableQuery(t) { AlterColumnCommand = this.ToAddCommand() };
+	}
+
+	public bool TryToPlainColumn(ITable t, [MaybeNullWhen(false)] out ColumnDefinition column)
+	{
+		column = null;
+		return false;
 	}
 }
