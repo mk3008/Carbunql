@@ -114,24 +114,24 @@ public class ColumnDefinition : ITableDefinition
 	{
 		if (IsNullable == false)
 		{
-			var constraint = new NotNullConstraint() { ColumnName = ColumnName };
-			yield return new AlterTableQuery(t, constraint.ToAddCommand());
-		}
-		if (CheckDefinition != null)
-		{
-			var constraint = new CheckConstraint() { Value = CheckDefinition };
-			yield return new AlterTableQuery(t, constraint.ToAddCommand());
+			var command = new SetNotNullCommand(ColumnName);
+			yield return new AlterTableQuery(new AlterTableClause(t, command));
 		}
 		if (DefaultValueDefinition != null)
 		{
 			var command = new SetDefaultCommand(ColumnName, DefaultValueDefinition.ToText());
-			yield return new AlterTableQuery(t, command);
+			yield return new AlterTableQuery(new AlterTableClause(t, command));
+		}
+		if (CheckDefinition != null)
+		{
+			var constraint = new CheckConstraint() { Value = CheckDefinition };
+			yield return new AlterTableQuery(new AlterTableClause(t, constraint.ToCommand()));
 		}
 	}
 
 	public bool TryToPlainColumn(ITable t, [MaybeNullWhen(false)] out ColumnDefinition column)
 	{
-		column = new ColumnDefinition(ColumnName, ColumnType) { AutoNumberDefinition = AutoNumberDefinition };
+		column = new ColumnDefinition(ColumnName, ColumnType) { IsNullable = true, AutoNumberDefinition = AutoNumberDefinition };
 		return true;
 	}
 }

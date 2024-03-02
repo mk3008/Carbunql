@@ -210,15 +210,15 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
 		if (pkeys.Any())
 		{
 			var c = new PrimaryKeyConstraint() { ColumnNames = pkeys };
-			queryset.AlterTableQueries.Add(new AlterTableQuery(this, c.ToAddCommand()));
+			queryset.AlterTableQueries.Add(new AlterTableQuery(new AlterTableClause(this, c.ToCommand())));
 		}
 
 		//unknown name unique key
 		var ukeys = DefinitionClause.Where(x => x is ColumnDefinition c && c.IsUniqueKey).Select(x => ((ColumnDefinition)x).ColumnName).ToList();
 		if (ukeys.Any())
 		{
-			var c = new UniqueConstraint() { ColumnNames = pkeys };
-			queryset.AlterTableQueries.Add(new AlterTableQuery(this, c.ToAddCommand()));
+			var c = new UniqueConstraint() { ColumnNames = ukeys };
+			queryset.AlterTableQueries.Add(new AlterTableQuery(new AlterTableClause(this, c.ToCommand())));
 		}
 
 		//other unknown name constraint

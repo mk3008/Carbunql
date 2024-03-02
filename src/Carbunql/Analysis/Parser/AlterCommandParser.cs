@@ -14,8 +14,6 @@ public class AlterCommandParser
 
 	public static IAlterCommand Parse(ITokenReader r)
 	{
-		var lst = new List<string>();
-
 		var token = r.Peek();
 		if (token.IsEqualNoCase("add"))
 		{
@@ -36,7 +34,7 @@ public class AlterCommandParser
 		{
 			return ParseAsRenameCommand(r);
 		}
-		throw new NotSupportedException();
+		throw new NotSupportedException($"Token:{token}");
 	}
 
 	private static IAlterCommand ParseAsAddCommand(ITokenReader r)
@@ -88,8 +86,7 @@ public class AlterCommandParser
 			}
 			if (token.IsEqualNoCase("not null"))
 			{
-				var value = r.Read();
-				return new SetDefaultCommand(column, value);
+				return new SetNotNullCommand(column);
 			}
 			throw new NotSupportedException();
 		}

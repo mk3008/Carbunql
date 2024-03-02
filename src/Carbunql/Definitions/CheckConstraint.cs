@@ -50,12 +50,17 @@ public class CheckConstraint : IConstraint
 
 	public IEnumerable<AlterTableQuery> ToAlterTableQueries(ITable t)
 	{
-		yield return new AlterTableQuery(t) { AlterColumnCommand = this.ToAddCommand() };
+		yield return new AlterTableQuery(new AlterTableClause(t, ToCommand()));
 	}
 
 	public bool TryToPlainColumn(ITable t, [MaybeNullWhen(false)] out ColumnDefinition column)
 	{
 		column = null;
 		return false;
+	}
+
+	public AddConstraintCommand ToCommand()
+	{
+		return new AddConstraintCommand(this);
 	}
 }

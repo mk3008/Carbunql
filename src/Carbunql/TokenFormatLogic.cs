@@ -55,6 +55,7 @@ public class TokenFormatLogic
 			if (token.Sender is PartitionClause) return true;
 			if (token.Sender is TableDefinitionClause) return true;
 			if (token.Sender is IndexOnClause) return true;
+			if (token.Sender is AlterTableClause) return true;
 		}
 
 		return false;

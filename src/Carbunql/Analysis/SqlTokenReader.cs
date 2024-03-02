@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using Carbunql.Extensions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Analysis;
 
@@ -94,5 +95,17 @@ public class SqlTokenReader : TokenReader, ITokenReader
 		ReadedCache = Cache;
 		Cache = RollBackCache;
 		RollBackCache = string.Empty;
+	}
+
+	public bool TryRead(string expect, [MaybeNullWhen(false)] out string token)
+	{
+		token = null;
+		var t = Peek();
+		if (t.IsEqualNoCase(expect))
+		{
+			token = Read();
+			return true;
+		}
+		return false;
 	}
 }

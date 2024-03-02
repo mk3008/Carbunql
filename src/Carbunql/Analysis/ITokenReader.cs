@@ -1,4 +1,5 @@
 ﻿using Carbunql.Extensions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Analysis;
 
@@ -9,6 +10,8 @@ public interface ITokenReader
 	string Read();
 
 	void RollBack();
+
+	bool TryRead(string expect, [MaybeNullWhen(false)] out string token);
 
 	int CurrentBracketLevel { get; }
 }
