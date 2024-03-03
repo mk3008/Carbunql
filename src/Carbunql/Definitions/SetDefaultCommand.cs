@@ -53,4 +53,11 @@ public class SetDefaultCommand : IAlterCommand
 			yield return item;
 		}
 	}
+
+	public bool TryIntegrate(TableDefinitionClause clause)
+	{
+		var c = clause.OfType<ColumnDefinition>().Where(x => x.ColumnName == ColumnName).First();
+		c.DefaultValueDefinition = DefaultValue;
+		return true;
+	}
 }

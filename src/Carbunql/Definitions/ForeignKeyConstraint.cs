@@ -12,6 +12,8 @@ internal class ForeignKeyConstraint : IConstraint
 
 	public ReferenceDefinition Reference { get; set; } = null!;
 
+	public string ColumnName => string.Empty;
+
 	public IEnumerable<CommonTable> GetCommonTables()
 	{
 		yield break;
@@ -54,19 +56,14 @@ internal class ForeignKeyConstraint : IConstraint
 		}
 	}
 
-	public IEnumerable<AlterTableQuery> ToAlterTableQueries(ITable t)
+	public bool TryIntegrate(TableDefinitionClause clause)
 	{
-		yield return new AlterTableQuery(new AlterTableClause(t, ToCommand()));
-	}
-
-	public bool TryToPlainColumn(ITable t, [MaybeNullWhen(false)] out ColumnDefinition column)
-	{
-		column = null;
 		return false;
 	}
 
-	public AddConstraintCommand ToCommand()
+	public bool TryDisasseble([MaybeNullWhen(false)] out IConstraint constraint)
 	{
-		return new AddConstraintCommand(this);
+		constraint = null;
+		return false;
 	}
 }

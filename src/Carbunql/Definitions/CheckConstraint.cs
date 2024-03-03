@@ -10,6 +10,8 @@ public class CheckConstraint : IConstraint
 
 	public ValueBase Value { get; set; } = null!;
 
+	public string ColumnName => string.Empty;
+
 	public IEnumerable<CommonTable> GetCommonTables()
 	{
 		yield break;
@@ -40,27 +42,20 @@ public class CheckConstraint : IConstraint
 
 		yield return new Token(this, parent, "check", isReserved: true);
 
-		yield return Token.ReservedBracketStart(this, parent);
 		foreach (var item in Value.GetTokens(parent))
 		{
 			yield return item;
 		}
-		yield return Token.ReservedBracketEnd(this, parent);
 	}
 
-	public IEnumerable<AlterTableQuery> ToAlterTableQueries(ITable t)
+	public bool TryIntegrate(TableDefinitionClause clause)
 	{
-		yield return new AlterTableQuery(new AlterTableClause(t, ToCommand()));
-	}
-
-	public bool TryToPlainColumn(ITable t, [MaybeNullWhen(false)] out ColumnDefinition column)
-	{
-		column = null;
 		return false;
 	}
 
-	public AddConstraintCommand ToCommand()
+	public bool TryDisasseble([MaybeNullWhen(false)] out IConstraint constraint)
 	{
-		return new AddConstraintCommand(this);
+		constraint = null;
+		return false;
 	}
 }

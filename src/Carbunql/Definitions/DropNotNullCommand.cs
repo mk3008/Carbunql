@@ -39,4 +39,11 @@ public class DropNotNullCommand : IAlterCommand
 		yield return new Token(this, parent, "drop", isReserved: true);
 		yield return new Token(this, parent, "not null", isReserved: true);
 	}
+
+	public bool TryIntegrate(TableDefinitionClause clause)
+	{
+		var c = clause.OfType<ColumnDefinition>().Where(x => x.ColumnName == ColumnName).First();
+		c.IsNullable = true;
+		return true;
+	}
 }

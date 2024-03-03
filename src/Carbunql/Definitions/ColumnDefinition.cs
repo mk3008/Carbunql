@@ -110,28 +110,27 @@ public class ColumnDefinition : ITableDefinition
 		}
 	}
 
-	public IEnumerable<AlterTableQuery> ToAlterTableQueries(ITable t)
+	public bool TryIntegrate(TableDefinitionClause clause)
 	{
-		if (IsNullable == false)
-		{
-			var command = new SetNotNullCommand(ColumnName);
-			yield return new AlterTableQuery(new AlterTableClause(t, command));
-		}
-		if (DefaultValueDefinition != null)
-		{
-			var command = new SetDefaultCommand(ColumnName, DefaultValueDefinition.ToText());
-			yield return new AlterTableQuery(new AlterTableClause(t, command));
-		}
-		if (CheckDefinition != null)
-		{
-			var constraint = new CheckConstraint() { Value = CheckDefinition };
-			yield return new AlterTableQuery(new AlterTableClause(t, constraint.ToCommand()));
-		}
+		// Since the Column is integrated from the beginning,
+		// it does not do anything, but it is treated as integrated.
+		return true;
 	}
 
-	public bool TryToPlainColumn(ITable t, [MaybeNullWhen(false)] out ColumnDefinition column)
+	public bool TryNormalize(ITable t, [MaybeNullWhen(false)] out ColumnDefinition column)
 	{
-		column = new ColumnDefinition(ColumnName, ColumnType) { IsNullable = true, AutoNumberDefinition = AutoNumberDefinition };
+		// Exclude key information
+		// Exclude check constraint
+		column = new ColumnDefinition(ColumnName, ColumnType) { IsNullable = IsNullable, AutoNumberDefinition = AutoNumberDefinition, DefaultValueDefinition = DefaultValueDefinition };
+		return true;
+	}
+
+	public bool TryDisasseble([MaybeNullWhen(false)] out IConstraint constraint)
+	{
+		constraint = null;
+		if (CheckDefinition == null) return false;
+
+		constraint = new CheckConstraint() { Value = CheckDefinition };
 		return true;
 	}
 }

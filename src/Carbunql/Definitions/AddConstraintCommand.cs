@@ -40,4 +40,9 @@ public class AddConstraintCommand : IAlterCommand
 			yield return item;
 		}
 	}
+
+	public bool TryIntegrate(TableDefinitionClause clause)
+	{
+		return Constraint.TryIntegrate(clause);
+	}
 }

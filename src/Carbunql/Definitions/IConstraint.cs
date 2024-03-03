@@ -4,9 +4,3 @@
 public interface IConstraint : ITableDefinition
 {
 }
-
-public static class IConstraintExtension
-{
-
-}
-

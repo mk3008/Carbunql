@@ -48,18 +48,10 @@ public static class ConstraintParser
 			var val = ValueParser.Parse(r);
 			return new CheckConstraint()
 			{
+				ConstraintName = name,
 				Value = val
 			};
 		}
-
-		//if (token.IsEqualNoCase("not null"))
-		//{
-		//	return new NotNullConstraint()
-		//	{
-		//		ConstraintName = name,
-		//		ColumnName = r.Read()
-		//	};
-		//}
 
 		if (token.IsEqualNoCase("foreign key"))
 		{

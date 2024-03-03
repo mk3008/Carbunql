@@ -39,4 +39,11 @@ public class SetNotNullCommand : IAlterCommand
 		yield return new Token(this, parent, "set", isReserved: true);
 		yield return new Token(this, parent, "not null", isReserved: true);
 	}
+
+	public bool TryIntegrate(TableDefinitionClause clause)
+	{
+		var c = clause.OfType<ColumnDefinition>().Where(x => x.ColumnName == ColumnName).First();
+		c.IsNullable = false;
+		return true;
+	}
 }

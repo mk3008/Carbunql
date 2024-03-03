@@ -18,6 +18,13 @@ public class AlterTableClause : QueryCommandCollection<IAlterCommand>, IQueryCom
 		Items.Add(command);
 	}
 
+	public AlterTableClause(ITable t, IConstraint constraint)
+	{
+		Schema = t.Schema;
+		Table = t.Table;
+		Items.Add(new AddConstraintCommand(constraint));
+	}
+
 	public AlterTableClause(string schema, string table)
 	{
 		Schema = schema;

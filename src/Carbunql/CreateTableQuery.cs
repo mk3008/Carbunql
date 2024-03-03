@@ -185,50 +185,19 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
 		return sq;
 	}
 
-	public DefinitionQuerySet ToDefinitionQuerySet()
+	public DefinitionQuerySet Normarize()
 	{
-		if (IsTemporary) throw new Exception();
-		if (Query != null) throw new Exception();
-		if (DefinitionClause == null) throw new Exception();
-
+		if (IsTemporary) throw new InvalidOperationException();
+		if (Query != null) throw new InvalidOperationException();
+		if (DefinitionClause == null) throw new InvalidOperationException();
 
 		//create table
 		var ct = new CreateTableQuery(this);
-		ct.DefinitionClause ??= new();
-		foreach (var def in DefinitionClause)
-		{
-			if (def.TryToPlainColumn(this, out var column))
-			{
-				ct.DefinitionClause.Add(column);
-			}
-		}
+		ct.DefinitionClause = DefinitionClause.Normalize(this);
 
 		var queryset = new DefinitionQuerySet(ct);
 
-		//unknown name primary key
-		var pkeys = DefinitionClause.Where(x => x is ColumnDefinition c && c.IsPrimaryKey).Select(x => ((ColumnDefinition)x).ColumnName).ToList();
-		if (pkeys.Any())
-		{
-			var c = new PrimaryKeyConstraint() { ColumnNames = pkeys };
-			queryset.AlterTableQueries.Add(new AlterTableQuery(new AlterTableClause(this, c.ToCommand())));
-		}
-
-		//unknown name unique key
-		var ukeys = DefinitionClause.Where(x => x is ColumnDefinition c && c.IsUniqueKey).Select(x => ((ColumnDefinition)x).ColumnName).ToList();
-		if (ukeys.Any())
-		{
-			var c = new UniqueConstraint() { ColumnNames = ukeys };
-			queryset.AlterTableQueries.Add(new AlterTableQuery(new AlterTableClause(this, c.ToCommand())));
-		}
-
-		//other unknown name constraint
-		foreach (var def in DefinitionClause)
-		{
-			foreach (var item in def.ToAlterTableQueries(this))
-			{
-				queryset.AlterTableQueries.Add(item);
-			}
-		}
+		queryset.AlterTableQueries.AddRange(DefinitionClause.Disasseble(this));
 
 		return queryset;
 	}

@@ -40,18 +40,26 @@ public class AlterCommandParser
 	private static IAlterCommand ParseAsAddCommand(ITokenReader r)
 	{
 		r.Read("add");
-		var target = r.Peek();
+		var token = r.Peek();
 
-		if (target.IsEqualNoCase("constraint"))
+		if (token.IsEqualNoCase(new[] { "constraint", "primary key", "unique" }))
 		{
 			var constraint = ConstraintParser.Parse(r);
 			return new AddConstraintCommand(constraint);
 		}
-		else
+		else if (token.IsEqualNoCase("column"))
 		{
 			var definition = ColumnDefinitionParser.Parse(r);
 			return new AddColumnCommand(definition);
 		}
+		else
+		{
+			//Consider "add column" with "column" omitted.
+			var definition = ColumnDefinitionParser.Parse(r);
+			return new AddColumnCommand(definition);
+		}
+
+		//throw new NotSupportedException($"Token:{token}");
 	}
 
 	private static IAlterCommand ParseAdDropCommand(ITokenReader r)
@@ -105,7 +113,7 @@ public class AlterCommandParser
 		}
 		if (token.IsEqualNoCase("type"))
 		{
-			var columnType = r.Read();
+			var columnType = ValueParser.Parse(r);
 			return new ChangeColumnTypeCommand(column, columnType);
 		}
 		throw new NotSupportedException();

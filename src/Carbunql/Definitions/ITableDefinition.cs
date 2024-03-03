@@ -1,10 +1,13 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using Carbunql.Clauses;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Definitions;
 
 public interface ITableDefinition : IQueryCommandable
 {
-	IEnumerable<AlterTableQuery> ToAlterTableQueries(ITable t);
+	bool TryIntegrate(TableDefinitionClause clause);
 
-	bool TryToPlainColumn(ITable t, [MaybeNullWhen(false)] out ColumnDefinition column);
+	bool TryDisasseble([MaybeNullWhen(false)] out IConstraint constraint);
+
+	string ColumnName { get; }
 }

@@ -15,13 +15,29 @@ public class AlterTableParserTest
 	public void AddColumn()
 	{
 		var text = @"ALTER TABLE table_name
-	ADD column_name datatype";
+	ADD COLUMN column_name datatype";
 		var v = AlterTableQueryParser.Parse(text);
 		Monitor.Log(v);
 
 		var lst = v.GetTokens().ToList();
-		Assert.Equal(5, lst.Count);
+		Assert.Equal(6, lst.Count);
 		Assert.Equal(text, v.ToCommand().CommandText, true, true, true);
+	}
+
+	[Fact]
+	public void AddColumn_omit()
+	{
+		var text = @"ALTER TABLE table_name
+	ADD column_name datatype";
+		var v = AlterTableQueryParser.Parse(text);
+		Monitor.Log(v);
+
+		var expect = @"ALTER TABLE table_name
+	ADD COLUMN column_name datatype";
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(6, lst.Count);
+		Assert.Equal(expect, v.ToCommand().CommandText, true, true, true);
 	}
 
 	[Fact]

@@ -38,4 +38,9 @@ public class RenameTableCommand : IAlterCommand
 		yield return new Token(this, parent, "to", isReserved: true);
 		yield return new Token(this, parent, NewTableName);
 	}
+
+	public bool TryIntegrate(TableDefinitionClause clause)
+	{
+		return false;
+	}
 }

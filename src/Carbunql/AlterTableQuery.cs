@@ -42,4 +42,22 @@ public class AlterTableQuery : QueryCommandCollection<IAlterCommand>, IQueryComm
 	{
 		yield break;
 	}
+
+	public List<AlterTableQuery> Disassemble()
+	{
+		//1 command equals 1 query
+		var lst = new List<AlterTableQuery>();
+		foreach (var item in AlterTableClause)
+		{
+			lst.Add(new AlterTableQuery(new AlterTableClause(AlterTableClause, item)));
+		}
+		return lst;
+	}
+
+	public bool TryIntegrate(TableDefinitionClause clause)
+	{
+		if (AlterTableClause.Items.Count != 1) throw new InvalidOperationException();
+		var cmd = AlterTableClause.Items[0];
+		return cmd.TryIntegrate(clause);
+	}
 }

@@ -39,4 +39,11 @@ public class DropDefaultCommand : IAlterCommand
 		yield return new Token(this, parent, "drop", isReserved: true);
 		yield return new Token(this, parent, "default", isReserved: true);
 	}
+
+	public bool TryIntegrate(TableDefinitionClause clause)
+	{
+		var c = clause.OfType<ColumnDefinition>().Where(x => x.ColumnName == ColumnName).First();
+		c.DefaultValueDefinition = null;
+		return true;
+	}
 }
