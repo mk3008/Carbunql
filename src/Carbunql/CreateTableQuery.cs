@@ -6,7 +6,7 @@ using MessagePack;
 
 namespace Carbunql;
 
-public class CreateTableQuery : IQueryCommandable, ICommentable
+public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
 {
 	public CreateTableQuery(string schema, string table)
 	{
@@ -17,6 +17,12 @@ public class CreateTableQuery : IQueryCommandable, ICommentable
 	public CreateTableQuery(string table)
 	{
 		Table = table;
+	}
+
+	public CreateTableQuery(ITable t)
+	{
+		Schema = t.Schema;
+		Table = t.Table;
 	}
 
 	public bool IsTemporary { get; set; } = false;
@@ -177,5 +183,22 @@ public class CreateTableQuery : IQueryCommandable, ICommentable
 		sq.From(TableFullName).As("q");
 		sq.Select("count(*)").As(alias);
 		return sq;
+	}
+
+	public DefinitionQuerySet Normarize()
+	{
+		if (IsTemporary) throw new InvalidOperationException();
+		if (Query != null) throw new InvalidOperationException();
+		if (DefinitionClause == null) throw new InvalidOperationException();
+
+		//create table
+		var ct = new CreateTableQuery(this);
+		ct.DefinitionClause = DefinitionClause.Normalize(this);
+
+		var queryset = new DefinitionQuerySet(ct);
+
+		queryset.AlterTableQueries.AddRange(DefinitionClause.Disasseble(this));
+
+		return queryset;
 	}
 }

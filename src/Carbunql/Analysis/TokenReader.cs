@@ -184,6 +184,37 @@ public abstract class TokenReader
 			throw new NotSupportedException(Reader.Read());
 		}
 
+		if (lex.IsEqualNoCase(new[] { "delete", "update" }))
+		{
+			if (Reader.TryRead("cascade", out var cascade))
+			{
+				//delete(update) cascade
+				sb.Append(" " + cascade);
+				return sb.ToString();
+			}
+			if (Reader.TryRead("set", out var s))
+			{
+				//delete(update) set null
+				var n = Reader.Read("null");
+				sb.Append(" " + s + " " + n);
+				return sb.ToString();
+			}
+			if (Reader.TryRead("no", out var no))
+			{
+				//delete(update) no action
+				var action = Reader.Read("action");
+				sb.Append(" " + no + " " + action);
+				return sb.ToString();
+			}
+			if (Reader.TryRead("restrict", out var restrict))
+			{
+				//delete(update) restrict
+				sb.Append(" " + restrict);
+				return sb.ToString();
+			}
+			return sb.ToString();
+		}
+
 		//if (lex.IsEqualNoCase("generated"))
 		//{
 		//	if (Reader.TryRead("always", out var always))

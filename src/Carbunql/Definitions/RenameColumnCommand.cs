@@ -43,4 +43,10 @@ public class RenameColumnCommand : IAlterCommand
 		yield return new Token(this, parent, "to", isReserved: true);
 		yield return new Token(this, parent, NewColumnName);
 	}
+
+	public bool TryIntegrate(TableDefinitionClause clause)
+	{
+		// Do not normalize as it will be treated as a Drop or Add.
+		return false;
+	}
 }

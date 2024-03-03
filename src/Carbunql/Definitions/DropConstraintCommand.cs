@@ -38,4 +38,9 @@ public class DropConstraintCommand : IAlterCommand
 		yield return new Token(this, parent, "constraint", isReserved: true);
 		yield return new Token(this, parent, ConstraintName);
 	}
+
+	public bool TryIntegrate(TableDefinitionClause clause)
+	{
+		return false;
+	}
 }

@@ -38,4 +38,59 @@ public class TableDefinitionClause : QueryCommandCollection<ITableDefinition>
 	{
 		yield break;
 	}
+
+	public IEnumerable<string> GetColumnNames()
+	{
+		var lst = new List<string>();
+		foreach (var item in Items.Where(x => !string.IsNullOrEmpty(x.ColumnName)))
+		{
+			lst.Add(item.ColumnName);
+		}
+		return lst.Distinct();
+	}
+
+	public TableDefinitionClause Normalize(ITable table)
+	{
+		var clause = new TableDefinitionClause();
+		foreach (var item in Items.OfType<ColumnDefinition>())
+		{
+			if (item.TryNormalize(table, out var column))
+			{
+				clause.Add(column);
+			}
+		}
+		return clause;
+	}
+
+	public List<AlterTableQuery> Disasseble(ITable table)
+	{
+		var lst = new List<AlterTableQuery>();
+
+		//normalize unknown name primary key
+		var pkeys = Items.OfType<ColumnDefinition>().Where(x => x.IsPrimaryKey).Select(x => x.ColumnName).Distinct();
+		if (pkeys.Any())
+		{
+			var c = new PrimaryKeyConstraint() { ColumnNames = pkeys.ToList() };
+			lst.Add(new AlterTableQuery(new AlterTableClause(table, c)));
+		}
+
+		//normalize unknown name unique key
+		var ukeys = Items.OfType<ColumnDefinition>().Where(x => x.IsUniqueKey).Select(x => x.ColumnName).Distinct();
+		if (ukeys.Any())
+		{
+			var c = new UniqueConstraint() { ColumnNames = ukeys.ToList() };
+			lst.Add(new AlterTableQuery(new AlterTableClause(table, c)));
+		}
+
+		//disassemble
+		foreach (var def in Items)
+		{
+			if (def.TryDisasseble(out var constraint))
+			{
+				lst.Add(new AlterTableQuery(new AlterTableClause(table, constraint)));
+			}
+		}
+
+		return lst;
+	}
 }

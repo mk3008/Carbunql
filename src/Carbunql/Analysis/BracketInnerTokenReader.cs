@@ -1,4 +1,7 @@
-﻿namespace Carbunql.Analysis;
+﻿using Carbunql.Extensions;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Carbunql.Analysis;
 
 public class BracketInnerTokenReader : ITokenReader, IDisposable
 {
@@ -60,5 +63,17 @@ public class BracketInnerTokenReader : ITokenReader, IDisposable
 	public void RollBack()
 	{
 		throw new NotImplementedException();
+	}
+
+	public bool TryRead(string expect, [MaybeNullWhen(false)] out string token)
+	{
+		token = null;
+		var t = Peek();
+		if (t.IsEqualNoCase(expect))
+		{
+			token = Read();
+			return true;
+		}
+		return false; ;
 	}
 }

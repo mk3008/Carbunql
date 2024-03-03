@@ -1,4 +1,7 @@
-﻿namespace Carbunql.Analysis;
+﻿using Carbunql.Extensions;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Carbunql.Analysis;
 
 /// <summary>
 /// Class for reading tokens. Reading concludes when an SQL terminator is encountered.
@@ -7,6 +10,23 @@ public class SqlTokenReader : TokenReader, ITokenReader
 {
 	public SqlTokenReader(string text) : base(text)
 	{
+	}
+
+	public bool TryReadNextQuery([MaybeNullWhen(false)] out string peekToken)
+	{
+		peekToken = null;
+		if (Peek() != ";")
+		{
+			return false;
+		}
+		Read();
+		IsTeminated = false;
+		peekToken = Peek();
+		if (string.IsNullOrEmpty(peekToken))
+		{
+			return false;
+		}
+		return true;
 	}
 
 	private bool IsTeminated { get; set; } = false;
@@ -75,5 +95,17 @@ public class SqlTokenReader : TokenReader, ITokenReader
 		ReadedCache = Cache;
 		Cache = RollBackCache;
 		RollBackCache = string.Empty;
+	}
+
+	public bool TryRead(string expect, [MaybeNullWhen(false)] out string token)
+	{
+		token = null;
+		var t = Peek();
+		if (t.IsEqualNoCase(expect))
+		{
+			token = Read();
+			return true;
+		}
+		return false;
 	}
 }

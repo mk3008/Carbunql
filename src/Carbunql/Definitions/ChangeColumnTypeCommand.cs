@@ -5,7 +5,7 @@ namespace Carbunql.Definitions;
 
 public class ChangeColumnTypeCommand : IAlterCommand
 {
-	public ChangeColumnTypeCommand(string columnName, string columnType)
+	public ChangeColumnTypeCommand(string columnName, ValueBase columnType)
 	{
 		ColumnName = columnName;
 		ColumnType = columnType;
@@ -13,7 +13,7 @@ public class ChangeColumnTypeCommand : IAlterCommand
 
 	public string ColumnName { get; set; }
 
-	public string ColumnType { get; set; }
+	public ValueBase ColumnType { get; set; }
 
 	public IEnumerable<CommonTable> GetCommonTables()
 	{
@@ -40,6 +40,17 @@ public class ChangeColumnTypeCommand : IAlterCommand
 		yield return new Token(this, parent, "alter column", isReserved: true);
 		yield return new Token(this, parent, ColumnName);
 		yield return new Token(this, parent, "type", isReserved: true);
-		yield return new Token(this, parent, ColumnType);
+		foreach (var item in ColumnType.GetTokens(parent))
+		{
+			yield return item;
+		}
+	}
+
+	public bool TryIntegrate(TableDefinitionClause clause)
+	{
+		var c = clause.OfType<ColumnDefinition>().Where(x => x.ColumnName == ColumnName).First();
+
+		c.ColumnType = ColumnType;
+		return true;
 	}
 }

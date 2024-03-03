@@ -35,9 +35,19 @@ public class AddColumnCommand : IAlterCommand
 	public IEnumerable<Token> GetTokens(Token? parent)
 	{
 		yield return new Token(this, parent, "add", isReserved: true);
+		yield return new Token(this, parent, "column", isReserved: true);
 		foreach (var item in Definition.GetTokens(parent))
 		{
 			yield return item;
 		}
+	}
+
+	public bool TryIntegrate(TableDefinitionClause clause)
+	{
+		var q = clause.OfType<ColumnDefinition>().Where(x => x.ColumnName == Definition.ColumnName);
+		if (q.Any()) throw new InvalidOperationException();
+
+		clause.Add(Definition);
+		return true;
 	}
 }

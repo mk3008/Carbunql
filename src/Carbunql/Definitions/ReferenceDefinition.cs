@@ -1,5 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Definitions;
 
@@ -14,6 +15,10 @@ public class ReferenceDefinition : IConstraint
 	public string TableName { get; set; }
 
 	public List<string> ColumnNames { get; set; } = new();
+
+	public string Option { get; set; } = string.Empty;
+
+	public string ColumnName => string.Empty;
 
 	public IEnumerable<CommonTable> GetCommonTables()
 	{
@@ -46,5 +51,22 @@ public class ReferenceDefinition : IConstraint
 			yield return new Token(this, parent, item);
 		}
 		yield return Token.ExpressionBracketEnd(this, parent);
+
+		if (!string.IsNullOrEmpty(Option))
+		{
+			yield return new Token(this, parent, "on", isReserved: true);
+			yield return new Token(this, parent, Option, isReserved: true);
+		}
+	}
+
+	public bool TryIntegrate(TableDefinitionClause clause)
+	{
+		return false;
+	}
+
+	public bool TryDisasseble([MaybeNullWhen(false)] out IConstraint constraint)
+	{
+		constraint = null;
+		return false;
 	}
 }

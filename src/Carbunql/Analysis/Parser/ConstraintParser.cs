@@ -48,16 +48,8 @@ public static class ConstraintParser
 			var val = ValueParser.Parse(r);
 			return new CheckConstraint()
 			{
-				Value = val
-			};
-		}
-
-		if (token.IsEqualNoCase("not null"))
-		{
-			return new NotNullConstraint()
-			{
 				ConstraintName = name,
-				ColumnName = r.Read()
+				Value = val
 			};
 		}
 
@@ -73,6 +65,6 @@ public static class ConstraintParser
 			};
 		}
 
-		throw new NotSupportedException();
+		throw new NotSupportedException($"Token : {token}");
 	}
 }

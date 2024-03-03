@@ -12,6 +12,11 @@ public class DropColumnCommand : IAlterCommand
 
 	public string ColumnName { get; set; }
 
+	public IEnumerable<string> GetColumnNames()
+	{
+		yield break;
+	}
+
 	public IEnumerable<CommonTable> GetCommonTables()
 	{
 		yield break;
@@ -37,5 +42,12 @@ public class DropColumnCommand : IAlterCommand
 		yield return new Token(this, parent, "drop", isReserved: true);
 		yield return new Token(this, parent, "column", isReserved: true);
 		yield return new Token(this, parent, ColumnName);
+	}
+
+	public bool TryIntegrate(TableDefinitionClause clause)
+	{
+		var c = clause.OfType<ColumnDefinition>().Where(x => x.ColumnName == ColumnName).First();
+		clause.Remove(c);
+		return true;
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using Carbunql.Analysis.Parser;
 using Carbunql.Clauses;
 using Carbunql.Tables;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Definitions;
 
@@ -107,5 +108,29 @@ public class ColumnDefinition : ITableDefinition
 				yield return item;
 			}
 		}
+	}
+
+	public bool TryIntegrate(TableDefinitionClause clause)
+	{
+		// Since the Column is integrated from the beginning,
+		// it does not do anything, but it is treated as integrated.
+		return true;
+	}
+
+	public bool TryNormalize(ITable t, [MaybeNullWhen(false)] out ColumnDefinition column)
+	{
+		// Exclude key information
+		// Exclude check constraint
+		column = new ColumnDefinition(ColumnName, ColumnType) { IsNullable = IsNullable, AutoNumberDefinition = AutoNumberDefinition, DefaultValueDefinition = DefaultValueDefinition };
+		return true;
+	}
+
+	public bool TryDisasseble([MaybeNullWhen(false)] out IConstraint constraint)
+	{
+		constraint = null;
+		if (CheckDefinition == null) return false;
+
+		constraint = new CheckConstraint() { Value = CheckDefinition };
+		return true;
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using Carbunql.Analysis.Parser;
 using Carbunql.Definitions;
+using Carbunql.Extensions;
 
 namespace Carbunql.Analysis;
 
@@ -18,6 +19,13 @@ public static class ReferenceParser
 		var table = r.Read();
 		var columns = ArrayParser.Parse(r);
 
-		return new ReferenceDefinition(table, columns);
+		var option = string.Empty;
+		if (r.Peek().IsEqualNoCase("on"))
+		{
+			r.Read();
+			option = r.Read();
+		}
+
+		return new ReferenceDefinition(table, columns) { Option = option };
 	}
 }

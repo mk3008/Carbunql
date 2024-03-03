@@ -6,26 +6,14 @@ using MessagePack;
 
 namespace Carbunql;
 
-public class AlterTableQuery : IQueryCommandable, ICommentable
+public class AlterTableQuery : QueryCommandCollection<IAlterCommand>, IQueryCommandable, ICommentable
 {
-	public AlterTableQuery(string schema, string table)
+	public AlterTableQuery(AlterTableClause clause)
 	{
-		Schema = schema;
-		Table = table;
+		AlterTableClause = clause;
 	}
 
-	public AlterTableQuery(string table)
-	{
-		Table = table;
-	}
-
-	public string? Schema { get; init; } = null;
-
-	public string Table { get; init; }
-
-	public string TableFullName => (string.IsNullOrEmpty(Schema)) ? Table : Schema + "." + Table;
-
-	public IAlterCommand? AlterColumnCommand { get; set; } = null;
+	public AlterTableClause AlterTableClause { get; set; }
 
 	[IgnoreMember]
 	public CommentClause? CommentClause { get; set; }
@@ -40,34 +28,36 @@ public class AlterTableQuery : IQueryCommandable, ICommentable
 		yield break;
 	}
 
-	public virtual IEnumerable<QueryParameter> GetParameters()
+	public override IEnumerable<Token> GetTokens(Token? parent)
 	{
-		yield break;
-	}
-
-	public IEnumerable<Token> GetTokens(Token? parent)
-	{
-		//if (Query == null) throw new NullReferenceException(nameof(Query));
-
 		if (CommentClause != null) foreach (var item in CommentClause.GetTokens(parent)) yield return item;
 
-		yield return Token.Reserved(this, parent, "alter table");
-		yield return new Token(this, parent, TableFullName);
-
-		if (AlterColumnCommand != null)
+		foreach (var item in AlterTableClause.GetTokens(parent))
 		{
-			foreach (var item in AlterColumnCommand.GetTokens(parent))
-			{
-				yield return item;
-			}
-			yield break;
+			yield return item;
 		}
-
-		throw new InvalidOperationException();
 	}
 
 	public IEnumerable<CommonTable> GetCommonTables()
 	{
 		yield break;
+	}
+
+	public List<AlterTableQuery> Disassemble()
+	{
+		//1 command equals 1 query
+		var lst = new List<AlterTableQuery>();
+		foreach (var item in AlterTableClause)
+		{
+			lst.Add(new AlterTableQuery(new AlterTableClause(AlterTableClause, item)));
+		}
+		return lst;
+	}
+
+	public bool TryIntegrate(TableDefinitionClause clause)
+	{
+		if (AlterTableClause.Items.Count != 1) throw new InvalidOperationException();
+		var cmd = AlterTableClause.Items[0];
+		return cmd.TryIntegrate(clause);
 	}
 }
