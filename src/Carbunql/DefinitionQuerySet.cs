@@ -21,7 +21,10 @@ public class DefinitionQuerySet
 
 	public List<AlterTableQuery> AlterTableQueries { get; set; } = new();
 
-	public List<CreateIndexQuery> CreateIndexQueries { get; set; } = new();
+	public List<IAlterIndexQuery> AlterIndexQueries { get; set; } = new();
+
+	//[Obsolete("use AlterIndexQueries")]
+	//public List<IAlterIndexQuery> CreateIndexQueries => AlterIndexQueries;
 
 	public DefinitionQuerySet MergeAlterTableQuery()
 	{
@@ -72,7 +75,7 @@ public class DefinitionQuerySet
 			}
 		}
 
-		q.CreateIndexQueries.AddRange(CreateIndexQueries);
+		q.AlterIndexQueries.AddRange(AlterIndexQueries);
 
 		if (doMergeAltarTablerQuery)
 		{
@@ -215,7 +218,7 @@ public class DefinitionQuerySet
 			}
 		}
 
-
+		// alter table query
 		var actualCommands = GetAddConstraintCommands(actual).ToDictionary(x => x, x => x.ToText());
 		var expectCommands = GetAddConstraintCommands(expect).ToDictionary(x => x, x => x.ToText());
 
@@ -242,6 +245,28 @@ public class DefinitionQuerySet
 					item.Key
 				};
 				queryset.AlterTableQueries.Add(new AlterTableQuery(clause));
+			}
+		}
+
+		//create index query
+		var actualIndexes = actual.AlterIndexQueries.ToDictionary(x => x, x => x.ToText());
+		var expectIndexes = expect.AlterIndexQueries.ToDictionary(x => x, x => x.ToText());
+
+		foreach (var item in actualIndexes)
+		{
+			//drop
+			if (!expectIndexes.ContainsValue(item.Value) && !string.IsNullOrEmpty(item.Key.IndexName))
+			{
+				queryset.AlterIndexQueries.Add(new DropIndexQuery(item.Key.IndexName));
+			}
+		}
+
+		foreach (var item in expectIndexes)
+		{
+			//add
+			if (!actualIndexes.ContainsValue(item.Value))
+			{
+				queryset.AlterIndexQueries.Add(item.Key);
 			}
 		}
 
@@ -281,7 +306,7 @@ public class DefinitionQuerySet
 			if (sb.Length > 0) sb.AppendLine(";");
 			sb.AppendLine(item.ToText());
 		}
-		foreach (var item in CreateIndexQueries)
+		foreach (var item in AlterIndexQueries)
 		{
 			if (sb.Length > 0) sb.AppendLine(";");
 			sb.AppendLine(item.ToText());

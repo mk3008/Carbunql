@@ -29,7 +29,7 @@ public class DefinitionQuerySetMigrationTest
 			sb.AppendLine(";");
 
 		}
-		foreach (var item in queryset.CreateIndexQueries)
+		foreach (var item in queryset.AlterIndexQueries)
 		{
 			sb.AppendLine(item.ToCommand().CommandText);
 			sb.AppendLine(";");
@@ -302,6 +302,65 @@ ALTER TABLE child_table
 
 		var result = @"ALTER TABLE child_table
     DROP CONSTRAINT child_name_unique
+;
+";
+
+		var expectQuerySet = DefinitionQuerySetParser.Parse(expect);
+		var actualQuerySet = DefinitionQuerySetParser.Parse(actual);
+
+		var queryset = actualQuerySet.GenerateMigrationQuery(expectQuerySet);
+		var sql = GetQueryText(queryset);
+		Assert.Equal(result, sql, true, true, true);
+	}
+
+	[Fact]
+	public void CrateIndex()
+	{
+		var expect = @"CREATE TABLE public.child_table (
+    parent_id int4 NOT NULL
+)
+;
+CREATE INDEX idx_parent_id ON public.child_table (parent_id)
+;
+";
+
+		var actual = @"CREATE TABLE public.child_table (
+    parent_id int4 NOT NULL
+)
+";
+
+		var result = @"CREATE INDEX idx_parent_id ON public.child_table (
+    parent_id
+)
+;
+";
+
+		var expectQuerySet = DefinitionQuerySetParser.Parse(expect);
+		var actualQuerySet = DefinitionQuerySetParser.Parse(actual);
+
+		var queryset = actualQuerySet.GenerateMigrationQuery(expectQuerySet);
+		var sql = GetQueryText(queryset);
+		Assert.Equal(result, sql, true, true, true);
+	}
+
+	[Fact]
+	public void DropIndex()
+	{
+		var expect = @"CREATE TABLE public.child_table (
+    parent_id int4 NOT NULL
+)
+;
+";
+
+		var actual = @"CREATE TABLE public.child_table (
+    parent_id int4 NOT NULL
+)
+;
+CREATE INDEX idx_parent_id ON public.child_table (parent_id)
+;
+";
+
+		var result = @"DROP INDEX idx_parent_id
 ;
 ";
 
