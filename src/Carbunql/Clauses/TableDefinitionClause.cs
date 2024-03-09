@@ -49,7 +49,7 @@ public class TableDefinitionClause : QueryCommandCollection<ITableDefinition>
 		return lst.Distinct();
 	}
 
-	public TableDefinitionClause Normalize(ITable table)
+	public TableDefinitionClause ToNormalize(ITable table)
 	{
 		var clause = new TableDefinitionClause();
 		foreach (var item in Items.OfType<ColumnDefinition>())

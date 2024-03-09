@@ -67,20 +67,20 @@ ALTER TABLE child_table
     child_name VARCHAR(100) NOT NULL,
     parent_id INT NOT NULL,
     value INT NOT NULL,
-    remarks TEXT DEFAULT '',
-    CHECK (value >= 0)
+    remarks TEXT DEFAULT ''
 )
 ;
 ALTER TABLE child_table
     ADD PRIMARY KEY (child_id),
-	ADD UNIQUE (child_name)
+    ADD UNIQUE (child_name),
+    ADD COLUMN CHECK (value >= 0)
 ;
 ";
 
 		var v = DefinitionQuerySetParser.Parse(text);
-		var q = v.Merge();
+		v.MergeAlterTableQuery();
 
-		var sql = GetQueryText(q);
+		var sql = GetQueryText(v);
 		Assert.Equal(expect, sql, true, true, true);
 	}
 
@@ -107,9 +107,9 @@ ALTER TABLE child_table
 ";
 
 		var v = DefinitionQuerySetParser.Parse(text);
-		var q = v.Merge();
+		v.MergeAlterTableQuery();
 
-		var sql = GetQueryText(q);
+		var sql = GetQueryText(v);
 		Assert.Equal(expect, sql, true, true, true);
 	}
 
@@ -138,9 +138,9 @@ ALTER TABLE child_table_2
 ";
 
 		var v = DefinitionQuerySetParser.Parse(text);
-		var q = v.Merge();
+		v.MergeAlterTableQuery();
 
-		var sql = GetQueryText(q);
+		var sql = GetQueryText(v);
 		Assert.Equal(expect, sql, true, true, true);
 	}
 }

@@ -73,7 +73,7 @@ ALTER TABLE child_table
 ";
 
 		var v = DefinitionQuerySetParser.Parse(text);
-		var normal = v.Normalize();
+		var normal = v.ToNormalize(doMergeAltarTablerQuery: false);
 
 		var sql = GetQueryText(normal);
 		Assert.Equal(expect, sql, true, true, true);
@@ -115,7 +115,7 @@ ALTER TABLE public.child_table
 ";
 
 		var v = DefinitionQuerySetParser.Parse(text);
-		var normal = v.Normalize();
+		var normal = v.ToNormalize(doMergeAltarTablerQuery: false);
 
 		var sql = GetQueryText(normal);
 		Assert.Equal(expect, sql, true, true, true);
@@ -155,7 +155,7 @@ ALTER TABLE public.child_table
 ";
 
 		var v = DefinitionQuerySetParser.Parse(text);
-		var normal = v.Normalize();
+		var normal = v.ToNormalize();
 
 		var sql = GetQueryText(normal);
 		Assert.Equal(expect, sql, true, true, true);
@@ -190,7 +190,7 @@ ALTER TABLE public.child_table
 ";
 
 		var v = DefinitionQuerySetParser.Parse(text);
-		var normal = v.Normalize();
+		var normal = v.ToNormalize();
 
 		var sql = GetQueryText(normal);
 		Assert.Equal(expect, sql, true, true, true);
@@ -225,7 +225,79 @@ ALTER TABLE public.child_table
 ";
 
 		var v = DefinitionQuerySetParser.Parse(text);
-		var normal = v.Normalize();
+		var normal = v.ToNormalize();
+
+		var sql = GetQueryText(normal);
+		Assert.Equal(expect, sql, true, true, true);
+	}
+
+	[Fact]
+	public void SetDefault()
+	{
+		var text = @"CREATE TABLE public.child_table (
+    child_id serial4 PRIMARY KEY,
+    child_name varchar(100),
+    parent_id int4,
+    value int4,
+    remarks text
+)
+;
+ALTER TABLE public.child_table
+	ALTER COLUMN remarks SET DEFAULT ''
+;
+";
+
+		var expect = @"CREATE TABLE public.child_table (
+    child_id serial4,
+    child_name VARCHAR(100),
+    parent_id int4,
+    value int4,
+    remarks text DEFAULT ''
+)
+;
+ALTER TABLE public.child_table
+    ADD PRIMARY KEY (child_id)
+;
+";
+
+		var v = DefinitionQuerySetParser.Parse(text);
+		var normal = v.ToNormalize();
+
+		var sql = GetQueryText(normal);
+		Assert.Equal(expect, sql, true, true, true);
+	}
+
+	[Fact]
+	public void DropDefault()
+	{
+		var text = @"CREATE TABLE public.child_table (
+    child_id serial4 PRIMARY KEY,
+    child_name varchar(100),
+    parent_id int4,
+    value int4,
+    remarks text DEFAULT ''
+)
+;
+ALTER TABLE public.child_table
+	ALTER COLUMN remarks DROP DEFAULT
+;
+";
+
+		var expect = @"CREATE TABLE public.child_table (
+    child_id serial4,
+    child_name VARCHAR(100),
+    parent_id int4,
+    value int4,
+    remarks text
+)
+;
+ALTER TABLE public.child_table
+    ADD PRIMARY KEY (child_id)
+;
+";
+
+		var v = DefinitionQuerySetParser.Parse(text);
+		var normal = v.ToNormalize();
 
 		var sql = GetQueryText(normal);
 		Assert.Equal(expect, sql, true, true, true);

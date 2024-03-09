@@ -112,7 +112,7 @@ fsql = q.ToText();";
 			var expectQuerySet = DefinitionQuerySetParser.Parse(expect);
 
 			var q = actualQuerySet.GenerateMigrationQuery(expectQuerySet);
-			fsql = q.Merge().ToText();
+			fsql = q.MergeAlterTableQuery().ToText();
 
 			if (string.IsNullOrEmpty(fsql))
 			{

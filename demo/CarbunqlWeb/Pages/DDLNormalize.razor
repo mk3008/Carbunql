@@ -89,7 +89,7 @@ Console.WriteLine(text);";
         try
         {
             var sq = DefinitionQuerySetParser.Parse(sql);
-            fsql = sq.Normalize().ToText();
+            fsql = sq.ToNormalize().ToText();
 		}
 		catch (Exception ex)
 		{

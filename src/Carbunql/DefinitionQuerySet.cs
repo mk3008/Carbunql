@@ -23,14 +23,12 @@ public class DefinitionQuerySet
 
 	public List<CreateIndexQuery> CreateIndexQueries { get; set; } = new();
 
-	public DefinitionQuerySet Merge()
+	public DefinitionQuerySet MergeAlterTableQuery()
 	{
-		var q = Normalize();
-
 		var dic = new Dictionary<string, AlterTableQuery>();
 
 		//merge alter table query
-		foreach (var alterquery in q.AlterTableQueries)
+		foreach (var alterquery in this.AlterTableQueries)
 		{
 			var key = alterquery.AlterTableClause.TableFullName;
 			if (!dic.ContainsKey(key))
@@ -45,18 +43,18 @@ public class DefinitionQuerySet
 			}
 		}
 
-		q.AlterTableQueries.Clear();
-		q.AlterTableQueries.AddRange(dic.Select(x => x.Value));
+		this.AlterTableQueries.Clear();
+		this.AlterTableQueries.AddRange(dic.Select(x => x.Value));
 
-		return q;
+		return this;
 	}
 
-	public DefinitionQuerySet Normalize()
+	public DefinitionQuerySet ToNormalize(bool doMergeAltarTablerQuery = true)
 	{
 		DefinitionQuerySet q;
 		if (CreateTableQuery != null)
 		{
-			q = CreateTableQuery.Normarize();
+			q = CreateTableQuery.ToNormalize();
 		}
 		else
 		{
@@ -75,6 +73,11 @@ public class DefinitionQuerySet
 		}
 
 		q.CreateIndexQueries.AddRange(CreateIndexQueries);
+
+		if (doMergeAltarTablerQuery)
+		{
+			q.MergeAlterTableQuery();
+		}
 
 		return q;
 	}
@@ -114,8 +117,8 @@ public class DefinitionQuerySet
 		var queryset = new DefinitionQuerySet();
 
 		// Normalize for easier comparison
-		var actual = Normalize();
-		var expect = expectQuerySet.Normalize();
+		var actual = ToNormalize();
+		var expect = expectQuerySet.ToNormalize();
 		if (expect.CreateTableQuery is null) throw new InvalidOperationException("create table query is missing.");
 		if (actual.CreateTableQuery is null) throw new InvalidOperationException("create table query is missing.");
 

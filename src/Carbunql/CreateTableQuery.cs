@@ -186,7 +186,7 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
 		return sq;
 	}
 
-	public DefinitionQuerySet Normarize()
+	public DefinitionQuerySet ToNormalize()
 	{
 		if (IsTemporary) throw new InvalidOperationException();
 		if (Query != null) throw new InvalidOperationException();
@@ -194,7 +194,7 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
 
 		//create table
 		var ct = new CreateTableQuery(this);
-		ct.DefinitionClause = DefinitionClause.Normalize(this);
+		ct.DefinitionClause = DefinitionClause.ToNormalize(this);
 
 		var queryset = new DefinitionQuerySet(ct);
 
