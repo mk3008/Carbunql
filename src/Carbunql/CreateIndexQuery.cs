@@ -1,11 +1,10 @@
-﻿using Carbunql.Building;
-using Carbunql.Clauses;
+﻿using Carbunql.Clauses;
 using Carbunql.Tables;
 using MessagePack;
 
 namespace Carbunql;
 
-public class CreateIndexQuery : IQueryCommandable, ICommentable
+public class CreateIndexQuery : IAlterIndexQuery
 {
 	public bool IsUnique { get; set; } = false;
 

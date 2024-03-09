@@ -21,7 +21,7 @@ public static class DefinitionQuerySetParser
 			}
 			else if (token.IsEqualNoCase("create index") || token.IsEqualNoCase("create unique index"))
 			{
-				q.CreateIndexQueries.Add(CreateIndexQueryParser.Parse(r));
+				q.AlterIndexQueries.Add(CreateIndexQueryParser.Parse(r));
 			}
 
 			if (!r.Peek().IsEndToken())

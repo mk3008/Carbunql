@@ -28,7 +28,7 @@ public class DefinitionQuerySetPaserTest
 			sb.AppendLine(";");
 
 		}
-		foreach (var item in queryset.CreateIndexQueries)
+		foreach (var item in queryset.AlterIndexQueries)
 		{
 			sb.AppendLine(item.ToCommand().CommandText);
 			sb.AppendLine(";");
