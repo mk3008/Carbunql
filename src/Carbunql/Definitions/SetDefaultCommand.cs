@@ -57,7 +57,7 @@ public class SetDefaultCommand : IAlterCommand
 	public bool TryIntegrate(TableDefinitionClause clause)
 	{
 		var c = clause.OfType<ColumnDefinition>().Where(x => x.ColumnName == ColumnName).First();
-		c.DefaultValueDefinition = DefaultValue;
+		c.DefaultValue = DefaultValue;
 		return true;
 	}
 }

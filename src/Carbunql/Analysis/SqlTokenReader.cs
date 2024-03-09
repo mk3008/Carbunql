@@ -15,11 +15,10 @@ public class SqlTokenReader : TokenReader, ITokenReader
 	public bool TryReadNextQuery([MaybeNullWhen(false)] out string peekToken)
 	{
 		peekToken = null;
-		if (Peek() != ";")
+		if (Peek() == ";")
 		{
-			return false;
+			Read();
 		}
-		Read();
 		IsTeminated = false;
 		peekToken = Peek();
 		if (string.IsNullOrEmpty(peekToken))

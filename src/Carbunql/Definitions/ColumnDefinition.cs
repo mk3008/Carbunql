@@ -41,7 +41,7 @@ public class ColumnDefinition : ITableDefinition
 
 	public bool IsAutoNumber { get; set; } = false;
 
-	public ValueBase? DefaultValueDefinition { get; set; } = null;
+	public ValueBase? DefaultValue { get; set; } = null;
 
 	public IEnumerable<CommonTable> GetCommonTables()
 	{
@@ -91,10 +91,10 @@ public class ColumnDefinition : ITableDefinition
 
 		if (!IsNullable) yield return new Token(this, parent, "not null", isReserved: true);
 
-		if (DefaultValueDefinition != null)
+		if (DefaultValue != null)
 		{
 			yield return new Token(this, parent, "default", isReserved: true);
-			foreach (var item in DefaultValueDefinition.GetTokens(parent))
+			foreach (var item in DefaultValue.GetTokens(parent))
 			{
 				yield return item;
 			}
@@ -121,7 +121,7 @@ public class ColumnDefinition : ITableDefinition
 	{
 		// Exclude key information
 		// Exclude check constraint
-		column = new ColumnDefinition(ColumnName, ColumnType) { IsNullable = IsNullable, AutoNumberDefinition = AutoNumberDefinition, DefaultValueDefinition = DefaultValueDefinition };
+		column = new ColumnDefinition(ColumnName, ColumnType) { IsNullable = IsNullable, AutoNumberDefinition = AutoNumberDefinition, DefaultValue = DefaultValue };
 		return true;
 	}
 

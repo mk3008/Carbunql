@@ -56,7 +56,7 @@ public class UniqueConstraint : IConstraint
 
 	public bool TryDisasseble([MaybeNullWhen(false)] out IConstraint constraint)
 	{
-		constraint = null;
-		return false;
+		constraint = this;
+		return true;
 	}
 }

@@ -76,7 +76,7 @@ public static class ColumnDefinitionParser
 		if (token.IsEqualNoCase("default"))
 		{
 			r.Read();
-			c.DefaultValueDefinition = ValueParser.Parse(r);
+			c.DefaultValue = ValueParser.Parse(r);
 			token = r.Peek();
 		}
 

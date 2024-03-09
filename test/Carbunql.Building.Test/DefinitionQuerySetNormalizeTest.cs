@@ -13,6 +13,33 @@ public class DefinitionQuerySetNormalizeTest
 
 	private ITestOutputHelper Output { get; set; }
 
+	private string GetQueryText(DefinitionQuerySet queryset)
+	{
+		var sb = new StringBuilder();
+
+		if (queryset.CreateTableQuery != null)
+		{
+			sb.AppendLine(queryset.CreateTableQuery.ToCommand().CommandText);
+			sb.AppendLine(";");
+		}
+
+		foreach (var item in queryset.AlterTableQueries)
+		{
+			sb.AppendLine(item.ToCommand().CommandText);
+			sb.AppendLine(";");
+
+		}
+		foreach (var item in queryset.CreateIndexQueries)
+		{
+			sb.AppendLine(item.ToCommand().CommandText);
+			sb.AppendLine(";");
+		}
+
+		Output.WriteLine(sb.ToString());
+
+		return sb.ToString();
+	}
+
 	[Fact]
 	public void UnknownNameConstraint()
 	{
@@ -46,27 +73,10 @@ ALTER TABLE child_table
 ";
 
 		var v = DefinitionQuerySetParser.Parse(text);
-		var sb = new StringBuilder();
+		var normal = v.ToNormalize(doMergeAltarTablerQuery: false);
 
-		var normal = v.Normarize();
-
-		sb.AppendLine(normal.CreateTableQuery.ToCommand().CommandText);
-		sb.AppendLine(";");
-		foreach (var item in normal.AlterTableQueries)
-		{
-			sb.AppendLine(item.ToCommand().CommandText);
-			sb.AppendLine(";");
-
-		}
-		foreach (var item in normal.CreateIndexQueries)
-		{
-			sb.AppendLine(item.ToCommand().CommandText);
-			sb.AppendLine(";");
-		}
-
-		Output.WriteLine(sb.ToString());
-
-		Assert.Equal(expect, sb.ToString(), true, true, true);
+		var sql = GetQueryText(normal);
+		Assert.Equal(expect, sql, true, true, true);
 	}
 
 	[Fact]
@@ -105,27 +115,10 @@ ALTER TABLE public.child_table
 ";
 
 		var v = DefinitionQuerySetParser.Parse(text);
-		var sb = new StringBuilder();
+		var normal = v.ToNormalize(doMergeAltarTablerQuery: false);
 
-		var normal = v.Normarize();
-
-		sb.AppendLine(normal.CreateTableQuery.ToCommand().CommandText);
-		sb.AppendLine(";");
-		foreach (var item in normal.AlterTableQueries)
-		{
-			sb.AppendLine(item.ToCommand().CommandText);
-			sb.AppendLine(";");
-
-		}
-		foreach (var item in normal.CreateIndexQueries)
-		{
-			sb.AppendLine(item.ToCommand().CommandText);
-			sb.AppendLine(";");
-		}
-
-		Output.WriteLine(sb.ToString());
-
-		Assert.Equal(expect, sb.ToString(), true, true, true);
+		var sql = GetQueryText(normal);
+		Assert.Equal(expect, sql, true, true, true);
 	}
 
 	[Fact]
@@ -162,27 +155,10 @@ ALTER TABLE public.child_table
 ";
 
 		var v = DefinitionQuerySetParser.Parse(text);
-		var sb = new StringBuilder();
+		var normal = v.ToNormalize();
 
-		var normal = v.Normarize();
-
-		sb.AppendLine(normal.CreateTableQuery.ToCommand().CommandText);
-		sb.AppendLine(";");
-		foreach (var item in normal.AlterTableQueries)
-		{
-			sb.AppendLine(item.ToCommand().CommandText);
-			sb.AppendLine(";");
-
-		}
-		foreach (var item in normal.CreateIndexQueries)
-		{
-			sb.AppendLine(item.ToCommand().CommandText);
-			sb.AppendLine(";");
-		}
-
-		Output.WriteLine(sb.ToString());
-
-		Assert.Equal(expect, sb.ToString(), true, true, true);
+		var sql = GetQueryText(normal);
+		Assert.Equal(expect, sql, true, true, true);
 	}
 
 	[Fact]
@@ -214,27 +190,10 @@ ALTER TABLE public.child_table
 ";
 
 		var v = DefinitionQuerySetParser.Parse(text);
-		var sb = new StringBuilder();
+		var normal = v.ToNormalize();
 
-		var normal = v.Normarize();
-
-		sb.AppendLine(normal.CreateTableQuery.ToCommand().CommandText);
-		sb.AppendLine(";");
-		foreach (var item in normal.AlterTableQueries)
-		{
-			sb.AppendLine(item.ToCommand().CommandText);
-			sb.AppendLine(";");
-
-		}
-		foreach (var item in normal.CreateIndexQueries)
-		{
-			sb.AppendLine(item.ToCommand().CommandText);
-			sb.AppendLine(";");
-		}
-
-		Output.WriteLine(sb.ToString());
-
-		Assert.Equal(expect, sb.ToString(), true, true, true);
+		var sql = GetQueryText(normal);
+		Assert.Equal(expect, sql, true, true, true);
 	}
 
 	[Fact]
@@ -266,26 +225,81 @@ ALTER TABLE public.child_table
 ";
 
 		var v = DefinitionQuerySetParser.Parse(text);
-		var sb = new StringBuilder();
+		var normal = v.ToNormalize();
 
-		var normal = v.Normarize();
+		var sql = GetQueryText(normal);
+		Assert.Equal(expect, sql, true, true, true);
+	}
 
-		sb.AppendLine(normal.CreateTableQuery.ToCommand().CommandText);
-		sb.AppendLine(";");
-		foreach (var item in normal.AlterTableQueries)
-		{
-			sb.AppendLine(item.ToCommand().CommandText);
-			sb.AppendLine(";");
+	[Fact]
+	public void SetDefault()
+	{
+		var text = @"CREATE TABLE public.child_table (
+    child_id serial4 PRIMARY KEY,
+    child_name varchar(100),
+    parent_id int4,
+    value int4,
+    remarks text
+)
+;
+ALTER TABLE public.child_table
+	ALTER COLUMN remarks SET DEFAULT ''
+;
+";
 
-		}
-		foreach (var item in normal.CreateIndexQueries)
-		{
-			sb.AppendLine(item.ToCommand().CommandText);
-			sb.AppendLine(";");
-		}
+		var expect = @"CREATE TABLE public.child_table (
+    child_id serial4,
+    child_name VARCHAR(100),
+    parent_id int4,
+    value int4,
+    remarks text DEFAULT ''
+)
+;
+ALTER TABLE public.child_table
+    ADD PRIMARY KEY (child_id)
+;
+";
 
-		Output.WriteLine(sb.ToString());
+		var v = DefinitionQuerySetParser.Parse(text);
+		var normal = v.ToNormalize();
 
-		Assert.Equal(expect, sb.ToString(), true, true, true);
+		var sql = GetQueryText(normal);
+		Assert.Equal(expect, sql, true, true, true);
+	}
+
+	[Fact]
+	public void DropDefault()
+	{
+		var text = @"CREATE TABLE public.child_table (
+    child_id serial4 PRIMARY KEY,
+    child_name varchar(100),
+    parent_id int4,
+    value int4,
+    remarks text DEFAULT ''
+)
+;
+ALTER TABLE public.child_table
+	ALTER COLUMN remarks DROP DEFAULT
+;
+";
+
+		var expect = @"CREATE TABLE public.child_table (
+    child_id serial4,
+    child_name VARCHAR(100),
+    parent_id int4,
+    value int4,
+    remarks text
+)
+;
+ALTER TABLE public.child_table
+    ADD PRIMARY KEY (child_id)
+;
+";
+
+		var v = DefinitionQuerySetParser.Parse(text);
+		var normal = v.ToNormalize();
+
+		var sql = GetQueryText(normal);
+		Assert.Equal(expect, sql, true, true, true);
 	}
 }
