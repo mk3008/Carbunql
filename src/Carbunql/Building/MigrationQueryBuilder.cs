@@ -7,6 +7,6 @@ public class MigrationQueryBuilder
 	public static DefinitionQuerySet Execute(string expectsql, string actualsql)
 	{
 		var actual = DefinitionQuerySetParser.Parse(actualsql);
-		return actual.GenerateMigrationQuery(expectsql);
+		return actual.GenerateMigrationQuery(expectsql).MergeAlterTableQuery();
 	}
 }
