@@ -80,7 +80,7 @@ ALTER TABLE child_table
 		var expectQuerySet = DefinitionQuerySetParser.Parse(expect);
 		var actualQuerySet = DefinitionQuerySetParser.Parse(actual);
 
-		var queryset = actualQuerySet.GenerateQuerySetForCorrection(expectQuerySet);
+		var queryset = actualQuerySet.GenerateMigrationQuery(expectQuerySet);
 
 		var sql = GetQueryText(queryset);
 
@@ -121,7 +121,7 @@ ALTER TABLE child_table
 		var expectQuerySet = DefinitionQuerySetParser.Parse(expect);
 		var actualQuerySet = DefinitionQuerySetParser.Parse(actual);
 
-		var queryset = actualQuerySet.GenerateQuerySetForCorrection(expectQuerySet);
+		var queryset = actualQuerySet.GenerateMigrationQuery(expectQuerySet);
 		var sql = GetQueryText(queryset);
 		Assert.Equal(result, sql, true, true, true);
 	}
@@ -158,7 +158,7 @@ ALTER TABLE child_table
 		var expectQuerySet = DefinitionQuerySetParser.Parse(expect);
 		var actualQuerySet = DefinitionQuerySetParser.Parse(actual);
 
-		var queryset = actualQuerySet.GenerateQuerySetForCorrection(expectQuerySet);
+		var queryset = actualQuerySet.GenerateMigrationQuery(expectQuerySet);
 		var sql = GetQueryText(queryset);
 		Assert.Equal(result, sql, true, true, true);
 	}
@@ -195,7 +195,7 @@ ALTER TABLE child_table
 		var expectQuerySet = DefinitionQuerySetParser.Parse(expect);
 		var actualQuerySet = DefinitionQuerySetParser.Parse(actual);
 
-		var queryset = actualQuerySet.GenerateQuerySetForCorrection(expectQuerySet);
+		var queryset = actualQuerySet.GenerateMigrationQuery(expectQuerySet);
 		var sql = GetQueryText(queryset);
 		Assert.Equal(result, sql, true, true, true);
 	}
@@ -232,7 +232,7 @@ ALTER TABLE child_table
 		var expectQuerySet = DefinitionQuerySetParser.Parse(expect);
 		var actualQuerySet = DefinitionQuerySetParser.Parse(actual);
 
-		var queryset = actualQuerySet.GenerateQuerySetForCorrection(expectQuerySet);
+		var queryset = actualQuerySet.GenerateMigrationQuery(expectQuerySet);
 		var sql = GetQueryText(queryset);
 		Assert.Equal(result, sql, true, true, true);
 	}
@@ -270,7 +270,7 @@ ALTER TABLE child_table
 		var expectQuerySet = DefinitionQuerySetParser.Parse(expect);
 		var actualQuerySet = DefinitionQuerySetParser.Parse(actual);
 
-		var queryset = actualQuerySet.GenerateQuerySetForCorrection(expectQuerySet);
+		var queryset = actualQuerySet.GenerateMigrationQuery(expectQuerySet);
 		var sql = GetQueryText(queryset);
 		Assert.Equal(result, sql, true, true, true);
 	}
@@ -308,7 +308,7 @@ ALTER TABLE child_table
 		var expectQuerySet = DefinitionQuerySetParser.Parse(expect);
 		var actualQuerySet = DefinitionQuerySetParser.Parse(actual);
 
-		var queryset = actualQuerySet.GenerateQuerySetForCorrection(expectQuerySet);
+		var queryset = actualQuerySet.GenerateMigrationQuery(expectQuerySet);
 		var sql = GetQueryText(queryset);
 		Assert.Equal(result, sql, true, true, true);
 	}

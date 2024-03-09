@@ -73,7 +73,7 @@ ALTER TABLE child_table
 ";
 
 		var v = DefinitionQuerySetParser.Parse(text);
-		var normal = v.Normarize();
+		var normal = v.Normalize();
 
 		var sql = GetQueryText(normal);
 		Assert.Equal(expect, sql, true, true, true);
@@ -115,7 +115,7 @@ ALTER TABLE public.child_table
 ";
 
 		var v = DefinitionQuerySetParser.Parse(text);
-		var normal = v.Normarize();
+		var normal = v.Normalize();
 
 		var sql = GetQueryText(normal);
 		Assert.Equal(expect, sql, true, true, true);
@@ -155,7 +155,7 @@ ALTER TABLE public.child_table
 ";
 
 		var v = DefinitionQuerySetParser.Parse(text);
-		var normal = v.Normarize();
+		var normal = v.Normalize();
 
 		var sql = GetQueryText(normal);
 		Assert.Equal(expect, sql, true, true, true);
@@ -190,7 +190,7 @@ ALTER TABLE public.child_table
 ";
 
 		var v = DefinitionQuerySetParser.Parse(text);
-		var normal = v.Normarize();
+		var normal = v.Normalize();
 
 		var sql = GetQueryText(normal);
 		Assert.Equal(expect, sql, true, true, true);
@@ -225,7 +225,7 @@ ALTER TABLE public.child_table
 ";
 
 		var v = DefinitionQuerySetParser.Parse(text);
-		var normal = v.Normarize();
+		var normal = v.Normalize();
 
 		var sql = GetQueryText(normal);
 		Assert.Equal(expect, sql, true, true, true);

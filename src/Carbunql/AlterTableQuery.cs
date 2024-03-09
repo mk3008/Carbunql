@@ -1,12 +1,11 @@
 ﻿using Carbunql.Building;
 using Carbunql.Clauses;
-using Carbunql.Definitions;
 using Carbunql.Tables;
 using MessagePack;
 
 namespace Carbunql;
 
-public class AlterTableQuery : QueryCommandCollection<IAlterCommand>, IQueryCommandable, ICommentable
+public class AlterTableQuery : IQueryCommandable, ICommentable
 {
 	public AlterTableQuery(AlterTableClause clause)
 	{
@@ -28,7 +27,7 @@ public class AlterTableQuery : QueryCommandCollection<IAlterCommand>, IQueryComm
 		yield break;
 	}
 
-	public override IEnumerable<Token> GetTokens(Token? parent)
+	public IEnumerable<Token> GetTokens(Token? parent)
 	{
 		if (CommentClause != null) foreach (var item in CommentClause.GetTokens(parent)) yield return item;
 
@@ -39,6 +38,11 @@ public class AlterTableQuery : QueryCommandCollection<IAlterCommand>, IQueryComm
 	}
 
 	public IEnumerable<CommonTable> GetCommonTables()
+	{
+		yield break;
+	}
+
+	public IEnumerable<QueryParameter> GetParameters()
 	{
 		yield break;
 	}

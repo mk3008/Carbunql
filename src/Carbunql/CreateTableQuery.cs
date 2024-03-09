@@ -3,6 +3,7 @@ using Carbunql.Clauses;
 using Carbunql.Definitions;
 using Carbunql.Tables;
 using MessagePack;
+using System.Data;
 
 namespace Carbunql;
 
@@ -197,7 +198,14 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
 
 		var queryset = new DefinitionQuerySet(ct);
 
-		queryset.AlterTableQueries.AddRange(DefinitionClause.Disasseble(this));
+		// alter table query normalize
+		foreach (var item in DefinitionClause.Disasseble(this))
+		{
+			if (!item.TryIntegrate(ct.DefinitionClause))
+			{
+				queryset.AlterTableQueries.Add(item);
+			}
+		}
 
 		return queryset;
 	}

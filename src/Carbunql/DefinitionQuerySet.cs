@@ -1,5 +1,7 @@
-﻿using Carbunql.Clauses;
+﻿using Carbunql.Analysis;
+using Carbunql.Clauses;
 using Carbunql.Definitions;
+using Cysharp.Text;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql;
@@ -21,31 +23,59 @@ public class DefinitionQuerySet
 
 	public List<CreateIndexQuery> CreateIndexQueries { get; set; } = new();
 
-	public DefinitionQuerySet Normarize()
+	public DefinitionQuerySet Merge()
 	{
-		if (CreateTableQuery == null) throw new NullReferenceException(nameof(CreateTableQuery));
+		var q = Normalize();
 
-		var q = CreateTableQuery.Normarize();
-		if (q.CreateTableQuery == null) throw new NullReferenceException(nameof(CreateTableQuery));
-		var clause = q.CreateTableQuery.DefinitionClause;
-		if (clause == null) throw new Exception();
+		var dic = new Dictionary<string, AlterTableQuery>();
 
-		// External command
-		foreach (var constraint in CreateTableQuery.DefinitionClause!.OfType<IConstraint>())
+		//merge alter table query
+		foreach (var alterquery in q.AlterTableQueries)
 		{
-			q.AlterTableQueries.Add(new AlterTableQuery(new AlterTableClause(q.CreateTableQuery, constraint)));
+			var key = alterquery.AlterTableClause.TableFullName;
+			if (!dic.ContainsKey(key))
+			{
+				var alt = new AlterTableQuery(new AlterTableClause(alterquery.AlterTableClause));
+				dic.Add(key, alt);
+			}
+			var value = dic[key];
+			foreach (var command in alterquery.AlterTableClause)
+			{
+				value.AlterTableClause.Add(command);
+			}
 		}
 
-		// apply
+		q.AlterTableQueries.Clear();
+		q.AlterTableQueries.AddRange(dic.Select(x => x.Value));
+
+		return q;
+	}
+
+	public DefinitionQuerySet Normalize()
+	{
+		DefinitionQuerySet q;
+		if (CreateTableQuery != null)
+		{
+			q = CreateTableQuery.Normarize();
+		}
+		else
+		{
+			q = new DefinitionQuerySet();
+		}
+
+		var clause = q.CreateTableQuery?.DefinitionClause;
+
+		// integrate
 		foreach (var atq in AlterTableQueries.SelectMany(x => x.Disassemble()))
 		{
-			if (!atq.TryIntegrate(clause))
+			if (clause == null || !atq.TryIntegrate(clause))
 			{
 				q.AlterTableQueries.Add(atq);
 			}
 		}
 
 		q.CreateIndexQueries.AddRange(CreateIndexQueries);
+
 		return q;
 	}
 
@@ -72,18 +102,35 @@ public class DefinitionQuerySet
 		return column is not null;
 	}
 
-	public DefinitionQuerySet GenerateQuerySetForCorrection(DefinitionQuerySet expectQuerySet)
+
+	public DefinitionQuerySet GenerateMigrationQuery(string expectQuerySet)
+	{
+		var queryset = DefinitionQuerySetParser.Parse(expectQuerySet);
+		return GenerateMigrationQuery(queryset);
+	}
+
+	public DefinitionQuerySet GenerateMigrationQuery(DefinitionQuerySet expectQuerySet)
 	{
 		var queryset = new DefinitionQuerySet();
 
 		// Normalize for easier comparison
-		var actual = Normarize();
-		var expect = expectQuerySet.Normarize();
+		var actual = Normalize();
+		var expect = expectQuerySet.Normalize();
 		if (expect.CreateTableQuery is null) throw new InvalidOperationException("create table query is missing.");
 		if (actual.CreateTableQuery is null) throw new InvalidOperationException("create table query is missing.");
 
 		var actualcolumns = actual.GetColumnNames().ToList();
 		var expectcolumns = expect.GetColumnNames().ToList();
+
+		//drop column
+		foreach (var item in actualcolumns.Where(x => !expectcolumns.Contains(x)))
+		{
+			var clause = new AlterTableClause(expect.CreateTableQuery)
+			{
+				new DropColumnCommand(item)
+			};
+			queryset.AlterTableQueries.Add(new AlterTableQuery(clause));
+		}
 
 		//add column
 		foreach (var item in expectcolumns.Where(x => !actualcolumns.Contains(x)))
@@ -96,16 +143,6 @@ public class DefinitionQuerySet
 				};
 				queryset.AlterTableQueries.Add(new AlterTableQuery(clause));
 			}
-		}
-
-		//drop column
-		foreach (var item in actualcolumns.Where(x => !expectcolumns.Contains(x)))
-		{
-			var clause = new AlterTableClause(expect.CreateTableQuery)
-			{
-				new DropColumnCommand(item)
-			};
-			queryset.AlterTableQueries.Add(new AlterTableQuery(clause));
 		}
 
 		//diff column
@@ -179,18 +216,6 @@ public class DefinitionQuerySet
 		var actualCommands = GetAddConstraintCommands(actual).ToDictionary(x => x, x => x.ToText());
 		var expectCommands = GetAddConstraintCommands(expect).ToDictionary(x => x, x => x.ToText());
 
-		foreach (var item in expectCommands)
-		{
-			//add
-			if (!actualCommands.ContainsValue(item.Value))
-			{
-				var clause = new AlterTableClause(expect.CreateTableQuery)
-				{
-					item.Key
-				};
-				queryset.AlterTableQueries.Add(new AlterTableQuery(clause));
-			}
-		}
 		foreach (var item in actualCommands)
 		{
 			//drop
@@ -203,8 +228,21 @@ public class DefinitionQuerySet
 				queryset.AlterTableQueries.Add(new AlterTableQuery(clause));
 			}
 		}
-		return queryset;
 
+		foreach (var item in expectCommands)
+		{
+			//add
+			if (!actualCommands.ContainsValue(item.Value))
+			{
+				var clause = new AlterTableClause(expect.CreateTableQuery)
+				{
+					item.Key
+				};
+				queryset.AlterTableQueries.Add(new AlterTableQuery(clause));
+			}
+		}
+
+		return queryset;
 	}
 
 	private IEnumerable<AddConstraintCommand> GetAddConstraintCommands(DefinitionQuerySet queryset)
@@ -224,5 +262,28 @@ public class DefinitionQuerySet
 		{
 			yield return cmd;
 		}
+	}
+
+	public string ToText()
+	{
+		var sb = ZString.CreateStringBuilder();
+
+		if (CreateTableQuery != null)
+		{
+			sb.AppendLine(CreateTableQuery.ToText());
+		}
+
+		foreach (var item in AlterTableQueries)
+		{
+			if (sb.Length > 0) sb.AppendLine(";");
+			sb.AppendLine(item.ToText());
+		}
+		foreach (var item in CreateIndexQueries)
+		{
+			if (sb.Length > 0) sb.AppendLine(";");
+			sb.AppendLine(item.ToText());
+		}
+
+		return sb.ToString();
 	}
 }

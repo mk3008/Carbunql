@@ -1,0 +1,127 @@
+@page "/ddl_migration"
+@using Carbunql;
+@using Carbunql.Analysis
+@using Carbunql.Building;
+
+<PageTitle>To SubQuery</PageTitle>
+
+<div class="container-fluid">
+@*	<div class="row" Style="margin: 0px 0px 16px 0px;">
+		<RadzenMenu class="rz-shadow-3">
+			<RadzenMenuItem Text="Clear SQL" Icon="clear" Click=@OnClear>
+			</RadzenMenuItem>
+		</RadzenMenu>
+	</div>*@
+	<div class="row">
+		<div class="col-md-12 p-3">
+			<RadzenText TextStyle="TextStyle.H4">DDL Migration</RadzenText>
+
+			<RadzenText>Compare the current DDL with the expected DDL and generate migration queries.</RadzenText>
+
+			<RadzenCard>
+				<RadzenText TextStyle="TextStyle.Subtitle2">Source code</RadzenText>
+				<RadzenTextArea @bind-Value=@sourcecode TValue="string" Style="width: 100%; min-height: 250px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" />
+			</RadzenCard>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12 p-3">
+            <RadzenText TextStyle="TextStyle.H5">Demo</RadzenText>
+        </div>
+	</div>
+	<div class="row">
+		<div class="col-md-12 p-3">
+			<RadzenCard>
+				<RadzenText TextStyle="TextStyle.Subtitle2">Actual DDL query set</RadzenText>
+				<RadzenTextArea @bind-Value=@actual TValue="string" Change=@OnChange Style="width: 100%; min-height: 150px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" Placeholder="Enter select query(ex. select id, value from table)" />
+			</RadzenCard>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12 p-3">
+			<RadzenCard>
+				<RadzenText TextStyle="TextStyle.Subtitle2">Expect DDL query set</RadzenText>
+				<RadzenTextArea @bind-Value=@expect TValue="string" Change=@OnChange Style="width: 100%; min-height: 150px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" Placeholder="Enter select query(ex. select id, value from table)" />
+			</RadzenCard>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12 p-3">
+			<RadzenCard>
+				<RadzenText TextStyle="TextStyle.Subtitle2">Result</RadzenText>
+				<RadzenTextArea @bind-Value=@fsql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" />
+			</RadzenCard>
+		</div>
+	</div>
+</div>
+
+@code {
+	string expect = @"CREATE TABLE public.child_table (
+    child_id serial4 NOT NULL,
+    child_name varchar(100) NOT NULL,
+    parent_id int4 NOT NULL,
+    value int4 NOT NULL,
+    remarks text NULL DEFAULT ''::text,
+    CONSTRAINT child_table_pkey PRIMARY KEY (child_id),
+    CONSTRAINT child_table_child_name_key UNIQUE (child_name),
+    CONSTRAINT child_table_value_check CHECK (value >= 0)
+)";
+
+	string actual = @"CREATE TABLE public.child_table (
+    child_id serial4 NOT NULL,
+    child_name_text varchar(100) NOT NULL,
+    CONSTRAINT pk_child_table PRIMARY KEY (child_id)
+)";
+	string fsql = string.Empty;
+
+	string sourcecode = @"using Carbunql;
+using Carbunql.Analysis;
+using Carbunql.Building;
+
+var actualQuerySet = DefinitionQuerySetParser.Parse(actual_ddl_query_text);
+var expectQuerySet = DefinitionQuerySetParser.Parse(expect_ddl_query_text);
+
+var q = actualQuerySet.GenerateMigrationQuery(expectQuerySet);
+fsql = q.ToText();";
+
+	string alias = "q";
+
+	protected override void OnInitialized()
+	{
+		OnChange();
+	}
+
+	void OnClear()
+	{
+		expect = string.Empty;
+		actual = string.Empty;
+		OnChange();
+	}
+
+	void OnChange()
+	{
+		if (string.IsNullOrEmpty(expect) || string.IsNullOrEmpty(actual))
+		{
+			fsql = string.Empty;
+			return;
+		}
+
+		try
+		{
+			var actualQuerySet = DefinitionQuerySetParser.Parse(actual); 
+			var expectQuerySet = DefinitionQuerySetParser.Parse(expect);
+
+			var q = actualQuerySet.GenerateMigrationQuery(expectQuerySet);
+			fsql = q.Merge().ToText();
+
+			if (string.IsNullOrEmpty(fsql))
+			{
+				fsql = "/* There is no difference */";
+			}
+		}
+		catch (Exception ex)
+		{
+			fsql = ex.ToString();
+		}
+	}
+}
