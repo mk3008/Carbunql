@@ -1,6 +1,5 @@
 @page "/ddl_migration"
 @using Carbunql;
-@using Carbunql.Analysis
 @using Carbunql.Building;
 
 <PageTitle>To SubQuery</PageTitle>
@@ -75,13 +74,9 @@
 	string fsql = string.Empty;
 
 	string sourcecode = @"using Carbunql;
-using Carbunql.Analysis;
 using Carbunql.Building;
 
-var actualQuerySet = DefinitionQuerySetParser.Parse(actual_ddl_query_text);
-var expectQuerySet = DefinitionQuerySetParser.Parse(expect_ddl_query_text);
-
-var q = actualQuerySet.GenerateMigrationQuery(expectQuerySet);
+var q = MigrationQueryBuilder.Execute(expect_ddl_query_text, actual_ddl_query_text);
 fsql = q.ToText();";
 
 	string alias = "q";
@@ -108,10 +103,7 @@ fsql = q.ToText();";
 
 		try
 		{
-			var actualQuerySet = DefinitionQuerySetParser.Parse(actual); 
-			var expectQuerySet = DefinitionQuerySetParser.Parse(expect);
-
-			var q = actualQuerySet.GenerateMigrationQuery(expectQuerySet);
+			var q = MigrationQueryBuilder.Execute(expect, actual);
 			fsql = q.MergeAlterTableQuery().ToText();
 
 			if (string.IsNullOrEmpty(fsql))
