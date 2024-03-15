@@ -1,6 +1,5 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
-using Carbunql.Values;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Definitions;

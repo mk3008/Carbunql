@@ -1,5 +1,4 @@
 ﻿using Carbunql.Clauses;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Definitions;
 

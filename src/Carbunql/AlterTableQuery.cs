@@ -3,7 +3,6 @@ using Carbunql.Clauses;
 using Carbunql.Definitions;
 using Carbunql.Tables;
 using MessagePack;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql;
 

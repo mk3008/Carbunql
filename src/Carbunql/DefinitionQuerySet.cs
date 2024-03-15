@@ -24,6 +24,13 @@ public class DefinitionQuerySet : ITable
 		Table = t.Table;
 	}
 
+	public DefinitionQuerySet(DropTableQuery dropTableQuery)
+	{
+		Schema = dropTableQuery.Schema;
+		Table = dropTableQuery.Table;
+		DropTableQuery = dropTableQuery;
+	}
+
 	public DefinitionQuerySet(CreateTableQuery createTableQuery)
 	{
 		Schema = createTableQuery.Schema;
@@ -34,6 +41,29 @@ public class DefinitionQuerySet : ITable
 	public string? Schema { get; init; }
 
 	public string Table { get; init; }
+
+	private DropTableQuery? _dropTableQuery = null;
+
+	public DropTableQuery? DropTableQuery
+	{
+		get => _dropTableQuery;
+		set
+		{
+			if (value == null)
+			{
+				_dropTableQuery = value;
+				return;
+			}
+			if (this.GetTableFullName() != value.GetTableFullName())
+			{
+				throw new ArgumentException("Unable to add operations for different tables");
+			}
+			_dropTableQuery = value;
+			_createTableQuery = null;
+			_alterTableQueries.Clear();
+			_alterIndexQueries.Clear();
+		}
+	}
 
 	private CreateTableQuery? _createTableQuery = null;
 
@@ -52,6 +82,7 @@ public class DefinitionQuerySet : ITable
 				throw new ArgumentException("Unable to add operations for different tables");
 			}
 			_createTableQuery = value;
+			_dropTableQuery = null;
 		}
 	}
 
@@ -61,6 +92,8 @@ public class DefinitionQuerySet : ITable
 
 	public void AddAlterTableQuery(AlterTableQuery query)
 	{
+		if (DropTableQuery != null) throw new InvalidOperationException();
+
 		if (this.GetTableFullName() != query.GetTableFullName())
 		{
 			throw new ArgumentException("Unable to add operations for different tables");
@@ -74,6 +107,8 @@ public class DefinitionQuerySet : ITable
 
 	public void AddAlterIndexQuery(IAlterIndexQuery query)
 	{
+		if (DropTableQuery != null) throw new InvalidOperationException();
+
 		if (this.GetTableFullName() != query.GetTableFullName())
 		{
 			throw new ArgumentException("Unable to add operations for different tables");
@@ -109,6 +144,7 @@ public class DefinitionQuerySet : ITable
 	public DefinitionQuerySet ToNormalize(bool doMergeAltarTablerQuery = true)
 	{
 		DefinitionQuerySet q;
+
 		if (CreateTableQuery != null)
 		{
 			q = CreateTableQuery.ToNormalize();
@@ -339,12 +375,20 @@ public class DefinitionQuerySet : ITable
 		}
 	}
 
-	public string ToText()
+	public string ToText(bool includeDropTableQuery)
 	{
 		var sb = ZString.CreateStringBuilder();
 
 		var name = this.GetTableFullName();
 		//sb.AppendLine("--" + name);
+		if (DropTableQuery != null)
+		{
+			if (!includeDropTableQuery) return string.Empty;
+			sb.AppendLine(DropTableQuery.ToText());
+			sb.AppendLine(";");
+			return sb.ToString();
+		}
+
 		if (CreateTableQuery != null)
 		{
 			sb.AppendLine(CreateTableQuery.ToText());

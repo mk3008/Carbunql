@@ -4,12 +4,12 @@ namespace Carbunql;
 
 public class DefinitionQuerySetList : List<DefinitionQuerySet>
 {
-	public string ToText()
+	public string ToText(bool includeDropTableQuery = false)
 	{
 		var sb = new StringBuilder();
 		foreach (var item in this)
 		{
-			sb.Append(item.ToText());
+			sb.Append(item.ToText(includeDropTableQuery));
 		}
 		return sb.ToString();
 	}
@@ -19,7 +19,10 @@ public class DefinitionQuerySetList : List<DefinitionQuerySet>
 		var lst = new DefinitionQuerySetList();
 		foreach (var item in this)
 		{
-			lst.Add(item.ToNormalize(doMergeAltarTablerQuery));
+			if (item.DropTableQuery == null)
+			{
+				lst.Add(item.ToNormalize(doMergeAltarTablerQuery));
+			}
 		}
 		return lst;
 	}

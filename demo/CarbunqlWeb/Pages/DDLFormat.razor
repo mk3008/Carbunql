@@ -89,13 +89,8 @@ Console.WriteLine(text);";
         }
         try
         {
-            var sb = new StringBuilder();
             var sq = DefinitionQuerySetParser.Parse(sql);
-            foreach(var item in sq){
-                if (sb.Length != 0) sb.AppendLine(";");
-                sb.AppendLine(item.ToText());
-            }
-            fsql = sb.ToString();
+            fsql = sq.ToText();
 		}
 		catch (Exception ex)
 		{

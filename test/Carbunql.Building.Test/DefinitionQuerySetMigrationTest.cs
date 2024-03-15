@@ -1,6 +1,4 @@
-﻿using Carbunql.Analysis;
-using System.Text;
-using Xunit.Abstractions;
+﻿using Xunit.Abstractions;
 
 namespace Carbunql.Building.Test;
 
@@ -310,5 +308,53 @@ CREATE INDEX idx_parent_id ON public.child_table (parent_id)
 		var sql = queryset.ToText();
 		Output.WriteLine(sql);
 		Assert.Equal(result, sql, true, true, true);
+	}
+
+	[Fact]
+	public void DropTable()
+	{
+		var expect = @"CREATE TABLE child_table (
+    child_id SERIAL PRIMARY KEY
+)
+";
+
+		var actual = @"CREATE TABLE child_table_2 (
+    child_id SERIAL PRIMARY KEY,
+    child_name VARCHAR(100) NOT NULL UNIQUE,
+    parent_id INT NOT NULL,
+    value INT NOT NULL CHECK (value >= 0),
+    remarks TEXT DEFAULT ''
+)
+";
+
+		var result1 = @"CREATE TABLE child_table (
+    child_id SERIAL
+)
+;
+ALTER TABLE child_table
+    ADD PRIMARY KEY (child_id)
+;
+";
+
+		var result2 = @"DROP TABLE child_table_2
+;
+CREATE TABLE child_table (
+    child_id SERIAL
+)
+;
+ALTER TABLE child_table
+    ADD PRIMARY KEY (child_id)
+;
+";
+
+		var queryset = MigrationQueryBuilder.Execute(expect, actual);
+
+		var sql = queryset.ToText();
+		Output.WriteLine(sql);
+		Assert.Equal(result1, sql, true, true, true);
+
+		sql = queryset.ToText(includeDropTableQuery: true);
+		Output.WriteLine(sql);
+		Assert.Equal(result2, sql, true, true, true);
 	}
 }
