@@ -1,16 +1,23 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Definitions;
 
 public class RenameTableCommand : IAlterCommand
 {
-	public RenameTableCommand(string newTableName)
+	public RenameTableCommand(ITable t, string newTableName)
 	{
 		NewTableName = newTableName;
+		Schema = t.Schema;
+		Table = t.Table;
 	}
 
 	public string NewTableName { get; set; }
+
+	public string? Schema { get; init; }
+
+	public string Table { get; init; } = string.Empty;
 
 	public IEnumerable<CommonTable> GetCommonTables()
 	{
@@ -39,8 +46,14 @@ public class RenameTableCommand : IAlterCommand
 		yield return new Token(this, parent, NewTableName);
 	}
 
-	public bool TryIntegrate(TableDefinitionClause clause)
+	public bool TrySet(TableDefinitionClause clause)
 	{
+		return false;
+	}
+
+	public bool TryToIndex([MaybeNullWhen(false)] out CreateIndexQuery query)
+	{
+		query = default;
 		return false;
 	}
 }

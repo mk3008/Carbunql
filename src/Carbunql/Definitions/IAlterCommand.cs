@@ -2,7 +2,9 @@
 
 namespace Carbunql.Definitions;
 
-public interface IAlterCommand : IQueryCommandable
+public interface IAlterCommand : IQueryCommandable, ITable
 {
-	bool TryIntegrate(TableDefinitionClause clause);
+	bool TrySet(TableDefinitionClause clause);
+
+	//bool TryToIndex([MaybeNullWhen(false)] out CreateIndexQuery query);
 }

@@ -6,16 +6,25 @@ namespace Carbunql;
 
 public class CreateIndexQuery : IAlterIndexQuery
 {
+	public CreateIndexQuery(IndexOnClause clause)
+	{
+		OnClause = clause;
+	}
+
 	public bool IsUnique { get; set; } = false;
 
 	public string? IndexName { get; init; } = null;
 
-	public IndexOnClause? OnClause { get; set; }
+	public IndexOnClause OnClause { get; set; }
 
 	public WhereClause? WhereClause { get; set; } = null;
 
 	[IgnoreMember]
 	public CommentClause? CommentClause { get; set; }
+
+	public string? Schema => OnClause.Schema;
+
+	public string Table => OnClause.Table;
 
 	public IEnumerable<SelectQuery> GetInternalQueries()
 	{

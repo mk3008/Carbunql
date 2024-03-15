@@ -12,6 +12,10 @@ public class AddConstraintCommand : IAlterCommand
 
 	public IConstraint Constraint { get; set; }
 
+	public string? Schema => Constraint.Schema;
+
+	public string Table => Constraint.Table;
+
 	public IEnumerable<CommonTable> GetCommonTables()
 	{
 		yield break;
@@ -41,8 +45,13 @@ public class AddConstraintCommand : IAlterCommand
 		}
 	}
 
-	public bool TryIntegrate(TableDefinitionClause clause)
+	public bool TrySet(TableDefinitionClause clause)
 	{
-		return Constraint.TryIntegrate(clause);
+		return Constraint.TrySet(clause);
 	}
+
+	//public bool TryToIndex([MaybeNullWhen(false)] out CreateIndexQuery query)
+	//{
+	//	return Constraint.TryToIndex(out query);
+	//}
 }

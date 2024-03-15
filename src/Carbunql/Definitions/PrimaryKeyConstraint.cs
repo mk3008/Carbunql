@@ -6,11 +6,21 @@ namespace Carbunql.Definitions;
 
 public class PrimaryKeyConstraint : IConstraint
 {
+	public PrimaryKeyConstraint(ITable t)
+	{
+		Schema = t.Schema;
+		Table = t.Table;
+	}
+
 	public string ConstraintName { get; set; } = string.Empty;
 
 	public List<string> ColumnNames { get; set; } = new();
 
 	public string ColumnName => string.Empty;
+
+	public string? Schema { get; init; }
+
+	public string Table { get; init; }
 
 	public IEnumerable<CommonTable> GetCommonTables()
 	{
@@ -50,7 +60,7 @@ public class PrimaryKeyConstraint : IConstraint
 		yield return Token.ReservedBracketEnd(this, parent);
 	}
 
-	public bool TryIntegrate(TableDefinitionClause clause)
+	public bool TrySet(TableDefinitionClause clause)
 	{
 		return false;
 	}
@@ -60,4 +70,10 @@ public class PrimaryKeyConstraint : IConstraint
 		constraint = this;
 		return true;
 	}
+
+	//public bool TryToIndex([MaybeNullWhen(false)] out CreateIndexQuery query)
+	//{
+	//	query = default;
+	//	return false;
+	//}
 }

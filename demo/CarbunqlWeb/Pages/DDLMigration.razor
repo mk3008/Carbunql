@@ -79,9 +79,8 @@
 using Carbunql.Building;
 
 var q = MigrationQueryBuilder.Execute(expect_ddl_query_text, actual_ddl_query_text);
-fsql = q.ToText();";
+fsql = q.MergeAlterTableQuery().ToText(includeDropTableQuery : true);";
 
-	string alias = "q";
 
 	protected override void OnInitialized()
 	{
@@ -97,16 +96,10 @@ fsql = q.ToText();";
 
 	void OnChange()
 	{
-		if (string.IsNullOrEmpty(expect) || string.IsNullOrEmpty(actual))
-		{
-			fsql = string.Empty;
-			return;
-		}
-
 		try
 		{
 			var q = MigrationQueryBuilder.Execute(expect, actual);
-			fsql = q.MergeAlterTableQuery().ToText();
+			fsql = q.MergeAlterTableQuery().ToText(includeDropTableQuery : true);
 
 			if (string.IsNullOrEmpty(fsql))
 			{

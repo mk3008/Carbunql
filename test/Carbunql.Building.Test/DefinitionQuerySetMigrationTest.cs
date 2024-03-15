@@ -1,6 +1,4 @@
-﻿using Carbunql.Analysis;
-using System.Text;
-using Xunit.Abstractions;
+﻿using Xunit.Abstractions;
 
 namespace Carbunql.Building.Test;
 
@@ -12,33 +10,6 @@ public class DefinitionQuerySetMigrationTest
 	}
 
 	private ITestOutputHelper Output { get; set; }
-
-	private string GetQueryText(DefinitionQuerySet queryset)
-	{
-		var sb = new StringBuilder();
-
-		if (queryset.CreateTableQuery != null)
-		{
-			sb.AppendLine(queryset.CreateTableQuery.ToCommand().CommandText);
-			sb.AppendLine(";");
-		}
-
-		foreach (var item in queryset.AlterTableQueries)
-		{
-			sb.AppendLine(item.ToCommand().CommandText);
-			sb.AppendLine(";");
-
-		}
-		foreach (var item in queryset.AlterIndexQueries)
-		{
-			sb.AppendLine(item.ToCommand().CommandText);
-			sb.AppendLine(";");
-		}
-
-		Output.WriteLine(sb.ToString());
-
-		return sb.ToString();
-	}
 
 	[Fact]
 	public void AddColumn()
@@ -58,32 +29,19 @@ public class DefinitionQuerySetMigrationTest
 ";
 
 		var result = @"ALTER TABLE child_table
-    ADD COLUMN child_name VARCHAR(100) NOT NULL
-;
-ALTER TABLE child_table
-    ADD COLUMN parent_id INT NOT NULL
-;
-ALTER TABLE child_table
-    ADD COLUMN value INT NOT NULL
-;
-ALTER TABLE child_table
-    ADD COLUMN remarks TEXT DEFAULT ''
-;
-ALTER TABLE child_table
-    ADD UNIQUE (child_name)
-;
-ALTER TABLE child_table
+    ADD COLUMN child_name VARCHAR(100) NOT NULL,
+    ADD COLUMN parent_id INT NOT NULL,
+    ADD COLUMN value INT NOT NULL,
+    ADD COLUMN remarks TEXT DEFAULT '',
+    ADD UNIQUE (child_name),
     ADD CHECK (value >= 0)
 ;
 ";
 
-		var expectQuerySet = DefinitionQuerySetParser.Parse(expect);
-		var actualQuerySet = DefinitionQuerySetParser.Parse(actual);
+		var queryset = MigrationQueryBuilder.Execute(expect, actual);
 
-		var queryset = actualQuerySet.GenerateMigrationQuery(expectQuerySet);
-
-		var sql = GetQueryText(queryset);
-
+		var sql = queryset.ToText();
+		Output.WriteLine(sql);
 		Assert.Equal(result, sql, true, true, true);
 	}
 
@@ -105,24 +63,17 @@ ALTER TABLE child_table
 ";
 
 		var result = @"ALTER TABLE child_table
-    DROP COLUMN child_name
-;
-ALTER TABLE child_table
-    DROP COLUMN parent_id
-;
-ALTER TABLE child_table
-    DROP COLUMN value
-;
-ALTER TABLE child_table
+    DROP COLUMN child_name,
+    DROP COLUMN parent_id,
+    DROP COLUMN value,
     DROP COLUMN remarks
 ;
 ";
 
-		var expectQuerySet = DefinitionQuerySetParser.Parse(expect);
-		var actualQuerySet = DefinitionQuerySetParser.Parse(actual);
+		var queryset = MigrationQueryBuilder.Execute(expect, actual);
 
-		var queryset = actualQuerySet.GenerateMigrationQuery(expectQuerySet);
-		var sql = GetQueryText(queryset);
+		var sql = queryset.ToText();
+		Output.WriteLine(sql);
 		Assert.Equal(result, sql, true, true, true);
 	}
 
@@ -148,18 +99,15 @@ ALTER TABLE child_table
 ";
 
 		var result = @"ALTER TABLE child_table
-    ALTER COLUMN child_name TYPE VARCHAR(200)
-;
-ALTER TABLE child_table
+    ALTER COLUMN child_name TYPE VARCHAR(200),
     ALTER COLUMN parent_id TYPE BIGINT
 ;
 ";
 
-		var expectQuerySet = DefinitionQuerySetParser.Parse(expect);
-		var actualQuerySet = DefinitionQuerySetParser.Parse(actual);
+		var queryset = MigrationQueryBuilder.Execute(expect, actual);
 
-		var queryset = actualQuerySet.GenerateMigrationQuery(expectQuerySet);
-		var sql = GetQueryText(queryset);
+		var sql = queryset.ToText();
+		Output.WriteLine(sql);
 		Assert.Equal(result, sql, true, true, true);
 	}
 
@@ -185,18 +133,15 @@ ALTER TABLE child_table
 ";
 
 		var result = @"ALTER TABLE child_table
-    ALTER COLUMN parent_id SET NOT NULL
-;
-ALTER TABLE child_table
+    ALTER COLUMN parent_id SET NOT NULL,
     ALTER COLUMN remarks DROP NOT NULL
 ;
 ";
 
-		var expectQuerySet = DefinitionQuerySetParser.Parse(expect);
-		var actualQuerySet = DefinitionQuerySetParser.Parse(actual);
+		var queryset = MigrationQueryBuilder.Execute(expect, actual);
 
-		var queryset = actualQuerySet.GenerateMigrationQuery(expectQuerySet);
-		var sql = GetQueryText(queryset);
+		var sql = queryset.ToText();
+		Output.WriteLine(sql);
 		Assert.Equal(result, sql, true, true, true);
 	}
 
@@ -222,18 +167,15 @@ ALTER TABLE child_table
 ";
 
 		var result = @"ALTER TABLE child_table
-    ALTER COLUMN parent_id SET DEFAULT 0
-;
-ALTER TABLE child_table
+    ALTER COLUMN parent_id SET DEFAULT 0,
     ALTER COLUMN remarks DROP DEFAULT
 ;
 ";
 
-		var expectQuerySet = DefinitionQuerySetParser.Parse(expect);
-		var actualQuerySet = DefinitionQuerySetParser.Parse(actual);
+		var queryset = MigrationQueryBuilder.Execute(expect, actual);
 
-		var queryset = actualQuerySet.GenerateMigrationQuery(expectQuerySet);
-		var sql = GetQueryText(queryset);
+		var sql = queryset.ToText();
+		Output.WriteLine(sql);
 		Assert.Equal(result, sql, true, true, true);
 	}
 
@@ -267,11 +209,10 @@ ALTER TABLE child_table
 ;
 ";
 
-		var expectQuerySet = DefinitionQuerySetParser.Parse(expect);
-		var actualQuerySet = DefinitionQuerySetParser.Parse(actual);
+		var queryset = MigrationQueryBuilder.Execute(expect, actual);
 
-		var queryset = actualQuerySet.GenerateMigrationQuery(expectQuerySet);
-		var sql = GetQueryText(queryset);
+		var sql = queryset.ToText();
+		Output.WriteLine(sql);
 		Assert.Equal(result, sql, true, true, true);
 	}
 
@@ -305,11 +246,10 @@ ALTER TABLE child_table
 ;
 ";
 
-		var expectQuerySet = DefinitionQuerySetParser.Parse(expect);
-		var actualQuerySet = DefinitionQuerySetParser.Parse(actual);
+		var queryset = MigrationQueryBuilder.Execute(expect, actual);
 
-		var queryset = actualQuerySet.GenerateMigrationQuery(expectQuerySet);
-		var sql = GetQueryText(queryset);
+		var sql = queryset.ToText();
+		Output.WriteLine(sql);
 		Assert.Equal(result, sql, true, true, true);
 	}
 
@@ -335,11 +275,10 @@ CREATE INDEX idx_parent_id ON public.child_table (parent_id)
 ;
 ";
 
-		var expectQuerySet = DefinitionQuerySetParser.Parse(expect);
-		var actualQuerySet = DefinitionQuerySetParser.Parse(actual);
+		var queryset = MigrationQueryBuilder.Execute(expect, actual);
 
-		var queryset = actualQuerySet.GenerateMigrationQuery(expectQuerySet);
-		var sql = GetQueryText(queryset);
+		var sql = queryset.ToText();
+		Output.WriteLine(sql);
 		Assert.Equal(result, sql, true, true, true);
 	}
 
@@ -364,11 +303,58 @@ CREATE INDEX idx_parent_id ON public.child_table (parent_id)
 ;
 ";
 
-		var expectQuerySet = DefinitionQuerySetParser.Parse(expect);
-		var actualQuerySet = DefinitionQuerySetParser.Parse(actual);
+		var queryset = MigrationQueryBuilder.Execute(expect, actual);
 
-		var queryset = actualQuerySet.GenerateMigrationQuery(expectQuerySet);
-		var sql = GetQueryText(queryset);
+		var sql = queryset.ToText();
+		Output.WriteLine(sql);
 		Assert.Equal(result, sql, true, true, true);
+	}
+
+	[Fact]
+	public void DropTable()
+	{
+		var expect = @"CREATE TABLE child_table (
+    child_id SERIAL PRIMARY KEY
+)
+";
+
+		var actual = @"CREATE TABLE child_table_2 (
+    child_id SERIAL PRIMARY KEY,
+    child_name VARCHAR(100) NOT NULL UNIQUE,
+    parent_id INT NOT NULL,
+    value INT NOT NULL CHECK (value >= 0),
+    remarks TEXT DEFAULT ''
+)
+";
+
+		var result1 = @"CREATE TABLE child_table (
+    child_id SERIAL
+)
+;
+ALTER TABLE child_table
+    ADD PRIMARY KEY (child_id)
+;
+";
+
+		var result2 = @"DROP TABLE child_table_2
+;
+CREATE TABLE child_table (
+    child_id SERIAL
+)
+;
+ALTER TABLE child_table
+    ADD PRIMARY KEY (child_id)
+;
+";
+
+		var queryset = MigrationQueryBuilder.Execute(expect, actual);
+
+		var sql = queryset.ToText();
+		Output.WriteLine(sql);
+		Assert.Equal(result1, sql, true, true, true);
+
+		sql = queryset.ToText(includeDropTableQuery: true);
+		Output.WriteLine(sql);
+		Assert.Equal(result2, sql, true, true, true);
 	}
 }

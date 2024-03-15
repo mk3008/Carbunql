@@ -7,17 +7,25 @@ namespace Carbunql.Definitions;
 
 public class ColumnDefinition : ITableDefinition
 {
-	public ColumnDefinition(string columnName, string columnType)
+	public ColumnDefinition(ITable t, string columnName, string columnType)
 	{
+		Schema = t.Schema;
+		Table = t.Table;
 		ColumnName = columnName;
 		ColumnType = ValueParser.Parse(columnType);
 	}
 
-	public ColumnDefinition(string columnName, ValueBase columnType)
+	public ColumnDefinition(ITable t, string columnName, ValueBase columnType)
 	{
+		Schema = t.Schema;
+		Table = t.Table;
 		ColumnName = columnName;
 		ColumnType = columnType;
 	}
+
+	public string? Schema { get; init; }
+
+	public string Table { get; init; }
 
 	public string ColumnName { get; set; }
 
@@ -110,18 +118,24 @@ public class ColumnDefinition : ITableDefinition
 		}
 	}
 
-	public bool TryIntegrate(TableDefinitionClause clause)
+	public bool TrySet(TableDefinitionClause clause)
 	{
 		// Since the Column is integrated from the beginning,
 		// it does not do anything, but it is treated as integrated.
 		return true;
 	}
 
-	public bool TryNormalize(ITable t, [MaybeNullWhen(false)] out ColumnDefinition column)
+	public bool TryToIndex([MaybeNullWhen(false)] out CreateIndexQuery query)
+	{
+		query = default;
+		return false;
+	}
+
+	public bool TryNormalize([MaybeNullWhen(false)] out ColumnDefinition column)
 	{
 		// Exclude key information
 		// Exclude check constraint
-		column = new ColumnDefinition(ColumnName, ColumnType) { IsNullable = IsNullable, AutoNumberDefinition = AutoNumberDefinition, DefaultValue = DefaultValue };
+		column = new ColumnDefinition(this, ColumnName, ColumnType) { IsNullable = IsNullable, AutoNumberDefinition = AutoNumberDefinition, DefaultValue = DefaultValue };
 		return true;
 	}
 
@@ -130,7 +144,7 @@ public class ColumnDefinition : ITableDefinition
 		constraint = null;
 		if (CheckDefinition == null) return false;
 
-		constraint = new CheckConstraint() { Value = CheckDefinition };
+		constraint = new CheckConstraint(this) { Value = CheckDefinition };
 		return true;
 	}
 }

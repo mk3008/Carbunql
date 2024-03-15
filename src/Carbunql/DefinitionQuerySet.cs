@@ -1,53 +1,142 @@
-﻿using Carbunql.Analysis;
-using Carbunql.Clauses;
+﻿using Carbunql.Clauses;
 using Carbunql.Definitions;
 using Cysharp.Text;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql;
 
-public class DefinitionQuerySet
+public class DefinitionQuerySet : ITable
 {
-	public DefinitionQuerySet()
+	public DefinitionQuerySet(string table)
 	{
+		Table = table;
+	}
+
+	public DefinitionQuerySet(string schema, string table)
+	{
+		Schema = schema;
+		Table = table;
+	}
+
+	public DefinitionQuerySet(ITable t)
+	{
+		Schema = t.Schema;
+		Table = t.Table;
+	}
+
+	public DefinitionQuerySet(DropTableQuery dropTableQuery)
+	{
+		Schema = dropTableQuery.Schema;
+		Table = dropTableQuery.Table;
+		DropTableQuery = dropTableQuery;
 	}
 
 	public DefinitionQuerySet(CreateTableQuery createTableQuery)
 	{
+		Schema = createTableQuery.Schema;
+		Table = createTableQuery.Table;
 		CreateTableQuery = createTableQuery;
 	}
 
-	public CreateTableQuery? CreateTableQuery { get; set; } = null;
+	public string? Schema { get; init; }
 
-	public List<AlterTableQuery> AlterTableQueries { get; set; } = new();
+	public string Table { get; init; }
 
-	public List<IAlterIndexQuery> AlterIndexQueries { get; set; } = new();
+	private DropTableQuery? _dropTableQuery = null;
+
+	public DropTableQuery? DropTableQuery
+	{
+		get => _dropTableQuery;
+		set
+		{
+			if (value == null)
+			{
+				_dropTableQuery = value;
+				return;
+			}
+			if (this.GetTableFullName() != value.GetTableFullName())
+			{
+				throw new ArgumentException("Unable to add operations for different tables");
+			}
+			_dropTableQuery = value;
+			_createTableQuery = null;
+			_alterTableQueries.Clear();
+			_alterIndexQueries.Clear();
+		}
+	}
+
+	private CreateTableQuery? _createTableQuery = null;
+
+	public CreateTableQuery? CreateTableQuery
+	{
+		get => _createTableQuery;
+		set
+		{
+			if (value == null)
+			{
+				_createTableQuery = value;
+				return;
+			}
+			if (this.GetTableFullName() != value.GetTableFullName())
+			{
+				throw new ArgumentException("Unable to add operations for different tables");
+			}
+			_createTableQuery = value;
+			_dropTableQuery = null;
+		}
+	}
+
+	private List<AlterTableQuery> _alterTableQueries = new List<AlterTableQuery>();
+
+	public IReadOnlyList<AlterTableQuery> AlterTableQueries => _alterTableQueries.AsReadOnly();
+
+	public void AddAlterTableQuery(AlterTableQuery query)
+	{
+		if (DropTableQuery != null) throw new InvalidOperationException();
+
+		if (this.GetTableFullName() != query.GetTableFullName())
+		{
+			throw new ArgumentException("Unable to add operations for different tables");
+		}
+		_alterTableQueries.Add(query);
+	}
+
+	private List<IAlterIndexQuery> _alterIndexQueries = new List<IAlterIndexQuery>();
+
+	public IReadOnlyList<IAlterIndexQuery> AlterIndexQueries => _alterIndexQueries.AsReadOnly();
+
+	public void AddAlterIndexQuery(IAlterIndexQuery query)
+	{
+		if (DropTableQuery != null) throw new InvalidOperationException();
+
+		if (this.GetTableFullName() != query.GetTableFullName())
+		{
+			throw new ArgumentException("Unable to add operations for different tables");
+		}
+		_alterIndexQueries.Add(query);
+	}
 
 	//[Obsolete("use AlterIndexQueries")]
 	//public List<IAlterIndexQuery> CreateIndexQueries => AlterIndexQueries;
 
 	public DefinitionQuerySet MergeAlterTableQuery()
 	{
-		var dic = new Dictionary<string, AlterTableQuery>();
+		var alt = new AlterTableQuery(new AlterTableClause(this));
 
 		//merge alter table query
-		foreach (var alterquery in this.AlterTableQueries)
+		foreach (var alterquery in AlterTableQueries)
 		{
-			var key = alterquery.AlterTableClause.TableFullName;
-			if (!dic.ContainsKey(key))
-			{
-				var alt = new AlterTableQuery(new AlterTableClause(alterquery.AlterTableClause));
-				dic.Add(key, alt);
-			}
-			var value = dic[key];
 			foreach (var command in alterquery.AlterTableClause)
 			{
-				value.AlterTableClause.Add(command);
+				alt.AlterTableClause.Add(command);
 			}
 		}
 
-		this.AlterTableQueries.Clear();
-		this.AlterTableQueries.AddRange(dic.Select(x => x.Value));
+		if (alt.AlterTableClause.Any())
+		{
+			_alterTableQueries.Clear();
+			_alterTableQueries.Add(alt);
+		}
 
 		return this;
 	}
@@ -55,27 +144,28 @@ public class DefinitionQuerySet
 	public DefinitionQuerySet ToNormalize(bool doMergeAltarTablerQuery = true)
 	{
 		DefinitionQuerySet q;
+
 		if (CreateTableQuery != null)
 		{
 			q = CreateTableQuery.ToNormalize();
 		}
 		else
 		{
-			q = new DefinitionQuerySet();
+			q = new DefinitionQuerySet(this);
 		}
 
 		var clause = q.CreateTableQuery?.DefinitionClause;
 
-		// integrate
 		foreach (var atq in AlterTableQueries.SelectMany(x => x.Disassemble()))
 		{
-			if (clause == null || !atq.TryIntegrate(clause))
-			{
-				q.AlterTableQueries.Add(atq);
-			}
+			if (clause != null && atq.TrySet(clause)) continue;
+			q.AddAlterTableQuery(atq);
 		}
 
-		q.AlterIndexQueries.AddRange(AlterIndexQueries);
+		foreach (var aiq in AlterIndexQueries)
+		{
+			q.AddAlterIndexQuery(aiq);
+		}
 
 		if (doMergeAltarTablerQuery)
 		{
@@ -108,16 +198,9 @@ public class DefinitionQuerySet
 		return column is not null;
 	}
 
-
-	public DefinitionQuerySet GenerateMigrationQuery(string expectQuerySet)
-	{
-		var queryset = DefinitionQuerySetParser.Parse(expectQuerySet);
-		return GenerateMigrationQuery(queryset);
-	}
-
 	public DefinitionQuerySet GenerateMigrationQuery(DefinitionQuerySet expectQuerySet)
 	{
-		var queryset = new DefinitionQuerySet();
+		var queryset = new DefinitionQuerySet(this);
 
 		// Normalize for easier comparison
 		var actual = ToNormalize();
@@ -133,9 +216,9 @@ public class DefinitionQuerySet
 		{
 			var clause = new AlterTableClause(expect.CreateTableQuery)
 			{
-				new DropColumnCommand(item)
+				new DropColumnCommand(this, item)
 			};
-			queryset.AlterTableQueries.Add(new AlterTableQuery(clause));
+			queryset.AddAlterTableQuery(new AlterTableQuery(clause));
 		}
 
 		//add column
@@ -147,7 +230,7 @@ public class DefinitionQuerySet
 				{
 					new AddColumnCommand(column)
 				};
-				queryset.AlterTableQueries.Add(new AlterTableQuery(clause));
+				queryset.AddAlterTableQuery(new AlterTableQuery(clause));
 			}
 		}
 
@@ -161,9 +244,9 @@ public class DefinitionQuerySet
 				{
 					var clause = new AlterTableClause(expect.CreateTableQuery)
 					{
-						new ChangeColumnTypeCommand(column, expectColumn.ColumnType)
+						new ChangeColumnTypeCommand(this, column, expectColumn.ColumnType)
 					};
-					queryset.AlterTableQueries.Add(new AlterTableQuery(clause));
+					queryset.AddAlterTableQuery(new AlterTableQuery(clause));
 				}
 
 				//default value change
@@ -172,27 +255,27 @@ public class DefinitionQuerySet
 					//default value change(set)
 					var clause = new AlterTableClause(expect.CreateTableQuery)
 					{
-						new SetDefaultCommand(column, expectColumn.DefaultValue)
+						new SetDefaultCommand(this, column, expectColumn.DefaultValue)
 					};
-					queryset.AlterTableQueries.Add(new AlterTableQuery(clause));
+					queryset.AddAlterTableQuery(new AlterTableQuery(clause));
 				}
 				else if (actualColumn.DefaultValue != null && expectColumn.DefaultValue == null)
 				{
 					//default value change(drop)
 					var clause = new AlterTableClause(expect.CreateTableQuery)
 					{
-						new DropDefaultCommand(column)
+						new DropDefaultCommand(this, column)
 					};
-					queryset.AlterTableQueries.Add(new AlterTableQuery(clause));
+					queryset.AddAlterTableQuery(new AlterTableQuery(clause));
 				}
 				else if (actualColumn.DefaultValue == null && expectColumn.DefaultValue != null)
 				{
 					//default value change(set)
 					var clause = new AlterTableClause(expect.CreateTableQuery)
 					{
-						new SetDefaultCommand(column, expectColumn.DefaultValue)
+						new SetDefaultCommand(this, column, expectColumn.DefaultValue)
 					};
-					queryset.AlterTableQueries.Add(new AlterTableQuery(clause));
+					queryset.AddAlterTableQuery(new AlterTableQuery(clause));
 				}
 
 				// nullable
@@ -202,17 +285,17 @@ public class DefinitionQuerySet
 					{
 						var clause = new AlterTableClause(expect.CreateTableQuery)
 						{
-							new DropNotNullCommand(expectColumn.ColumnName)
+							new DropNotNullCommand(this, expectColumn.ColumnName)
 						};
-						queryset.AlterTableQueries.Add(new AlterTableQuery(clause));
+						queryset.AddAlterTableQuery(new AlterTableQuery(clause));
 					}
 					else
 					{
 						var clause = new AlterTableClause(expect.CreateTableQuery)
 						{
-							new SetNotNullCommand(expectColumn.ColumnName)
+							new SetNotNullCommand(this, expectColumn.ColumnName)
 						};
-						queryset.AlterTableQueries.Add(new AlterTableQuery(clause));
+						queryset.AddAlterTableQuery(new AlterTableQuery(clause));
 					}
 				}
 			}
@@ -229,9 +312,9 @@ public class DefinitionQuerySet
 			{
 				var clause = new AlterTableClause(expect.CreateTableQuery)
 				{
-					new DropConstraintCommand(item.Key.Constraint.ConstraintName)
+					new DropConstraintCommand(this, item.Key.Constraint.ConstraintName)
 				};
-				queryset.AlterTableQueries.Add(new AlterTableQuery(clause));
+				queryset.AddAlterTableQuery(new AlterTableQuery(clause));
 			}
 		}
 
@@ -244,7 +327,7 @@ public class DefinitionQuerySet
 				{
 					item.Key
 				};
-				queryset.AlterTableQueries.Add(new AlterTableQuery(clause));
+				queryset.AddAlterTableQuery(new AlterTableQuery(clause));
 			}
 		}
 
@@ -257,7 +340,7 @@ public class DefinitionQuerySet
 			//drop
 			if (!expectIndexes.ContainsValue(item.Value) && !string.IsNullOrEmpty(item.Key.IndexName))
 			{
-				queryset.AlterIndexQueries.Add(new DropIndexQuery(item.Key.IndexName));
+				queryset.AddAlterIndexQuery(new DropIndexQuery(this, item.Key.IndexName));
 			}
 		}
 
@@ -266,7 +349,7 @@ public class DefinitionQuerySet
 			//add
 			if (!actualIndexes.ContainsValue(item.Value))
 			{
-				queryset.AlterIndexQueries.Add(item.Key);
+				queryset.AddAlterIndexQuery(item.Key);
 			}
 		}
 
@@ -292,24 +375,35 @@ public class DefinitionQuerySet
 		}
 	}
 
-	public string ToText()
+	public string ToText(bool includeDropTableQuery)
 	{
 		var sb = ZString.CreateStringBuilder();
+
+		var name = this.GetTableFullName();
+		//sb.AppendLine("--" + name);
+		if (DropTableQuery != null)
+		{
+			if (!includeDropTableQuery) return string.Empty;
+			sb.AppendLine(DropTableQuery.ToText());
+			sb.AppendLine(";");
+			return sb.ToString();
+		}
 
 		if (CreateTableQuery != null)
 		{
 			sb.AppendLine(CreateTableQuery.ToText());
+			sb.AppendLine(";");
 		}
 
 		foreach (var item in AlterTableQueries)
 		{
-			if (sb.Length > 0) sb.AppendLine(";");
 			sb.AppendLine(item.ToText());
+			sb.AppendLine(";");
 		}
 		foreach (var item in AlterIndexQueries)
 		{
-			if (sb.Length > 0) sb.AppendLine(";");
 			sb.AppendLine(item.ToText());
+			sb.AppendLine(";");
 		}
 
 		return sb.ToString();

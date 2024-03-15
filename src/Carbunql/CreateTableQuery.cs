@@ -32,8 +32,6 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
 
 	public string Table { get; init; }
 
-	public string TableFullName => (string.IsNullOrEmpty(Schema)) ? Table : Schema + "." + Table;
-
 	public TableDefinitionClause? DefinitionClause { get; set; } = null;
 
 	public IReadQuery? Query { get; set; }
@@ -102,7 +100,7 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
 
 		var ct = GetCreateTableToken(parent);
 		yield return ct;
-		yield return new Token(this, parent, TableFullName);
+		yield return new Token(this, parent, this.GetTableFullName());
 
 		if (Query != null)
 		{
@@ -142,12 +140,12 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
 
 	public SelectQuery ToSelectQuery()
 	{
-		if (string.IsNullOrEmpty(TableFullName)) throw new NullReferenceException(nameof(TableFullName));
+		if (string.IsNullOrEmpty(this.GetTableFullName())) throw new NullReferenceException(nameof(Table));
 
 		if (Query != null)
 		{
 			var sq = new SelectQuery();
-			var (_, t) = sq.From(TableFullName).As("t");
+			var (_, t) = sq.From(this.GetTableFullName()).As("t");
 
 			foreach (var item in Query.GetColumnNames())
 			{
@@ -160,7 +158,7 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
 		if (DefinitionClause != null)
 		{
 			var sq = new SelectQuery();
-			var (_, t) = sq.From(TableFullName).As("t");
+			var (_, t) = sq.From(this.GetTableFullName()).As("t");
 
 			foreach (var item in DefinitionClause)
 			{
@@ -178,10 +176,10 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
 
 	public SelectQuery ToCountQuery(string alias = "row_count")
 	{
-		if (string.IsNullOrEmpty(TableFullName)) throw new NullReferenceException(nameof(TableFullName));
+		if (string.IsNullOrEmpty(this.GetTableFullName())) throw new NullReferenceException(nameof(Table));
 
 		var sq = new SelectQuery();
-		sq.From(TableFullName).As("q");
+		sq.From(this.GetTableFullName()).As("q");
 		sq.Select("count(*)").As(alias);
 		return sq;
 	}
@@ -194,16 +192,16 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
 
 		//create table
 		var ct = new CreateTableQuery(this);
-		ct.DefinitionClause = DefinitionClause.ToNormalize(this);
+		ct.DefinitionClause = DefinitionClause.ToNormalize();
 
 		var queryset = new DefinitionQuerySet(ct);
 
 		// alter table query normalize
-		foreach (var item in DefinitionClause.Disasseble(this))
+		foreach (var item in DefinitionClause.Disasseble())
 		{
-			if (!item.TryIntegrate(ct.DefinitionClause))
+			if (!item.TrySet(ct.DefinitionClause))
 			{
-				queryset.AlterTableQueries.Add(item);
+				queryset.AddAlterTableQuery(item);
 			}
 		}
 

@@ -22,7 +22,6 @@ public static class CreateIndexQueryParser
 	public static CreateIndexQuery Parse(ITokenReader r)
 	{
 		var t = ParseAsCreateIndexCommand(r);
-		t.OnClause = ParseAsOnClause(r);
 
 		if (r.Peek().IsEqualNoCase("where"))
 		{
@@ -54,7 +53,12 @@ public static class CreateIndexQueryParser
 			indexName = r.Read();
 		}
 
-		return new CreateIndexQuery { IsUnique = isUnique, IndexName = indexName };
+		var clause = ParseAsOnClause(r);
+		return new CreateIndexQuery(clause)
+		{
+			IsUnique = isUnique,
+			IndexName = indexName
+		};
 	}
 
 	private static IndexOnClause ParseAsOnClause(ITokenReader r)

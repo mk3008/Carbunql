@@ -1,19 +1,26 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Definitions;
 
 public class ChangeColumnTypeCommand : IAlterCommand
 {
-	public ChangeColumnTypeCommand(string columnName, ValueBase columnType)
+	public ChangeColumnTypeCommand(ITable t, string columnName, ValueBase columnType)
 	{
 		ColumnName = columnName;
 		ColumnType = columnType;
+		Schema = t.Schema;
+		Table = t.Table;
 	}
 
 	public string ColumnName { get; set; }
 
 	public ValueBase ColumnType { get; set; }
+
+	public string? Schema { get; init; }
+
+	public string Table { get; init; } = string.Empty;
 
 	public IEnumerable<CommonTable> GetCommonTables()
 	{
@@ -46,11 +53,17 @@ public class ChangeColumnTypeCommand : IAlterCommand
 		}
 	}
 
-	public bool TryIntegrate(TableDefinitionClause clause)
+	public bool TrySet(TableDefinitionClause clause)
 	{
 		var c = clause.OfType<ColumnDefinition>().Where(x => x.ColumnName == ColumnName).First();
 
 		c.ColumnType = ColumnType;
 		return true;
+	}
+
+	public bool TryToIndex([MaybeNullWhen(false)] out CreateIndexQuery query)
+	{
+		query = default;
+		return false;
 	}
 }

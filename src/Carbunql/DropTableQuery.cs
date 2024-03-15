@@ -1,20 +1,18 @@
-﻿using Carbunql.Clauses;
+﻿using Carbunql.Building;
+using Carbunql.Clauses;
 using Carbunql.Definitions;
 using Carbunql.Tables;
 using MessagePack;
 
 namespace Carbunql;
 
-public class DropIndexQuery : IAlterIndexQuery
+public class DropTableQuery : IQueryCommandable, ICommentable, ITable
 {
-	public DropIndexQuery(ITable t, string indexName)
+	public DropTableQuery(ITable t)
 	{
 		Schema = t.Schema;
 		Table = t.Table;
-		IndexName = indexName;
 	}
-
-	public string IndexName { get; init; }
 
 	[IgnoreMember]
 	public CommentClause? CommentClause { get; set; }
@@ -40,12 +38,10 @@ public class DropIndexQuery : IAlterIndexQuery
 
 	public IEnumerable<Token> GetTokens(Token? parent)
 	{
-		//if (Query == null) throw new NullReferenceException(nameof(Query));
-
 		if (CommentClause != null) foreach (var item in CommentClause.GetTokens(parent)) yield return item;
 
-		yield return Token.Reserved(this, parent, "drop index");
-		yield return new Token(this, parent, IndexName);
+		yield return Token.Reserved(this, parent, "drop table");
+		yield return new Token(this, parent, this.GetTableFullName());
 	}
 
 	public IEnumerable<CommonTable> GetCommonTables()

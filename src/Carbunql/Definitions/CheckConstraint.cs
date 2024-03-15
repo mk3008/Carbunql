@@ -6,11 +6,21 @@ namespace Carbunql.Definitions;
 
 public class CheckConstraint : IConstraint
 {
+	public CheckConstraint(ITable t)
+	{
+		Schema = t.Schema;
+		Table = t.Table;
+	}
+
 	public string ConstraintName { get; set; } = string.Empty;
 
 	public ValueBase Value { get; set; } = null!;
 
 	public string ColumnName => string.Empty;
+
+	public string? Schema { get; init; }
+
+	public string Table { get; init; }
 
 	public IEnumerable<CommonTable> GetCommonTables()
 	{
@@ -48,7 +58,7 @@ public class CheckConstraint : IConstraint
 		}
 	}
 
-	public bool TryIntegrate(TableDefinitionClause clause)
+	public bool TrySet(TableDefinitionClause clause)
 	{
 		return false;
 	}
@@ -58,4 +68,10 @@ public class CheckConstraint : IConstraint
 		constraint = this;
 		return true;
 	}
+
+	//public bool TryToIndex([MaybeNullWhen(false)] out CreateIndexQuery query)
+	//{
+	//	query = default;
+	//	return false;
+	//}
 }
