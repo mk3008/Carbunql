@@ -13,33 +13,6 @@ public class DefinitionQuerySetNormalizeTest
 
 	private ITestOutputHelper Output { get; set; }
 
-	private string GetQueryText(DefinitionQuerySet queryset)
-	{
-		var sb = new StringBuilder();
-
-		if (queryset.CreateTableQuery != null)
-		{
-			sb.AppendLine(queryset.CreateTableQuery.ToCommand().CommandText);
-			sb.AppendLine(";");
-		}
-
-		foreach (var item in queryset.AlterTableQueries)
-		{
-			sb.AppendLine(item.ToCommand().CommandText);
-			sb.AppendLine(";");
-
-		}
-		foreach (var item in queryset.AlterIndexQueries)
-		{
-			sb.AppendLine(item.ToCommand().CommandText);
-			sb.AppendLine(";");
-		}
-
-		Output.WriteLine(sb.ToString());
-
-		return sb.ToString();
-	}
-
 	[Fact]
 	public void UnknownNameConstraint()
 	{
@@ -75,7 +48,8 @@ ALTER TABLE child_table
 		var v = DefinitionQuerySetParser.Parse(text);
 		var normal = v.ToNormalize(doMergeAltarTablerQuery: false);
 
-		var sql = GetQueryText(normal);
+		var sql = normal.ToText();
+		Output.WriteLine(sql);
 		Assert.Equal(expect, sql, true, true, true);
 	}
 
@@ -117,7 +91,8 @@ ALTER TABLE public.child_table
 		var v = DefinitionQuerySetParser.Parse(text);
 		var normal = v.ToNormalize(doMergeAltarTablerQuery: false);
 
-		var sql = GetQueryText(normal);
+		var sql = normal.ToText();
+		Output.WriteLine(sql);
 		Assert.Equal(expect, sql, true, true, true);
 	}
 
@@ -132,7 +107,7 @@ ALTER TABLE public.child_table
     remarks text DEFAULT ''::text
 )
 ;
-ALTER TABLE child_table
+ALTER TABLE public.child_table
 	ALTER COLUMN child_id SET NOT NULL,
 	ALTER COLUMN child_name SET NOT NULL,
 	ALTER COLUMN parent_id SET NOT NULL,
@@ -157,7 +132,8 @@ ALTER TABLE public.child_table
 		var v = DefinitionQuerySetParser.Parse(text);
 		var normal = v.ToNormalize();
 
-		var sql = GetQueryText(normal);
+		var sql = normal.ToText();
+		Output.WriteLine(sql);
 		Assert.Equal(expect, sql, true, true, true);
 	}
 
@@ -192,7 +168,8 @@ ALTER TABLE public.child_table
 		var v = DefinitionQuerySetParser.Parse(text);
 		var normal = v.ToNormalize();
 
-		var sql = GetQueryText(normal);
+		var sql = normal.ToText();
+		Output.WriteLine(sql);
 		Assert.Equal(expect, sql, true, true, true);
 	}
 
@@ -207,7 +184,7 @@ ALTER TABLE public.child_table
     remarks text DEFAULT ''::text
 )
 ;
-ALTER TABLE child_table
+ALTER TABLE public.child_table
 	DROP COLUMN remarks
 ;
 ";
@@ -227,7 +204,8 @@ ALTER TABLE public.child_table
 		var v = DefinitionQuerySetParser.Parse(text);
 		var normal = v.ToNormalize();
 
-		var sql = GetQueryText(normal);
+		var sql = normal.ToText();
+		Output.WriteLine(sql);
 		Assert.Equal(expect, sql, true, true, true);
 	}
 
@@ -263,7 +241,8 @@ ALTER TABLE public.child_table
 		var v = DefinitionQuerySetParser.Parse(text);
 		var normal = v.ToNormalize();
 
-		var sql = GetQueryText(normal);
+		var sql = normal.ToText();
+		Output.WriteLine(sql);
 		Assert.Equal(expect, sql, true, true, true);
 	}
 
@@ -299,7 +278,75 @@ ALTER TABLE public.child_table
 		var v = DefinitionQuerySetParser.Parse(text);
 		var normal = v.ToNormalize();
 
-		var sql = GetQueryText(normal);
+		var sql = normal.ToText();
+		Output.WriteLine(sql);
+		Assert.Equal(expect, sql, true, true, true);
+	}
+
+	[Fact]
+	public void CraeteUniqueIndex()
+	{
+		var text = @"CREATE TABLE public.child_table (
+    child_id serial4 PRIMARY KEY,
+    child_name varchar(100)
+)
+;
+CREATE UNIQUE INDEX idx_child_name ON public.child_table (
+    child_name
+);
+";
+
+		var expect = @"CREATE TABLE public.child_table (
+    child_id serial4,
+    child_name VARCHAR(100)
+)
+;
+ALTER TABLE public.child_table
+    ADD PRIMARY KEY (child_id)
+;
+CREATE UNIQUE INDEX idx_child_name ON public.child_table (
+    child_name
+)
+;
+";
+
+		var v = DefinitionQuerySetParser.Parse(text);
+		var normal = v.ToNormalize();
+
+		var sql = normal.ToText();
+		Output.WriteLine(sql);
+		Assert.Equal(expect, sql, true, true, true);
+	}
+
+	[Fact]
+	public void AlterTableUnique()
+	{
+		var text = @"CREATE TABLE public.child_table (
+    child_id serial4 PRIMARY KEY,
+    child_name varchar(100)
+)
+;
+ALTER TABLE public.child_table
+ADD CONSTRAINT idx_child_name UNIQUE (child_name)
+;
+";
+
+		var expect = @"CREATE TABLE public.child_table (
+    child_id serial4,
+    child_name VARCHAR(100)
+)
+;
+ALTER TABLE public.child_table
+    ADD PRIMARY KEY (child_id),
+    ADD CONSTRAINT idx_child_name UNIQUE (child_name)
+;
+";
+
+		var v = DefinitionQuerySetParser.Parse(text);
+		var normal = v.ToNormalize();
+
+		var sql = normal.ToText();
+		Output.WriteLine(sql);
 		Assert.Equal(expect, sql, true, true, true);
 	}
 }

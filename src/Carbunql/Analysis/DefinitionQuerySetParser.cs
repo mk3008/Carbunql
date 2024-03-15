@@ -1,35 +1,73 @@
-﻿using Carbunql.Extensions;
+﻿using Carbunql.Definitions;
+using Carbunql.Extensions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Analysis;
 
 public static class DefinitionQuerySetParser
 {
-	public static DefinitionQuerySet Parse(string text)
+	public static DefinitionQuerySetList Parse(string text)
 	{
 		var r = new SqlTokenReader(text);
-		var q = new DefinitionQuerySet();
+		var dic = new Dictionary<string, DefinitionQuerySet>();
 
-		while (r.TryReadNextQuery(out var token))
+		while (TryParse(r, out var t))
 		{
-			if (token.IsEqualNoCase("create table"))
-			{
-				q.CreateTableQuery = CreateTableQueryParser.Parse(r);
-			}
-			else if (token.IsEqualNoCase("alter table"))
-			{
-				q.AlterTableQueries.Add(AlterTableQueryParser.Parse(r));
-			}
-			else if (token.IsEqualNoCase("create index") || token.IsEqualNoCase("create unique index"))
-			{
-				q.AlterIndexQueries.Add(CreateIndexQueryParser.Parse(r));
-			}
-
 			if (!r.Peek().IsEndToken())
 			{
 				throw new NotSupportedException($"Parsing terminated despite the presence of unparsed tokens.(token:'{r.Peek()}')");
 			}
+
+			if (!dic.ContainsKey(t.GetTableFullName()))
+			{
+				dic.Add(t.GetTableFullName(), new DefinitionQuerySet(t));
+			}
+			var qs = dic[t.GetTableFullName()];
+
+			if (t is CreateTableQuery table)
+			{
+				qs.CreateTableQuery = table;
+			}
+			else if (t is AlterTableQuery alter)
+			{
+				qs.AddAlterTableQuery(alter);
+			}
+			else if (t is CreateIndexQuery index)
+			{
+				qs.AddAlterIndexQuery(index);
+			}
+			else
+			{
+				throw new NotSupportedException();
+			}
 		}
 
-		return q;
+		var lst = new DefinitionQuerySetList();
+		dic.ForEach(x => lst.Add(x.Value));
+		return lst;
+	}
+
+	private static bool TryParse(SqlTokenReader r, [MaybeNullWhen(false)] out ITable t)
+	{
+		t = default;
+		if (r.TryReadNextQuery(out var token))
+		{
+			if (token.IsEqualNoCase("create table"))
+			{
+				t = CreateTableQueryParser.Parse(r);
+				return true;
+			}
+			else if (token.IsEqualNoCase("alter table"))
+			{
+				t = AlterTableQueryParser.Parse(r);
+				return true;
+			}
+			else if (token.IsEqualNoCase("create index") || token.IsEqualNoCase("create unique index"))
+			{
+				t = CreateIndexQueryParser.Parse(r);
+				return true;
+			}
+		}
+		return false;
 	}
 }

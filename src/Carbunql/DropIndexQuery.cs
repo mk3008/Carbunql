@@ -1,4 +1,5 @@
 ﻿using Carbunql.Clauses;
+using Carbunql.Definitions;
 using Carbunql.Tables;
 using MessagePack;
 
@@ -6,8 +7,10 @@ namespace Carbunql;
 
 public class DropIndexQuery : IAlterIndexQuery
 {
-	public DropIndexQuery(string indexName)
+	public DropIndexQuery(ITable t, string indexName)
 	{
+		Schema = t.Schema;
+		Table = t.Table;
 		IndexName = indexName;
 	}
 
@@ -15,6 +18,10 @@ public class DropIndexQuery : IAlterIndexQuery
 
 	[IgnoreMember]
 	public CommentClause? CommentClause { get; set; }
+
+	public string? Schema { get; init; }
+
+	public string Table { get; init; }
 
 	public IEnumerable<SelectQuery> GetInternalQueries()
 	{

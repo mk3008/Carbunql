@@ -13,33 +13,6 @@ public class DefinitionQuerySetMergeTest
 
 	private ITestOutputHelper Output { get; set; }
 
-	private string GetQueryText(DefinitionQuerySet queryset)
-	{
-		var sb = new StringBuilder();
-
-		if (queryset.CreateTableQuery != null)
-		{
-			sb.AppendLine(queryset.CreateTableQuery.ToCommand().CommandText);
-			sb.AppendLine(";");
-		}
-
-		foreach (var item in queryset.AlterTableQueries)
-		{
-			sb.AppendLine(item.ToCommand().CommandText);
-			sb.AppendLine(";");
-
-		}
-		foreach (var item in queryset.AlterIndexQueries)
-		{
-			sb.AppendLine(item.ToCommand().CommandText);
-			sb.AppendLine(";");
-		}
-
-		Output.WriteLine(sb.ToString());
-
-		return sb.ToString();
-	}
-
 	[Fact]
 	public void Default()
 	{
@@ -80,7 +53,8 @@ ALTER TABLE child_table
 		var v = DefinitionQuerySetParser.Parse(text);
 		v.MergeAlterTableQuery();
 
-		var sql = GetQueryText(v);
+		var sql = v.ToText();
+		Output.WriteLine(sql);
 		Assert.Equal(expect, sql, true, true, true);
 	}
 
@@ -109,7 +83,8 @@ ALTER TABLE child_table
 		var v = DefinitionQuerySetParser.Parse(text);
 		v.MergeAlterTableQuery();
 
-		var sql = GetQueryText(v);
+		var sql = v.ToText();
+		Output.WriteLine(sql);
 		Assert.Equal(expect, sql, true, true, true);
 	}
 
@@ -140,7 +115,8 @@ ALTER TABLE child_table_2
 		var v = DefinitionQuerySetParser.Parse(text);
 		v.MergeAlterTableQuery();
 
-		var sql = GetQueryText(v);
+		var sql = v.ToText();
+		Output.WriteLine(sql);
 		Assert.Equal(expect, sql, true, true, true);
 	}
 }

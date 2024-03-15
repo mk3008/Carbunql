@@ -1,8 +1,9 @@
-﻿using Carbunql.Tables;
+﻿using Carbunql.Definitions;
+using Carbunql.Tables;
 
 namespace Carbunql.Clauses;
 
-public class IndexOnClause : QueryCommandCollection<SortableItem>
+public class IndexOnClause : QueryCommandCollection<SortableItem>, ITable
 {
 	public IndexOnClause(string table)
 	{
@@ -15,11 +16,17 @@ public class IndexOnClause : QueryCommandCollection<SortableItem>
 		Table = table;
 	}
 
+	public IndexOnClause(ITable t)
+	{
+		Schema = t.Schema;
+		Table = t.Table;
+
+	}
 	public string? Schema { get; init; } = null;
 
 	public string Table { get; init; }
 
-	public string TableFullName => (string.IsNullOrEmpty(Schema)) ? Table : Schema + "." + Table;
+	//public string TableFullName => (string.IsNullOrEmpty(Schema)) ? Table : Schema + "." + Table;
 
 	public string? Using { get; set; } = null;
 
@@ -29,7 +36,7 @@ public class IndexOnClause : QueryCommandCollection<SortableItem>
 
 		var clause = Token.Reserved(this, parent, "on");
 		yield return clause;
-		yield return new Token(this, parent, TableFullName);
+		yield return new Token(this, parent, this.GetTableFullName());
 
 		if (!string.IsNullOrEmpty(Using))
 		{

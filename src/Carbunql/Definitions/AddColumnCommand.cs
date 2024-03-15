@@ -1,5 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Definitions;
 
@@ -11,6 +12,10 @@ public class AddColumnCommand : IAlterCommand
 	}
 
 	public ColumnDefinition Definition { get; set; }
+
+	public string? Schema => Definition.Schema;
+
+	public string Table => Definition.Table;
 
 	public IEnumerable<CommonTable> GetCommonTables()
 	{
@@ -42,12 +47,18 @@ public class AddColumnCommand : IAlterCommand
 		}
 	}
 
-	public bool TryIntegrate(TableDefinitionClause clause)
+	public bool TrySet(TableDefinitionClause clause)
 	{
 		var q = clause.OfType<ColumnDefinition>().Where(x => x.ColumnName == Definition.ColumnName);
 		if (q.Any()) throw new InvalidOperationException();
 
 		clause.Add(Definition);
 		return true;
+	}
+
+	public bool TryToIndex([MaybeNullWhen(false)] out CreateIndexQuery query)
+	{
+		query = default;
+		return false;
 	}
 }

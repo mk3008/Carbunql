@@ -1,11 +1,13 @@
 ﻿using Carbunql.Building;
 using Carbunql.Clauses;
+using Carbunql.Definitions;
 using Carbunql.Tables;
 using MessagePack;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql;
 
-public class AlterTableQuery : IQueryCommandable, ICommentable
+public class AlterTableQuery : IQueryCommandable, ICommentable, ITable
 {
 	public AlterTableQuery(AlterTableClause clause)
 	{
@@ -16,6 +18,10 @@ public class AlterTableQuery : IQueryCommandable, ICommentable
 
 	[IgnoreMember]
 	public CommentClause? CommentClause { get; set; }
+
+	public string? Schema => ((ITable)AlterTableClause).Schema;
+
+	public string Table => ((ITable)AlterTableClause).Table;
 
 	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
@@ -58,10 +64,17 @@ public class AlterTableQuery : IQueryCommandable, ICommentable
 		return lst;
 	}
 
-	public bool TryIntegrate(TableDefinitionClause clause)
+	public bool TrySet(TableDefinitionClause clause)
 	{
 		if (AlterTableClause.Items.Count != 1) throw new InvalidOperationException();
 		var cmd = AlterTableClause.Items[0];
-		return cmd.TryIntegrate(clause);
+		return cmd.TrySet(clause);
 	}
+
+	//public bool TryToIndex([MaybeNullWhen(false)] out CreateIndexQuery query)
+	//{
+	//	if (AlterTableClause.Items.Count != 1) throw new InvalidOperationException();
+	//	var cmd = AlterTableClause.Items[0];
+	//	return cmd.TryToIndex(out query);
+	//}
 }

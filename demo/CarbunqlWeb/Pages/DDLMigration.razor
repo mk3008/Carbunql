@@ -79,9 +79,8 @@
 using Carbunql.Building;
 
 var q = MigrationQueryBuilder.Execute(expect_ddl_query_text, actual_ddl_query_text);
-fsql = q.ToText();";
+fsql = q.MergeAlterTableQuery().ToText();";
 
-	string alias = "q";
 
 	protected override void OnInitialized()
 	{

@@ -23,7 +23,7 @@ public static class AlterTableClauseParser
 		var t = ParseAsAlterTableCommand(r);
 		do
 		{
-			t.Add(AlterCommandParser.Parse(r));
+			t.Add(AlterCommandParser.Parse(t, r));
 		} while (r.TryRead(",", out _));
 		return t;
 	}

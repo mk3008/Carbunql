@@ -1,16 +1,27 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
+using Carbunql.Values;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Definitions;
 
-public class UniqueConstraint : IConstraint
+public class UniqueConstraint : IConstraint, ITable
 {
+	public UniqueConstraint(ITable t)
+	{
+		Schema = t.Schema;
+		Table = t.Table;
+	}
+
 	public string ConstraintName { get; set; } = string.Empty;
 
 	public List<string> ColumnNames { get; set; } = new();
 
 	public string ColumnName => string.Empty;
+
+	public string? Schema { get; init; }
+
+	public string Table { get; init; }
 
 	public IEnumerable<CommonTable> GetCommonTables()
 	{
@@ -49,7 +60,7 @@ public class UniqueConstraint : IConstraint
 		yield return Token.ReservedBracketEnd(this, parent);
 	}
 
-	public bool TryIntegrate(TableDefinitionClause clause)
+	public bool TrySet(TableDefinitionClause clause)
 	{
 		return false;
 	}
@@ -59,4 +70,16 @@ public class UniqueConstraint : IConstraint
 		constraint = this;
 		return true;
 	}
+
+	//public bool TryToIndex([MaybeNullWhen(false)] out CreateIndexQuery query)
+	//{
+	//	var clause = new IndexOnClause(this);
+	//	ColumnNames.ForEach(x => clause.Add(new SortableItem(new ColumnValue(x))));
+	//	query = new CreateIndexQuery(clause)
+	//	{
+	//		IndexName = ConstraintName,
+	//		IsUnique = true,
+	//	};
+	//	return true;
+	//}
 }

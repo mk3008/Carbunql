@@ -2,6 +2,7 @@
 @using Carbunql;
 @using Carbunql.Analysis
 @using Carbunql.Building;
+@using System.Text
 
 <PageTitle>DDL Format</PageTitle>
 
@@ -88,8 +89,13 @@ Console.WriteLine(text);";
         }
         try
         {
+            var sb = new StringBuilder();
             var sq = DefinitionQuerySetParser.Parse(sql);
-            fsql = sq.ToText();
+            foreach(var item in sq){
+                if (sb.Length != 0) sb.AppendLine(";");
+                sb.AppendLine(item.ToText());
+            }
+            fsql = sb.ToString();
 		}
 		catch (Exception ex)
 		{

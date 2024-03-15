@@ -8,7 +8,7 @@ public class ReferenceDefinition
 		ColumnNames = columnNames;
 	}
 
-	public string TableName { get; set; }
+	public string TableName { get; init; } = string.Empty;
 
 	public List<string> ColumnNames { get; set; } = new();
 

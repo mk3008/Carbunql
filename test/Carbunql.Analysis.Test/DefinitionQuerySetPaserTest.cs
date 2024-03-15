@@ -12,33 +12,6 @@ public class DefinitionQuerySetPaserTest
 
 	private ITestOutputHelper Output { get; set; }
 
-	private string GetQueryText(DefinitionQuerySet queryset)
-	{
-		var sb = new StringBuilder();
-
-		if (queryset.CreateTableQuery != null)
-		{
-			sb.AppendLine(queryset.CreateTableQuery.ToCommand().CommandText);
-			sb.AppendLine(";");
-		}
-
-		foreach (var item in queryset.AlterTableQueries)
-		{
-			sb.AppendLine(item.ToCommand().CommandText);
-			sb.AppendLine(";");
-
-		}
-		foreach (var item in queryset.AlterIndexQueries)
-		{
-			sb.AppendLine(item.ToCommand().CommandText);
-			sb.AppendLine(";");
-		}
-
-		Output.WriteLine(sb.ToString());
-
-		return sb.ToString();
-	}
-
 	[Fact]
 	public void Default()
 	{
@@ -59,7 +32,8 @@ CREATE UNIQUE INDEX idx_child_name ON child_table (
 ";
 		var v = DefinitionQuerySetParser.Parse(text);
 
-		var sql = GetQueryText(v);
+		var sql = v.ToText();
+		Output.WriteLine(sql);
 		Assert.Equal(text, sql, true, true, true);
 	}
 
@@ -101,7 +75,8 @@ CREATE UNIQUE INDEX idx_child_name ON child_table (
 ";
 		var v = DefinitionQuerySetParser.Parse(text);
 
-		var sql = GetQueryText(v);
+		var sql = v.ToText();
+		Output.WriteLine(sql);
 		Assert.Equal(text, sql, true, true, true);
 	}
 
@@ -131,7 +106,8 @@ CREATE UNIQUE INDEX idx_child_name ON child_table (
 ";
 		var v = DefinitionQuerySetParser.Parse(text);
 
-		var sql = GetQueryText(v);
+		var sql = v.ToText();
+		Output.WriteLine(sql);
 		Assert.Equal(text, sql, true, true, true);
 	}
 }

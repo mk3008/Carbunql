@@ -6,6 +6,12 @@ namespace Carbunql.Definitions;
 
 internal class ForeignKeyConstraint : IConstraint
 {
+	public ForeignKeyConstraint(ITable t)
+	{
+		Schema = t.Schema;
+		Table = t.Table;
+	}
+
 	public string ConstraintName { get; set; } = string.Empty;
 
 	public List<string> ColumnNames { get; set; } = new();
@@ -13,6 +19,10 @@ internal class ForeignKeyConstraint : IConstraint
 	public ReferenceDefinition Reference { get; set; } = null!;
 
 	public string ColumnName => string.Empty;
+
+	public string? Schema { get; init; }
+
+	public string Table { get; init; }
 
 	public IEnumerable<CommonTable> GetCommonTables()
 	{
@@ -56,7 +66,7 @@ internal class ForeignKeyConstraint : IConstraint
 		}
 	}
 
-	public bool TryIntegrate(TableDefinitionClause clause)
+	public bool TrySet(TableDefinitionClause clause)
 	{
 		return false;
 	}
@@ -66,4 +76,10 @@ internal class ForeignKeyConstraint : IConstraint
 		constraint = this;
 		return true;
 	}
+
+	//public bool TryToIndex([MaybeNullWhen(false)] out CreateIndexQuery query)
+	//{
+	//	query = default;
+	//	return false;
+	//}
 }

@@ -33,7 +33,7 @@ public static class CreateTableQueryParser
 		}
 		else if (token == "(")
 		{
-			t.DefinitionClause ??= new();
+			t.DefinitionClause ??= new(t);
 			r.Read("(");
 			do
 			{
@@ -41,12 +41,12 @@ public static class CreateTableQueryParser
 				token = r.Peek();
 				if (token.IsEqualNoCase(ConstraintTokens))
 				{
-					var c = ConstraintParser.Parse(r);
+					var c = ConstraintParser.Parse(t, r);
 					t.DefinitionClause.Add(c);
 				}
 				else
 				{
-					var c = ColumnDefinitionParser.Parse(r);
+					var c = ColumnDefinitionParser.Parse(t, r);
 					t.DefinitionClause.Add(c);
 				}
 			} while (r.Peek() == ",");

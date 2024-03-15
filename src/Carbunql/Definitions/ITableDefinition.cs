@@ -3,9 +3,11 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Definitions;
 
-public interface ITableDefinition : IQueryCommandable
+public interface ITableDefinition : IQueryCommandable, ITable
 {
-	bool TryIntegrate(TableDefinitionClause clause);
+	bool TrySet(TableDefinitionClause clause);
+
+	//bool TryToIndex([MaybeNullWhen(false)] out CreateIndexQuery query);
 
 	bool TryDisasseble([MaybeNullWhen(false)] out IConstraint constraint);
 

@@ -5,81 +5,81 @@ namespace Carbunql.Analysis.Parser;
 
 public class AlterCommandParser
 {
-	public static IAlterCommand Parse(string text)
-	{
-		var r = new SqlTokenReader(text);
-		var q = Parse(r);
-		return q;
-	}
+	//public static IAlterCommand Parse(ITable t, string text)
+	//{
+	//	var r = new SqlTokenReader(text);
+	//	var q = Parse(t, r);
+	//	return q;
+	//}
 
-	public static IAlterCommand Parse(ITokenReader r)
+	public static IAlterCommand Parse(ITable t, ITokenReader r)
 	{
 		var token = r.Peek();
 		if (token.IsEqualNoCase("add"))
 		{
-			return ParseAsAddCommand(r);
+			return ParseAsAddCommand(t, r);
 		}
 
 		if (token.IsEqualNoCase("drop"))
 		{
-			return ParseAdDropCommand(r);
+			return ParseAdDropCommand(t, r);
 		}
 
 		if (token.IsEqualNoCase("alter column"))
 		{
-			return ParseAsAlterColumnCommand(r);
+			return ParseAsAlterColumnCommand(t, r);
 		}
 
 		if (token.IsEqualNoCase("rename"))
 		{
-			return ParseAsRenameCommand(r);
+			return ParseAsRenameCommand(t, r);
 		}
 		throw new NotSupportedException($"Token:{token}");
 	}
 
-	private static IAlterCommand ParseAsAddCommand(ITokenReader r)
+	private static IAlterCommand ParseAsAddCommand(ITable t, ITokenReader r)
 	{
 		r.Read("add");
 		var token = r.Peek();
 
 		if (token.IsEqualNoCase(new[] { "constraint", "primary key", "unique" }))
 		{
-			var constraint = ConstraintParser.Parse(r);
+			var constraint = ConstraintParser.Parse(t, r);
 			return new AddConstraintCommand(constraint);
 		}
 		else if (token.IsEqualNoCase("column"))
 		{
-			var definition = ColumnDefinitionParser.Parse(r);
+			var definition = ColumnDefinitionParser.Parse(t, r);
 			return new AddColumnCommand(definition);
 		}
 		else
 		{
 			//Consider "add column" with "column" omitted.
-			var definition = ColumnDefinitionParser.Parse(r);
+			var definition = ColumnDefinitionParser.Parse(t, r);
 			return new AddColumnCommand(definition);
 		}
 
 		//throw new NotSupportedException($"Token:{token}");
 	}
 
-	private static IAlterCommand ParseAdDropCommand(ITokenReader r)
+	private static IAlterCommand ParseAdDropCommand(ITable t, ITokenReader r)
 	{
 		r.Read("drop");
 		var target = r.Read();
 		if (target.IsEqualNoCase("column"))
 		{
 			var name = r.Read();
-			return new DropColumnCommand(name);
+			return new DropColumnCommand(t, name);
 		}
 		if (target.IsEqualNoCase("constraint"))
 		{
 			var name = r.Read();
-			return new DropConstraintCommand(name);
+			return new DropConstraintCommand(t, name);
 		}
 		throw new NotSupportedException();
 	}
 
-	private static IAlterCommand ParseAsAlterColumnCommand(ITokenReader r)
+	private static IAlterCommand ParseAsAlterColumnCommand(ITable t, ITokenReader r)
 	{
 		r.Read("alter column");
 		var column = r.Read();
@@ -90,11 +90,11 @@ public class AlterCommandParser
 			if (token.IsEqualNoCase("default"))
 			{
 				var value = r.Read();
-				return new SetDefaultCommand(column, value);
+				return new SetDefaultCommand(t, column, value);
 			}
 			if (token.IsEqualNoCase("not null"))
 			{
-				return new SetNotNullCommand(column);
+				return new SetNotNullCommand(t, column);
 			}
 			throw new NotSupportedException();
 		}
@@ -103,23 +103,23 @@ public class AlterCommandParser
 			token = r.Read();
 			if (token.IsEqualNoCase("default"))
 			{
-				return new DropDefaultCommand(column);
+				return new DropDefaultCommand(t, column);
 			}
 			if (token.IsEqualNoCase("not null"))
 			{
-				return new DropNotNullCommand(column);
+				return new DropNotNullCommand(t, column);
 			}
 			throw new NotSupportedException();
 		}
 		if (token.IsEqualNoCase("type"))
 		{
 			var columnType = ValueParser.Parse(r);
-			return new ChangeColumnTypeCommand(column, columnType);
+			return new ChangeColumnTypeCommand(t, column, columnType);
 		}
 		throw new NotSupportedException();
 	}
 
-	private static IAlterCommand ParseAsRenameCommand(ITokenReader r)
+	private static IAlterCommand ParseAsRenameCommand(ITable t, ITokenReader r)
 	{
 		r.Read("rename");
 		var token = r.Read();
@@ -129,12 +129,12 @@ public class AlterCommandParser
 			var oldName = r.Read();
 			r.Read("to");
 			var newName = r.Read();
-			return new RenameColumnCommand(oldName, newName);
+			return new RenameColumnCommand(t, oldName, newName);
 		}
 		else
 		{
 			//rename table
-			return new RenameTableCommand(token);
+			return new RenameTableCommand(t, token);
 		}
 	}
 }

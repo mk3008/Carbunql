@@ -3,8 +3,18 @@ using Carbunql.Tables;
 
 namespace Carbunql.Clauses;
 
-public class TableDefinitionClause : QueryCommandCollection<ITableDefinition>
+public class TableDefinitionClause : QueryCommandCollection<ITableDefinition>, ITable
 {
+	public TableDefinitionClause(ITable t)
+	{
+		Schema = t.Schema;
+		Table = t.Table;
+	}
+
+	public string? Schema { get; init; }
+
+	public string Table { get; init; }
+
 	public override IEnumerable<Token> GetTokens(Token? parent)
 	{
 		if (!Items.Any()) yield break;
@@ -49,12 +59,12 @@ public class TableDefinitionClause : QueryCommandCollection<ITableDefinition>
 		return lst.Distinct();
 	}
 
-	public TableDefinitionClause ToNormalize(ITable table)
+	public TableDefinitionClause ToNormalize()
 	{
-		var clause = new TableDefinitionClause();
+		var clause = new TableDefinitionClause(this);
 		foreach (var item in Items.OfType<ColumnDefinition>())
 		{
-			if (item.TryNormalize(table, out var column))
+			if (item.TryNormalize(out var column))
 			{
 				clause.Add(column);
 			}
@@ -62,7 +72,7 @@ public class TableDefinitionClause : QueryCommandCollection<ITableDefinition>
 		return clause;
 	}
 
-	public List<AlterTableQuery> Disasseble(ITable table)
+	public List<AlterTableQuery> Disasseble()
 	{
 		var lst = new List<AlterTableQuery>();
 
@@ -70,16 +80,16 @@ public class TableDefinitionClause : QueryCommandCollection<ITableDefinition>
 		var pkeys = Items.OfType<ColumnDefinition>().Where(x => x.IsPrimaryKey).Select(x => x.ColumnName).Distinct();
 		if (pkeys.Any())
 		{
-			var c = new PrimaryKeyConstraint() { ColumnNames = pkeys.ToList() };
-			lst.Add(new AlterTableQuery(new AlterTableClause(table, c)));
+			var c = new PrimaryKeyConstraint(this) { ColumnNames = pkeys.ToList() };
+			lst.Add(new AlterTableQuery(new AlterTableClause(this, c)));
 		}
 
 		//normalize unknown name unique key
 		var ukeys = Items.OfType<ColumnDefinition>().Where(x => x.IsUniqueKey).Select(x => x.ColumnName).Distinct();
 		if (ukeys.Any())
 		{
-			var c = new UniqueConstraint() { ColumnNames = ukeys.ToList() };
-			lst.Add(new AlterTableQuery(new AlterTableClause(table, c)));
+			var c = new UniqueConstraint(this) { ColumnNames = ukeys.ToList() };
+			lst.Add(new AlterTableQuery(new AlterTableClause(this, c)));
 		}
 
 		//disassemble
@@ -87,7 +97,7 @@ public class TableDefinitionClause : QueryCommandCollection<ITableDefinition>
 		{
 			if (def.TryDisasseble(out var constraint))
 			{
-				lst.Add(new AlterTableQuery(new AlterTableClause(table, constraint)));
+				lst.Add(new AlterTableQuery(new AlterTableClause(this, constraint)));
 			}
 		}
 
