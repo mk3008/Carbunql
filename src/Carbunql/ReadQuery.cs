@@ -10,7 +10,7 @@ public abstract class ReadQuery : IReadQuery
 {
 	public abstract SelectClause? GetSelectClause();
 
-	public OperatableQuery? OperatableQuery { get; set; }
+	public List<OperatableQuery> OperatableQueries { get; set; } = new();
 
 	public OrderClause? OrderClause { get; set; }
 
@@ -18,8 +18,7 @@ public abstract class ReadQuery : IReadQuery
 
 	public IReadQuery AddOperatableValue(string @operator, IReadQuery query)
 	{
-		if (OperatableQuery != null) throw new InvalidOperationException();
-		OperatableQuery = new OperatableQuery(@operator, query);
+		OperatableQueries.Add(new OperatableQuery(@operator, query));
 		return query;
 	}
 
@@ -45,7 +44,7 @@ public abstract class ReadQuery : IReadQuery
 			{
 				yield return item;
 			}
-		};
+		}
 		q = GetSelectClause()?.GetParameters();
 		if (q != null)
 		{
@@ -53,7 +52,7 @@ public abstract class ReadQuery : IReadQuery
 			{
 				yield return item;
 			}
-		};
+		}
 		q = GetInnerParameters();
 		if (q != null)
 		{
@@ -61,15 +60,14 @@ public abstract class ReadQuery : IReadQuery
 			{
 				yield return item;
 			}
-		};
-		q = OperatableQuery?.GetParameters();
-		if (q != null)
+		}
+		foreach (var oq in OperatableQueries)
 		{
-			foreach (var item in q)
+			foreach (var item in oq.GetParameters())
 			{
 				yield return item;
 			}
-		};
+		}
 		q = OrderClause?.GetParameters();
 		if (q != null)
 		{
@@ -77,7 +75,7 @@ public abstract class ReadQuery : IReadQuery
 			{
 				yield return item;
 			}
-		};
+		}
 		q = LimitClause?.GetParameters();
 		if (q != null)
 		{
@@ -85,7 +83,7 @@ public abstract class ReadQuery : IReadQuery
 			{
 				yield return item;
 			}
-		};
+		}
 		foreach (var item in Parameters)
 		{
 			yield return item;
@@ -97,7 +95,10 @@ public abstract class ReadQuery : IReadQuery
 	public IEnumerable<Token> GetTokens(Token? parent)
 	{
 		foreach (var item in GetCurrentTokens(parent)) yield return item;
-		if (OperatableQuery != null) foreach (var item in OperatableQuery.GetTokens(parent)) yield return item;
+		foreach (var oq in OperatableQueries)
+		{
+			foreach (var item in oq.GetTokens(parent)) yield return item;
+		}
 		if (OrderClause != null) foreach (var item in OrderClause.GetTokens(parent)) yield return item;
 		if (LimitClause != null) foreach (var item in LimitClause.GetTokens(parent)) yield return item;
 	}

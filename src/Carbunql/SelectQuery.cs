@@ -22,7 +22,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
 		GroupClause = q.GroupClause;
 		HavingClause = q.HavingClause;
 		WindowClause = q.WindowClause;
-		OperatableQuery = q.OperatableQuery;
+		OperatableQueries = q.OperatableQueries;
 		OrderClause = q.OrderClause;
 		LimitClause = q.LimitClause;
 	}
@@ -52,10 +52,13 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
 
 		if (parent == null && WithClause != null)
 		{
-			var lst = GetCommonTables().ToList();
+			var lst = GetCommonTables();
 			foreach (var item in WithClause.GetTokens(parent, lst)) yield return item;
 		}
 		foreach (var item in SelectClause.GetTokens(parent)) yield return item;
+
+		if (FromClause == null) yield break;
+
 		if (FromClause != null) foreach (var item in FromClause.GetTokens(parent)) yield return item;
 		if (WhereClause != null) foreach (var item in WhereClause.GetTokens(parent)) yield return item;
 		if (GroupClause != null) foreach (var item in GroupClause.GetTokens(parent)) yield return item;
@@ -181,9 +184,9 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
 				yield return item;
 			}
 		}
-		if (OperatableQuery != null)
+		foreach (var oq in OperatableQueries)
 		{
-			foreach (var item in OperatableQuery.GetPhysicalTables())
+			foreach (var item in oq.GetPhysicalTables())
 			{
 				yield return item;
 			}
@@ -258,9 +261,9 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
 				yield return item;
 			}
 		}
-		if (OperatableQuery != null)
+		foreach (var oq in OperatableQueries)
 		{
-			foreach (var item in OperatableQuery.GetInternalQueries())
+			foreach (var item in oq.GetInternalQueries())
 			{
 				yield return item;
 			}
@@ -349,9 +352,9 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
 				yield return item;
 			}
 		}
-		if (OperatableQuery != null)
+		foreach (var oq in OperatableQueries)
 		{
-			foreach (var item in OperatableQuery.GetCommonTables())
+			foreach (var item in oq.GetCommonTables())
 			{
 				yield return item;
 			}

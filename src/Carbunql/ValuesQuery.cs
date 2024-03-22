@@ -25,7 +25,7 @@ public class ValuesQuery : ReadQuery
 	{
 		var q = ValuesQueryParser.Parse(query);
 		Rows = q.Rows;
-		OperatableQuery = q.OperatableQuery;
+		OperatableQueries = q.OperatableQueries;
 		OrderClause = q.OrderClause;
 		LimitClause = q.LimitClause;
 	}

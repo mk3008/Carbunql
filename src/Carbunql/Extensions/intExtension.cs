@@ -1,4 +1,7 @@
-﻿namespace Carbunql.Extensions;
+﻿using Cysharp.Text;
+using System.Text;
+
+namespace Carbunql.Extensions;
 
 internal static class intExtension
 {
@@ -9,8 +12,8 @@ internal static class intExtension
 
 	public static string ToSpaceString(this int source)
 	{
-		var space = string.Empty;
-		source.ForEach(x => space += " ");
-		return space;
+		using var sb = ZString.CreateStringBuilder();
+		source.ForEach(s => sb.Append(" "));
+		return sb.ToString();
 	}
 }

@@ -19,7 +19,7 @@ public class TokenFormatLogic
 
 		if (token.Text.Equals(",") && token.Sender is Relation) return false;
 
-		if (token.Text.Equals("as") && token.Sender is CreateTableQuery) return true;
+		if (token.Text.IsEqualNoCase("as") && token.Sender is CreateTableQuery) return true;
 
 		if (!token.Text.IsEqualNoCase("on") && token.Sender is Relation) return true;
 		if (token.Text.IsEqualNoCase("else") || token.Text.IsEqualNoCase("when")) return true;
@@ -31,7 +31,7 @@ public class TokenFormatLogic
 			return false;
 		}
 
-		if (token.Text.Equals("where") && token.Parent == null) return true;
+		if (token.Text.IsEqualNoCase("where") && token.Parent == null) return true;
 
 		return false;
 	}
@@ -71,8 +71,8 @@ public class TokenFormatLogic
 		if (token.Parent != null && token.Parent.Sender is ValuesQuery) return false;
 		if (token.Sender is FunctionValue) return false;
 		if (token.Sender is FunctionTable) return false;
-		if (token.Text.Equals("filter")) return false;
-		if (token.Text.Equals("over")) return false;
+		if (token.Text.IsEqualNoCase("filter")) return false;
+		if (token.Text.IsEqualNoCase("over")) return false;
 
 		return true;
 	}

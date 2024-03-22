@@ -25,6 +25,8 @@ public class CommandTextBuilder
 
 	private int Level { get; set; }
 
+	private Dictionary<int, string> SpacerCache = new();
+
 	public void Init()
 	{
 		Level = 0;
@@ -66,8 +68,6 @@ public class CommandTextBuilder
 
 			if (Formatter.IsDecrementIndentOnBeforeWriteToken(t))
 			{
-
-
 				var q = IndentLevels.Where(x => x.Token != null && x.Token.Equals(t.Parent)).Select(x => x.Level);
 				var lv = 0;
 				if (q.Any()) lv = q.First();
@@ -75,6 +75,11 @@ public class CommandTextBuilder
 				{
 					Logger?.Invoke($"decrement indent and line break on before : {t.Text}");
 					Level = lv;
+
+					//NOTE:
+					//Remembering indentation has a big impact on performance.
+					//Improves performance by deleting the cache of indentation levels when the indentation is no longer present.
+					if (Level == 0) IndentLevels.Clear();
 					sb.Append(GetLineBreakText());
 				}
 				else
@@ -82,6 +87,7 @@ public class CommandTextBuilder
 					Logger?.Invoke($"*Indentation is invalid because the levels are the same : {t.Text}");
 				}
 			}
+
 			foreach (var item in GetTokenTexts(t)) sb.Append(item);
 		}
 		return sb.ToString();
@@ -115,7 +121,9 @@ public class CommandTextBuilder
 		}
 
 		if (token.NeedsSpace(PrevToken)) sb.Append(' ');
+
 		PrevToken = token;
+
 		if (token.IsReserved)
 		{
 			sb.Append(token.Text.ToUpper());
@@ -127,8 +135,6 @@ public class CommandTextBuilder
 
 		return sb.ToString();
 	}
-
-	private Dictionary<int, string> SpacerCache = new();
 
 	private string GetLineBreakText()
 	{
