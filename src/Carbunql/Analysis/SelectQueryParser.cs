@@ -30,6 +30,22 @@ public static class SelectQueryParser
 
 	internal static SelectQuery Parse(ITokenReader r)
 	{
+		var sq = ParseMain(r);
+
+		var tokens = new string[] { "union", "union all", "except", "minus", "intersect" };
+		while (r.Peek().IsEqualNoCase(tokens))
+		{
+			var op = r.Read();
+			sq.AddOperatableValue(op, ParseMain(r));
+		}
+
+		sq.LimitClause = ParseLimitOrDefault(r);
+
+		return sq;
+	}
+
+	private static SelectQuery ParseMain(ITokenReader r)
+	{
 		var sq = new SelectQuery();
 
 		r.Read("select");
@@ -41,15 +57,6 @@ public static class SelectQueryParser
 		sq.HavingClause = ParseHavingOrDefault(r);
 		sq.WindowClause = ParseWindowOrDefault(r);
 		sq.OrderClause = ParseOrderOrDefault(r);
-
-		var tokens = new string[] { "union", "union all", "except", "minus", "intersect" };
-		if (r.Peek().IsEqualNoCase(tokens))
-		{
-			var op = r.Read();
-			sq.AddOperatableValue(op, Parse(r));
-		}
-
-		sq.LimitClause = ParseLimitOrDefault(r);
 
 		return sq;
 	}

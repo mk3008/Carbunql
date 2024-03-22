@@ -7,13 +7,6 @@ namespace Carbunql.Building;
 
 public static class ReadQueryExtension
 {
-	public static SelectQuery GetLast(this SelectQuery source)
-	{
-		if (source.OperatableQuery == null) return source;
-		if (source.OperatableQuery.Query is SelectQuery sq) return sq.GetLast();
-		return source;
-	}
-
 	public static (SelectQuery, CommonTable) ToCTE(this IReadQuery source, string alias)
 	{
 		var sq = new SelectQuery();
@@ -270,7 +263,7 @@ public static class ReadQueryExtension
 	public static void UnionAll(this IReadQuery source, IReadQuery query)
 	{
 		var sq = source.GetOrNewSelectQuery();
-		sq.GetLast().AddOperatableValue("union all", query);
+		sq.AddOperatableValue("union all", query);
 	}
 
 	public static void UnionAll(this IReadQuery source, Func<IReadQuery> builder)
@@ -281,7 +274,7 @@ public static class ReadQueryExtension
 	public static void Union(this IReadQuery source, IReadQuery query)
 	{
 		var sq = source.GetOrNewSelectQuery();
-		sq.GetLast().AddOperatableValue("union", query);
+		sq.AddOperatableValue("union", query);
 	}
 
 	public static void Union(this IReadQuery source, Func<IReadQuery> builder)

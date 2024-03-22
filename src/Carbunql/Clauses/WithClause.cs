@@ -20,38 +20,35 @@ public class WithClause : IList<CommonTable>, IQueryCommandable
 
 	public bool HasRecursiveKeyword { get; set; } = false;
 
-	public IEnumerable<Token> GetTokens(Token? parent, IList<CommonTable> commons)
+	public IEnumerable<Token> GetTokens(Token? parent, IEnumerable<CommonTable> commons)
 	{
-		if (!commons.Any() || parent != null) yield break;
+		if (parent != null) yield break;
 
-		Token? clause;
-		if (HasRecursiveKeyword)
-		{
-			clause = Token.Reserved(this, null, "with recursive");
-		}
-		else
-		{
-			clause = Token.Reserved(this, null, "with");
-		}
-		yield return clause;
-
+		Token? clause = null;
 
 		var dic = new Dictionary<string, CommonTable>();
-		var isFisrt = true;
 		foreach (var item in commons)
 		{
 			if (dic.ContainsKey(item.Alias)) continue;
 			dic.Add(item.Alias, item);
 
-			if (isFisrt)
+			if (clause == null)
 			{
-				isFisrt = false;
+				if (HasRecursiveKeyword)
+				{
+					clause = Token.Reserved(this, null, "with recursive");
+				}
+				else
+				{
+					clause = Token.Reserved(this, null, "with");
+				}
+				yield return clause;
 			}
 			else
 			{
 				yield return Token.Comma(this, clause);
 			}
-			foreach (var token in item.GetTokens(clause)) yield return token;
+			foreach (var token in item.GetTokens(clause!)) yield return token;
 		}
 	}
 
