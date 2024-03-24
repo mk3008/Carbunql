@@ -683,6 +683,17 @@ public class ValueParserTest
 	}
 
 	[Fact]
+	public void PostgresArray_Query()
+	{
+		var text = "array(select 1)";
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(5, lst.Count);
+	}
+
+	[Fact]
 	public void MySqlSystemVariable()
 	{
 		var text = "@@session.time_zone";

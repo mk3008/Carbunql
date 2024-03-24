@@ -14,19 +14,12 @@ public class ArrayValue : ValueBase
 
 	public ArrayValue(ValueBase arg)
 	{
-		if (arg is ValueCollection vc)
-		{
-			Argument = vc;
-		}
-		else
-		{
-			Argument = new ValueCollection(arg);
-		}
+		Argument = arg;
 	}
 
 	public string Name => "array";
 
-	public ValueCollection Argument { get; set; }
+	public ValueBase Argument { get; set; }
 
 	protected override IEnumerable<SelectQuery> GetInternalQueriesCore()
 	{
@@ -40,9 +33,9 @@ public class ArrayValue : ValueBase
 	{
 		yield return Token.Reserved(this, parent, Name);
 
-		yield return Token.Reserved(this, parent, "[");
+		if (Argument is ValueCollection) yield return Token.Reserved(this, parent, "[");
 		foreach (var item in Argument.GetTokens(parent)) yield return item;
-		yield return Token.Reserved(this, parent, "]");
+		if (Argument is ValueCollection) yield return Token.Reserved(this, parent, "]");
 	}
 
 	protected override IEnumerable<QueryParameter> GetParametersCore()

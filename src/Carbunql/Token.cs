@@ -1,4 +1,5 @@
 ﻿using Carbunql.Clauses;
+using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
 
@@ -65,7 +66,8 @@ public class Token
 		if (prev!.Text.Equals("(")) return false;
 		if (prev!.Text.Equals(".")) return false;
 		if (prev!.Text.Equals("::")) return false;
-		if (prev!.Text.Equals("as")) return true;
+		if (prev!.Text.IsEqualNoCase("as")) return true;
+		if (prev!.Text.IsEqualNoCase("array")) return false;
 
 		if (Text.Equals("[")) return false;
 		if (Text.Equals("]")) return false;

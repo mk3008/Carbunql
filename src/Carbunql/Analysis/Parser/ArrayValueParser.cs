@@ -1,24 +1,32 @@
-﻿using Carbunql.Values;
+﻿using Carbunql.Clauses;
+using Carbunql.Values;
 
 namespace Carbunql.Analysis.Parser;
 
 public static class ArrayValueParser
 {
-	public static ArrayValue Parse(string argument)
+	public static ValueBase Parse(string argument)
 	{
 		var r = new SqlTokenReader(argument);
 		return Parse(r);
 	}
 
-	public static ArrayValue Parse(ITokenReader r)
+	public static ValueBase Parse(ITokenReader r)
 	{
-		r.Read("array");
-		var val = r.Read();
-		if (val.First() == '[' && val.Last() == ']')
+		var token = r.Read("array");
+		var next = r.Peek();
+		if (next.First() == '[' && next.Last() == ']')
 		{
-			var text = val.Substring(1, val.Length - 2);
-			var collection = ValueCollectionParser.Parse(text);
-			return new ArrayValue(collection);
+			// It is interpreted as a SQL Server token, so disassemble it
+			next = r.Read();
+			var text = next.Substring(1, next.Length - 2);
+			var value = ValueCollectionParser.Parse(text);
+			return new ArrayValue(value);
+		}
+		else if (BracketValueParser.IsBracketValue(next))
+		{
+			var value = BracketValueParser.Parse(r);
+			return new ArrayValue(value);
 		}
 		throw new NotSupportedException();
 	}
