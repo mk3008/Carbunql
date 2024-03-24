@@ -13,9 +13,13 @@ public static class ArrayValueParser
 	public static ArrayValue Parse(ITokenReader r)
 	{
 		r.Read("array");
-		using var ir = new BracketInnerTokenReader(r, "[", "]");
-
-		var collection = ValueCollectionParser.Parse(ir);
-		return new ArrayValue(collection);
+		var val = r.Read();
+		if (val.First() == '[' && val.Last() == ']')
+		{
+			var text = val.Substring(1, val.Length - 2);
+			var collection = ValueCollectionParser.Parse(text);
+			return new ArrayValue(collection);
+		}
+		throw new NotSupportedException();
 	}
 }

@@ -83,10 +83,24 @@ public abstract class LexReader
 			return string.Empty;
 		}
 
+		// escape identifer
+		if (fc == '\"' || fc == '`')
+		{
+			// for Postgres, MySql
+			// ex. "column name", `column name`
+			return Read(1) + ReadUntilTerminator(fc);
+		}
+		else if (fc == '[')
+		{
+			// for SQLServer
+			// ex. [column name]
+			return Read(1) + ReadUntilTerminator(']');
+		}
+
 		// ex. 'text'
 		if (fc == '\'')
 		{
-			return Read(1) + ReadUntilSingleQuote();
+			return Read(1) + ReadUntilTerminator(fc);
 		}
 
 		// ex. | or ||
@@ -173,7 +187,7 @@ public abstract class LexReader
 		}
 
 		// ForceBreakSymbols
-		if (".,();[]".Contains(fc))
+		if (".,();".Contains(fc))
 		{
 			return Read(1);
 		}
@@ -388,17 +402,25 @@ public abstract class LexReader
 
 	private int FindIndexOfSingleQuoteEnd(int shift)
 	{
+		return FindIndexOfTerminator(shift, '\'');
+	}
+
+	private int FindIndexOfTerminator(int shift, char terminatorSymbol)
+	{
+		var terminator = terminatorSymbol.ToString();
 		var s = Peek(shift, 1);
 		while (!string.IsNullOrEmpty(s))
 		{
-			if (s != "'")
+			if (s != terminator)
 			{
 				shift++;
 				s = Peek(shift, 1);
 				continue;
 			}
 
-			if (s == "'" && Peek(shift + 1, 1) == "'")
+			// If the terminator symbol appears consecutively,
+			// it is not considered.
+			if (s == terminator && Peek(shift + 1, 1) == terminator)
 			{
 				shift += 2;
 				s = Peek(shift, 1);
@@ -408,7 +430,7 @@ public abstract class LexReader
 			break;
 		}
 
-		if (s != "'") throw new SyntaxException("single quote is not closed.");
+		if (s != terminator) throw new SyntaxException($"Terminator not found. (\"{terminator}\")");
 
 		shift++;
 		return shift;
@@ -416,7 +438,12 @@ public abstract class LexReader
 
 	private string ReadUntilSingleQuote()
 	{
-		var shift = FindIndexOfSingleQuoteEnd(0);
+		return ReadUntilTerminator('\'');
+	}
+
+	private string ReadUntilTerminator(char terminatorSymbol)
+	{
+		var shift = FindIndexOfTerminator(0, terminatorSymbol);
 		return Read(shift);
 	}
 
