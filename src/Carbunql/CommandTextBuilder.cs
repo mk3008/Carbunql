@@ -75,11 +75,6 @@ public class CommandTextBuilder
 				{
 					Logger?.Invoke($"decrement indent and line break on before : {t.Text}");
 					Level = lv;
-
-					//NOTE:
-					//Remembering indentation has a big impact on performance.
-					//Improves performance by deleting the cache of indentation levels when the indentation is no longer present.
-					if (Level == 0) IndentLevels.Clear();
 					sb.Append(GetLineBreakText());
 				}
 				else
@@ -138,7 +133,16 @@ public class CommandTextBuilder
 
 	private string GetLineBreakText()
 	{
+		//init previous token
 		PrevToken = null;
+
+		// NOTE:
+		// For performance improvement, remove unnecessary indent information
+		// However, keep one for the starting position of brackets
+		var startIndent = IndentLevels.Where(x => x.Level == Level).FirstOrDefault();
+		IndentLevels.RemoveAll(x => Level <= x.Level && x != startIndent);
+
+		//line break
 		if (!SpacerCache.ContainsKey(Level))
 		{
 			SpacerCache[Level] = (Level * 4).ToSpaceString();
