@@ -16,10 +16,10 @@ public class StackOverFlowTest
 	public void Union_50k()
 	{
 		var sb = new StringBuilder();
-		sb.Append("select 1");
+		sb.Append("select 1,2,3,4,5,6,7,8,9,10");
 		for (int i = 0; i < 50000; i++)
 		{
-			sb.Append(" union all select 1");
+			sb.Append(" union all select 1,2,3,4,5,6,7,8,9,10");
 		}
 
 		var exception = Record.Exception(() =>
@@ -28,6 +28,27 @@ public class StackOverFlowTest
 			sq.GetTokens();
 
 			Output.WriteLine(sq.ToText());
+		});
+
+		Assert.Null(exception);
+	}
+
+	[Fact]
+	public void Values_50k()
+	{
+		var sb = new StringBuilder();
+		sb.Append("values (1,2,3,4,5,6,7,8,9,10)");
+		for (int i = 0; i < 50000; i++)
+		{
+			sb.Append(", (1,2,3,4,5,6,7,8,9,10)");
+		}
+
+		var exception = Record.Exception(() =>
+		{
+			var vq = new ValuesQuery(sb.ToString());
+			vq.GetTokens();
+
+			Output.WriteLine(vq.ToText());
 		});
 
 		Assert.Null(exception);
