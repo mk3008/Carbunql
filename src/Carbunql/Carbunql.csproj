@@ -6,13 +6,14 @@
 		<Nullable>enable</Nullable>
 		<Title></Title>
 		<Copyright>mk3008net</Copyright>
-		<Description>A lightweight library for parsing and building select queries. SQL can be rebuilt dynamically.</Description>
-		<Version>0.7.3</Version>
+		<Description>Carbunql provides query parsing and building functionality.</Description>
+		<Version>0.7.4</Version>
 		<Authors>mk3008net</Authors>
 		<PackageProjectUrl>https://github.com/mk3008/Carbunql</PackageProjectUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/mk3008/Carbunql.git</RepositoryUrl>
-		<PackageTags>SQL;SQLBuilder;SQLParser;SQLRebuilder;Migration</PackageTags>
+		<PackageTags>sql;migration;sql-parser;query-builder;sql-builder;sqlbuilder;sqlparser;sqlrebuilder</PackageTags>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -22,6 +23,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Include="..\..\LICENSE">
+		  <Pack>True</Pack>
+		  <PackagePath>\</PackagePath>
+		</None>
 		<None Include="..\..\README.md">
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
