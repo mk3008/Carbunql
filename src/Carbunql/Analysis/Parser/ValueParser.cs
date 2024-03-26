@@ -151,10 +151,18 @@ public static class ValueParser
 
 		if (r.Peek() == ".")
 		{
-			//table.column
-			var table = item;
-			r.Read(".");
-			return new ColumnValue(table, r.Read());
+			var value = item;
+			while (r.Peek() == ".")
+			{
+				r.Read(".");
+				value += "." + r.Read();
+			};
+
+			var parts = value.Split(".");
+			var column = parts[parts.Length - 1];
+			var table = value.Substring(0, value.Length - column.Length - 1);
+
+			return new ColumnValue(table, column);
 		}
 
 		//omit table column

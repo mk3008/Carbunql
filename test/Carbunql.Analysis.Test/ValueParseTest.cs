@@ -739,4 +739,18 @@ public class ValueParserTest
 
 		Assert.Equal(expect, v.ToText());
 	}
+
+	[Fact]
+	public void CatalogSchemaTableColumn()
+	{
+		var text = @"catalog.schema.table.column";
+
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(3, lst.Count);
+
+		Assert.Equal(text, v.ToText());
+	}
 }
