@@ -28,10 +28,18 @@ public static class TableParser
 
 		if (r.Peek().IsEqualNoCase("."))
 		{
-			//schema.table
-			var schema = item;
-			r.Read(".");
-			return new PhysicalTable(schema, r.Read());
+			var value = item;
+			while (r.Peek() == ".")
+			{
+				r.Read(".");
+				value += "." + r.Read();
+			};
+
+			var parts = value.Split(".");
+			var table = parts[parts.Length - 1];
+			var schema = value.Substring(0, value.Length - table.Length - 1);
+
+			return new PhysicalTable(schema, table);
 		}
 
 		if (r.Peek().IsEqualNoCase("("))

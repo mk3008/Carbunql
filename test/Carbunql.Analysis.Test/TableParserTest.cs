@@ -24,6 +24,20 @@ public class TableParserTest
 	}
 
 	[Fact]
+	public void CatalogSchemaTable()
+	{
+		var text = @"catalog.schema.table";
+
+		var v = ValueParser.Parse(text);
+		Monitor.Log(v);
+
+		var lst = v.GetTokens().ToList();
+		Assert.Equal(3, lst.Count);
+
+		Assert.Equal(text, v.ToText());
+	}
+
+	[Fact]
 	public void PhysicalTable2()
 	{
 		var text = "table_name";
