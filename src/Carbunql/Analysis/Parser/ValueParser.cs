@@ -2,7 +2,6 @@
 using Carbunql.Extensions;
 using Carbunql.Values;
 using Cysharp.Text;
-using System.IO;
 
 namespace Carbunql.Analysis.Parser;
 
