@@ -2,7 +2,7 @@
 
 public interface ITable
 {
-	string? Schema { get; }
+	string Schema { get; }
 
 	string Table { get; }
 }

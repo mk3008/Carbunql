@@ -38,7 +38,7 @@ public class DefinitionQuerySet : ITable
 		CreateTableQuery = createTableQuery;
 	}
 
-	public string? Schema { get; init; }
+	public string Schema { get; init; } = string.Empty;
 
 	public string Table { get; init; }
 
@@ -375,7 +375,7 @@ public class DefinitionQuerySet : ITable
 		}
 	}
 
-	public string ToText(bool includeDropTableQuery)
+	public string ToText(bool includeDropTableQuery = false)
 	{
 		var sb = ZString.CreateStringBuilder();
 
