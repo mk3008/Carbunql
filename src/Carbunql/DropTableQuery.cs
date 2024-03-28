@@ -17,7 +17,9 @@ public class DropTableQuery : IQueryCommandable, ICommentable, ITable
 	[IgnoreMember]
 	public CommentClause? CommentClause { get; set; }
 
-	public string? Schema { get; init; }
+	public bool HasIfExists { get; set; } = false;
+
+	public string Schema { get; init; }
 
 	public string Table { get; init; }
 
@@ -41,6 +43,11 @@ public class DropTableQuery : IQueryCommandable, ICommentable, ITable
 		if (CommentClause != null) foreach (var item in CommentClause.GetTokens(parent)) yield return item;
 
 		yield return Token.Reserved(this, parent, "drop table");
+		if (HasIfExists)
+		{
+			yield return Token.Reserved(this, parent, "if exists");
+		}
+
 		yield return new Token(this, parent, this.GetTableFullName());
 	}
 

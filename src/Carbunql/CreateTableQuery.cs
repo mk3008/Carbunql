@@ -28,7 +28,9 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
 
 	public bool IsTemporary { get; set; } = false;
 
-	public string? Schema { get; init; } = null;
+	public bool HasIfNotExists { get; set; } = false;
+
+	public string Schema { get; init; } = string.Empty;
 
 	public string Table { get; init; }
 
@@ -100,6 +102,12 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
 
 		var ct = GetCreateTableToken(parent);
 		yield return ct;
+
+		if (HasIfNotExists)
+		{
+			yield return Token.Reserved(this, parent, "if not exists");
+		}
+
 		yield return new Token(this, parent, this.GetTableFullName());
 
 		if (Query != null)

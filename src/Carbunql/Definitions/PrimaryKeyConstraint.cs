@@ -6,6 +6,12 @@ namespace Carbunql.Definitions;
 
 public class PrimaryKeyConstraint : IConstraint
 {
+	public PrimaryKeyConstraint(string schema, string table)
+	{
+		Schema = schema;
+		Table = table;
+	}
+
 	public PrimaryKeyConstraint(ITable t)
 	{
 		Schema = t.Schema;

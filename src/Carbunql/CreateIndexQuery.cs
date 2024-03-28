@@ -13,6 +13,8 @@ public class CreateIndexQuery : IAlterIndexQuery
 
 	public bool IsUnique { get; set; } = false;
 
+	public bool HasIfNotExists { get; set; } = false;
+
 	public string? IndexName { get; init; } = null;
 
 	public IndexOnClause OnClause { get; set; }
@@ -22,7 +24,7 @@ public class CreateIndexQuery : IAlterIndexQuery
 	[IgnoreMember]
 	public CommentClause? CommentClause { get; set; }
 
-	public string? Schema => OnClause.Schema;
+	public string Schema => OnClause.Schema;
 
 	public string Table => OnClause.Table;
 
@@ -58,6 +60,12 @@ public class CreateIndexQuery : IAlterIndexQuery
 
 		var ct = GetCreateIndexToken(parent);
 		yield return ct;
+
+		if (HasIfNotExists)
+		{
+			yield return Token.Reserved(this, parent, "if not exists");
+		}
+
 		if (!string.IsNullOrEmpty(IndexName))
 		{
 			yield return new Token(this, parent, IndexName);
