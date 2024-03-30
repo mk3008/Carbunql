@@ -30,6 +30,8 @@ public class ValuesQuery : ReadQuery
 		LimitClause = q.LimitClause;
 	}
 
+
+	[Obsolete("This feature has been deprecated. Consider building it outside of class.")]
 	public ValuesQuery(IEnumerable<object> matrix)
 	{
 		foreach (var row in matrix)
@@ -38,20 +40,21 @@ public class ValuesQuery : ReadQuery
 
 			foreach (var column in row.GetType().GetProperties().Where(x => x.CanRead && x.CanWrite).Select(x => x.GetValue(row)))
 			{
-				if (column == null)
+				if (column == null || column.ToString() == null)
 				{
 					lst.Add(new LiteralValue("null"));
 				}
 				else
 				{
 					var v = $"\"{column}\"";
-					lst.Add(ValueParser.Parse(v));
+					lst.Add(ValueParser.Parse(column.ToString()!));
 				}
 			}
 			Rows.Add(new ValueCollection(lst));
 		}
 	}
 
+	[Obsolete("This feature has been deprecated. Consider building it outside of class.")]
 	public ValuesQuery(IEnumerable<object> matrix, string placeholderIndentifer)
 	{
 		var r = 0;
@@ -73,6 +76,7 @@ public class ValuesQuery : ReadQuery
 		}
 	}
 
+	[Obsolete("This feature has been deprecated. Consider building it outside of class.")]
 	public ValuesQuery(string[,] matrix)
 	{
 		for (int row = 0; row < matrix.GetLength(0); row++)
@@ -88,6 +92,7 @@ public class ValuesQuery : ReadQuery
 		}
 	}
 
+	[Obsolete("This feature has been deprecated. Consider building it outside of class.")]
 	public ValuesQuery(IEnumerable<IEnumerable<string>> matrix)
 	{
 		foreach (var row in matrix)
@@ -102,6 +107,7 @@ public class ValuesQuery : ReadQuery
 		}
 	}
 
+	[Obsolete("This feature has been deprecated. Consider building it outside of class.")]
 	public ValuesQuery(string[,] matrix, string placeholderIndentifer)
 	{
 		for (int row = 0; row < matrix.GetLength(0); row++)
@@ -119,6 +125,7 @@ public class ValuesQuery : ReadQuery
 		}
 	}
 
+	[Obsolete("This feature has been deprecated. Consider building it outside of class.")]
 	public ValuesQuery(IEnumerable<IEnumerable<string>> matrix, string placeholderIndentifer)
 	{
 		var r = 0;
