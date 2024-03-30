@@ -89,12 +89,12 @@ public static class IQueryCommandableExtension
 		return new QueryCommand(source.GetTokens().ToText(), source.GetParameters());
 	}
 
-	public static string ToText(this IQueryCommandable source)
+	public static string ToText(this IQueryCommandable source, bool exportParameterInfo = true)
 	{
 		var cmd = source.ToCommand();
 		var text = cmd.CommandText;
 
-		if (!cmd.Parameters.Any()) return text;
+		if (!cmd.Parameters.Any() || !exportParameterInfo) return text;
 
 		var head = GetParameterText(cmd);
 		if (string.IsNullOrEmpty(head)) return text;
