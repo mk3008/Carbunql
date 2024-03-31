@@ -215,6 +215,16 @@ public abstract class TokenReader
 			return sb.ToString();
 		}
 
+		if (lex.IsEqualNoCase(new[] { "insert" }))
+		{
+			if (Reader.TryRead("into", out var into))
+			{
+				//insert into
+				sb.Append(" " + into);
+				return sb.ToString();
+			}
+			return sb.ToString();
+		}
 		//if (lex.IsEqualNoCase("generated"))
 		//{
 		//	if (Reader.TryRead("always", out var always))
