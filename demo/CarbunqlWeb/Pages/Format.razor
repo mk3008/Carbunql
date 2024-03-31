@@ -17,7 +17,7 @@
         <div class="col-md-12 p-3">
             <RadzenText TextStyle="TextStyle.H4">Format</RadzenText>
 
-            <RadzenText>SQL can be formatted.</RadzenText>
+            <RadzenText>SQL can be formatted.Åiselect, values, insert, create table, create index, alter tableÅj</RadzenText>
             
              <RadzenCard>
                 <RadzenText TextStyle="TextStyle.Subtitle2">Source code</RadzenText>
@@ -51,8 +51,8 @@
 
     string sourcecode = @"using Carbunql;
 
-var sq = new SelectQuery(""select id, val from table_a as a"");
-Console.WriteLine(sq.ToCommand().CommandText);";
+var q = QueryCommandableParser.Parse(sql_text);
+Console.WriteLine(q.ToText());";
 
     protected override void OnInitialized()
 	{
@@ -74,8 +74,8 @@ Console.WriteLine(sq.ToCommand().CommandText);";
 		}
 		try
 		{
-			var sq = QueryParser.Parse(sql);
-			fsql = sq.ToCommand().CommandText;
+            var q = QueryCommandableParser.Parse(sql);
+			fsql = q.ToText();
 		}
 		catch (Exception ex)
 		{
