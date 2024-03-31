@@ -1,49 +1,52 @@
 ﻿using Carbunql.Tables;
+using Carbunql.Values;
 
 namespace Carbunql.Clauses;
 
-public class ReturningClause : IQueryCommandable
+public class ReturningClause : QueryCommandCollection<ValueBase>, IQueryCommandable
 {
 	public ReturningClause(ValueBase value)
 	{
-		Value = value;
+		if (value is ValueCollection collection)
+		{
+			foreach (var item in collection)
+			{
+				Items.Add(item);
+			}
+		}
+		else
+		{
+			Items.Add(value);
+		}
 	}
 
-	public ValueBase Value { get; init; }
+	public ReturningClause(IEnumerable<ValueBase> values)
+	{
+		foreach (var item in values)
+		{
+			Items.Add(item);
+		}
+	}
 
-	public IEnumerable<Token> GetTokens(Token? parent)
+	public override IEnumerable<Token> GetTokens(Token? parent)
 	{
 		var t = Token.Reserved(this, parent, "returning");
 		yield return t;
-		foreach (var item in Value.GetTokens(t)) yield return item;
+		foreach (var item in base.GetTokens(t)) yield return item;
 	}
 
 	public IEnumerable<SelectQuery> GetInternalQueries()
 	{
-		foreach (var item in Value.GetInternalQueries())
-		{
-			yield return item;
-		}
+		yield break;
 	}
 
 	public IEnumerable<PhysicalTable> GetPhysicalTables()
 	{
-		foreach (var item in Value.GetPhysicalTables())
-		{
-			yield return item;
-		}
-	}
-
-	public IEnumerable<QueryParameter> GetParameters()
-	{
-		return Value.GetParameters();
+		yield break;
 	}
 
 	public IEnumerable<CommonTable> GetCommonTables()
 	{
-		foreach (var item in Value.GetCommonTables())
-		{
-			yield return item;
-		}
+		yield break;
 	}
 }
