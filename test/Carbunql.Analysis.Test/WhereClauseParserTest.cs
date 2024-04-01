@@ -108,10 +108,10 @@ and t1.c1 between 1 and 10";
         Monitor.Log(item);
 
         var lst = item.GetTokens(null).ToList();
-        Assert.Equal(25, lst.Count());
+        Assert.Equal(29, lst.Count());
 
         var expect = @"WHERE
-    (d.id, d.sub_id) IN (
+    (1 + 2 * 3, 4 - 5 / 6) IN (
         SELECT
             x.id,
             x.sub_id
