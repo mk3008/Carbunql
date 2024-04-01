@@ -24,7 +24,7 @@ public static class BracketValueParser
 		}
 		else
 		{
-			var v = ValueParser.Parse(ir);
+			var v = ValueCollectionParser.Parse(ir);
 			return new BracketValue(v);
 		}
 	}
