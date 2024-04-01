@@ -23,142 +23,142 @@ namespace Carbunql.Clauses;
 [Union(13, typeof(ValueCollection))]
 public abstract class ValueBase : IQueryCommandable
 {
-	public virtual string GetDefaultName() => string.Empty;
+    public virtual string GetDefaultName() => string.Empty;
 
-	public OperatableValue? OperatableValue { get; set; }
+    public OperatableValue? OperatableValue { get; set; }
 
-	public ValueBase AddOperatableValue(string @operator, ValueBase value)
-	{
-		//if (OperatableValue != null) throw new InvalidOperationException();
-		if (OperatableValue != null)
-		{
-			OperatableValue.Value.AddOperatableValue(@operator, value);
-			return this;
-		}
-		OperatableValue = new OperatableValue(@operator, value);
-		return this;
-	}
+    public ValueBase AddOperatableValue(string @operator, ValueBase value)
+    {
+        //if (OperatableValue != null) throw new InvalidOperationException();
+        if (OperatableValue != null)
+        {
+            OperatableValue.Value.AddOperatableValue(@operator, value);
+            return this;
+        }
+        OperatableValue = new OperatableValue(@operator, value);
+        return this;
+    }
 
-	public string RecommendedName { get; set; } = string.Empty;
+    public string RecommendedName { get; set; } = string.Empty;
 
-	public ValueBase AddOperatableValue(string @operator, string value)
-	{
-		return AddOperatableValue(@operator, ValueParser.Parse(value));
-	}
+    public ValueBase AddOperatableValue(string @operator, string value)
+    {
+        return AddOperatableValue(@operator, ValueParser.Parse(value));
+    }
 
-	public IEnumerable<string> GetOperators()
-	{
-		if (OperatableValue == null) yield break;
-		yield return OperatableValue.Operator;
-		foreach (var item in OperatableValue.Value.GetOperators()) yield return item;
-	}
+    public IEnumerable<string> GetOperators()
+    {
+        if (OperatableValue == null) yield break;
+        yield return OperatableValue.Operator;
+        foreach (var item in OperatableValue.Value.GetOperators()) yield return item;
+    }
 
-	public virtual IEnumerable<QueryParameter> GetParameters()
-	{
-		foreach (var item in GetParametersCore())
-		{
-			yield return item;
-		};
-		var q = OperatableValue?.GetParameters();
-		if (q != null)
-		{
-			foreach (var item in q)
-			{
-				yield return item;
-			}
-		}
-	}
+    public virtual IEnumerable<QueryParameter> GetParameters()
+    {
+        foreach (var item in GetParametersCore())
+        {
+            yield return item;
+        };
+        var q = OperatableValue?.GetParameters();
+        if (q != null)
+        {
+            foreach (var item in q)
+            {
+                yield return item;
+            }
+        }
+    }
 
-	public IEnumerable<SelectQuery> GetInternalQueries()
-	{
-		foreach (var item in GetInternalQueriesCore())
-		{
-			yield return item;
-		}
-		if (OperatableValue != null)
-		{
-			foreach (var item in OperatableValue.GetInternalQueries())
-			{
-				yield return item;
-			}
-		}
-	}
+    public IEnumerable<SelectQuery> GetInternalQueries()
+    {
+        foreach (var item in GetInternalQueriesCore())
+        {
+            yield return item;
+        }
+        if (OperatableValue != null)
+        {
+            foreach (var item in OperatableValue.GetInternalQueries())
+            {
+                yield return item;
+            }
+        }
+    }
 
-	public IEnumerable<PhysicalTable> GetPhysicalTables()
-	{
-		foreach (var item in GetPhysicalTablesCore())
-		{
-			yield return item;
-		}
-		if (OperatableValue != null)
-		{
-			foreach (var item in OperatableValue.GetPhysicalTables())
-			{
-				yield return item;
-			}
-		}
-	}
+    public IEnumerable<PhysicalTable> GetPhysicalTables()
+    {
+        foreach (var item in GetPhysicalTablesCore())
+        {
+            yield return item;
+        }
+        if (OperatableValue != null)
+        {
+            foreach (var item in OperatableValue.GetPhysicalTables())
+            {
+                yield return item;
+            }
+        }
+    }
 
-	public IEnumerable<CommonTable> GetCommonTables()
-	{
-		foreach (var item in GetCommonTablesCore())
-		{
-			yield return item;
-		}
-		if (OperatableValue != null)
-		{
-			foreach (var item in OperatableValue.GetCommonTables())
-			{
-				yield return item;
-			}
-		}
-	}
+    public IEnumerable<CommonTable> GetCommonTables()
+    {
+        foreach (var item in GetCommonTablesCore())
+        {
+            yield return item;
+        }
+        if (OperatableValue != null)
+        {
+            foreach (var item in OperatableValue.GetCommonTables())
+            {
+                yield return item;
+            }
+        }
+    }
 
-	public IEnumerable<ValueBase> GetValues()
-	{
-		yield return this;
+    public virtual IEnumerable<ValueBase> GetValues()
+    {
+        yield return this;
 
-		if (OperatableValue != null)
-		{
-			foreach (var item in OperatableValue.Value.GetValues())
-			{
-				yield return item;
-			}
-		}
-	}
+        if (OperatableValue != null)
+        {
+            foreach (var item in OperatableValue.Value.GetValues())
+            {
+                yield return item;
+            }
+        }
+    }
 
-	protected abstract IEnumerable<QueryParameter> GetParametersCore();
+    protected abstract IEnumerable<QueryParameter> GetParametersCore();
 
-	protected abstract IEnumerable<SelectQuery> GetInternalQueriesCore();
+    protected abstract IEnumerable<SelectQuery> GetInternalQueriesCore();
 
-	protected abstract IEnumerable<PhysicalTable> GetPhysicalTablesCore();
+    protected abstract IEnumerable<PhysicalTable> GetPhysicalTablesCore();
 
-	protected abstract IEnumerable<CommonTable> GetCommonTablesCore();
+    protected abstract IEnumerable<CommonTable> GetCommonTablesCore();
 
-	public abstract IEnumerable<Token> GetCurrentTokens(Token? parent);
+    public abstract IEnumerable<Token> GetCurrentTokens(Token? parent);
 
-	public IEnumerable<Token> GetTokens(Token? parent)
-	{
-		foreach (var item in GetCurrentTokens(parent)) yield return item;
+    public IEnumerable<Token> GetTokens(Token? parent)
+    {
+        foreach (var item in GetCurrentTokens(parent)) yield return item;
 
-		if (OperatableValue != null)
-		{
-			foreach (var item in OperatableValue.GetTokens(parent)) yield return item;
-		}
-	}
+        if (OperatableValue != null)
+        {
+            foreach (var item in OperatableValue.GetTokens(parent)) yield return item;
+        }
+    }
 
-	public BracketValue ToBracket()
-	{
-		return new BracketValue(this);
-	}
+    public BracketValue ToBracket()
+    {
+        return new BracketValue(this);
+    }
 
-	public WhereClause ToWhereClause()
-	{
-		return new WhereClause(this);
-	}
+    public WhereClause ToWhereClause()
+    {
+        return new WhereClause(this);
+    }
 
-	public string ToText()
-	{
-		return GetTokens(null).ToText();
-	}
+    public string ToText()
+    {
+        return GetTokens(null).ToText();
+    }
 }
