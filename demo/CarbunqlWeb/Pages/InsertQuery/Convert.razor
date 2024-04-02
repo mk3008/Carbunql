@@ -1,0 +1,136 @@
+@page "/insert_query/try_convert_to"
+
+@using Carbunql.Analysis;
+@using Carbunql;
+
+<PageTitle>Format</PageTitle>
+
+<div class="container-fluid">
+@*    <div class="row" Style="margin: 0px 0px 16px 0px;">
+        <RadzenMenu class="rz-shadow-3">
+            <RadzenMenuItem Text="Clear SQL" Icon="clear" Click=@OnClear>
+            </RadzenMenuItem>
+        </RadzenMenu>
+    </div>*@
+    <div class="row">
+        <div class="col-md-12 p-3">
+            <RadzenText TextStyle="TextStyle.H4">TryConvertTo</RadzenText>
+
+            <RadzenText>Try converting to InsertValues format or InsertSelectQuery format</RadzenText>
+            
+             <RadzenCard>
+                <RadzenText TextStyle="TextStyle.Subtitle2">Source code</RadzenText>
+                <RadzenTextArea @bind-Value=@sourcecode TValue="string" Style="width: 100%; min-height: 250px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" />
+            </RadzenCard>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 p-3">
+            <RadzenText TextStyle="TextStyle.H5">Demo</RadzenText>
+        </div>
+
+        <div class="col-md-6 p-3">
+			<RadzenCard>
+                <RadzenRadioButtonList @bind-Value=@formatType TValue="int" class="mb-5" Change=@OnChange>
+                    <Items>
+                        <RadzenRadioButtonListItem Text="Values" Value="-1" />
+                        <RadzenRadioButtonListItem Text="Select" Value="1" />
+                    </Items>
+                </RadzenRadioButtonList>
+                <RadzenButton Click=@(args => Swap()) Text="Swap" ButtonStyle="ButtonStyle.Primary" />
+			</RadzenCard>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 p-3">
+            <RadzenCard>
+                <RadzenText TextStyle="TextStyle.Subtitle2">Input</RadzenText>
+                <RadzenTextArea @bind-Value=@sql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" Placeholder="Enter select query(ex. select * from table)" />
+            </RadzenCard>
+        </div>
+        <div class="col-md-6 p-3">
+            <RadzenCard>
+                <RadzenText TextStyle="TextStyle.Subtitle2">Result</RadzenText>
+                <RadzenTextArea @bind-Value=@fsql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" />
+            </RadzenCard>
+        </div>
+
+    </div>
+</div>
+
+@code {
+
+    string fsql = string.Empty;
+
+    int formatType = 1;
+
+    string sourcecode = @"using Carbunql;
+using Carbunql.Analysis;
+
+var q = InsertQueryParser.Parse(sql);
+if (q.TryConvertToInsertSelect(out var isq))
+{
+    Console.WriteLine(isq.ToText());
+}";
+
+    protected override void OnInitialized()
+    {
+        OnChange();
+    }
+
+    void OnClear()
+    {
+        sql = string.Empty;
+        OnChange();
+    }
+
+    void OnChange()
+    {
+        if (string.IsNullOrEmpty(sql))
+        {
+            fsql = string.Empty;
+            return;
+        }
+        try
+        {
+            var q = InsertQueryParser.Parse(sql);
+            if (formatType == 1)
+            {
+                if (q.TryConvertToInsertSelect(out var isq))
+                {
+                    fsql = isq.ToText();
+                }
+                else
+                {
+                    fsql = "/* TryConvertToInsertSelect method failed */";
+                }
+            }
+            else
+            {
+                if (q.TryConvertToInsertValues(out var ivq))
+                {
+                    fsql = ivq.ToText();
+                }
+                else
+                {
+                    fsql = "/* TryConvertToInsertValues method failed */";
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            fsql = ex.ToString();
+        }
+    }
+
+    private void Swap()
+    {
+        sql = fsql;
+        formatType = formatType * -1;
+        OnChange();
+    }
+
+    string sql = @"INSERT INTO sale (sale_date,price,created_at) VALUES
+     ('2023-01-01',160,'2024-01-11 14:29:01.618'),
+     ('2023-03-12',200,'2024-01-11 14:29:01.618')";
+}
