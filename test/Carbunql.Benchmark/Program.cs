@@ -6,18 +6,18 @@ using Carbunql.Extensions;
 
 class Program
 {
-	static void Main(string[] args) => BenchmarkRunner.Run<Test>();
+    static void Main(string[] args) => BenchmarkRunner.Run<Test>();
 }
 
 public class Test
 {
-	public Test()
-	{
-		SqModelQuery = GetSqModelQuery();
-		CarbunqlQuery = GetCarbunqlQuery();
-	}
+    public Test()
+    {
+        SqModelQuery = GetSqModelQuery();
+        CarbunqlQuery = GetCarbunqlQuery();
+    }
 
-	public static string Sql = @"with
+    public static string Sql = @"with
 dat(line_id, name, unit_price, amount, tax_rate) as ( 
     values
     (1, 'apple' , 105, 5, 0.07),
@@ -90,67 +90,67 @@ from
 order by 
     line_id";
 
-	private SqModel.SelectQuery SqModelQuery { get; init; }
+    private SqModel.SelectQuery SqModelQuery { get; init; }
 
-	private SqModel.SelectQuery GetSqModelQuery()
-	{
-		var sq = SqModel.Analysis.SqlParser.Parse(Sql);
-		sq.Parameters = new();
-		for (int i = 0; i < 100; i++)
-		{
-			sq.Parameters.Add(":" + i, i);
-		}
-		return sq;
-	}
+    private SqModel.SelectQuery GetSqModelQuery()
+    {
+        var sq = SqModel.Analysis.SqlParser.Parse(Sql);
+        sq.Parameters = new();
+        for (int i = 0; i < 100; i++)
+        {
+            sq.Parameters.Add(":" + i, i);
+        }
+        return sq;
+    }
 
-	private SelectQuery CarbunqlQuery { get; init; }
+    private SelectQuery CarbunqlQuery { get; init; }
 
-	private SelectQuery GetCarbunqlQuery()
-	{
-		var sq = new SelectQuery(Sql);
-		for (int i = 0; i < 100; i++)
-		{
-			sq.AddParameter(":" + i, i);
-		}
-		return sq;
-	}
+    private SelectQuery GetCarbunqlQuery()
+    {
+        var sq = new SelectQuery(Sql);
+        for (int i = 0; i < 100; i++)
+        {
+            sq.AddParameter(":" + i, i);
+        }
+        return sq;
+    }
 
-	[Benchmark]
-	public string SqModelParse()
-	{
-		var sq = SqModel.Analysis.SqlParser.Parse(Sql);
-		return "success";// sq.ToQuery().CommandText;
-	}
+    [Benchmark]
+    public string SqModelParse()
+    {
+        var sq = SqModel.Analysis.SqlParser.Parse(Sql);
+        return "success";// sq.ToQuery().CommandText;
+    }
 
-	[Benchmark]
-	public string SqModelCommandText()
-	{
-		return SqModelQuery.ToQuery().CommandText;
-	}
+    [Benchmark]
+    public string SqModelCommandText()
+    {
+        return SqModelQuery.ToQuery().CommandText;
+    }
 
-	[Benchmark]
-	public string CarbunqlDeepCopy()
-	{
-		var sq = CarbunqlQuery.DeepCopy();
-		return "success";// sq.GetTokens().ToString(" ");
-	}
+    [Benchmark]
+    public string CarbunqlDeepCopy()
+    {
+        var sq = CarbunqlQuery.DeepCopy();
+        return "success";// sq.GetTokens().ToString(" ");
+    }
 
-	[Benchmark]
-	public string CarbunqlParse()
-	{
-		var sq = QueryParser.Parse(Sql);
-		return "success";// sq.GetTokens().ToString(" ");
-	}
+    [Benchmark]
+    public string CarbunqlParse()
+    {
+        var sq = QueryParser.Parse(Sql);
+        return "success";// sq.GetTokens().ToString(" ");
+    }
 
-	[Benchmark]
-	public string CarbunqlToOneLineText()
-	{
-		return CarbunqlQuery.ToOneLineText();
-	}
+    [Benchmark]
+    public string CarbunqlToOneLineText()
+    {
+        return CarbunqlQuery.ToOneLineText();
+    }
 
-	[Benchmark]
-	public string CarbunqlToText()
-	{
-		return CarbunqlQuery.ToText();
-	}
+    [Benchmark]
+    public string CarbunqlToText()
+    {
+        return CarbunqlQuery.ToText();
+    }
 }

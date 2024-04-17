@@ -4,17 +4,17 @@ namespace Carbunql.Analysis.Test;
 
 public class DefinitionQuerySetPaserTest
 {
-	public DefinitionQuerySetPaserTest(ITestOutputHelper output)
-	{
-		Output = output;
-	}
+    public DefinitionQuerySetPaserTest(ITestOutputHelper output)
+    {
+        Output = output;
+    }
 
-	private ITestOutputHelper Output { get; set; }
+    private ITestOutputHelper Output { get; set; }
 
-	[Fact]
-	public void Default()
-	{
-		var text = @"CREATE TABLE child_table (
+    [Fact]
+    public void Default()
+    {
+        var text = @"CREATE TABLE child_table (
     child_id SERIAL PRIMARY KEY,
     child_name VARCHAR(100) NOT NULL,
     parent_id INT NOT NULL,
@@ -29,17 +29,17 @@ CREATE UNIQUE INDEX idx_child_name ON child_table (
 )
 ;
 ";
-		var v = DefinitionQuerySetParser.Parse(text);
+        var v = DefinitionQuerySetParser.Parse(text);
 
-		var sql = v.ToText();
-		Output.WriteLine(sql);
-		Assert.Equal(text, sql, true, true, true);
-	}
+        var sql = v.ToText();
+        Output.WriteLine(sql);
+        Assert.Equal(text, sql, true, true, true);
+    }
 
-	[Fact]
-	public void AlterColumn()
-	{
-		var text = @"CREATE TABLE child_table (
+    [Fact]
+    public void AlterColumn()
+    {
+        var text = @"CREATE TABLE child_table (
     child_id SERIAL,
     child_name VARCHAR(100),
     parent_id INT,
@@ -72,17 +72,17 @@ CREATE UNIQUE INDEX idx_child_name ON child_table (
 )
 ;
 ";
-		var v = DefinitionQuerySetParser.Parse(text);
+        var v = DefinitionQuerySetParser.Parse(text);
 
-		var sql = v.ToText();
-		Output.WriteLine(sql);
-		Assert.Equal(text, sql, true, true, true);
-	}
+        var sql = v.ToText();
+        Output.WriteLine(sql);
+        Assert.Equal(text, sql, true, true, true);
+    }
 
-	[Fact]
-	public void AlterColumnMany()
-	{
-		var text = @"CREATE TABLE child_table (
+    [Fact]
+    public void AlterColumnMany()
+    {
+        var text = @"CREATE TABLE child_table (
     child_id SERIAL,
     child_name VARCHAR(100),
     parent_id INT,
@@ -103,10 +103,10 @@ CREATE UNIQUE INDEX idx_child_name ON child_table (
 )
 ;
 ";
-		var v = DefinitionQuerySetParser.Parse(text);
+        var v = DefinitionQuerySetParser.Parse(text);
 
-		var sql = v.ToText();
-		Output.WriteLine(sql);
-		Assert.Equal(text, sql, true, true, true);
-	}
+        var sql = v.ToText();
+        Output.WriteLine(sql);
+        Assert.Equal(text, sql, true, true, true);
+    }
 }

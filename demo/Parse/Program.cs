@@ -7,7 +7,7 @@ Console.WriteLine("> Input Select Query\n> (End by entering a blank line. If not
 var sql = ReadMultiLine();
 if (string.IsNullOrEmpty(sql))
 {
-	sql = @"
+    sql = @"
 with
 dat(line_id, name, unit_price, quantity, tax_rate) as ( 
     values
@@ -94,104 +94,104 @@ Console.ReadLine();
 
 static void WriteLineSelectQuery(SelectQuery sq, int level = 0)
 {
-	WriteLineWithIndent($"SelectQuery:{sq.ToOneLineText()}", level);
+    WriteLineWithIndent($"SelectQuery:{sq.ToOneLineText()}", level);
 
-	WriteLineWithIndent($"CommonTables:{sq.GetCommonTables().Count()}", level + 1);
-	foreach (var item in sq.GetCommonTables())
-	{
-		WriteLineSelectableTable(item, level + 2);
-		if (item.ColumnAliases != null)
-		{
-			WriteLineWithIndent($"ColumnAliases:{item.ColumnAliases.Count()}", level + 3);
-			foreach (var ca in item.ColumnAliases)
-			{
-				WriteLineWithIndent($"Text:{ca.ToOneLineText()}", level + 4);
-			}
-		}
-	}
+    WriteLineWithIndent($"CommonTables:{sq.GetCommonTables().Count()}", level + 1);
+    foreach (var item in sq.GetCommonTables())
+    {
+        WriteLineSelectableTable(item, level + 2);
+        if (item.ColumnAliases != null)
+        {
+            WriteLineWithIndent($"ColumnAliases:{item.ColumnAliases.Count()}", level + 3);
+            foreach (var ca in item.ColumnAliases)
+            {
+                WriteLineWithIndent($"Text:{ca.ToOneLineText()}", level + 4);
+            }
+        }
+    }
 
-	WriteLineWithIndent($"SelectableItems:{sq.GetSelectableItems().Count()}", level + 1);
-	foreach (var item in sq.GetSelectableItems())
-	{
-		WriteLineSelectableItem(item, level + 2);
-	}
+    WriteLineWithIndent($"SelectableItems:{sq.GetSelectableItems().Count()}", level + 1);
+    foreach (var item in sq.GetSelectableItems())
+    {
+        WriteLineSelectableItem(item, level + 2);
+    }
 
-	WriteLineWithIndent($"SelectableTables:{sq.GetSelectableTables().Count()}", level + 1);
-	foreach (var item in sq.GetSelectableTables())
-	{
-		WriteLineSelectableTable(item, level + 2);
-	}
+    WriteLineWithIndent($"SelectableTables:{sq.GetSelectableTables().Count()}", level + 1);
+    foreach (var item in sq.GetSelectableTables())
+    {
+        WriteLineSelectableTable(item, level + 2);
+    }
 }
 
 static void WriteLineValuesQuery(ValuesQuery vq, int level = 0)
 {
-	WriteLineWithIndent($"ValuesQuery:{vq.ToOneLineText()}", level);
+    WriteLineWithIndent($"ValuesQuery:{vq.ToOneLineText()}", level);
 
-	WriteLineWithIndent($"CommonTables:{vq.GetCommonTables().Count()}", level + 1);
-	foreach (var item in vq.GetCommonTables())
-	{
-		WriteLineSelectableTable(item, level + 2);
-	}
+    WriteLineWithIndent($"CommonTables:{vq.GetCommonTables().Count()}", level + 1);
+    foreach (var item in vq.GetCommonTables())
+    {
+        WriteLineSelectableTable(item, level + 2);
+    }
 
-	WriteLineWithIndent($"Rows:{vq.Rows.Count()}", level + 1);
-	foreach (var row in vq.Rows)
-	{
-		WriteLineWithIndent($"Columns:{row.Count()}", level + 2);
-		foreach (var col in row)
-		{
-			WriteLineWithIndent($"Text:{col.ToOneLineText()}", level + 3);
-		}
-	}
+    WriteLineWithIndent($"Rows:{vq.Rows.Count()}", level + 1);
+    foreach (var row in vq.Rows)
+    {
+        WriteLineWithIndent($"Columns:{row.Count()}", level + 2);
+        foreach (var col in row)
+        {
+            WriteLineWithIndent($"Text:{col.ToOneLineText()}", level + 3);
+        }
+    }
 }
 
 static void WriteLineSelectableItem(SelectableItem item, int level = 0)
 {
-	WriteLineWithIndent($"SelectableItem:{item.Value.ToOneLineText()}", level);
-	WriteLineWithIndent($"Alias:{item.Alias}", level + 1);
+    WriteLineWithIndent($"SelectableItem:{item.Value.ToOneLineText()}", level);
+    WriteLineWithIndent($"Alias:{item.Alias}", level + 1);
 }
 
 static void WriteLineSelectableTable(SelectableTable table, int level = 0)
 {
-	WriteLineWithIndent($"SelectableTable:{table.Table.ToOneLineText()}", level);
-	WriteLineWithIndent($"Alias:{table.Alias}", level + 1);
-	WriteLineWithIndent($"Type:{table.Table.GetType().Name}", level + 1);
-	if (table.Table is VirtualTable vt)
-	{
-		if (vt.Query is SelectQuery sq)
-		{
-			WriteLineSelectQuery(sq, level + 1);
-		}
-		else if (vt.Query is ValuesQuery vq)
-		{
-			WriteLineValuesQuery(vq, level + 1);
-		}
-	}
+    WriteLineWithIndent($"SelectableTable:{table.Table.ToOneLineText()}", level);
+    WriteLineWithIndent($"Alias:{table.Alias}", level + 1);
+    WriteLineWithIndent($"Type:{table.Table.GetType().Name}", level + 1);
+    if (table.Table is VirtualTable vt)
+    {
+        if (vt.Query is SelectQuery sq)
+        {
+            WriteLineSelectQuery(sq, level + 1);
+        }
+        else if (vt.Query is ValuesQuery vq)
+        {
+            WriteLineValuesQuery(vq, level + 1);
+        }
+    }
 }
 
 static void WriteLineWithIndent(string value, int level, int limit = 80)
 {
-	var indentation = new string(' ', level * 4);
-	value = indentation + value;
+    var indentation = new string(' ', level * 4);
+    value = indentation + value;
 
-	if (value.Length > limit)
-	{
-		value = value.Substring(0, limit) + "...";
-	}
-	Console.WriteLine(value);
+    if (value.Length > limit)
+    {
+        value = value.Substring(0, limit) + "...";
+    }
+    Console.WriteLine(value);
 }
 
 static string ReadMultiLine()
 {
-	StringBuilder sb = new StringBuilder();
+    StringBuilder sb = new StringBuilder();
 
-	while (true)
-	{
-		var line = Console.ReadLine();
-		if (string.IsNullOrEmpty(line))
-		{
-			break;
-		}
-		sb.AppendLine(line);
-	}
-	return sb.ToString();
+    while (true)
+    {
+        var line = Console.ReadLine();
+        if (string.IsNullOrEmpty(line))
+        {
+            break;
+        }
+        sb.AppendLine(line);
+    }
+    return sb.ToString();
 }

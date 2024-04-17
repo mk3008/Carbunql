@@ -4,28 +4,28 @@ namespace Carbunql.Building.Test;
 
 public class FormatTest
 {
-	private readonly QueryCommandMonitor Monitor;
+    private readonly QueryCommandMonitor Monitor;
 
-	public FormatTest(ITestOutputHelper output)
-	{
-		Monitor = new QueryCommandMonitor(output);
-	}
+    public FormatTest(ITestOutputHelper output)
+    {
+        Monitor = new QueryCommandMonitor(output);
+    }
 
-	private string GetFormatValidateText(string text)
-	{
-		return text.Replace("\t", "    ").Replace("\r", "");
-	}
+    private string GetFormatValidateText(string text)
+    {
+        return text.Replace("\t", "    ").Replace("\r", "");
+    }
 
-	[Fact]
-	public void Issuse280_CreateTable()
-	{
-		var sq = new SelectQuery("SELECT x.id FROM x");
-		var q = sq.ToCreateTableQuery("test");
+    [Fact]
+    public void Issuse280_CreateTable()
+    {
+        var sq = new SelectQuery("SELECT x.id FROM x");
+        var q = sq.ToCreateTableQuery("test");
 
-		Monitor.Log(q);
+        Monitor.Log(q);
 
-		var actual = q.ToText();
-		var expect =
+        var actual = q.ToText();
+        var expect =
 @"CREATE TEMPORARY TABLE test
 AS
 SELECT
@@ -33,18 +33,18 @@ SELECT
 FROM
     x";
 
-		Assert.Equal(GetFormatValidateText(expect), GetFormatValidateText(actual));
-	}
+        Assert.Equal(GetFormatValidateText(expect), GetFormatValidateText(actual));
+    }
 
-	[Fact]
-	public void Issuse280_Union()
-	{
-		var sq = new SelectQuery("select x.id from x union select y.id from y");
+    [Fact]
+    public void Issuse280_Union()
+    {
+        var sq = new SelectQuery("select x.id from x union select y.id from y");
 
-		Monitor.Log(sq);
+        Monitor.Log(sq);
 
-		var actual = sq.ToText();
-		var expect =
+        var actual = sq.ToText();
+        var expect =
 @"SELECT
     x.id
 FROM
@@ -55,18 +55,18 @@ SELECT
 FROM
     y";
 
-		Assert.Equal(GetFormatValidateText(expect), GetFormatValidateText(actual));
-	}
+        Assert.Equal(GetFormatValidateText(expect), GetFormatValidateText(actual));
+    }
 
-	[Fact]
-	public void Issuse280_SubQuery()
-	{
-		var sq = new SelectQuery("select x.id from (select select y.id from y) as x");
+    [Fact]
+    public void Issuse280_SubQuery()
+    {
+        var sq = new SelectQuery("select x.id from (select select y.id from y) as x");
 
-		Monitor.Log(sq);
+        Monitor.Log(sq);
 
-		var actual = sq.ToText();
-		var expect =
+        var actual = sq.ToText();
+        var expect =
 @"SELECT
     x.id
 FROM
@@ -77,6 +77,6 @@ FROM
             y
     ) AS x";
 
-		Assert.Equal(GetFormatValidateText(expect), GetFormatValidateText(actual));
-	}
+        Assert.Equal(GetFormatValidateText(expect), GetFormatValidateText(actual));
+    }
 }

@@ -4,58 +4,58 @@ namespace Carbunql.Building.Test;
 
 public class ToTextTest
 {
-	private ITestOutputHelper Output;
+    private ITestOutputHelper Output;
 
-	public ToTextTest(ITestOutputHelper output)
-	{
-		Output = output;
-	}
+    public ToTextTest(ITestOutputHelper output)
+    {
+        Output = output;
+    }
 
-	private string TruncateControlString(string text)
-	{
-		return text.Replace("\r", "").Replace("\n", "").Replace(" ", "").ToLower();
-	}
+    private string TruncateControlString(string text)
+    {
+        return text.Replace("\r", "").Replace("\n", "").Replace(" ", "").ToLower();
+    }
 
-	[Fact]
-	public void ToText()
-	{
-		var sql = @"
+    [Fact]
+    public void ToText()
+    {
+        var sql = @"
 /*
   :id = 1
   :value = 'test'
 */
 select a.column_1 as c1 from table_a as a";
-		var sq = new SelectQuery(sql);
-		sq.AddParameter(":id", 1);
-		sq.AddParameter(":value", "test");
+        var sq = new SelectQuery(sql);
+        sq.AddParameter(":id", 1);
+        sq.AddParameter(":value", "test");
 
-		Output.WriteLine(sq.ToText());
+        Output.WriteLine(sq.ToText());
 
-		Assert.Equal(TruncateControlString(sql), TruncateControlString(sq.ToText()));
-	}
+        Assert.Equal(TruncateControlString(sql), TruncateControlString(sq.ToText()));
+    }
 
-	[Fact]
-	public void ToOneLineText()
-	{
-		var sql = @"
+    [Fact]
+    public void ToOneLineText()
+    {
+        var sql = @"
 /*
   :id = 1
   :value = 'test'
 */
 select a.column_1 as c1 from table_a as a";
-		var sq = new SelectQuery(sql);
-		sq.AddParameter(":id", 1);
-		sq.AddParameter(":value", "test");
+        var sq = new SelectQuery(sql);
+        sq.AddParameter(":id", 1);
+        sq.AddParameter(":value", "test");
 
-		Output.WriteLine(sq.ToOneLineText());
+        Output.WriteLine(sq.ToOneLineText());
 
-		Assert.Equal(TruncateControlString(sql), TruncateControlString(sq.ToOneLineText()));
-	}
+        Assert.Equal(TruncateControlString(sql), TruncateControlString(sq.ToOneLineText()));
+    }
 
-	[Fact]
-	public void ToOneLineText_identity()
-	{
-		var sql = @"WITH
+    [Fact]
+    public void ToOneLineText_identity()
+    {
+        var sql = @"WITH
     dat (
         line_id, name, unit_price, quantity, tax_rate
     ) AS (
@@ -141,11 +141,11 @@ FROM
     ) AS q
 ORDER BY
     line_id";
-		var sq = new SelectQuery(sql);
-		Output.WriteLine(sq.ToText());
-		Output.WriteLine(sq.ToOneLineText());
+        var sq = new SelectQuery(sql);
+        Output.WriteLine(sq.ToText());
+        Output.WriteLine(sq.ToOneLineText());
 
-		var sq2 = new SelectQuery(sq.ToOneLineCommand().CommandText);
-		Assert.Equal(sql, sq2.ToCommand().CommandText);
-	}
+        var sq2 = new SelectQuery(sq.ToOneLineCommand().CommandText);
+        Assert.Equal(sql, sq2.ToCommand().CommandText);
+    }
 }

@@ -5,54 +5,54 @@ namespace Carbunql.Analysis.Parser;
 
 public static class CaseExpressionParser
 {
-	public static bool IsCaseExpression(string text)
-	{
-		return text.IsEqualNoCase("case");
-	}
+    public static bool IsCaseExpression(string text)
+    {
+        return text.IsEqualNoCase("case");
+    }
 
-	public static CaseExpression Parse(string text)
-	{
-		var r = new SqlTokenReader(text);
-		return Parse(r);
-	}
+    public static CaseExpression Parse(string text)
+    {
+        var r = new SqlTokenReader(text);
+        return Parse(r);
+    }
 
-	public static CaseExpression Parse(ITokenReader r)
-	{
-		var exp = ParseCaseExpression(r);
+    public static CaseExpression Parse(ITokenReader r)
+    {
+        var exp = ParseCaseExpression(r);
 
-		foreach (var w in ParseWhenExpressions(r))
-		{
-			exp.WhenExpressions.Add(w);
-		}
-		r.Read("end");
+        foreach (var w in ParseWhenExpressions(r))
+        {
+            exp.WhenExpressions.Add(w);
+        }
+        r.Read("end");
 
-		return exp;
-	}
+        return exp;
+    }
 
-	private static CaseExpression ParseCaseExpression(ITokenReader r)
-	{
-		r.Read("case");
+    private static CaseExpression ParseCaseExpression(ITokenReader r)
+    {
+        r.Read("case");
 
-		if (r.Peek().IsEqualNoCase("when"))
-		{
-			return new CaseExpression();
-		}
-		else
-		{
-			var v = ValueParser.Parse(r);
-			return new CaseExpression(v);
-		}
-	}
+        if (r.Peek().IsEqualNoCase("when"))
+        {
+            return new CaseExpression();
+        }
+        else
+        {
+            var v = ValueParser.Parse(r);
+            return new CaseExpression(v);
+        }
+    }
 
-	private static IEnumerable<WhenExpression> ParseWhenExpressions(ITokenReader r)
-	{
-		var lst = new List<WhenExpression>();
-		do
-		{
-			lst.Add(WhenExpressionParser.Parse(r));
-		}
-		while (r.Peek().IsEqualNoCase(new string[] { "when", "else" }));
+    private static IEnumerable<WhenExpression> ParseWhenExpressions(ITokenReader r)
+    {
+        var lst = new List<WhenExpression>();
+        do
+        {
+            lst.Add(WhenExpressionParser.Parse(r));
+        }
+        while (r.Peek().IsEqualNoCase(new string[] { "when", "else" }));
 
-		return lst;
-	}
+        return lst;
+    }
 }

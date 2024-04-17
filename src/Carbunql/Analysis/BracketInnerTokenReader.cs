@@ -5,75 +5,75 @@ namespace Carbunql.Analysis;
 
 public class BracketInnerTokenReader : ITokenReader, IDisposable
 {
-	private string StartSymbol { get; init; } = "(";
+    private string StartSymbol { get; init; } = "(";
 
-	private string EndSymbol { get; init; } = ")";
+    private string EndSymbol { get; init; } = ")";
 
-	public BracketInnerTokenReader(ITokenReader r, string startSymbol, string endSymbol)
-	{
-		StartSymbol = startSymbol;
-		EndSymbol = endSymbol;
+    public BracketInnerTokenReader(ITokenReader r, string startSymbol, string endSymbol)
+    {
+        StartSymbol = startSymbol;
+        EndSymbol = endSymbol;
 
-		r.Read(StartSymbol);
+        r.Read(StartSymbol);
 
-		Reader = r;
-		RootBracketLevel = r.CurrentBracketLevel;
-	}
+        Reader = r;
+        RootBracketLevel = r.CurrentBracketLevel;
+    }
 
-	public BracketInnerTokenReader(ITokenReader r)
-	{
-		r.Read(StartSymbol);
+    public BracketInnerTokenReader(ITokenReader r)
+    {
+        r.Read(StartSymbol);
 
-		Reader = r;
-		RootBracketLevel = r.CurrentBracketLevel;
-	}
+        Reader = r;
+        RootBracketLevel = r.CurrentBracketLevel;
+    }
 
-	private ITokenReader Reader { get; set; }
+    private ITokenReader Reader { get; set; }
 
-	private int RootBracketLevel { get; set; }
+    private int RootBracketLevel { get; set; }
 
-	public int CurrentBracketLevel => Reader.CurrentBracketLevel;
+    public int CurrentBracketLevel => Reader.CurrentBracketLevel;
 
-	private bool IsTerminated { get; set; } = false;
+    private bool IsTerminated { get; set; } = false;
 
-	public string Peek()
-	{
-		if (IsTerminated) return string.Empty;
+    public string Peek()
+    {
+        if (IsTerminated) return string.Empty;
 
-		return Reader.Peek();
-	}
+        return Reader.Peek();
+    }
 
-	public string Read()
-	{
-		if (IsTerminated) return string.Empty;
+    public string Read()
+    {
+        if (IsTerminated) return string.Empty;
 
-		var token = Reader.Read();
-		if (token == EndSymbol && RootBracketLevel > Reader.CurrentBracketLevel)
-		{
-			IsTerminated = true;
-		}
-		return token;
-	}
+        var token = Reader.Read();
+        if (token == EndSymbol && RootBracketLevel > Reader.CurrentBracketLevel)
+        {
+            IsTerminated = true;
+        }
+        return token;
+    }
 
-	public void Dispose()
-	{
-		Reader.Read(EndSymbol);
-	}
+    public void Dispose()
+    {
+        Reader.Read(EndSymbol);
+    }
 
-	public void RollBack()
-	{
-		throw new NotImplementedException();
-	}
+    public void RollBack()
+    {
+        throw new NotImplementedException();
+    }
 
-	public bool TryRead(string expect, [MaybeNullWhen(false)] out string token)
-	{
-		token = null;
-		var t = Peek();
-		if (t.IsEqualNoCase(expect))
-		{
-			token = Read();
-			return true;
-		}
-		return false; ;
-	}
+    public bool TryRead(string expect, [MaybeNullWhen(false)] out string token)
+    {
+        token = null;
+        var t = Peek();
+        if (t.IsEqualNoCase(expect))
+        {
+            token = Read();
+            return true;
+        }
+        return false; ;
+    }
 }

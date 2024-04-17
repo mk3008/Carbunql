@@ -4,18 +4,18 @@ namespace Carbunql.Analysis.Parser;
 
 public class WhereClauseParser
 {
-	public static WhereClause Parse(string text)
-	{
-		var r = new SqlTokenReader(text);
-		return Parse(r);
-	}
+    public static WhereClause Parse(string text)
+    {
+        var r = new SqlTokenReader(text);
+        return Parse(r);
+    }
 
-	public static WhereClause Parse(ITokenReader r)
-	{
-		r.ReadOrDefault("where");
+    public static WhereClause Parse(ITokenReader r)
+    {
+        r.ReadOrDefault("where");
 
-		var val = ValueParser.Parse(r);
-		var where = new WhereClause(val);
-		return where;
-	}
+        var val = ValueParser.Parse(r);
+        var where = new WhereClause(val);
+        return where;
+    }
 }

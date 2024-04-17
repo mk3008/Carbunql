@@ -5,5 +5,5 @@ namespace Carbunql;
 
 public interface IAlterIndexQuery : IQueryCommandable, ICommentable, ITable
 {
-	string? IndexName { get; }
+    string? IndexName { get; }
 }

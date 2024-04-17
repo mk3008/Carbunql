@@ -8,25 +8,25 @@ namespace Carbunql;
 [Union(1, typeof(ValuesQuery))]
 public interface IReadQuery : IQueryCommandable
 {
-	SelectClause? GetSelectClause();
+    SelectClause? GetSelectClause();
 
-	WithClause? GetWithClause();
+    WithClause? GetWithClause();
 
-	SelectQuery GetOrNewSelectQuery();
+    SelectQuery GetOrNewSelectQuery();
 
-	IEnumerable<string> GetColumnNames();
+    IEnumerable<string> GetColumnNames();
 }
 
 public static class IReadQueryExtension
 {
-	public static ValueBase ToValue(this IReadQuery source)
-	{
-		return new QueryContainer(source);
-	}
+    public static ValueBase ToValue(this IReadQuery source)
+    {
+        return new QueryContainer(source);
+    }
 
-	public static IReadQuery DeepCopy(this IReadQuery source)
-	{
-		var json = MessagePackSerializer.Serialize(source);
-		return MessagePackSerializer.Deserialize<IReadQuery>(json);
-	}
+    public static IReadQuery DeepCopy(this IReadQuery source)
+    {
+        var json = MessagePackSerializer.Serialize(source);
+        return MessagePackSerializer.Deserialize<IReadQuery>(json);
+    }
 }

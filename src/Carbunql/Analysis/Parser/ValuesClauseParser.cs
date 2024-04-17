@@ -5,29 +5,29 @@ namespace Carbunql.Analysis.Parser;
 
 internal static class ValuesClauseParser
 {
-	public static ValuesQuery Parse(string text)
-	{
-		var r = new SqlTokenReader(text);
-		return Parse(r);
-	}
+    public static ValuesQuery Parse(string text)
+    {
+        var r = new SqlTokenReader(text);
+        return Parse(r);
+    }
 
-	public static ValuesQuery Parse(ITokenReader r)
-	{
-		var fn = () =>
-		{
-			if (!r.Peek().IsEqualNoCase(",")) return false;
-			r.Read(",");
-			return true;
-		};
+    public static ValuesQuery Parse(ITokenReader r)
+    {
+        var fn = () =>
+        {
+            if (!r.Peek().IsEqualNoCase(",")) return false;
+            r.Read(",");
+            return true;
+        };
 
-		r.ReadOrDefault("values");
+        r.ReadOrDefault("values");
 
-		var lst = new List<ValueCollection>();
-		do
-		{
-			lst.Add(ValueCollectionParser.ParseAsInner(r));
-		} while (fn());
+        var lst = new List<ValueCollection>();
+        do
+        {
+            lst.Add(ValueCollectionParser.ParseAsInner(r));
+        } while (fn());
 
-		return new ValuesQuery(lst);
-	}
+        return new ValuesQuery(lst);
+    }
 }

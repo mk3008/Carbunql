@@ -8,51 +8,51 @@ namespace Carbunql;
 
 public class DropTableQuery : IQueryCommandable, ICommentable, ITable
 {
-	public DropTableQuery(ITable t)
-	{
-		Schema = t.Schema;
-		Table = t.Table;
-	}
+    public DropTableQuery(ITable t)
+    {
+        Schema = t.Schema;
+        Table = t.Table;
+    }
 
-	[IgnoreMember]
-	public CommentClause? CommentClause { get; set; }
+    [IgnoreMember]
+    public CommentClause? CommentClause { get; set; }
 
-	public bool HasIfExists { get; set; } = false;
+    public bool HasIfExists { get; set; } = false;
 
-	public string Schema { get; init; }
+    public string Schema { get; init; }
 
-	public string Table { get; init; }
+    public string Table { get; init; }
 
-	public IEnumerable<SelectQuery> GetInternalQueries()
-	{
-		yield break;
-	}
+    public IEnumerable<SelectQuery> GetInternalQueries()
+    {
+        yield break;
+    }
 
-	public IEnumerable<PhysicalTable> GetPhysicalTables()
-	{
-		yield break;
-	}
+    public IEnumerable<PhysicalTable> GetPhysicalTables()
+    {
+        yield break;
+    }
 
-	public virtual IEnumerable<QueryParameter> GetParameters()
-	{
-		yield break;
-	}
+    public virtual IEnumerable<QueryParameter> GetParameters()
+    {
+        yield break;
+    }
 
-	public IEnumerable<Token> GetTokens(Token? parent)
-	{
-		if (CommentClause != null) foreach (var item in CommentClause.GetTokens(parent)) yield return item;
+    public IEnumerable<Token> GetTokens(Token? parent)
+    {
+        if (CommentClause != null) foreach (var item in CommentClause.GetTokens(parent)) yield return item;
 
-		yield return Token.Reserved(this, parent, "drop table");
-		if (HasIfExists)
-		{
-			yield return Token.Reserved(this, parent, "if exists");
-		}
+        yield return Token.Reserved(this, parent, "drop table");
+        if (HasIfExists)
+        {
+            yield return Token.Reserved(this, parent, "if exists");
+        }
 
-		yield return new Token(this, parent, this.GetTableFullName());
-	}
+        yield return new Token(this, parent, this.GetTableFullName());
+    }
 
-	public IEnumerable<CommonTable> GetCommonTables()
-	{
-		yield break;
-	}
+    public IEnumerable<CommonTable> GetCommonTables()
+    {
+        yield break;
+    }
 }

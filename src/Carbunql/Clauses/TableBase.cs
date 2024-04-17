@@ -14,46 +14,46 @@ namespace Carbunql.Clauses;
 [Union(3, typeof(LateralTable))]
 public abstract class TableBase : IQueryCommandable
 {
-	public abstract IEnumerable<Token> GetTokens(Token? parent);
+    public abstract IEnumerable<Token> GetTokens(Token? parent);
 
-	public virtual string GetDefaultName() => string.Empty;
+    public virtual string GetDefaultName() => string.Empty;
 
-	public virtual SelectableTable ToSelectable() => ToSelectable(GetDefaultName());
+    public virtual SelectableTable ToSelectable() => ToSelectable(GetDefaultName());
 
-	public virtual SelectableTable ToSelectable(string alias)
-	{
-		return new SelectableTable(this, alias);
-	}
+    public virtual SelectableTable ToSelectable(string alias)
+    {
+        return new SelectableTable(this, alias);
+    }
 
-	public virtual SelectableTable ToSelectable(string alias, IEnumerable<string> columnAliases)
-	{
-		return new SelectableTable(this, alias, columnAliases.ToValueCollection());
-	}
+    public virtual SelectableTable ToSelectable(string alias, IEnumerable<string> columnAliases)
+    {
+        return new SelectableTable(this, alias, columnAliases.ToValueCollection());
+    }
 
-	public virtual SelectableTable ToSelectable(string alias, ValueCollection columnAliases)
-	{
-		return new SelectableTable(this, alias, columnAliases);
-	}
+    public virtual SelectableTable ToSelectable(string alias, ValueCollection columnAliases)
+    {
+        return new SelectableTable(this, alias, columnAliases);
+    }
 
-	public virtual IEnumerable<QueryParameter> GetParameters()
-	{
-		yield break;
-	}
+    public virtual IEnumerable<QueryParameter> GetParameters()
+    {
+        yield break;
+    }
 
-	public virtual IList<string> GetColumnNames()
-	{
-		return ImmutableList<string>.Empty;
-	}
+    public virtual IList<string> GetColumnNames()
+    {
+        return ImmutableList<string>.Empty;
+    }
 
-	public virtual bool IsSelectQuery => false;
+    public virtual bool IsSelectQuery => false;
 
-	public virtual string GetTableFullName() => "";
+    public virtual string GetTableFullName() => "";
 
-	public virtual SelectQuery GetSelectQuery() => throw new NotSupportedException();
+    public virtual SelectQuery GetSelectQuery() => throw new NotSupportedException();
 
-	public abstract IEnumerable<SelectQuery> GetInternalQueries();
+    public abstract IEnumerable<SelectQuery> GetInternalQueries();
 
-	public abstract IEnumerable<PhysicalTable> GetPhysicalTables();
+    public abstract IEnumerable<PhysicalTable> GetPhysicalTables();
 
-	public abstract IEnumerable<CommonTable> GetCommonTables();
+    public abstract IEnumerable<CommonTable> GetCommonTables();
 }

@@ -5,16 +5,16 @@ namespace Carbunql.Postgres;
 
 internal static class TypeExtension
 {
-	internal static string ToTableName(this Type type)
-	{
-		var atr = type.GetCustomAttribute(typeof(TableAttribute)) as TableAttribute;
-		if (atr != null && !string.IsNullOrEmpty(atr.GetTableFullName()))
-		{
-			return atr.GetTableFullName();
-		}
-		else
-		{
-			return type.Name;
-		}
-	}
+    internal static string ToTableName(this Type type)
+    {
+        var atr = type.GetCustomAttribute(typeof(TableAttribute)) as TableAttribute;
+        if (atr != null && !string.IsNullOrEmpty(atr.GetTableFullName()))
+        {
+            return atr.GetTableFullName();
+        }
+        else
+        {
+            return type.Name;
+        }
+    }
 }

@@ -6,29 +6,29 @@ namespace Carbunql.Building.Test;
 
 public class CreateTableTest
 {
-	private readonly QueryCommandMonitor sq;
+    private readonly QueryCommandMonitor sq;
 
-	public CreateTableTest(ITestOutputHelper output)
-	{
-		sq = new QueryCommandMonitor(output);
-	}
+    public CreateTableTest(ITestOutputHelper output)
+    {
+        sq = new QueryCommandMonitor(output);
+    }
 
-	[Fact]
-	public void CreateTable()
-	{
-		var sql = "select a.id, a.value from table as a";
-		var q = QueryParser.Parse(sql);
+    [Fact]
+    public void CreateTable()
+    {
+        var sql = "select a.id, a.value from table as a";
+        var q = QueryParser.Parse(sql);
 
-		var ctq = q.ToCreateTableQuery("new_table");
-		ctq.IsTemporary = false;
+        var ctq = q.ToCreateTableQuery("new_table");
+        ctq.IsTemporary = false;
 
-		sq.Log(ctq);
+        sq.Log(ctq);
 
-		var lst = ctq.GetTokens().ToList();
+        var lst = ctq.GetTokens().ToList();
 
-		Assert.Equal(15, lst.Count());
+        Assert.Equal(15, lst.Count());
 
-		var expect = @"
+        var expect = @"
 CREATE TABLE
     new_table
 AS
@@ -38,65 +38,65 @@ SELECT
 FROM
     table AS a";
 
-		Assert.Equal(expect.ToValidateText(), ctq.ToText().ToValidateText());
-	}
+        Assert.Equal(expect.ToValidateText(), ctq.ToText().ToValidateText());
+    }
 
-	[Fact]
-	public void CreateTemporaryTable()
-	{
-		var sql = "select a.id, a.value from table as a";
-		var q = QueryParser.Parse(sql);
+    [Fact]
+    public void CreateTemporaryTable()
+    {
+        var sql = "select a.id, a.value from table as a";
+        var q = QueryParser.Parse(sql);
 
-		var ctq = q.ToCreateTableQuery("new_table");
-		sq.Log(ctq);
+        var ctq = q.ToCreateTableQuery("new_table");
+        sq.Log(ctq);
 
-		var lst = ctq.GetTokens().ToList();
+        var lst = ctq.GetTokens().ToList();
 
-		Assert.Equal(15, lst.Count());
-	}
+        Assert.Equal(15, lst.Count());
+    }
 
-	[Fact]
-	public void SelectQuery()
-	{
-		var sql = "select a.id, 'test' as value from table as a";
-		var q = QueryParser.Parse(sql);
+    [Fact]
+    public void SelectQuery()
+    {
+        var sql = "select a.id, 'test' as value from table as a";
+        var q = QueryParser.Parse(sql);
 
-		var sq = q.ToCreateTableQuery("new_table").ToSelectQuery();
-		this.sq.Log(sq);
+        var sq = q.ToCreateTableQuery("new_table").ToSelectQuery();
+        this.sq.Log(sq);
 
-		var lst = sq.GetTokens().ToList();
+        var lst = sq.GetTokens().ToList();
 
-		Assert.Equal(12, lst.Count());
+        Assert.Equal(12, lst.Count());
 
-		var expect = @"
+        var expect = @"
 SELECT
     t.id,
     t.value
 FROM
     new_table AS t";
 
-		Assert.Equal(expect.ToValidateText(), sq.ToText().ToValidateText());
-	}
+        Assert.Equal(expect.ToValidateText(), sq.ToText().ToValidateText());
+    }
 
-	[Fact]
-	public void CountQuery()
-	{
-		var sql = "select a.id, 'test' as value from table as a";
-		var q = QueryParser.Parse(sql);
+    [Fact]
+    public void CountQuery()
+    {
+        var sql = "select a.id, 'test' as value from table as a";
+        var q = QueryParser.Parse(sql);
 
-		var sq = q.ToCreateTableQuery("new_table").ToCountQuery();
-		this.sq.Log(sq);
+        var sq = q.ToCreateTableQuery("new_table").ToCountQuery();
+        this.sq.Log(sq);
 
-		var lst = sq.GetTokens().ToList();
+        var lst = sq.GetTokens().ToList();
 
-		Assert.Equal(11, lst.Count());
+        Assert.Equal(11, lst.Count());
 
-		var expect = @"
+        var expect = @"
 SELECT
     COUNT(*) AS row_count
 FROM
     new_table AS q";
 
-		Assert.Equal(expect.ToValidateText(), sq.ToText().ToValidateText());
-	}
+        Assert.Equal(expect.ToValidateText(), sq.ToText().ToValidateText());
+    }
 }

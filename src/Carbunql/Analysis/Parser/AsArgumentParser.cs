@@ -5,15 +5,15 @@ namespace Carbunql.Analysis.Parser;
 
 public static class AsArgumentParser
 {
-	public static AsArgument Parse(ValueBase value, string argument)
-	{
-		var r = new SqlTokenReader(argument);
-		return Parse(value, r);
-	}
+    public static AsArgument Parse(ValueBase value, string argument)
+    {
+        var r = new SqlTokenReader(argument);
+        return Parse(value, r);
+    }
 
-	public static AsArgument Parse(ValueBase value, ITokenReader r)
-	{
-		var type = ValueParser.Parse(r);
-		return new AsArgument(value, type);
-	}
+    public static AsArgument Parse(ValueBase value, ITokenReader r)
+    {
+        var type = ValueParser.Parse(r);
+        return new AsArgument(value, type);
+    }
 }
