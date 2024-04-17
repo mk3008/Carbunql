@@ -382,7 +382,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         query = default;
         if (SelectClause is null) return false;
 
-        var row = new ValueCollection(SelectClause.Select(x => x.Value).OfType<LiteralValue>().ToList<ValueBase>());
+        var row = new ValueCollection(SelectClause.Select(x => x.Value).ToList<ValueBase>());
         var q = new ValuesQuery();
         q.Rows.Add(row);
 

@@ -193,4 +193,68 @@ SELECT
         Assert.Equal(36, lst.Count);
         Assert.Equal(expect, iq.ToText(), true, true, true);
     }
+
+    [Fact]
+    public void InsertSelectToInsertValues_DiverseValues()
+    {
+        var text = @"INSERT INTO
+    sale(col1, col2, col3, col4)
+SELECT
+    now() AS col1,
+    :price AS col2,
+    current_timestamp AS col3,
+    null::int as col4";
+
+        var expect = @"INSERT INTO
+    sale(col1, col2, col3, col4)
+VALUES
+    (NOW(), :price, current_timestamp, null::int)";
+
+        var iq = InsertQueryParser.Parse(text);
+        if (iq == null) throw new Exception();
+
+        if (iq.TryConvertToInsertValues(out var x))
+        {
+            iq = x;
+        }
+
+        Monitor.Log(iq);
+
+        var lst = iq.GetTokens().ToList();
+
+        Assert.Equal(25, lst.Count);
+        Assert.Equal(expect, iq.ToText(), true, true, true);
+    }
+
+    [Fact]
+    public void InsertValuesToInsertSelect_DiverseValues()
+    {
+        var text = @"INSERT INTO
+    sale(col1, col2, col3, col4)
+VALUES
+    (NOW(), :price, current_timestamp, null::int)";
+
+        var expect = @"INSERT INTO
+    sale(col1, col2, col3, col4)
+SELECT
+    NOW() AS col1,
+    :price AS col2,
+    current_timestamp AS col3,
+    null::int as col4";
+
+        var iq = InsertQueryParser.Parse(text);
+        if (iq == null) throw new Exception();
+
+        if (iq.TryConvertToInsertSelect(out var x))
+        {
+            iq = x;
+        }
+
+        Monitor.Log(iq);
+
+        var lst = iq.GetTokens().ToList();
+
+        Assert.Equal(31, lst.Count);
+        Assert.Equal(expect, iq.ToText(), true, true, true);
+    }
 }
