@@ -102,7 +102,7 @@ if (q.TryConvertToInsertSelect(out var isq))
                 }
                 else
                 {
-                    fsql = "/* TryConvertToInsertSelect method failed */";
+                    fsql = $"/* TryConvertToInsertSelect method failed */\n{sql}";
                 }
             }
             else
@@ -113,7 +113,7 @@ if (q.TryConvertToInsertSelect(out var isq))
                 }
                 else
                 {
-                    fsql = "/* TryConvertToInsertValues method failed */";
+                    fsql = $"/* TryConvertToInsertValues method failed */\n{sql}";
                 }
             }
         }

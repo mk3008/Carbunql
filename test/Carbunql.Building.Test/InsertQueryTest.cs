@@ -21,7 +21,7 @@ INSERT INTO sale (sale_date,price,created_at) VALUES
      ('2023-03-12',200,'2024-01-11 14:29:01.618')";
 
         var expect = @"INSERT INTO
-    SALE(sale_date, price, created_at)
+    sale(sale_date, price, created_at)
 SELECT
     '2023-01-01' AS sale_date,
     160 AS price,
@@ -45,6 +45,42 @@ SELECT
         var lst = iq.GetTokens().ToList();
 
         Assert.Equal(34, lst.Count);
+        Assert.Equal(expect, iq.ToText(), true, true, true);
+    }
+
+    [Fact]
+    public void InsertValuesToInsertSelect_CatalogSchame()
+    {
+        var text = @"
+INSERT INTO catalog.schema.sale (sale_date,price,created_at) VALUES
+     ('2023-01-01',160,'2024-01-11 14:29:01.618'),
+     ('2023-03-12',200,'2024-01-11 14:29:01.618')";
+
+        var expect = @"INSERT INTO
+    catalog.schema.sale(sale_date, price, created_at)
+SELECT
+    '2023-01-01' AS sale_date,
+    160 AS price,
+    '2024-01-11 14:29:01.618' AS created_at
+UNION ALL
+SELECT
+    '2023-03-12' AS sale_date,
+    200 AS price,
+    '2024-01-11 14:29:01.618' AS created_at";
+
+        var iq = InsertQueryParser.Parse(text);
+        if (iq == null) throw new Exception();
+
+        if (iq.TryConvertToInsertSelect(out var x))
+        {
+            iq = x;
+        }
+
+        Monitor.Log(iq);
+
+        var lst = iq.GetTokens().ToList();
+
+        Assert.Equal(36, lst.Count);
         Assert.Equal(expect, iq.ToText(), true, true, true);
     }
 
@@ -131,12 +167,16 @@ INSERT INTO catalog.schema.sale (sale_date,price,created_at) VALUES
      ('2023-03-12',200,'2024-01-11 14:29:01.618')";
 
         var expect = @"INSERT INTO
-    catalog.schema.sale (
-        sale_date, price, created_at
-    )
-VALUES
-    ('2023-01-01', 160, '2024-01-11 14:29:01.618'),
-    ('2023-03-12', 200, '2024-01-11 14:29:01.618')";
+    catalog.schema.sale(sale_date, price, created_at)
+SELECT
+    '2023-01-01' AS sale_date,
+    160 AS price,
+    '2024-01-11 14:29:01.618' AS created_at
+UNION ALL
+SELECT
+    '2023-03-12' AS sale_date,
+    200 AS price,
+    '2024-01-11 14:29:01.618' AS created_at";
 
         var iq = InsertQueryParser.Parse(text);
         if (iq == null) throw new Exception();
@@ -150,7 +190,7 @@ VALUES
 
         var lst = iq.GetTokens().ToList();
 
-        Assert.Equal(27, lst.Count);
+        Assert.Equal(36, lst.Count);
         Assert.Equal(expect, iq.ToText(), true, true, true);
     }
 }
