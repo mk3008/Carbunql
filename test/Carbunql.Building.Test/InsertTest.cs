@@ -7,75 +7,125 @@ namespace Carbunql.Building.Test;
 
 public class InsertTest
 {
-	private readonly QueryCommandMonitor Monitor;
+    private readonly QueryCommandMonitor Monitor;
 
-	public InsertTest(ITestOutputHelper output)
-	{
-		Monitor = new QueryCommandMonitor(output);
-	}
+    public InsertTest(ITestOutputHelper output)
+    {
+        Monitor = new QueryCommandMonitor(output);
+    }
 
-	[Fact]
-	public void InsertQuery()
-	{
-		var sql = "select a.id, a.value as v from table as a";
-		var q = QueryParser.Parse(sql);
+    [Fact]
+    public void InsertQuery()
+    {
+        var sql = "select a.id, a.value as v from table as a";
+        var q = QueryParser.Parse(sql);
 
-		var iq = q.ToInsertQuery("new_table");
-		Monitor.Log(iq);
+        var iq = q.ToInsertQuery("new_table");
+        Monitor.Log(iq);
 
-		var lst = iq.GetTokens().ToList();
+        var lst = iq.GetTokens().ToList();
 
-		Assert.Equal(21, lst.Count());
-	}
+        Assert.Equal(21, lst.Count());
 
-	[Fact]
-	public void InsertQuery_Values()
-	{
-		var sql = "values (1, 'a'), (2, 'b')";
-		var q = QueryParser.Parse(sql);
+        var expect = @"INSERT INTO
+    new_table(id, v)
+SELECT
+    a.id,
+    a.value AS v
+FROM
+    table AS a";
 
-		var iq = q.ToInsertQuery("new_table");
-		Monitor.Log(iq);
+        Assert.Equal(expect, iq.ToText(), true, true, true);
+    }
 
-		var lst = iq.GetTokens().ToList();
+    [Fact]
+    public void InsertQuery_Values()
+    {
+        var sql = "values (1, 'a'), (2, 'b')";
+        var q = QueryParser.Parse(sql);
 
-		Assert.Equal(14, lst.Count());
-	}
+        var iq = q.ToInsertQuery("new_table");
+        Monitor.Log(iq);
 
-	[Fact]
-	public void InsertQuery_ColumnFilter()
-	{
-		var sql = "select a.id, a.value as v from table as a";
-		var tmp = QueryParser.Parse(sql);
+        var lst = iq.GetTokens().ToList();
 
-		var sq = new SelectQuery();
-		var (f, q) = sq.From(tmp).As("q");
-		q.GetColumnNames().Where(x => x.IsEqualNoCase("id")).ToList().ForEach(x => sq.Select(q, x));
+        Assert.Equal(14, lst.Count());
 
-		var iq = sq.ToInsertQuery("new_table");
-		Monitor.Log(iq);
+        var expect = @"INSERT INTO
+    new_table
+VALUES
+    (1, 'a'),
+    (2, 'b')";
 
-		var lst = iq.GetTokens().ToList();
+        Assert.Equal(expect, iq.ToText(), true, true, true);
+    }
 
-		Assert.Equal(28, lst.Count());
-	}
+    [Fact]
+    public void InsertQuery_ColumnFilter()
+    {
+        var sql = "select a.id, a.value as v from table as a";
+        var tmp = QueryParser.Parse(sql);
 
-	[Fact]
-	public void InsertQuery_Returning()
-	{
-		var sql = "select a.id, a.value as v from table as a";
-		var tmp = QueryParser.Parse(sql);
+        var sq = new SelectQuery();
+        var (f, q) = sq.From(tmp).As("q");
+        q.GetColumnNames().Where(x => x.IsEqualNoCase("id")).ToList().ForEach(x => sq.Select(q, x));
 
-		var sq = new SelectQuery();
-		var (f, q) = sq.From(tmp).As("q");
-		q.GetColumnNames().Where(x => x.IsEqualNoCase("id")).ToList().ForEach(x => sq.Select(q, x));
+        var iq = sq.ToInsertQuery("new_table");
+        Monitor.Log(iq);
 
-		var iq = sq.ToInsertQuery("new_table");
-		iq.Returning("seq");
-		Monitor.Log(iq);
+        var lst = iq.GetTokens().ToList();
 
-		var lst = iq.GetTokens().ToList();
+        Assert.Equal(28, lst.Count());
 
-		Assert.Equal(30, lst.Count());
-	}
+        var expect = @"INSERT INTO
+    new_table(id)
+SELECT
+    q.id
+FROM
+    (
+        SELECT
+            a.id,
+            a.value AS v
+        FROM
+            table AS a
+    ) AS q";
+
+        Assert.Equal(expect, iq.ToText(), true, true, true);
+    }
+
+    [Fact]
+    public void InsertQuery_Returning()
+    {
+        var sql = "select a.id, a.value as v from table as a";
+        var tmp = QueryParser.Parse(sql);
+
+        var sq = new SelectQuery();
+        var (f, q) = sq.From(tmp).As("q");
+        q.GetColumnNames().Where(x => x.IsEqualNoCase("id")).ToList().ForEach(x => sq.Select(q, x));
+
+        var iq = sq.ToInsertQuery("new_table");
+        iq.Returning("seq");
+        Monitor.Log(iq);
+
+        var lst = iq.GetTokens().ToList();
+
+        Assert.Equal(30, lst.Count());
+
+        var expect = @"INSERT INTO
+    new_table(id)
+SELECT
+    q.id
+FROM
+    (
+        SELECT
+            a.id,
+            a.value AS v
+        FROM
+            table AS a
+    ) AS q
+RETURNING
+    seq";
+
+        Assert.Equal(expect, iq.ToText(), true, true, true);
+    }
 }

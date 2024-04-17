@@ -80,9 +80,9 @@ public class InsertQuery : IQueryCommandable, IReturning, ICommentable
     public bool TryConvertToInsertSelect([MaybeNullWhen(false)] out InsertQuery insertQuery)
     {
         insertQuery = default;
-        if (Query is ValuesQuery v && InsertClause != null && InsertClause.Table.Table is FunctionTable ft)
+        if (Query is ValuesQuery v && InsertClause != null && InsertClause.ColumnAliases != null)
         {
-            var names = ft.Argument.GetValues().Select(x => x.ToText()).ToList();
+            var names = InsertClause.ColumnAliases.GetColumnNames();
             var iq = new InsertQuery();
             iq.InsertClause = InsertClause;
             iq.Query = v.ToPlainSelectQuery(names);
