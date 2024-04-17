@@ -6,56 +6,56 @@ namespace Carbunql.Building.Test;
 
 public class CountTest
 {
-	private readonly QueryCommandMonitor Monitor;
+    private readonly QueryCommandMonitor Monitor;
 
-	public CountTest(ITestOutputHelper output)
-	{
-		Monitor = new QueryCommandMonitor(output);
-	}
+    public CountTest(ITestOutputHelper output)
+    {
+        Monitor = new QueryCommandMonitor(output);
+    }
 
-	[Fact]
-	public void CountQuery_With()
-	{
-		var sql = @"with 
+    [Fact]
+    public void CountQuery_With()
+    {
+        var sql = @"with 
 dat as (
     select a.id, a.value as v from table as a
 ) 
 select * from dat";
-		var q = QueryParser.Parse(sql);
+        var q = QueryParser.Parse(sql);
 
-		var sq = q.ToCountQuery();
-		Monitor.Log(sq);
+        var sq = q.ToCountQuery();
+        Monitor.Log(sq);
 
-		var lst = sq.GetTokens().ToList();
+        var lst = sq.GetTokens().ToList();
 
-		Assert.Equal(35, lst.Count());
+        Assert.Equal(35, lst.Count());
 
-	}
-	[Fact]
-	public void CountQuery()
-	{
-		var sql = "select a.id, a.value as v from table as a";
-		var q = QueryParser.Parse(sql);
+    }
+    [Fact]
+    public void CountQuery()
+    {
+        var sql = "select a.id, a.value as v from table as a";
+        var q = QueryParser.Parse(sql);
 
-		var sq = q.ToCountQuery();
-		Monitor.Log(sq);
+        var sq = q.ToCountQuery();
+        Monitor.Log(sq);
 
-		var lst = sq.GetTokens().ToList();
+        var lst = sq.GetTokens().ToList();
 
-		Assert.Equal(26, lst.Count());
-	}
+        Assert.Equal(26, lst.Count());
+    }
 
-	[Fact]
-	public void CountQuery_Values()
-	{
-		var sql = "values (1, 'a'), (2, 'b')";
-		var q = QueryParser.Parse(sql);
+    [Fact]
+    public void CountQuery_Values()
+    {
+        var sql = "values (1, 'a'), (2, 'b')";
+        var q = QueryParser.Parse(sql);
 
-		var sq = q.ToCountQuery();
-		Monitor.Log(sq);
+        var sq = q.ToCountQuery();
+        Monitor.Log(sq);
 
-		var lst = sq.GetTokens().ToList();
+        var lst = sq.GetTokens().ToList();
 
-		Assert.Equal(24, lst.Count());
-	}
+        Assert.Equal(24, lst.Count());
+    }
 }

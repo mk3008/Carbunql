@@ -5,22 +5,22 @@ namespace Carbunql.Analysis.Parser;
 
 public static class SelectableItemParser
 {
-	public static SelectableItem Parse(string text)
-	{
-		var r = new SqlTokenReader(text);
-		return Parse(r);
-	}
+    public static SelectableItem Parse(string text)
+    {
+        var r = new SqlTokenReader(text);
+        return Parse(r);
+    }
 
-	public static SelectableItem Parse(ITokenReader r)
-	{
-		var v = ValueParser.Parse(r);
-		r.ReadOrDefault("as");
+    public static SelectableItem Parse(ITokenReader r)
+    {
+        var v = ValueParser.Parse(r);
+        r.ReadOrDefault("as");
 
-		if (r.Peek().IsEqualNoCase(ReservedText.All()))
-		{
-			return new SelectableItem(v, v.GetDefaultName());
-		}
+        if (r.Peek().IsEqualNoCase(ReservedText.All()))
+        {
+            return new SelectableItem(v, v.GetDefaultName());
+        }
 
-		return new SelectableItem(v, r.Read());
-	}
+        return new SelectableItem(v, r.Read());
+    }
 }

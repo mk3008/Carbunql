@@ -55,93 +55,93 @@ namespace Carbunql;
 [Union(45, typeof(MergeWhenUpdate))]
 public interface IQueryCommandable
 {
-	IEnumerable<Token> GetTokens(Token? parent);
+    IEnumerable<Token> GetTokens(Token? parent);
 
-	IEnumerable<QueryParameter> GetParameters();
+    IEnumerable<QueryParameter> GetParameters();
 
-	IEnumerable<SelectQuery> GetInternalQueries();
+    IEnumerable<SelectQuery> GetInternalQueries();
 
-	IEnumerable<PhysicalTable> GetPhysicalTables();
+    IEnumerable<PhysicalTable> GetPhysicalTables();
 
-	IEnumerable<CommonTable> GetCommonTables();
+    IEnumerable<CommonTable> GetCommonTables();
 }
 
 public static class IQueryCommandableExtension
 {
-	public static IEnumerable<Token> GetTokens(this IQueryCommandable source)
-	{
-		return source.GetTokens(null);
-	}
+    public static IEnumerable<Token> GetTokens(this IQueryCommandable source)
+    {
+        return source.GetTokens(null);
+    }
 
-	public static QueryCommand ToCommand(this IQueryCommandable source)
-	{
-		var builder = new CommandTextBuilder();
-		return new QueryCommand(builder.Execute(source), source.GetParameters());
-	}
+    public static QueryCommand ToCommand(this IQueryCommandable source)
+    {
+        var builder = new CommandTextBuilder();
+        return new QueryCommand(builder.Execute(source), source.GetParameters());
+    }
 
-	public static QueryCommand ToCommand(this IQueryCommandable source, CommandTextBuilder builder)
-	{
-		return new QueryCommand(builder.Execute(source), source.GetParameters());
-	}
+    public static QueryCommand ToCommand(this IQueryCommandable source, CommandTextBuilder builder)
+    {
+        return new QueryCommand(builder.Execute(source), source.GetParameters());
+    }
 
-	public static QueryCommand ToOneLineCommand(this IQueryCommandable source)
-	{
-		return new QueryCommand(source.GetTokens().ToText(), source.GetParameters());
-	}
+    public static QueryCommand ToOneLineCommand(this IQueryCommandable source)
+    {
+        return new QueryCommand(source.GetTokens().ToText(), source.GetParameters());
+    }
 
-	public static string ToText(this IQueryCommandable source, bool exportParameterInfo = true)
-	{
-		var cmd = source.ToCommand();
-		var text = cmd.CommandText;
+    public static string ToText(this IQueryCommandable source, bool exportParameterInfo = true)
+    {
+        var cmd = source.ToCommand();
+        var text = cmd.CommandText;
 
-		if (!cmd.Parameters.Any() || !exportParameterInfo) return text;
+        if (!cmd.Parameters.Any() || !exportParameterInfo) return text;
 
-		var head = GetParameterText(cmd);
-		if (string.IsNullOrEmpty(head)) return text;
-		return head + text;
-	}
+        var head = GetParameterText(cmd);
+        if (string.IsNullOrEmpty(head)) return text;
+        return head + text;
+    }
 
-	public static string ToOneLineText(this IQueryCommandable source)
-	{
-		var cmd = source.ToOneLineCommand();
-		var text = cmd.CommandText;
+    public static string ToOneLineText(this IQueryCommandable source)
+    {
+        var cmd = source.ToOneLineCommand();
+        var text = cmd.CommandText;
 
-		if (!cmd.Parameters.Any()) return text;
+        if (!cmd.Parameters.Any()) return text;
 
-		var head = GetParameterText(cmd);
-		if (string.IsNullOrEmpty(head)) return text;
-		return head + text;
-	}
+        var head = GetParameterText(cmd);
+        if (string.IsNullOrEmpty(head)) return text;
+        return head + text;
+    }
 
-	private static string GetParameterText(this QueryCommand source)
-	{
-		var prms = source.Parameters;
-		if (!prms.Any()) return string.Empty;
+    private static string GetParameterText(this QueryCommand source)
+    {
+        var prms = source.Parameters;
+        if (!prms.Any()) return string.Empty;
 
-		var names = new List<string>();
+        var names = new List<string>();
 
-		var sb = ZString.CreateStringBuilder();
-		sb.AppendLine("/*");
-		foreach (var item in prms)
-		{
-			if (names.Contains(item.Key)) continue;
+        var sb = ZString.CreateStringBuilder();
+        sb.AppendLine("/*");
+        foreach (var item in prms)
+        {
+            if (names.Contains(item.Key)) continue;
 
-			names.Add(item.Key);
-			if (item.Value == null)
-			{
-				sb.AppendLine($"  {item.Key} is NULL");
-			}
-			else if (item.Value.GetType() == typeof(string))
-			{
-				sb.AppendLine($"  {item.Key} = '{item.Value}'");
-			}
-			else
-			{
-				sb.AppendLine($"  {item.Key} = {item.Value}");
-			}
-		}
-		sb.AppendLine("*/");
+            names.Add(item.Key);
+            if (item.Value == null)
+            {
+                sb.AppendLine($"  {item.Key} is NULL");
+            }
+            else if (item.Value.GetType() == typeof(string))
+            {
+                sb.AppendLine($"  {item.Key} = '{item.Value}'");
+            }
+            else
+            {
+                sb.AppendLine($"  {item.Key} = {item.Value}");
+            }
+        }
+        sb.AppendLine("*/");
 
-		return sb.ToString();
-	}
+        return sb.ToString();
+    }
 }

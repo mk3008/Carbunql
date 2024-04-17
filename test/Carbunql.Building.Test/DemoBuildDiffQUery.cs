@@ -4,34 +4,34 @@ namespace Carbunql.Building.Test;
 
 public class DemoBuildDiffQuery
 {
-	public DemoBuildDiffQuery(ITestOutputHelper output)
-	{
-		Monitor = new QueryCommandMonitor(output);
-		Output = output;
-	}
+    public DemoBuildDiffQuery(ITestOutputHelper output)
+    {
+        Monitor = new QueryCommandMonitor(output);
+        Output = output;
+    }
 
-	private readonly QueryCommandMonitor Monitor;
+    private readonly QueryCommandMonitor Monitor;
 
-	private readonly ITestOutputHelper Output;
+    private readonly ITestOutputHelper Output;
 
-	private void DebugPrint(QueryCommand cmd)
-	{
-		if (cmd.Parameters.Any())
-		{
-			Output.WriteLine("/*");
-			foreach (var prm in cmd.Parameters)
-			{
-				Output.WriteLine($"    {prm.Key} = {prm.Value}");
-			}
-			Output.WriteLine("*/");
-		}
-		Output.WriteLine(cmd.CommandText);
-	}
+    private void DebugPrint(QueryCommand cmd)
+    {
+        if (cmd.Parameters.Any())
+        {
+            Output.WriteLine("/*");
+            foreach (var prm in cmd.Parameters)
+            {
+                Output.WriteLine($"    {prm.Key} = {prm.Value}");
+            }
+            Output.WriteLine("*/");
+        }
+        Output.WriteLine(cmd.CommandText);
+    }
 
-	[Fact]
-	public void Build()
-	{
-		var expectSql = @"
+    [Fact]
+    public void Build()
+    {
+        var expectSql = @"
 with
 	v1 (id, value1, value2, value3) as (
 		values
@@ -63,7 +63,7 @@ select
 	value3 
 from 
 	v1";
-		var actualSql = @"
+        var actualSql = @"
 with
 	v2 (id, value1, value2, value3) as (
 		values
@@ -95,14 +95,14 @@ select
 	value3 
 from 
 	v2";
-		var keys = new[] { "id" };
+        var keys = new[] { "id" };
 
-		var expectsq = new SelectQuery(expectSql);
-		var actualsq = new SelectQuery(actualSql);
+        var expectsq = new SelectQuery(expectSql);
+        var actualsq = new SelectQuery(actualSql);
 
-		var sq = DiffQueryBuilder.Execute(expectsq, actualsq, keys);
+        var sq = DiffQueryBuilder.Execute(expectsq, actualsq, keys);
 
-		DebugPrint(sq.ToCommand());
-	}
+        DebugPrint(sq.ToCommand());
+    }
 
 }

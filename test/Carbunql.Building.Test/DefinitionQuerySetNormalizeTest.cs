@@ -5,17 +5,17 @@ namespace Carbunql.Building.Test;
 
 public class DefinitionQuerySetNormalizeTest
 {
-	public DefinitionQuerySetNormalizeTest(ITestOutputHelper output)
-	{
-		Output = output;
-	}
+    public DefinitionQuerySetNormalizeTest(ITestOutputHelper output)
+    {
+        Output = output;
+    }
 
-	private ITestOutputHelper Output { get; set; }
+    private ITestOutputHelper Output { get; set; }
 
-	[Fact]
-	public void UnknownNameConstraint()
-	{
-		var text = @"CREATE TABLE child_table (
+    [Fact]
+    public void UnknownNameConstraint()
+    {
+        var text = @"CREATE TABLE child_table (
     child_id SERIAL PRIMARY KEY,
     child_name VARCHAR(100) NOT NULL UNIQUE,
     parent_id INT NOT NULL,
@@ -25,7 +25,7 @@ public class DefinitionQuerySetNormalizeTest
 ;
 ";
 
-		var expect = @"CREATE TABLE child_table (
+        var expect = @"CREATE TABLE child_table (
     child_id SERIAL,
     child_name VARCHAR(100) NOT NULL,
     parent_id INT NOT NULL,
@@ -44,18 +44,18 @@ ALTER TABLE child_table
 ;
 ";
 
-		var v = DefinitionQuerySetParser.Parse(text);
-		var normal = v.ToNormalize(doMergeAltarTablerQuery: false);
+        var v = DefinitionQuerySetParser.Parse(text);
+        var normal = v.ToNormalize(doMergeAltarTablerQuery: false);
 
-		var sql = normal.ToText();
-		Output.WriteLine(sql);
-		Assert.Equal(expect, sql, true, true, true);
-	}
+        var sql = normal.ToText();
+        Output.WriteLine(sql);
+        Assert.Equal(expect, sql, true, true, true);
+    }
 
-	[Fact]
-	public void NamedConstraint()
-	{
-		var text = @"CREATE TABLE public.child_table (
+    [Fact]
+    public void NamedConstraint()
+    {
+        var text = @"CREATE TABLE public.child_table (
     child_id serial4 NOT NULL,
     child_name varchar(100) NOT NULL,
     parent_id int4 NOT NULL,
@@ -68,7 +68,7 @@ ALTER TABLE child_table
 ;
 ";
 
-		var expect = @"CREATE TABLE public.child_table (
+        var expect = @"CREATE TABLE public.child_table (
     child_id serial4 NOT NULL,
     child_name VARCHAR(100) NOT NULL,
     parent_id int4 NOT NULL,
@@ -87,18 +87,18 @@ ALTER TABLE public.child_table
 ;
 ";
 
-		var v = DefinitionQuerySetParser.Parse(text);
-		var normal = v.ToNormalize(doMergeAltarTablerQuery: false);
+        var v = DefinitionQuerySetParser.Parse(text);
+        var normal = v.ToNormalize(doMergeAltarTablerQuery: false);
 
-		var sql = normal.ToText();
-		Output.WriteLine(sql);
-		Assert.Equal(expect, sql, true, true, true);
-	}
+        var sql = normal.ToText();
+        Output.WriteLine(sql);
+        Assert.Equal(expect, sql, true, true, true);
+    }
 
-	[Fact]
-	public void IntegrateNotNull()
-	{
-		var text = @"CREATE TABLE public.child_table (
+    [Fact]
+    public void IntegrateNotNull()
+    {
+        var text = @"CREATE TABLE public.child_table (
     child_id serial4 PRIMARY KEY,
     child_name varchar(100),
     parent_id int4,
@@ -115,7 +115,7 @@ ALTER TABLE public.child_table
 ;
 ";
 
-		var expect = @"CREATE TABLE public.child_table (
+        var expect = @"CREATE TABLE public.child_table (
     child_id serial4 NOT NULL,
     child_name VARCHAR(100) NOT NULL,
     parent_id int4 NOT NULL,
@@ -128,18 +128,18 @@ ALTER TABLE public.child_table
 ;
 ";
 
-		var v = DefinitionQuerySetParser.Parse(text);
-		var normal = v.ToNormalize();
+        var v = DefinitionQuerySetParser.Parse(text);
+        var normal = v.ToNormalize();
 
-		var sql = normal.ToText();
-		Output.WriteLine(sql);
-		Assert.Equal(expect, sql, true, true, true);
-	}
+        var sql = normal.ToText();
+        Output.WriteLine(sql);
+        Assert.Equal(expect, sql, true, true, true);
+    }
 
-	[Fact]
-	public void IntegrateAddColumn()
-	{
-		var text = @"CREATE TABLE public.child_table (
+    [Fact]
+    public void IntegrateAddColumn()
+    {
+        var text = @"CREATE TABLE public.child_table (
     child_id serial4 PRIMARY KEY
 )
 ;
@@ -151,7 +151,7 @@ ALTER TABLE public.child_table
 ;
 ";
 
-		var expect = @"CREATE TABLE public.child_table (
+        var expect = @"CREATE TABLE public.child_table (
     child_id serial4,
     child_name VARCHAR(100) NOT NULL,
     parent_id int4 NOT NULL,
@@ -164,18 +164,18 @@ ALTER TABLE public.child_table
 ;
 ";
 
-		var v = DefinitionQuerySetParser.Parse(text);
-		var normal = v.ToNormalize();
+        var v = DefinitionQuerySetParser.Parse(text);
+        var normal = v.ToNormalize();
 
-		var sql = normal.ToText();
-		Output.WriteLine(sql);
-		Assert.Equal(expect, sql, true, true, true);
-	}
+        var sql = normal.ToText();
+        Output.WriteLine(sql);
+        Assert.Equal(expect, sql, true, true, true);
+    }
 
-	[Fact]
-	public void IntegrateDropColumn()
-	{
-		var text = @"CREATE TABLE public.child_table (
+    [Fact]
+    public void IntegrateDropColumn()
+    {
+        var text = @"CREATE TABLE public.child_table (
     child_id serial4 PRIMARY KEY,
     child_name varchar(100),
     parent_id int4,
@@ -188,7 +188,7 @@ ALTER TABLE public.child_table
 ;
 ";
 
-		var expect = @"CREATE TABLE public.child_table (
+        var expect = @"CREATE TABLE public.child_table (
     child_id serial4,
     child_name VARCHAR(100),
     parent_id int4,
@@ -200,18 +200,18 @@ ALTER TABLE public.child_table
 ;
 ";
 
-		var v = DefinitionQuerySetParser.Parse(text);
-		var normal = v.ToNormalize();
+        var v = DefinitionQuerySetParser.Parse(text);
+        var normal = v.ToNormalize();
 
-		var sql = normal.ToText();
-		Output.WriteLine(sql);
-		Assert.Equal(expect, sql, true, true, true);
-	}
+        var sql = normal.ToText();
+        Output.WriteLine(sql);
+        Assert.Equal(expect, sql, true, true, true);
+    }
 
-	[Fact]
-	public void SetDefault()
-	{
-		var text = @"CREATE TABLE public.child_table (
+    [Fact]
+    public void SetDefault()
+    {
+        var text = @"CREATE TABLE public.child_table (
     child_id serial4 PRIMARY KEY,
     child_name varchar(100),
     parent_id int4,
@@ -224,7 +224,7 @@ ALTER TABLE public.child_table
 ;
 ";
 
-		var expect = @"CREATE TABLE public.child_table (
+        var expect = @"CREATE TABLE public.child_table (
     child_id serial4,
     child_name VARCHAR(100),
     parent_id int4,
@@ -237,18 +237,18 @@ ALTER TABLE public.child_table
 ;
 ";
 
-		var v = DefinitionQuerySetParser.Parse(text);
-		var normal = v.ToNormalize();
+        var v = DefinitionQuerySetParser.Parse(text);
+        var normal = v.ToNormalize();
 
-		var sql = normal.ToText();
-		Output.WriteLine(sql);
-		Assert.Equal(expect, sql, true, true, true);
-	}
+        var sql = normal.ToText();
+        Output.WriteLine(sql);
+        Assert.Equal(expect, sql, true, true, true);
+    }
 
-	[Fact]
-	public void DropDefault()
-	{
-		var text = @"CREATE TABLE public.child_table (
+    [Fact]
+    public void DropDefault()
+    {
+        var text = @"CREATE TABLE public.child_table (
     child_id serial4 PRIMARY KEY,
     child_name varchar(100),
     parent_id int4,
@@ -261,7 +261,7 @@ ALTER TABLE public.child_table
 ;
 ";
 
-		var expect = @"CREATE TABLE public.child_table (
+        var expect = @"CREATE TABLE public.child_table (
     child_id serial4,
     child_name VARCHAR(100),
     parent_id int4,
@@ -274,18 +274,18 @@ ALTER TABLE public.child_table
 ;
 ";
 
-		var v = DefinitionQuerySetParser.Parse(text);
-		var normal = v.ToNormalize();
+        var v = DefinitionQuerySetParser.Parse(text);
+        var normal = v.ToNormalize();
 
-		var sql = normal.ToText();
-		Output.WriteLine(sql);
-		Assert.Equal(expect, sql, true, true, true);
-	}
+        var sql = normal.ToText();
+        Output.WriteLine(sql);
+        Assert.Equal(expect, sql, true, true, true);
+    }
 
-	[Fact]
-	public void CraeteUniqueIndex()
-	{
-		var text = @"CREATE TABLE public.child_table (
+    [Fact]
+    public void CraeteUniqueIndex()
+    {
+        var text = @"CREATE TABLE public.child_table (
     child_id serial4 PRIMARY KEY,
     child_name varchar(100)
 )
@@ -295,7 +295,7 @@ CREATE UNIQUE INDEX idx_child_name ON public.child_table (
 );
 ";
 
-		var expect = @"CREATE TABLE public.child_table (
+        var expect = @"CREATE TABLE public.child_table (
     child_id serial4,
     child_name VARCHAR(100)
 )
@@ -309,18 +309,18 @@ CREATE UNIQUE INDEX idx_child_name ON public.child_table (
 ;
 ";
 
-		var v = DefinitionQuerySetParser.Parse(text);
-		var normal = v.ToNormalize();
+        var v = DefinitionQuerySetParser.Parse(text);
+        var normal = v.ToNormalize();
 
-		var sql = normal.ToText();
-		Output.WriteLine(sql);
-		Assert.Equal(expect, sql, true, true, true);
-	}
+        var sql = normal.ToText();
+        Output.WriteLine(sql);
+        Assert.Equal(expect, sql, true, true, true);
+    }
 
-	[Fact]
-	public void AlterTableUnique()
-	{
-		var text = @"CREATE TABLE public.child_table (
+    [Fact]
+    public void AlterTableUnique()
+    {
+        var text = @"CREATE TABLE public.child_table (
     child_id serial4 PRIMARY KEY,
     child_name varchar(100)
 )
@@ -330,7 +330,7 @@ ADD CONSTRAINT idx_child_name UNIQUE (child_name)
 ;
 ";
 
-		var expect = @"CREATE TABLE public.child_table (
+        var expect = @"CREATE TABLE public.child_table (
     child_id serial4,
     child_name VARCHAR(100)
 )
@@ -341,11 +341,11 @@ ALTER TABLE public.child_table
 ;
 ";
 
-		var v = DefinitionQuerySetParser.Parse(text);
-		var normal = v.ToNormalize();
+        var v = DefinitionQuerySetParser.Parse(text);
+        var normal = v.ToNormalize();
 
-		var sql = normal.ToText();
-		Output.WriteLine(sql);
-		Assert.Equal(expect, sql, true, true, true);
-	}
+        var sql = normal.ToText();
+        Output.WriteLine(sql);
+        Assert.Equal(expect, sql, true, true, true);
+    }
 }

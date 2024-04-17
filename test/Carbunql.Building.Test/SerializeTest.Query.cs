@@ -5,104 +5,104 @@ namespace Carbunql.Building.Test;
 
 public partial class SerializeTest
 {
-	[Fact]
-	public void SelectQuery()
-	{
-		var sq = new SelectQuery("select a.column_1 as c1 from table_a as a");
+    [Fact]
+    public void SelectQuery()
+    {
+        var sq = new SelectQuery("select a.column_1 as c1 from table_a as a");
 
-		var json = MessagePackSerializer.Serialize(sq);
-		Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
+        var json = MessagePackSerializer.Serialize(sq);
+        Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
 
-		var actual = MessagePackSerializer.Deserialize<SelectQuery>(json);
-		Output.WriteLine(actual.ToText());
+        var actual = MessagePackSerializer.Deserialize<SelectQuery>(json);
+        Output.WriteLine(actual.ToText());
 
-		Assert.Equal(TruncateControlString(sq.ToText()), TruncateControlString(actual!.ToText()));
-	}
+        Assert.Equal(TruncateControlString(sq.ToText()), TruncateControlString(actual!.ToText()));
+    }
 
-	[Fact]
-	public void JoinQuery()
-	{
-		var sq = new SelectQuery("select a.* from table_a as a inner join table_b as b on a.id = b.id");
+    [Fact]
+    public void JoinQuery()
+    {
+        var sq = new SelectQuery("select a.* from table_a as a inner join table_b as b on a.id = b.id");
 
-		var json = MessagePackSerializer.Serialize(sq);
-		Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
+        var json = MessagePackSerializer.Serialize(sq);
+        Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
 
-		var actual = MessagePackSerializer.Deserialize<SelectQuery>(json);
-		Output.WriteLine(actual.ToText());
+        var actual = MessagePackSerializer.Deserialize<SelectQuery>(json);
+        Output.WriteLine(actual.ToText());
 
-		Assert.Equal(TruncateControlString(sq.ToText()), TruncateControlString(actual!.ToText()));
-	}
+        Assert.Equal(TruncateControlString(sq.ToText()), TruncateControlString(actual!.ToText()));
+    }
 
-	[Fact]
-	public void OperatableQuery()
-	{
-		var sq = new OperatableQuery("union", new SelectQuery("select 1"));
+    [Fact]
+    public void OperatableQuery()
+    {
+        var sq = new OperatableQuery("union", new SelectQuery("select 1"));
 
-		var json = MessagePackSerializer.Serialize(sq);
-		Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
+        var json = MessagePackSerializer.Serialize(sq);
+        Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
 
-		var actual = MessagePackSerializer.Deserialize<OperatableQuery>(json);
-		Output.WriteLine(actual.ToText());
+        var actual = MessagePackSerializer.Deserialize<OperatableQuery>(json);
+        Output.WriteLine(actual.ToText());
 
-		Assert.Equal(TruncateControlString(sq.ToText()), TruncateControlString(actual!.ToText()));
-	}
+        Assert.Equal(TruncateControlString(sq.ToText()), TruncateControlString(actual!.ToText()));
+    }
 
-	[Fact]
-	public void UnionQuery()
-	{
-		var sq = new SelectQuery("select 1 as v1 union select 2 as v1 union all select 3 as v1");
+    [Fact]
+    public void UnionQuery()
+    {
+        var sq = new SelectQuery("select 1 as v1 union select 2 as v1 union all select 3 as v1");
 
-		var json = MessagePackSerializer.Serialize(sq);
-		Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
+        var json = MessagePackSerializer.Serialize(sq);
+        Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
 
-		var actual = MessagePackSerializer.Deserialize<SelectQuery>(json);
-		Output.WriteLine(actual.ToText());
+        var actual = MessagePackSerializer.Deserialize<SelectQuery>(json);
+        Output.WriteLine(actual.ToText());
 
-		Assert.Equal(TruncateControlString(sq.ToText()), TruncateControlString(actual!.ToText()));
-	}
+        Assert.Equal(TruncateControlString(sq.ToText()), TruncateControlString(actual!.ToText()));
+    }
 
-	[Fact]
-	public void ValueCollectionList()
-	{
-		var sq = new List<ValueCollection>
-		{
-			new ValueCollection()
-			{
-				new LiteralValue(1),
-				new LiteralValue(2),
-			},
-			new ValueCollection()
-			{
-				new LiteralValue(3),
-				new LiteralValue(4),
-			}
-		};
+    [Fact]
+    public void ValueCollectionList()
+    {
+        var sq = new List<ValueCollection>
+        {
+            new ValueCollection()
+            {
+                new LiteralValue(1),
+                new LiteralValue(2),
+            },
+            new ValueCollection()
+            {
+                new LiteralValue(3),
+                new LiteralValue(4),
+            }
+        };
 
-		var json = MessagePackSerializer.Serialize(sq);
-		Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
+        var json = MessagePackSerializer.Serialize(sq);
+        Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
 
-		var actual = MessagePackSerializer.Deserialize<List<ValueCollection>>(json);
-		Assert.Equal(2, actual.Count);
-	}
+        var actual = MessagePackSerializer.Deserialize<List<ValueCollection>>(json);
+        Assert.Equal(2, actual.Count);
+    }
 
-	[Fact]
-	public void ValuesQuery()
-	{
-		var sq = new ValuesQuery(new[,] { { "a1", "b1", "c1" }, { "a2", "b2", "c2" } });
+    [Fact]
+    public void ValuesQuery()
+    {
+        var sq = new ValuesQuery(new[,] { { "a1", "b1", "c1" }, { "a2", "b2", "c2" } });
 
-		var json = MessagePackSerializer.Serialize(sq);
-		Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
+        var json = MessagePackSerializer.Serialize(sq);
+        Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
 
-		var actual = MessagePackSerializer.Deserialize<ValuesQuery>(json);
-		Output.WriteLine(actual.ToText());
+        var actual = MessagePackSerializer.Deserialize<ValuesQuery>(json);
+        Output.WriteLine(actual.ToText());
 
-		Assert.Equal(TruncateControlString(sq.ToText()), TruncateControlString(actual!.ToText()));
-	}
+        Assert.Equal(TruncateControlString(sq.ToText()), TruncateControlString(actual!.ToText()));
+    }
 
-	[Fact]
-	public void SampleQuery()
-	{
-		var sq = new SelectQuery(@"
+    [Fact]
+    public void SampleQuery()
+    {
+        var sq = new SelectQuery(@"
 WITH
     dat (
         line_id, name, unit_price, quantity, tax_rate
@@ -190,19 +190,19 @@ FROM
 ORDER BY
     line_id");
 
-		var json = MessagePackSerializer.Serialize(sq);
-		Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
+        var json = MessagePackSerializer.Serialize(sq);
+        Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
 
-		var actual = MessagePackSerializer.Deserialize<SelectQuery>(json);
-		Output.WriteLine(actual.ToText());
+        var actual = MessagePackSerializer.Deserialize<SelectQuery>(json);
+        Output.WriteLine(actual.ToText());
 
-		Assert.Equal(TruncateControlString(sq.ToText()), TruncateControlString(actual!.ToText()));
-	}
+        Assert.Equal(TruncateControlString(sq.ToText()), TruncateControlString(actual!.ToText()));
+    }
 
-	[Fact]
-	public void SampleQuery_WindowFunction()
-	{
-		var sq = new SelectQuery(@"
+    [Fact]
+    public void SampleQuery_WindowFunction()
+    {
+        var sq = new SelectQuery(@"
 with
 v (id, name, value) as (
     values
@@ -219,31 +219,31 @@ select
 from
     v");
 
-		var json = MessagePackSerializer.Serialize(sq);
-		Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
+        var json = MessagePackSerializer.Serialize(sq);
+        Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
 
-		var actual = MessagePackSerializer.Deserialize<SelectQuery>(json);
-		Output.WriteLine(actual.ToText());
+        var actual = MessagePackSerializer.Deserialize<SelectQuery>(json);
+        Output.WriteLine(actual.ToText());
 
-		Assert.Equal(TruncateControlString(sq.ToText()), TruncateControlString(actual!.ToText()));
-	}
+        Assert.Equal(TruncateControlString(sq.ToText()), TruncateControlString(actual!.ToText()));
+    }
 
-	[Fact]
-	public void WindowClause()
-	{
-		var sql = @"
+    [Fact]
+    public void WindowClause()
+    {
+        var sql = @"
 SELECT sum(salary) OVER w, avg(salary) OVER w
   FROM empsalary
   WINDOW w AS (PARTITION BY depname ORDER BY salary DESC)
 ";
-		var sq = new SelectQuery(sql);
+        var sq = new SelectQuery(sql);
 
-		var json = MessagePackSerializer.Serialize(sq);
-		Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
+        var json = MessagePackSerializer.Serialize(sq);
+        Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
 
-		var actual = MessagePackSerializer.Deserialize<SelectQuery>(json);
-		Output.WriteLine(actual.ToText());
+        var actual = MessagePackSerializer.Deserialize<SelectQuery>(json);
+        Output.WriteLine(actual.ToText());
 
-		Assert.Equal(TruncateControlString(sql), TruncateControlString(actual!.ToText()));
-	}
+        Assert.Equal(TruncateControlString(sql), TruncateControlString(actual!.ToText()));
+    }
 }

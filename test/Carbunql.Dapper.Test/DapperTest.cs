@@ -4,22 +4,22 @@ namespace Carbunql.Dapper.Test;
 
 public class LoadTest : IClassFixture<PostgresDB>
 {
-	public LoadTest(PostgresDB postgresDB, ITestOutputHelper output)
-	{
-		PostgresDB = postgresDB;
-		Logger = new UnitTestLogger() { Output = output };
-	}
+    public LoadTest(PostgresDB postgresDB, ITestOutputHelper output)
+    {
+        PostgresDB = postgresDB;
+        Logger = new UnitTestLogger() { Output = output };
+    }
 
-	private readonly PostgresDB PostgresDB;
+    private readonly PostgresDB PostgresDB;
 
-	private readonly UnitTestLogger Logger;
+    private readonly UnitTestLogger Logger;
 
-	[Fact]
-	public void ExecuteReader_NoParamter()
-	{
-		using var cn = PostgresDB.ConnectionOpenAsNew(Logger);
+    [Fact]
+    public void ExecuteReader_NoParamter()
+    {
+        using var cn = PostgresDB.ConnectionOpenAsNew(Logger);
 
-		var sql = @"with
+        var sql = @"with
 data_ds(c1, c2) as (
 	values
 	(1,2)
@@ -31,22 +31,22 @@ from
 	data_ds
 ";
 
-		var sq = new SelectQuery(sql);
-		using var r = cn.ExecuteReader(sq);
-		var cnt = 0;
-		while (r.Read())
-		{
-			cnt++;
-		}
-		Assert.Equal(2, cnt);
-	}
+        var sq = new SelectQuery(sql);
+        using var r = cn.ExecuteReader(sq);
+        var cnt = 0;
+        while (r.Read())
+        {
+            cnt++;
+        }
+        Assert.Equal(2, cnt);
+    }
 
-	[Fact]
-	public void ExecuteReader_HasParamter()
-	{
-		using var cn = PostgresDB.ConnectionOpenAsNew(Logger);
+    [Fact]
+    public void ExecuteReader_HasParamter()
+    {
+        using var cn = PostgresDB.ConnectionOpenAsNew(Logger);
 
-		var sql = @"with
+        var sql = @"with
 data_ds(c1, c2) as (
 	values
 	(1,1)
@@ -62,15 +62,15 @@ where
 	c1 = :val
 ";
 
-		var sq = new SelectQuery(sql);
-		sq.AddParameter(":val", 1);
+        var sq = new SelectQuery(sql);
+        sq.AddParameter(":val", 1);
 
-		using var r = cn.ExecuteReader(sq);
-		var cnt = 0;
-		while (r.Read())
-		{
-			cnt++;
-		}
-		Assert.Equal(2, cnt);
-	}
+        using var r = cn.ExecuteReader(sq);
+        var cnt = 0;
+        while (r.Read())
+        {
+            cnt++;
+        }
+        Assert.Equal(2, cnt);
+    }
 }

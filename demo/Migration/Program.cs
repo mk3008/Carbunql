@@ -18,17 +18,17 @@ Console.ReadLine();
 
 static string ReadMultiLine()
 {
-	StringBuilder sb = new StringBuilder();
+    StringBuilder sb = new StringBuilder();
 
-	while (true)
-	{
-		var line = Console.ReadLine();
-		if (string.IsNullOrEmpty(line))
-		{
-			break;
-		}
-		sb.AppendLine(line);
-	}
-	return sb.ToString();
+    while (true)
+    {
+        var line = Console.ReadLine();
+        if (string.IsNullOrEmpty(line))
+        {
+            break;
+        }
+        sb.AppendLine(line);
+    }
+    return sb.ToString();
 }
 

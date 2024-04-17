@@ -8,17 +8,17 @@ namespace Carbunql.Building.Test;
 
 public class GetInternalQueriesTest
 {
-	private readonly ITestOutputHelper Output;
+    private readonly ITestOutputHelper Output;
 
-	public GetInternalQueriesTest(ITestOutputHelper output)
-	{
-		Output = output;
-	}
+    public GetInternalQueriesTest(ITestOutputHelper output)
+    {
+        Output = output;
+    }
 
-	[Fact]
-	public void CountTest()
-	{
-		var sq = new SelectQuery(@"
+    [Fact]
+    public void CountTest()
+    {
+        var sq = new SelectQuery(@"
 with
 cte_a as (
 	--index:0 cte query
@@ -71,20 +71,20 @@ select
 	--index:10 inline query
 	(select 1) as id");
 
-		var cnt = 0;
-		foreach (var q in sq.GetInternalQueries())
-		{
-			Output.WriteLine($"index : {cnt}");
-			Output.WriteLine(q.ToText());
-			cnt++;
-		}
+        var cnt = 0;
+        foreach (var q in sq.GetInternalQueries())
+        {
+            Output.WriteLine($"index : {cnt}");
+            Output.WriteLine(q.ToText());
+            cnt++;
+        }
 
-		Assert.Equal(11, cnt);
-	}
+        Assert.Equal(11, cnt);
+    }
 
-	private void InjectUserFilter(SelectQuery sq, string filteredTable, out bool isSuccess)
-	{
-		var filterQuery = new SelectQuery(@"
+    private void InjectUserFilter(SelectQuery sq, string filteredTable, out bool isSuccess)
+    {
+        var filterQuery = new SelectQuery(@"
 select 
 	userid
 from
@@ -99,35 +99,35 @@ where
 			userid = @currentUser
 )
     ");
-		isSuccess = false;
+        isSuccess = false;
 
-		foreach (var q in sq.GetInternalQueries())
-		{
-			var t = q.GetSelectableTables().Where(x => x.Table is PhysicalTable pt && pt.Table.IsEqualNoCase(filteredTable)).FirstOrDefault();
-			if (t == null) continue;
+        foreach (var q in sq.GetInternalQueries())
+        {
+            var t = q.GetSelectableTables().Where(x => x.Table is PhysicalTable pt && pt.Table.IsEqualNoCase(filteredTable)).FirstOrDefault();
+            if (t == null) continue;
 
-			q.AddComment("user filter injected");
-			var cnd = new InClause(new ColumnValue(t, "CreatedBy"), new QueryContainer(filterQuery));
-			q.Where(cnd);
-			q.AddParameter("@currentUser", 1);
-			isSuccess = true;
-			return;
-		}
-	}
+            q.AddComment("user filter injected");
+            var cnd = new InClause(new ColumnValue(t, "CreatedBy"), new QueryContainer(filterQuery));
+            q.Where(cnd);
+            q.AddParameter("@currentUser", 1);
+            isSuccess = true;
+            return;
+        }
+    }
 
-	[Fact]
-	public void InjectWhereTest()
-	{
-		var sq = new SelectQuery(@"
+    [Fact]
+    public void InjectWhereTest()
+    {
+        var sq = new SelectQuery(@"
 select a.* from articles as a order by CreatedOn desc
 ");
 
-		var filtered = false;
-		InjectUserFilter(sq, "articles", out filtered);
-		Output.WriteLine(sq.ToText());
+        var filtered = false;
+        InjectUserFilter(sq, "articles", out filtered);
+        Output.WriteLine(sq.ToText());
 
-		Assert.True(filtered);
-		var expect = @"/*
+        Assert.True(filtered);
+        var expect = @"/*
   @currentUser = 1
 */
 /* user filter injected */
@@ -154,13 +154,13 @@ WHERE
 ORDER BY
     CreatedOn DESC".Replace("\r", "").Replace("\n", "");
 
-		Assert.Equal(expect, sq.ToText().Replace("\r", "").Replace("\n", ""));
-	}
+        Assert.Equal(expect, sq.ToText().Replace("\r", "").Replace("\n", ""));
+    }
 
-	[Fact]
-	public void InjectWhereTest_Joined()
-	{
-		var sq = new SelectQuery(@"
+    [Fact]
+    public void InjectWhereTest_Joined()
+    {
+        var sq = new SelectQuery(@"
 select 
     c.categoryname
     , a.*
@@ -171,12 +171,12 @@ order by
    a.CreatedOn desc
 ");
 
-		var filtered = false;
-		InjectUserFilter(sq, "categories", out filtered);
-		Output.WriteLine(sq.ToText());
+        var filtered = false;
+        InjectUserFilter(sq, "categories", out filtered);
+        Output.WriteLine(sq.ToText());
 
-		Assert.True(filtered);
-		var expect = @"/*
+        Assert.True(filtered);
+        var expect = @"/*
   @currentUser = 1
 */
 /* user filter injected */
@@ -205,13 +205,13 @@ WHERE
 ORDER BY
     a.CreatedOn DESC".Replace("\r", "").Replace("\n", "");
 
-		Assert.Equal(expect, sq.ToText().Replace("\r", "").Replace("\n", ""));
-	}
+        Assert.Equal(expect, sq.ToText().Replace("\r", "").Replace("\n", ""));
+    }
 
-	[Fact]
-	public void InjectWhereTest_SubQuery()
-	{
-		var sq = new SelectQuery(@"
+    [Fact]
+    public void InjectWhereTest_SubQuery()
+    {
+        var sq = new SelectQuery(@"
 select 
     a2.*
 from
@@ -222,12 +222,12 @@ order by
    a2.CreatedOn desc
 ");
 
-		var filtered = false;
-		InjectUserFilter(sq, "articles", out filtered);
-		Output.WriteLine(sq.ToText());
+        var filtered = false;
+        InjectUserFilter(sq, "articles", out filtered);
+        Output.WriteLine(sq.ToText());
 
-		Assert.True(filtered);
-		var expect = @"/*
+        Assert.True(filtered);
+        var expect = @"/*
   @currentUser = 1
 */
 SELECT
@@ -259,13 +259,13 @@ FROM
 ORDER BY
     a2.CreatedOn DESC".Replace("\r", "").Replace("\n", "");
 
-		Assert.Equal(expect, sq.ToText().Replace("\r", "").Replace("\n", ""));
-	}
+        Assert.Equal(expect, sq.ToText().Replace("\r", "").Replace("\n", ""));
+    }
 
-	[Fact]
-	public void InjectWhereTest_CTE()
-	{
-		var sq = new SelectQuery(@"
+    [Fact]
+    public void InjectWhereTest_CTE()
+    {
+        var sq = new SelectQuery(@"
 with
 a2 as (
 	select a1.* from articles as a1
@@ -278,12 +278,12 @@ order by
    a2.CreatedOn desc
 ");
 
-		var filtered = false;
-		InjectUserFilter(sq, "articles", out filtered);
-		Output.WriteLine(sq.ToText());
+        var filtered = false;
+        InjectUserFilter(sq, "articles", out filtered);
+        Output.WriteLine(sq.ToText());
 
-		Assert.True(filtered);
-		var expect = @"/*
+        Assert.True(filtered);
+        var expect = @"/*
   @currentUser = 1
 */
 WITH
@@ -317,13 +317,13 @@ FROM
 ORDER BY
     a2.CreatedOn DESC".Replace("\r", "").Replace("\n", "");
 
-		Assert.Equal(expect, sq.ToText().Replace("\r", "").Replace("\n", ""));
-	}
+        Assert.Equal(expect, sq.ToText().Replace("\r", "").Replace("\n", ""));
+    }
 
-	[Fact]
-	public void CountTest_SubQuery()
-	{
-		var sq = new SelectQuery(@"
+    [Fact]
+    public void CountTest_SubQuery()
+    {
+        var sq = new SelectQuery(@"
 select
 	*
 from
@@ -345,14 +345,14 @@ from
 	) d
 ");
 
-		var cnt = 0;
-		foreach (var q in sq.GetInternalQueries())
-		{
-			Output.WriteLine($"index : {cnt}");
-			Output.WriteLine(q.ToText());
-			cnt++;
-		}
+        var cnt = 0;
+        foreach (var q in sq.GetInternalQueries())
+        {
+            Output.WriteLine($"index : {cnt}");
+            Output.WriteLine(q.ToText());
+            cnt++;
+        }
 
-		Assert.Equal(4, cnt);
-	}
+        Assert.Equal(4, cnt);
+    }
 }

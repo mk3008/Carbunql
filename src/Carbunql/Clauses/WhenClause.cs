@@ -5,115 +5,115 @@ namespace Carbunql.Clauses;
 
 public class WhenClause : IList<MergeCondition>, IQueryCommandable
 {
-	public List<MergeCondition> Conditions { get; set; } = new();
+    public List<MergeCondition> Conditions { get; set; } = new();
 
-	public IEnumerable<SelectQuery> GetInternalQueries()
-	{
-		foreach (var condition in Conditions)
-		{
-			foreach (var item in condition.GetInternalQueries())
-			{
-				yield return item;
-			}
-		}
-	}
+    public IEnumerable<SelectQuery> GetInternalQueries()
+    {
+        foreach (var condition in Conditions)
+        {
+            foreach (var item in condition.GetInternalQueries())
+            {
+                yield return item;
+            }
+        }
+    }
 
-	public IEnumerable<PhysicalTable> GetPhysicalTables()
-	{
-		foreach (var condition in Conditions)
-		{
-			foreach (var item in condition.GetPhysicalTables())
-			{
-				yield return item;
-			}
-		}
-	}
+    public IEnumerable<PhysicalTable> GetPhysicalTables()
+    {
+        foreach (var condition in Conditions)
+        {
+            foreach (var item in condition.GetPhysicalTables())
+            {
+                yield return item;
+            }
+        }
+    }
 
-	public IEnumerable<CommonTable> GetCommonTables()
-	{
-		foreach (var condition in Conditions)
-		{
-			foreach (var item in condition.GetCommonTables())
-			{
-				yield return item;
-			}
-		}
-	}
+    public IEnumerable<CommonTable> GetCommonTables()
+    {
+        foreach (var condition in Conditions)
+        {
+            foreach (var item in condition.GetCommonTables())
+            {
+                yield return item;
+            }
+        }
+    }
 
-	public IEnumerable<QueryParameter> GetParameters()
-	{
-		foreach (var item in Conditions)
-		{
-			foreach (var p in item.GetParameters())
-			{
-				yield return p;
-			}
-		}
-	}
+    public IEnumerable<QueryParameter> GetParameters()
+    {
+        foreach (var item in Conditions)
+        {
+            foreach (var p in item.GetParameters())
+            {
+                yield return p;
+            }
+        }
+    }
 
-	public IEnumerable<Token> GetTokens(Token? parent)
-	{
-		foreach (var condition in Conditions)
-		{
-			foreach (var item in condition.GetTokens(parent)) yield return item;
-		}
-	}
+    public IEnumerable<Token> GetTokens(Token? parent)
+    {
+        foreach (var condition in Conditions)
+        {
+            foreach (var item in condition.GetTokens(parent)) yield return item;
+        }
+    }
 
-	#region implements IList<MergeCondition>
-	public MergeCondition this[int index] { get => ((IList<MergeCondition>)Conditions)[index]; set => ((IList<MergeCondition>)Conditions)[index] = value; }
+    #region implements IList<MergeCondition>
+    public MergeCondition this[int index] { get => ((IList<MergeCondition>)Conditions)[index]; set => ((IList<MergeCondition>)Conditions)[index] = value; }
 
-	public int Count => ((ICollection<MergeCondition>)Conditions).Count;
+    public int Count => ((ICollection<MergeCondition>)Conditions).Count;
 
-	public bool IsReadOnly => ((ICollection<MergeCondition>)Conditions).IsReadOnly;
+    public bool IsReadOnly => ((ICollection<MergeCondition>)Conditions).IsReadOnly;
 
-	public void Add(MergeCondition item)
-	{
-		((ICollection<MergeCondition>)Conditions).Add(item);
-	}
+    public void Add(MergeCondition item)
+    {
+        ((ICollection<MergeCondition>)Conditions).Add(item);
+    }
 
-	public void Clear()
-	{
-		((ICollection<MergeCondition>)Conditions).Clear();
-	}
+    public void Clear()
+    {
+        ((ICollection<MergeCondition>)Conditions).Clear();
+    }
 
-	public bool Contains(MergeCondition item)
-	{
-		return ((ICollection<MergeCondition>)Conditions).Contains(item);
-	}
+    public bool Contains(MergeCondition item)
+    {
+        return ((ICollection<MergeCondition>)Conditions).Contains(item);
+    }
 
-	public void CopyTo(MergeCondition[] array, int arrayIndex)
-	{
-		((ICollection<MergeCondition>)Conditions).CopyTo(array, arrayIndex);
-	}
+    public void CopyTo(MergeCondition[] array, int arrayIndex)
+    {
+        ((ICollection<MergeCondition>)Conditions).CopyTo(array, arrayIndex);
+    }
 
-	public IEnumerator<MergeCondition> GetEnumerator()
-	{
-		return ((IEnumerable<MergeCondition>)Conditions).GetEnumerator();
-	}
+    public IEnumerator<MergeCondition> GetEnumerator()
+    {
+        return ((IEnumerable<MergeCondition>)Conditions).GetEnumerator();
+    }
 
-	public int IndexOf(MergeCondition item)
-	{
-		return ((IList<MergeCondition>)Conditions).IndexOf(item);
-	}
+    public int IndexOf(MergeCondition item)
+    {
+        return ((IList<MergeCondition>)Conditions).IndexOf(item);
+    }
 
-	public void Insert(int index, MergeCondition item)
-	{
-		((IList<MergeCondition>)Conditions).Insert(index, item);
-	}
+    public void Insert(int index, MergeCondition item)
+    {
+        ((IList<MergeCondition>)Conditions).Insert(index, item);
+    }
 
-	public bool Remove(MergeCondition item)
-	{
-		return ((ICollection<MergeCondition>)Conditions).Remove(item);
-	}
+    public bool Remove(MergeCondition item)
+    {
+        return ((ICollection<MergeCondition>)Conditions).Remove(item);
+    }
 
-	public void RemoveAt(int index)
-	{
-		((IList<MergeCondition>)Conditions).RemoveAt(index);
-	}
+    public void RemoveAt(int index)
+    {
+        ((IList<MergeCondition>)Conditions).RemoveAt(index);
+    }
 
-	IEnumerator IEnumerable.GetEnumerator()
-	{
-		return ((IEnumerable)Conditions).GetEnumerator();
-	}
-	#endregion
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return ((IEnumerable)Conditions).GetEnumerator();
+    }
+    #endregion
 }

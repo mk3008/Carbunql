@@ -4,32 +4,32 @@ namespace Carbunql.Building.Test;
 
 public class IEnumerableTest
 {
-	private readonly QueryCommandMonitor Monitor;
+    private readonly QueryCommandMonitor Monitor;
 
-	public IEnumerableTest(ITestOutputHelper output)
-	{
-		Monitor = new QueryCommandMonitor(output);
-		Output = output;
-	}
+    public IEnumerableTest(ITestOutputHelper output)
+    {
+        Monitor = new QueryCommandMonitor(output);
+        Output = output;
+    }
 
-	private ITestOutputHelper Output { get; set; }
+    private ITestOutputHelper Output { get; set; }
 
-	[Fact]
-	public void ToValuesQuery()
-	{
-		var results = new List<ApiResult>()
-		{
-			new (){ ResultId = 1 , ResultText = "a", ResultValue = 10, ResultDate = new DateTime(2000,1,1), ResultBool= true },
-			new (){ ResultId = 2 , ResultText = "b", ResultValue = 20, ResultDate = new DateTime(2010,10,10), ResultBool= false },
-			new (){ ResultId = 3 , ResultText = null, ResultValue = null, ResultDate = null, ResultBool= null},
-		};
+    [Fact]
+    public void ToValuesQuery()
+    {
+        var results = new List<ApiResult>()
+        {
+            new (){ ResultId = 1 , ResultText = "a", ResultValue = 10, ResultDate = new DateTime(2000,1,1), ResultBool= true },
+            new (){ ResultId = 2 , ResultText = "b", ResultValue = 20, ResultDate = new DateTime(2010,10,10), ResultBool= false },
+            new (){ ResultId = 3 , ResultText = null, ResultValue = null, ResultDate = null, ResultBool= null},
+        };
 
-		var q = results.ToValuesQuery();
+        var q = results.ToValuesQuery();
 
-		var actual = q.ToText(true);
-		Output.WriteLine(actual);
+        var actual = q.ToText(true);
+        Output.WriteLine(actual);
 
-		var expect = @"/*
+        var expect = @"/*
   r0c0 = 1
   r0c1 = 'a'
   r0c2 = 10
@@ -51,25 +51,25 @@ VALUES
     (:r1c0, :r1c1, :r1c2, :r1c3, :r1c4),
     (:r2c0, :r2c1, :r2c2, :r2c3, :r2c4)";
 
-		Assert.Equal(expect, actual, true, true, true);
-	}
+        Assert.Equal(expect, actual, true, true, true);
+    }
 
-	[Fact]
-	public void ToSelectQuery()
-	{
-		var results = new List<ApiResult>()
-		{
-			new (){ ResultId = 1 , ResultText = "a", ResultValue = 10, ResultDate = new DateTime(2000,1,1), ResultBool= true },
-			new (){ ResultId = 2 , ResultText = "b", ResultValue = 20, ResultDate = new DateTime(2010,10,10), ResultBool= false },
-			new (){ ResultId = 3 , ResultText = null, ResultValue = null, ResultDate = null, ResultBool= null},
-		};
+    [Fact]
+    public void ToSelectQuery()
+    {
+        var results = new List<ApiResult>()
+        {
+            new (){ ResultId = 1 , ResultText = "a", ResultValue = 10, ResultDate = new DateTime(2000,1,1), ResultBool= true },
+            new (){ ResultId = 2 , ResultText = "b", ResultValue = 20, ResultDate = new DateTime(2010,10,10), ResultBool= false },
+            new (){ ResultId = 3 , ResultText = null, ResultValue = null, ResultDate = null, ResultBool= null},
+        };
 
-		var q = results.ToSelectQuery();
+        var q = results.ToSelectQuery();
 
-		var actual = q.ToText(true);
-		Output.WriteLine(actual);
+        var actual = q.ToText(true);
+        Output.WriteLine(actual);
 
-		var expect = @"/*
+        var expect = @"/*
   r0c0 = 1
   r0c1 = 'a'
   r0c2 = 10
@@ -102,47 +102,47 @@ FROM
         result_id, result_text, result_value, result_date, result_bool
     )";
 
-		Assert.Equal(expect, actual, true, true, true);
-	}
+        Assert.Equal(expect, actual, true, true, true);
+    }
 
-	[Fact]
-	public void ToSelectQuery_50k()
-	{
-		var results = GenerateDummyResults(50000);
+    [Fact]
+    public void ToSelectQuery_50k()
+    {
+        var results = GenerateDummyResults(50000);
 
-		var q = results.ToSelectQuery();
+        var q = results.ToSelectQuery();
 
-		var actual = q.ToText(false);
-		Output.WriteLine(actual);
-	}
+        var actual = q.ToText(false);
+        Output.WriteLine(actual);
+    }
 
-	private static List<ApiResult> GenerateDummyResults(int count)
-	{
-		var dummyResults = new List<ApiResult>();
+    private static List<ApiResult> GenerateDummyResults(int count)
+    {
+        var dummyResults = new List<ApiResult>();
 
-		for (int i = 0; i < count; i++)
-		{
-			var result = new ApiResult
-			{
-				ResultId = i + 1,
-				ResultText = "dummy",
-				ResultValue = i * 10,
-				ResultDate = DateTime.Now.AddDays(i),
-				ResultBool = i % 2 == 0
-			};
+        for (int i = 0; i < count; i++)
+        {
+            var result = new ApiResult
+            {
+                ResultId = i + 1,
+                ResultText = "dummy",
+                ResultValue = i * 10,
+                ResultDate = DateTime.Now.AddDays(i),
+                ResultBool = i % 2 == 0
+            };
 
-			dummyResults.Add(result);
-		}
+            dummyResults.Add(result);
+        }
 
-		return dummyResults;
-	}
+        return dummyResults;
+    }
 
-	public class ApiResult
-	{
-		public int ResultId { get; set; }
-		public string? ResultText { get; set; }
-		public long? ResultValue { get; set; }
-		public DateTime? ResultDate { get; set; }
-		public bool? ResultBool { get; set; }
-	}
+    public class ApiResult
+    {
+        public int ResultId { get; set; }
+        public string? ResultText { get; set; }
+        public long? ResultValue { get; set; }
+        public DateTime? ResultDate { get; set; }
+        public bool? ResultBool { get; set; }
+    }
 }
