@@ -7,7 +7,7 @@
 		<Title></Title>
 		<Copyright>mk3008net</Copyright>
 		<Description>Carbunql provides query parsing and building functionality.</Description>
-		<Version>0.7.6</Version>
+		<Version>0.7.7</Version>
 		<Authors>mk3008net</Authors>
 		<PackageProjectUrl>https://github.com/mk3008/Carbunql</PackageProjectUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
@@ -24,8 +24,8 @@
 
 	<ItemGroup>
 		<None Include="..\..\LICENSE">
-		  <Pack>True</Pack>
-		  <PackagePath>\</PackagePath>
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
 		</None>
 		<None Include="..\..\README.md">
 			<Pack>True</Pack>
