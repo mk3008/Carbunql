@@ -1,5 +1,6 @@
 ﻿using Carbunql.Building;
 using Carbunql.Clauses;
+using Carbunql.Postgres.Linq;
 
 namespace Carbunql.Postgres;
 
@@ -23,5 +24,12 @@ public static class FromnExtension
         source.As(alias);
         var r = (T)Activator.CreateInstance(typeof(T))!;
         return (source, r);
+    }
+
+    public static (FromClause, T) FromAs<T>(this SelectQuery source, SelectQuery<T> query, string alias)
+    {
+        var r = (T)Activator.CreateInstance(typeof(T))!;
+        var (from, _) = source.From(query).As(alias);
+        return (from, r);
     }
 }
