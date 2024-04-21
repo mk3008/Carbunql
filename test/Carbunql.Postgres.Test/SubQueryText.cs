@@ -153,13 +153,42 @@ FROM
         return sq;
     }
 
+
+    [Fact]
+    public void QueryClassTest()
+    {
+        var sq = new SelectQuery();
+        var (from, a) = sq.FromAs(SampleQuery.Query, "a");
+
+        sq.Select(() => a.a_id);
+        sq.Select(() => a.value * 2).As("value");
+
+        Monitor.Log(sq);
+
+        Assert.Equal(45, sq.GetTokens().ToList().Count);
+
+        var sql = @"SELECT
+    a.a_id,
+    a.value * 2 AS value
+FROM
+    (
+        SELECT
+            a.a_id,
+            a.text,
+            b.value
+        FROM
+            table_a AS a
+            INNER JOIN table_b AS b ON a.a_id = b.a_id
+    ) AS a";
+
+        Assert.Equal(sql, sq.ToText(), true, true, true);
+    }
+
     public record struct RecordA(int a_id, string text, int value, bool is_enabled, double rate, DateTime timestamp, Gender gender);
 
     public record struct RecordB(int a_id, int b_id, string text, int value);
 
     public record struct SubQueryRow(int a_id, string text, int value);
-
-    public class Myclass { public int MyProperty { get; set; } }
 
     public enum Gender
     {

@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Carbunql.Postgres;
+﻿namespace Carbunql.Postgres;
 
 public class SelectQuery<T> : SelectQuery
 {
+    public SelectQuery() : base()
+    {
+    }
 
+    public SelectQuery(string query) : base(query)
+    {
+    }
 }
