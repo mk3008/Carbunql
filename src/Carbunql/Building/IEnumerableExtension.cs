@@ -19,7 +19,7 @@ public static class IEnumerableExtension
         {
             var lst = new List<ValueBase>();
             var c = 0;
-            foreach (var column in typeof(T).GetProperties().Where(x => x.CanRead && x.CanWrite).Select(x => x.GetValue(row)))
+            foreach (var column in typeof(T).GetProperties().Where(x => x.CanRead).Select(x => x.GetValue(row)))
             {
                 var name = $"r{r}c{c}";
                 var v = placeholderIndentifer + name;
@@ -40,7 +40,7 @@ public static class IEnumerableExtension
 
     public static SelectQuery ToSelectQuery<T>(this IEnumerable<T> source, string placeholderIndentifer, Func<string, string> propertyNameConverter)
     {
-        var columns = typeof(T).GetProperties().Where(x => x.CanRead && x.CanWrite).Select(x => propertyNameConverter(x.Name)).ToList();
+        var columns = typeof(T).GetProperties().Where(x => x.CanRead).Select(x => propertyNameConverter(x.Name));
         var vq = source.ToValuesQuery(placeholderIndentifer);
         var sq = vq.ToSelectQuery(columns);
 

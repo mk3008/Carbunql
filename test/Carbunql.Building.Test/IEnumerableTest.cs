@@ -116,6 +116,60 @@ FROM
         Output.WriteLine(actual);
     }
 
+    [Fact]
+    public void AnonymousTypeTest_ToSelectQuery()
+    {
+        var students = new[]
+        {
+            new { Name = "Alice", Age = 20 },
+            new { Name = "Bob", Age = 22 },
+            new { Name = "Charlie", Age = 21 }
+        };
+
+        var q = students.ToSelectQuery();
+
+        var actual = q.ToText(false);
+        Output.WriteLine(actual);
+
+        var expect = @"SELECT
+    v.name,
+    v.age
+FROM
+    (
+        VALUES
+            (:r0c0, :r0c1),
+            (:r1c0, :r1c1),
+            (:r2c0, :r2c1)
+    ) AS v (
+        name, age
+    )";
+
+        Assert.Equal(expect, actual, true, true, true);
+    }
+
+    [Fact]
+    public void AnonymousTypeTest_ToValuesQuery()
+    {
+        var students = new[]
+        {
+            new { Name = "Alice", Age = 20 },
+            new { Name = "Bob", Age = 22 },
+            new { Name = "Charlie", Age = 21 }
+        };
+
+        var q = students.ToValuesQuery();
+
+        var actual = q.ToText(false);
+        Output.WriteLine(actual);
+
+        var expect = @"VALUES
+    (:r0c0, :r0c1),
+    (:r1c0, :r1c1),
+    (:r2c0, :r2c1)";
+
+        Assert.Equal(expect, actual, true, true, true);
+    }
+
     private static List<ApiResult> GenerateDummyResults(int count)
     {
         var dummyResults = new List<ApiResult>();
