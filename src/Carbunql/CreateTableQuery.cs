@@ -26,6 +26,13 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
         Table = t.Table;
     }
 
+    public CreateTableQuery(TableDefinitionClause clause)
+    {
+        Schema = clause.Schema;
+        Table = clause.Table;
+        DefinitionClause = clause;
+    }
+
     public bool IsTemporary { get; set; } = false;
 
     public bool HasIfNotExists { get; set; } = false;
@@ -168,12 +175,9 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
             var sq = new SelectQuery();
             var (_, t) = sq.From(this.GetTableFullName()).As("t");
 
-            foreach (var item in DefinitionClause)
+            foreach (var column in DefinitionClause.OfType<ColumnDefinition>())
             {
-                if (item is ColumnDefinition column)
-                {
-                    sq.Select(t, column.ColumnName);
-                }
+                sq.Select(t, column.ColumnName);
             }
 
             return sq;
@@ -216,3 +220,4 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
         return queryset;
     }
 }
+

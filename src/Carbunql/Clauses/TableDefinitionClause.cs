@@ -11,6 +11,12 @@ public class TableDefinitionClause : QueryCommandCollection<ITableDefinition>, I
         Table = t.Table;
     }
 
+    public TableDefinitionClause(string schema, string table)
+    {
+        Schema = schema;
+        Table = table;
+    }
+
     public string Schema { get; init; }
 
     public string Table { get; init; }

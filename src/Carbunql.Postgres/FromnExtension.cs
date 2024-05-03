@@ -1,6 +1,5 @@
 ﻿using Carbunql.Building;
 using Carbunql.Clauses;
-using Carbunql.Postgres.Linq;
 
 namespace Carbunql.Postgres;
 

@@ -7,6 +7,14 @@ namespace Carbunql.Definitions;
 
 public class ColumnDefinition : ITableDefinition
 {
+    public ColumnDefinition(string schema, string table, string columnName, string columnType)
+    {
+        Schema = schema;
+        Table = table;
+        ColumnName = columnName;
+        ColumnType = ValueParser.Parse(columnType);
+    }
+
     public ColumnDefinition(ITable t, string columnName, string columnType)
     {
         Schema = t.Schema;

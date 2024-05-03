@@ -27,6 +27,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demo.Migration", "..\demo\M
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demo.Parse", "..\demo\Parse\Demo.Parse.csproj", "{42FA31DD-B42A-4F88-BEDE-6BE9BF31BE2D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carbunql.Annotation.Test", "..\test\Carbunql.Annotation.Test\Carbunql.Annotation.Test.csproj", "{E76AE876-D280-401B-BE02-7500B608E320}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,10 @@ Global
 		{42FA31DD-B42A-4F88-BEDE-6BE9BF31BE2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42FA31DD-B42A-4F88-BEDE-6BE9BF31BE2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42FA31DD-B42A-4F88-BEDE-6BE9BF31BE2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E76AE876-D280-401B-BE02-7500B608E320}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E76AE876-D280-401B-BE02-7500B608E320}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E76AE876-D280-401B-BE02-7500B608E320}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E76AE876-D280-401B-BE02-7500B608E320}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
