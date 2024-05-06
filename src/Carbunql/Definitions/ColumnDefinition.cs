@@ -7,12 +7,22 @@ namespace Carbunql.Definitions;
 
 public class ColumnDefinition : ITableDefinition
 {
+    public ColumnDefinition(string schema, string table, string columnName, string columnType)
+    {
+        Schema = schema;
+        Table = table;
+        ColumnName = columnName;
+        ColumnType = ValueParser.Parse(columnType);
+        RelationColumnType = ColumnType;
+    }
+
     public ColumnDefinition(ITable t, string columnName, string columnType)
     {
         Schema = t.Schema;
         Table = t.Table;
         ColumnName = columnName;
         ColumnType = ValueParser.Parse(columnType);
+        RelationColumnType = ColumnType;
     }
 
     public ColumnDefinition(ITable t, string columnName, ValueBase columnType)
@@ -21,6 +31,7 @@ public class ColumnDefinition : ITableDefinition
         Table = t.Table;
         ColumnName = columnName;
         ColumnType = columnType;
+        RelationColumnType = ColumnType;
     }
 
     public string Schema { get; init; }
@@ -30,6 +41,8 @@ public class ColumnDefinition : ITableDefinition
     public string ColumnName { get; set; }
 
     public ValueBase ColumnType { get; set; }
+
+    public ValueBase RelationColumnType { get; set; }
 
     public bool IsNullable { get; set; } = false;
 

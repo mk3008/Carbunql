@@ -1,5 +1,6 @@
 ﻿namespace Carbunql;
 
+[Obsolete]
 public class CommandAttribute : Attribute
 {
     public CommandAttribute(string text)

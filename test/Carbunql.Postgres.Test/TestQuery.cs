@@ -1,6 +1,6 @@
 ﻿namespace Carbunql.Postgres.Test;
 
-public static class SampleQuery
+public static class TestQuery
 {
     public static string CommandText =>
 """

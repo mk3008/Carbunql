@@ -6,21 +6,39 @@ namespace Carbunql.Definitions;
 
 public class PrimaryKeyConstraint : IConstraint
 {
-    public PrimaryKeyConstraint(string schema, string table)
+    public PrimaryKeyConstraint(string schema, string table, IEnumerable<string> columns)
     {
         Schema = schema;
         Table = table;
+        PrimaryKeyMaps = columns.Select(x => new PrimaryKeyMap(x, string.Empty)).ToList();
     }
 
-    public PrimaryKeyConstraint(ITable t)
+    public PrimaryKeyConstraint(string schema, string table, IEnumerable<PrimaryKeyMap> maps)
+    {
+        Schema = schema;
+        Table = table;
+        PrimaryKeyMaps = maps.ToList();
+    }
+
+    public PrimaryKeyConstraint(ITable t, IEnumerable<string> columns)
     {
         Schema = t.Schema;
         Table = t.Table;
+        PrimaryKeyMaps = columns.Select(x => new PrimaryKeyMap(x, string.Empty)).ToList();
+    }
+
+    public PrimaryKeyConstraint(ITable t, IEnumerable<PrimaryKeyMap> maps)
+    {
+        Schema = t.Schema;
+        Table = t.Table;
+        PrimaryKeyMaps = maps.ToList();
     }
 
     public string ConstraintName { get; set; } = string.Empty;
 
-    public List<string> ColumnNames { get; set; } = new();
+    public List<PrimaryKeyMap> PrimaryKeyMaps { get; } = new();
+
+    public IEnumerable<string> ColumnNames => PrimaryKeyMaps.Select(x => x.ColumnName);
 
     public string ColumnName => string.Empty;
 
@@ -82,4 +100,11 @@ public class PrimaryKeyConstraint : IConstraint
     //	query = default;
     //	return false;
     //}
+}
+
+
+public readonly struct PrimaryKeyMap(string ColumnName, string PropertyName)
+{
+    public string ColumnName { get; } = ColumnName;
+    public string PropertyName { get; } = PropertyName;
 }

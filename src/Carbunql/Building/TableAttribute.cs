@@ -1,5 +1,6 @@
 ﻿namespace Carbunql.Building;
 
+[Obsolete]
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false)]
 public class TableAttribute : System.ComponentModel.DataAnnotations.Schema.TableAttribute
 {

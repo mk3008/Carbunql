@@ -158,7 +158,7 @@ FROM
     public void QueryClassTest()
     {
         var sq = new SelectQuery();
-        var (from, a) = sq.FromAs(SampleQuery.Query, "a");
+        var (from, a) = sq.FromAs(TestQuery.Query, "a");
 
         sq.Select(() => a.a_id);
         sq.Select(() => a.value * 2).As("value");

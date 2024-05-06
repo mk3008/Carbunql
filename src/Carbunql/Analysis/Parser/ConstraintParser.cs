@@ -6,13 +6,6 @@ namespace Carbunql.Analysis;
 
 public static class ConstraintParser
 {
-    //public static IConstraint Parse(string text)
-    //{
-    //	var r = new SqlTokenReader(text);
-    //	var q = Parse(r);
-    //	return q;
-    //}
-
     public static IConstraint Parse(ITable t, ITokenReader r)
     {
         var token = r.Read();
@@ -26,10 +19,9 @@ public static class ConstraintParser
         if (token.IsEqualNoCase("primary key"))
         {
             var columns = ArrayParser.Parse(r);
-            return new PrimaryKeyConstraint(t)
+            return new PrimaryKeyConstraint(t, columns)
             {
                 ConstraintName = name,
-                ColumnNames = columns
             };
         }
 

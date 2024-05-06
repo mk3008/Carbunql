@@ -1,4 +1,6 @@
-﻿namespace Carbunql;
+﻿using Carbunql.Building;
+using Carbunql.Extensions;
+namespace Carbunql;
 
 public static class DbmsConfiguration
 {
@@ -19,6 +21,10 @@ public static class DbmsConfiguration
     public static string DecimalDbType { get; set; } = "numeric";
     public static string DateTimeDbType { get; set; } = "timestamp";
     public static string StringDbType { get; set; } = "text";
+
+    public static string Identity16DbType { get; set; } = "serial";
+    public static string Identity32DbType { get; set; } = "bigserial";
+    public static string Identity64DbType { get; set; } = "bigserial";
 
     /// <summary>
     /// Sets the configuration values for Oracle database.
@@ -42,6 +48,10 @@ public static class DbmsConfiguration
         DecimalDbType = "NUMBER"; // Oracle numeric type
         DateTimeDbType = "TIMESTAMP"; // Oracle timestamp type
         StringDbType = "VARCHAR2"; // Oracle string type
+
+        Identity16DbType = "NUMBER(5)"; // Oracle equivalent for serial
+        Identity32DbType = "NUMBER(10)"; // Oracle equivalent for bigserial
+        Identity64DbType = "NUMBER(19)"; // Oracle equivalent for bigserial
     }
 
     /// <summary>
@@ -66,6 +76,10 @@ public static class DbmsConfiguration
         DecimalDbType = "NUMERIC"; // SQL Server numeric type
         DateTimeDbType = "DATETIME"; // SQL Server datetime type
         StringDbType = "NVARCHAR(MAX)"; // SQL Server string type
+
+        Identity16DbType = "SMALLINT"; // SQL Server equivalent for serial
+        Identity32DbType = "INT"; // SQL Server equivalent for bigserial
+        Identity64DbType = "BIGINT"; // SQL Server equivalent for bigserial
     }
 
     /// <summary>
@@ -90,6 +104,10 @@ public static class DbmsConfiguration
         DecimalDbType = "DECIMAL"; // MySQL decimal type
         DateTimeDbType = "DATETIME"; // MySQL datetime type
         StringDbType = "TEXT"; // MySQL text type
+
+        Identity16DbType = "SMALLINT"; // MySQL equivalent for serial
+        Identity32DbType = "INT"; // MySQL equivalent for bigserial
+        Identity64DbType = "BIGINT"; // MySQL equivalent for bigserial
     }
 
     /// <summary>
@@ -114,5 +132,174 @@ public static class DbmsConfiguration
         DecimalDbType = "NUMERIC"; // SQLite numeric type
         DateTimeDbType = "TEXT"; // SQLite text type for storing datetime
         StringDbType = "TEXT"; // SQLite text type
+
+        Identity16DbType = "INTEGER"; // SQLite equivalent for serial
+        Identity32DbType = "INTEGER"; // SQLite equivalent for bigserial
+        Identity64DbType = "INTEGER"; // SQLite equivalent for bigserial
     }
+
+    public static string ToDbType(Type propertyType)
+    {
+        if (propertyType == typeof(bool) || Nullable.GetUnderlyingType(propertyType) == typeof(bool))
+        {
+            return BooleanDbType;
+        }
+        else if (propertyType == typeof(char) || Nullable.GetUnderlyingType(propertyType) == typeof(char))
+        {
+            return CharDbType;
+        }
+        else if (propertyType == typeof(sbyte) || Nullable.GetUnderlyingType(propertyType) == typeof(sbyte))
+        {
+            return SByteDbType;
+        }
+        else if (propertyType == typeof(byte) || Nullable.GetUnderlyingType(propertyType) == typeof(byte))
+        {
+            return ByteDbType;
+        }
+        else if (propertyType == typeof(short) || Nullable.GetUnderlyingType(propertyType) == typeof(short))
+        {
+            return Int16DbType;
+        }
+        else if (propertyType == typeof(ushort) || Nullable.GetUnderlyingType(propertyType) == typeof(ushort))
+        {
+            return UInt16DbType;
+        }
+        else if (propertyType == typeof(int) || Nullable.GetUnderlyingType(propertyType) == typeof(int))
+        {
+            return Int32DbType;
+        }
+        else if (propertyType == typeof(uint) || Nullable.GetUnderlyingType(propertyType) == typeof(uint))
+        {
+            return UInt32DbType;
+        }
+        else if (propertyType == typeof(long) || Nullable.GetUnderlyingType(propertyType) == typeof(long))
+        {
+            return Int64DbType;
+        }
+        else if (propertyType == typeof(ulong) || Nullable.GetUnderlyingType(propertyType) == typeof(ulong))
+        {
+            return UInt64DbType;
+        }
+        else if (propertyType == typeof(float) || Nullable.GetUnderlyingType(propertyType) == typeof(float))
+        {
+            return SingleDbType;
+        }
+        else if (propertyType == typeof(double) || Nullable.GetUnderlyingType(propertyType) == typeof(double))
+        {
+            return DoubleDbType;
+        }
+        else if (propertyType == typeof(decimal) || Nullable.GetUnderlyingType(propertyType) == typeof(decimal))
+        {
+            return DecimalDbType;
+        }
+        else if (propertyType == typeof(DateTime) || Nullable.GetUnderlyingType(propertyType) == typeof(DateTime))
+        {
+            return DateTimeDbType;
+        }
+        else if (propertyType == typeof(string) || Nullable.GetUnderlyingType(propertyType) == typeof(string))
+        {
+            return StringDbType;
+        }
+        else
+        {
+            throw new ArgumentException("Unsupported property type");
+        }
+    }
+
+    public static string ToIdentityDbType(Type propertyType)
+    {
+        if (propertyType == typeof(sbyte) || propertyType == typeof(byte) || propertyType == typeof(short))
+        {
+            return Identity16DbType;
+        }
+        else if (propertyType == typeof(int) || propertyType == typeof(uint))
+        {
+            return Identity32DbType;
+        }
+        else if (propertyType == typeof(long) || propertyType == typeof(ulong))
+        {
+            return Identity64DbType;
+        }
+        else
+        {
+            throw new ArgumentException("Unsupported property type for identity column");
+        }
+    }
+
+    private static bool IsPrimaryKeyColumn(string table, string column)
+    {
+        var pk = ConvertToDefaultPrimaryKeyColumnLogic(table);
+
+        if (string.Equals(pk, column, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public static Func<string, string, bool> IsPrimaryKeyColumnLogic { get; set; } = IsPrimaryKeyColumn;
+
+    private static string GetDefaultAutoNumberDefinition()
+    {
+        /*
+            Postgres :(empty)
+            MySQL    :AUTO_INCREMENT 
+            SQLServer:IDENTITY(1,1)
+            Oracle   :GENERATED BY DEFAULT AS IDENTITY
+        */
+        return string.Empty;
+    }
+
+    public static Func<string> GetDefaultAutoNumberDefinitionLogic { get; set; } = GetDefaultAutoNumberDefinition;
+
+    private static string ConvertToDefaultColumnName(string propertyName)
+    {
+        return propertyName.ToSnakeCase().ToLower();
+    }
+
+    public static Func<string, string> ConvertToDefaultColumnNameLogic { get; set; } = ConvertToDefaultColumnName;
+
+    private static string ConvertToDefaultTableName(Type classType)
+    {
+        return classType.Name.ToSnakeCase().ToLower();
+    }
+
+    public static Func<Type, string> ConvertToDefaultTableNameLogic { get; set; } = ConvertToDefaultTableName;
+
+    private static string ConvertToDefaultSchemaName(Type classType)
+    {
+        return string.Empty;
+    }
+
+    public static Func<Type, string> ConvertToDefaultSchemaNameLogic { get; set; } = ConvertToDefaultSchemaName;
+
+    private static string ConvertToDefaultPrimaryKeyColumn(string table)
+    {
+        return table + "_id";
+    }
+
+    public static Func<string, string> ConvertToDefaultPrimaryKeyColumnLogic { get; set; } = ConvertToDefaultPrimaryKeyColumn;
+
+    private static string ConvertToDefaultPrimaryKeyProperty(Type table)
+    {
+        var prop = table.GetProperties().Where(x => x.Name.IsEqualNoCase(table.Name + "id") || x.Name.IsEqualNoCase(table.Name + "_id")).FirstOrDefault();
+        if (prop != null) return prop.Name;
+        throw new InvalidProgramException();
+    }
+
+    public static Func<Type, string> ConvertToDefaultPrimaryKeyPropertyLogic { get; set; } = ConvertToDefaultPrimaryKeyProperty;
+
+    private static string ConvertToDefaultPrimaryKeyConstraintName(string table)
+    {
+        return table + "_pkey";
+    }
+
+    public static Func<string, string> ConvertToDefaultPrimaryKeyConstraintNameLogic { get; set; } = ConvertToDefaultPrimaryKeyConstraintName;
+
+    private static string GetDefaultIndexName(string propertyName)
+    {
+        return "idx_" + propertyName.ToSnakeCase().ToLower();
+    }
+
+    public static Func<string, string> GetDefaultIndexNameLogic { get; set; } = GetDefaultIndexName;
 }
