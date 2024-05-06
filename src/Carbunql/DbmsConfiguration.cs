@@ -1,5 +1,5 @@
 ﻿using Carbunql.Building;
-
+using Carbunql.Extensions;
 namespace Carbunql;
 
 public static class DbmsConfiguration
@@ -280,10 +280,26 @@ public static class DbmsConfiguration
 
     public static Func<string, string> ConvertToDefaultPrimaryKeyColumnLogic { get; set; } = ConvertToDefaultPrimaryKeyColumn;
 
+    private static string ConvertToDefaultPrimaryKeyProperty(Type table)
+    {
+        var prop = table.GetProperties().Where(x => x.Name.IsEqualNoCase(table.Name + "id") || x.Name.IsEqualNoCase(table.Name + "_id")).FirstOrDefault();
+        if (prop != null) return prop.Name;
+        throw new InvalidProgramException();
+    }
+
+    public static Func<Type, string> ConvertToDefaultPrimaryKeyPropertyLogic { get; set; } = ConvertToDefaultPrimaryKeyProperty;
+
     private static string ConvertToDefaultPrimaryKeyConstraintName(string table)
     {
         return table + "_pkey";
     }
 
     public static Func<string, string> ConvertToDefaultPrimaryKeyConstraintNameLogic { get; set; } = ConvertToDefaultPrimaryKeyConstraintName;
+
+    private static string GetDefaultIndexName(string propertyName)
+    {
+        return "idx_" + propertyName.ToSnakeCase().ToLower();
+    }
+
+    public static Func<string, string> GetDefaultIndexNameLogic { get; set; } = GetDefaultIndexName;
 }

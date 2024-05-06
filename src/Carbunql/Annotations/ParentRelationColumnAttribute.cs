@@ -1,46 +1,43 @@
-﻿using Carbunql.Building;
-using Carbunql.Definitions;
-using System.Reflection;
+﻿namespace Carbunql.Annotations;
 
-namespace Carbunql.Annotations;
+/// <summary>
+/// Attribute for specifying parent relation columns.
+/// </summary>
+[AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
+public class ParentRelationColumnAttribute : Attribute
+{
+    public ParentRelationColumnAttribute()
+    {
+    }
 
-//[AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
-//public class ParentRelationColumnAttribute : Attribute
-//{
-//    public ParentRelationColumnAttribute(string columnType, string parentIdentifer)
-//    {
-//        ColumnType = columnType;
-//        ParentProperty = parentIdentifer;
-//    }
+    public ParentRelationColumnAttribute(string parentProperty)
+    {
+        ParentProperty = parentProperty;
+    }
 
-//    public ParentRelationColumnAttribute(string columnName, string columnType, string parentIdentifer)
-//    {
-//        ColumnName = columnName;
-//        ColumnType = columnType;
-//        ParentProperty = parentIdentifer;
-//    }
+    /// <summary>
+    /// Specify when there are multiple relations to the same table or when column names differ between the source and target of the join.
+    /// It is similar to ColumnName, but specify Prefix if only a prefix can correspond.
+    /// If a prefix cannot express it, specify ColumnName.
+    /// </summary>
+    public string Prefix { get; set; } = string.Empty;
 
-//    public string ColumnName { get; set; } = string.Empty;
+    /// <summary>
+    /// Specify when there are multiple relations to the same table or when column names differ between the source and target of the join.
+    /// It is similar to ColumnName, but specify Prefix if only a prefix can correspond.
+    /// If a prefix cannot express it, specify ColumnName.
+    /// </summary>
+    public string ColumnName { get; set; } = string.Empty;
 
-//    public string ParentProperty { get; set; }
+    /// <summary>
+    /// Specifies the name of the property that corresponds to the primary key of the target type.
+    /// </summary>
+    public string ParentProperty { get; set; } = string.Empty;
 
-//    public string ColumnType { get; set; }
+    /// <summary>
+    /// Specifies the type of the column.
+    /// </summary>
+    public string ColumnType { get; set; } = string.Empty;
 
-//    public string Comment { get; set; } = string.Empty;
-
-//    public ParentRelationColumnDefinition ToDefinition(ITable t, PropertyInfo prop)
-//    {
-//        var columnName = !string.IsNullOrEmpty(ColumnName) ? ColumnName : prop.Name.ToSnakeCase() + "_id";
-
-//        var d = new ParentRelationColumnDefinition(t, columnName, ColumnType, prop.Name, ParentProperty)
-//        {
-//            Comment = Comment,
-//            IsNullable = prop.IsDbNullable(),
-//            IsAutoNumber = false,
-//            //RelationColumnType = ColumnType,
-//            SpecialColumn = SpecialColumn.ParentRelation
-//        };
-//        return d;
-//    }
-//}
-
+    public string Comment { get; set; } = string.Empty;
+}

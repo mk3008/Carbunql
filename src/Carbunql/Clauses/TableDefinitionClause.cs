@@ -86,7 +86,7 @@ public class TableDefinitionClause : QueryCommandCollection<ITableDefinition>, I
         var pkeys = Items.OfType<ColumnDefinition>().Where(x => x.IsPrimaryKey).Select(x => x.ColumnName).Distinct();
         if (pkeys.Any())
         {
-            var c = new PrimaryKeyConstraint(this) { ColumnNames = pkeys.ToList() };
+            var c = new PrimaryKeyConstraint(this, pkeys);
             lst.Add(new AlterTableQuery(new AlterTableClause(this, c)));
         }
 

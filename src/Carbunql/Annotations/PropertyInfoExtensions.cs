@@ -3,18 +3,35 @@ using System.Reflection;
 
 namespace Carbunql.Annotations;
 
-public static class PropertyInfoExtenstion
+/// <summary>
+/// Extension methods for PropertyInfo class.
+/// </summary>
+public static class PropertyInfoExtension
 {
-    public static ParameterValue ToParameterValue<T>(this PropertyInfo prop, T instance, string placeholderIdentifer)
+    /// <summary>
+    /// Converts the property value to a ParameterValue with the specified placeholder identifier.
+    /// </summary>
+    /// <typeparam name="T">The type of the instance containing the property.</typeparam>
+    /// <param name="prop">The property to convert.</param>
+    /// <param name="instance">The instance containing the property.</param>
+    /// <param name="placeholderIdentifier">The placeholder identifier to prepend to the key.</param>
+    /// <returns>A ParameterValue containing the property value.</returns>
+    public static ParameterValue ToParameterValue<T>(this PropertyInfo prop, T instance, string placeholderIdentifier)
     {
         var value = prop.GetValue(instance);
-        var key = placeholderIdentifer + prop.Name;
+        var key = placeholderIdentifier + prop.Name;
         return new ParameterValue(key, value);
     }
 
-    public static ParameterValue ToParameterNullValue(this PropertyInfo prop, string placeholderIdentifer)
+    /// <summary>
+    /// Converts the property to a ParameterValue with a null value and the specified placeholder identifier.
+    /// </summary>
+    /// <param name="prop">The property to convert.</param>
+    /// <param name="placeholderIdentifier">The placeholder identifier to prepend to the key.</param>
+    /// <returns>A ParameterValue with a null value.</returns>
+    public static ParameterValue ToParameterNullValue(this PropertyInfo prop, string placeholderIdentifier)
     {
-        var key = placeholderIdentifer + prop.Name;
+        var key = placeholderIdentifier + prop.Name;
         return new ParameterValue(key, null);
     }
 
@@ -25,43 +42,47 @@ public static class PropertyInfoExtenstion
     /// <returns><c>true</c> if the specified property should be nullable; otherwise, <c>false</c>.</returns>
     public static bool IsDbNullable(this PropertyInfo prop)
     {
-        var proptype = prop.PropertyType;
+        var propertyType = prop.PropertyType;
 
         // Treat string type as non-nullable in the context of a database.
-        // NOTE:
-        // Even Nullable<string> is considered as non-nullable.
-        // Reason:
-        // Allowing NULLs should be minimized as they are hard to handle,
+        // NOTE: Even Nullable<string> is considered as non-nullable.
+        // Reason: Allowing NULLs should be minimized as they are hard to handle,
         // and empty strings can be used as substitutes, hence this decision.
-        if (prop.PropertyType == typeof(string)) return false;
+        if (propertyType == typeof(string)) return false;
 
         // Treat reference types as nullable.
-        if (!proptype.IsValueType) return true;
+        if (!propertyType.IsValueType) return true;
 
         // Check if the type is a nullable value type.
-        if (Nullable.GetUnderlyingType(proptype) != null) return true;
+        if (Nullable.GetUnderlyingType(propertyType) != null) return true;
 
         // Otherwise, treat as non-nullable.
         return false;
     }
 
+    /// <summary>
+    /// Indicates whether the specified property is an auto-incrementing column.
+    /// </summary>
+    /// <param name="prop">The property to check.</param>
+    /// <returns><c>true</c> if the specified property is an auto-incrementing column; otherwise, <c>false</c>.</returns>
     public static bool IsAutoNumber(this PropertyInfo prop)
     {
-        // プロパティの型が数値型出ない場合、false
+        // If the property type is not a numeric type, return false.
         if (!IsNumericType(prop.PropertyType)) return false;
 
-        // プロパティが属しているクラスのTableAttributeを取得する
-        var atr = prop.DeclaringType?.GetCustomAttribute<TableAttribute>();
+        // Get the TableAttribute of the class to which the property belongs.
+        var attribute = prop.DeclaringType?.GetCustomAttribute<TableAttribute>();
 
-        if (atr != null)
+        if (attribute != null)
         {
-            if (atr.PrimaryKeyProperties.Count() == 1 && atr.PrimaryKeyProperties.First() == prop.Name) return true;
+            if (attribute.PrimaryKeyProperties.Count() == 1 && attribute.PrimaryKeyProperties.First() == prop.Name) return true;
             return false;
         }
 
-        var table = DbmsConfiguration.ConvertToDefaultTableNameLogic(prop.DeclaringType!);
-        var column = DbmsConfiguration.ConvertToDefaultColumnNameLogic(prop.Name);
-        if (DbmsConfiguration.IsPrimaryKeyColumnLogic(table, column))
+        // If TableAttribute is not found, infer auto-incrementing from default naming conventions.
+        var tableName = DbmsConfiguration.ConvertToDefaultTableNameLogic(prop.DeclaringType!);
+        var columnName = DbmsConfiguration.ConvertToDefaultColumnNameLogic(prop.Name);
+        if (DbmsConfiguration.IsPrimaryKeyColumnLogic(tableName, columnName))
         {
             return true;
         }
