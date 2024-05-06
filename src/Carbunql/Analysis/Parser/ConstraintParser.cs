@@ -4,8 +4,17 @@ using Carbunql.Extensions;
 
 namespace Carbunql.Analysis;
 
+/// <summary>
+/// Parses a constraint from token streams.
+/// </summary>
 public static class ConstraintParser
 {
+    /// <summary>
+    /// Parses a constraint from the token stream.
+    /// </summary>
+    /// <param name="t">The table the constraint belongs to.</param>
+    /// <param name="r">The token reader.</param>
+    /// <returns>The parsed constraint.</returns>
     public static IConstraint Parse(ITable t, ITokenReader r)
     {
         var token = r.Read();
@@ -57,6 +66,6 @@ public static class ConstraintParser
             };
         }
 
-        throw new NotSupportedException($"Token : {token}");
+        throw new NotSupportedException($"Unsupported token:{token}");
     }
 }

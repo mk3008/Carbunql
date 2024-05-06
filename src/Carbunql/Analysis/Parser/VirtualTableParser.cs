@@ -3,8 +3,16 @@ using Carbunql.Tables;
 
 namespace Carbunql.Analysis.Parser;
 
+/// <summary>
+/// Parses virtual tables from SQL text or token stream.
+/// </summary>
 public class VirtualTableParser
 {
+    /// <summary>
+    /// Parses a virtual table from the token stream.
+    /// </summary>
+    /// <param name="r">The token reader.</param>
+    /// <returns>The parsed virtual table.</returns>
     public static VirtualTable Parse(ITokenReader r)
     {
         r.Read("(");
@@ -13,7 +21,7 @@ public class VirtualTableParser
 
         if (string.IsNullOrEmpty(first)) throw new NotSupportedException();
 
-        //virtualTable
+        // virtualTable
         if (first.IsEqualNoCase("select"))
         {
             var t = new VirtualTable(SelectQueryParser.Parse(r));
@@ -28,12 +36,12 @@ public class VirtualTableParser
         }
         else if (first == "(")
         {
-            //empty bracket pattern
+            // empty bracket pattern
             var t = new VirtualTable(Parse(r));
             r.Read(")");
             return t;
         }
 
-        throw new NotSupportedException($"token:{first}");
+        throw new NotSupportedException($"Unsupported token:{first}");
     }
 }

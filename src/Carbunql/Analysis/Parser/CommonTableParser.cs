@@ -4,14 +4,27 @@ using Carbunql.Values;
 
 namespace Carbunql.Analysis.Parser;
 
+/// <summary>
+/// Parses a common table expression (CTE) from SQL text or token streams.
+/// </summary>
 public static class CommonTableParser
 {
+    /// <summary>
+    /// Parses a common table expression (CTE) from SQL text.
+    /// </summary>
+    /// <param name="text">The SQL text containing the CTE.</param>
+    /// <returns>The parsed CTE.</returns>
     public static CommonTable Parse(string text)
     {
         var r = new SqlTokenReader(text);
         return Parse(r);
     }
 
+    /// <summary>
+    /// Parses a common table expression (CTE) from the token stream.
+    /// </summary>
+    /// <param name="r">The token reader.</param>
+    /// <returns>The parsed CTE.</returns>
     public static CommonTable Parse(ITokenReader r)
     {
         var alias = r.Read();
@@ -36,13 +49,8 @@ public static class CommonTableParser
         }
 
         var t = VirtualTableParser.Parse(r);
-        if (colAliases != null)
-        {
-            return new CommonTable(t, alias, colAliases) { Materialized = material };
-        }
-        else
-        {
-            return new CommonTable(t, alias) { Materialized = material };
-        }
+        return colAliases != null
+            ? new CommonTable(t, alias, colAliases) { Materialized = material }
+            : new CommonTable(t, alias) { Materialized = material };
     }
 }

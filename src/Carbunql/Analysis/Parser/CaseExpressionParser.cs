@@ -3,19 +3,37 @@ using Carbunql.Values;
 
 namespace Carbunql.Analysis.Parser;
 
+/// <summary>
+/// Parses a CASE expression from SQL text or token streams.
+/// </summary>
 public static class CaseExpressionParser
 {
+    /// <summary>
+    /// Checks if the text represents a CASE expression.
+    /// </summary>
+    /// <param name="text">The text to check.</param>
+    /// <returns>True if the text represents a CASE expression; otherwise, false.</returns>
     public static bool IsCaseExpression(string text)
     {
         return text.IsEqualNoCase("case");
     }
 
+    /// <summary>
+    /// Parses a CASE expression from SQL text.
+    /// </summary>
+    /// <param name="text">The SQL text containing the CASE expression.</param>
+    /// <returns>The parsed CASE expression.</returns>
     public static CaseExpression Parse(string text)
     {
         var r = new SqlTokenReader(text);
         return Parse(r);
     }
 
+    /// <summary>
+    /// Parses a CASE expression from the token stream.
+    /// </summary>
+    /// <param name="r">The token reader.</param>
+    /// <returns>The parsed CASE expression.</returns>
     public static CaseExpression Parse(ITokenReader r)
     {
         var exp = ParseCaseExpression(r);

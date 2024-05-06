@@ -5,22 +5,27 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Analysis.Parser;
 
+/// <summary>
+/// Parses selectable tables from SQL text or token streams.
+/// </summary>
 public static class SelectableTableParser
 {
-    private static string[] SelectTableBreakTokens = new[] { "on" };
-
+    /// <summary>
+    /// Parses a selectable table from SQL text.
+    /// </summary>
+    /// <param name="text">The SQL text containing the selectable table.</param>
+    /// <returns>The parsed selectable table.</returns>
     public static SelectableTable Parse(string text)
     {
         var r = new SqlTokenReader(text);
         return Parse(r);
     }
 
-    private static bool ReservedTokenFilter(string text)
-    {
-        if (ReservedText.As == text) return false;
-        return true;
-    }
-
+    /// <summary>
+    /// Parses a selectable table from the token stream.
+    /// </summary>
+    /// <param name="r">The token reader.</param>
+    /// <returns>The parsed selectable table.</returns>
     public static SelectableTable Parse(ITokenReader r)
     {
         var v = TableParser.Parse(r);
@@ -53,6 +58,23 @@ public static class SelectableTableParser
         }
     }
 
+    /// <summary>
+    /// Filters out reserved tokens to determine if a token is part of a column alias or not.
+    /// </summary>
+    /// <param name="text">The token text.</param>
+    /// <returns><c>true</c> if the token is not a reserved token; otherwise, <c>false</c>.</returns>
+    private static bool ReservedTokenFilter(string text)
+    {
+        if (ReservedText.As == text) return false;
+        return true;
+    }
+
+    /// <summary>
+    /// Tries to parse column aliases from the token stream.
+    /// </summary>
+    /// <param name="r">The token reader.</param>
+    /// <param name="columnAliases">The parsed column aliases.</param>
+    /// <returns><c>true</c> if column aliases were successfully parsed; otherwise, <c>false</c>.</returns>
     private static bool TryParseColumnAliases(ITokenReader r, [MaybeNullWhen(false)] out ValueCollection columnAliases)
     {
         columnAliases = default;

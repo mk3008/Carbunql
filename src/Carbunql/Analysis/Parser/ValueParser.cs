@@ -1,18 +1,14 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Values;
-using Cysharp.Text;
 
 namespace Carbunql.Analysis.Parser;
 
+/// <summary>
+/// Parses SQL values from text or token streams.
+/// </summary>
 public static class ValueParser
 {
-    public static ValueBase Parse(string text)
-    {
-        var r = new SqlTokenReader(text);
-        return Parse(r);
-    }
-
     private static string[] ArithmeticOperators = new[]
     {
         "+", "-", "*", "/", "%", "=", "!", ">", "<", "|", "&", "^", "#", "~"
@@ -23,6 +19,22 @@ public static class ValueParser
         "and", "is", "is distinct from", "is not", "is not distinct from", "or", "uescape"
     };
 
+    /// <summary>
+    /// Parses a SQL value from the provided text.
+    /// </summary>
+    /// <param name="text">The SQL text containing the value.</param>
+    /// <returns>The parsed SQL value.</returns>
+    public static ValueBase Parse(string text)
+    {
+        var r = new SqlTokenReader(text);
+        return Parse(r);
+    }
+
+    /// <summary>
+    /// Parses a SQL value from the token stream.
+    /// </summary>
+    /// <param name="r">The token reader.</param>
+    /// <returns>The parsed SQL value.</returns>
     public static ValueBase Parse(ITokenReader r)
     {
         ValueBase value = ParseMain(r);
@@ -53,7 +65,7 @@ public static class ValueParser
         }
         else if (item.IsEqualNoCase("without time zone"))
         {
-            return WithoutTImeZoneClauseParser.Parse(v, r);
+            return WithoutTimeZoneClauseParser.Parse(v, r);
         }
 
         var isNegative = false;
@@ -109,8 +121,8 @@ public static class ValueParser
 
         if (item == "+" || item == "-")
         {
-            //Signs indicating positive and negative are not considered operators.
-            //ex. '+1', '-1' 
+            // Signs indicating positive and negative are not considered operators.
+            // ex. '+1', '-1' 
             var sign = r.Read();
             var v = (LiteralValue)Parse(r);
             v.CommandText = sign + v.CommandText;
@@ -165,29 +177,7 @@ public static class ValueParser
             return new ColumnValue(table, column);
         }
 
-        //omit table column
+        // Omit table column
         return new ColumnValue(item);
-    }
-
-    private static string ReadUntilCaseExpressionEnd(ITokenReader r)
-    {
-        using var inner = ZString.CreateStringBuilder();
-
-        var word = r.Read();
-        while (!string.IsNullOrEmpty(word))
-        {
-            inner.Append(word);
-            if (word.TrimStart().IsEqualNoCase("end"))
-            {
-                return inner.ToString();
-            }
-            if (word.TrimStart().IsEqualNoCase("case"))
-            {
-                inner.Append(ReadUntilCaseExpressionEnd(r));
-            }
-            word = r.Read();
-        }
-
-        throw new SyntaxException("case expression is not end");
     }
 }

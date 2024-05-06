@@ -4,8 +4,16 @@ using Carbunql.Extensions;
 
 namespace Carbunql.Analysis;
 
+/// <summary>
+/// Parses reference definitions from SQL text or token streams.
+/// </summary>
 public static class ReferenceParser
 {
+    /// <summary>
+    /// Parses a reference definition from SQL text.
+    /// </summary>
+    /// <param name="text">The SQL text containing the reference definition.</param>
+    /// <returns>The parsed reference definition.</returns>
     public static ReferenceDefinition Parse(string text)
     {
         var r = new SqlTokenReader(text);
@@ -13,6 +21,11 @@ public static class ReferenceParser
         return q;
     }
 
+    /// <summary>
+    /// Parses a reference definition from the token stream.
+    /// </summary>
+    /// <param name="r">The token reader.</param>
+    /// <returns>The parsed reference definition.</returns>
     public static ReferenceDefinition Parse(ITokenReader r)
     {
         var token = r.Read("references");
