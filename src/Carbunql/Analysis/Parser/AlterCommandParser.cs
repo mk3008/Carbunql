@@ -3,15 +3,18 @@ using Carbunql.Extensions;
 
 namespace Carbunql.Analysis.Parser;
 
+/// <summary>
+/// Parses alter commands based on provided table and token reader.
+/// </summary>
 public class AlterCommandParser
 {
-    //public static IAlterCommand Parse(ITable t, string text)
-    //{
-    //	var r = new SqlTokenReader(text);
-    //	var q = Parse(t, r);
-    //	return q;
-    //}
-
+    /// <summary>
+    /// Parses the alter command.
+    /// </summary>
+    /// <param name="t">The table to alter.</param>
+    /// <param name="r">The token reader.</param>
+    /// <returns>The parsed alter command.</returns>
+    /// <exception cref="NotSupportedException">Thrown when the token is not supported.</exception>
     public static IAlterCommand Parse(ITable t, ITokenReader r)
     {
         var token = r.Peek();
@@ -22,7 +25,7 @@ public class AlterCommandParser
 
         if (token.IsEqualNoCase("drop"))
         {
-            return ParseAdDropCommand(t, r);
+            return ParseAsDropCommand(t, r);
         }
 
         if (token.IsEqualNoCase("alter column"))
@@ -34,9 +37,16 @@ public class AlterCommandParser
         {
             return ParseAsRenameCommand(t, r);
         }
-        throw new NotSupportedException($"Token:{token}");
+        throw new NotSupportedException($"Unsupported token:{token}");
     }
 
+    /// <summary>
+    /// Parses the "add" command.
+    /// </summary>
+    /// <param name="t">The table to alter.</param>
+    /// <param name="r">The token reader.</param>
+    /// <returns>The parsed alter command.</returns>
+    /// <exception cref="NotSupportedException">Thrown when the token is not supported.</exception>
     private static IAlterCommand ParseAsAddCommand(ITable t, ITokenReader r)
     {
         r.Read("add");
@@ -54,15 +64,22 @@ public class AlterCommandParser
         }
         else
         {
-            //Consider "add column" with "column" omitted.
+            // Consider "add column" with "column" omitted.
             var definition = ColumnDefinitionParser.Parse(t, r);
             return new AddColumnCommand(definition);
         }
 
-        //throw new NotSupportedException($"Token:{token}");
+        throw new NotSupportedException($"Unsupported token:{token}");
     }
 
-    private static IAlterCommand ParseAdDropCommand(ITable t, ITokenReader r)
+    /// <summary>
+    /// Parses the "drop" command.
+    /// </summary>
+    /// <param name="t">The table to alter.</param>
+    /// <param name="r">The token reader.</param>
+    /// <returns>The parsed alter command.</returns>
+    /// <exception cref="NotSupportedException">Thrown when the token is not supported.</exception>
+    private static IAlterCommand ParseAsDropCommand(ITable t, ITokenReader r)
     {
         r.Read("drop");
         var target = r.Read();
@@ -76,9 +93,16 @@ public class AlterCommandParser
             var name = r.Read();
             return new DropConstraintCommand(t, name);
         }
-        throw new NotSupportedException();
+        throw new NotSupportedException($"Unsupported token:{target}");
     }
 
+    /// <summary>
+    /// Parses the "alter column" command.
+    /// </summary>
+    /// <param name="t">The table to alter.</param>
+    /// <param name="r">The token reader.</param>
+    /// <returns>The parsed alter command.</returns>
+    /// <exception cref="NotSupportedException">Thrown when the token is not supported.</exception>
     private static IAlterCommand ParseAsAlterColumnCommand(ITable t, ITokenReader r)
     {
         r.Read("alter column");
@@ -116,16 +140,23 @@ public class AlterCommandParser
             var columnType = ValueParser.Parse(r);
             return new ChangeColumnTypeCommand(t, column, columnType);
         }
-        throw new NotSupportedException();
+
+        throw new NotSupportedException($"Unsupported token:{token}");
     }
 
+    /// <summary>
+    /// Parses the "rename" command.
+    /// </summary>
+    /// <param name="t">The table to alter.</param>
+    /// <param name="r">The token reader.</param>
+    /// <returns>The parsed alter command.</returns>
     private static IAlterCommand ParseAsRenameCommand(ITable t, ITokenReader r)
     {
         r.Read("rename");
         var token = r.Read();
         if (token.IsEqualNoCase("column"))
         {
-            //rename column
+            // Rename column.
             var oldName = r.Read();
             r.Read("to");
             var newName = r.Read();
@@ -133,7 +164,7 @@ public class AlterCommandParser
         }
         else
         {
-            //rename table
+            // Rename table.
             return new RenameTableCommand(t, token);
         }
     }

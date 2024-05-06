@@ -3,14 +3,27 @@ using Carbunql.Extensions;
 
 namespace Carbunql.Analysis.Parser;
 
+/// <summary>
+/// Parses sortable items used in ORDER BY clauses from SQL text or token streams.
+/// </summary>
 public static class SortableItemParser
 {
+    /// <summary>
+    /// Parses a sortable item from SQL text.
+    /// </summary>
+    /// <param name="text">The SQL text containing the sortable item.</param>
+    /// <returns>The parsed sortable item.</returns>
     public static SortableItem Parse(string text)
     {
         var r = new SqlTokenReader(text);
         return Parse(r);
     }
 
+    /// <summary>
+    /// Parses a sortable item from the token stream.
+    /// </summary>
+    /// <param name="r">The token reader.</param>
+    /// <returns>The parsed sortable item.</returns>
     public static SortableItem Parse(ITokenReader r)
     {
         var v = ValueParser.Parse(r);
@@ -32,18 +45,18 @@ public static class SortableItemParser
             isasc = false;
         }
 
+        var nullSort = NullSort.Undefined;
         if (r.Peek().IsEqualNoCase("nulls first"))
         {
             r.Read("nulls first");
-            return new SortableItem(v, isasc, NullSort.First);
+            nullSort = NullSort.First;
         }
-
-        if (r.Peek().IsEqualNoCase("nulls last"))
+        else if (r.Peek().IsEqualNoCase("nulls last"))
         {
             r.Read("nulls last");
-            return new SortableItem(v, isasc, NullSort.Last);
+            nullSort = NullSort.Last;
         }
 
-        return new SortableItem(v, isasc, NullSort.Undefined);
+        return new SortableItem(v, isasc, nullSort);
     }
 }

@@ -3,14 +3,27 @@ using Carbunql.Extensions;
 
 namespace Carbunql.Analysis.Parser;
 
+/// <summary>
+/// Parses a LIMIT clause from SQL text or token streams.
+/// </summary>
 public static class LimitClauseParser
 {
+    /// <summary>
+    /// Parses a LIMIT clause from SQL text.
+    /// </summary>
+    /// <param name="text">The SQL text containing the LIMIT clause.</param>
+    /// <returns>The parsed LIMIT clause.</returns>
     public static LimitClause Parse(string text)
     {
         var r = new SqlTokenReader(text);
         return Parse(r);
     }
 
+    /// <summary>
+    /// Parses a LIMIT clause from the token stream.
+    /// </summary>
+    /// <param name="r">The token reader.</param>
+    /// <returns>The parsed LIMIT clause.</returns>
     public static LimitClause Parse(ITokenReader r)
     {
         var condition = ParseItems(r).ToList();

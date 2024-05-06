@@ -4,14 +4,27 @@ using Carbunql.Tables;
 
 namespace Carbunql.Analysis.Parser;
 
+/// <summary>
+/// Parses various types of tables from SQL text or token streams.
+/// </summary>
 public static class TableParser
 {
+    /// <summary>
+    /// Parses a table from SQL text.
+    /// </summary>
+    /// <param name="text">The SQL text containing the table.</param>
+    /// <returns>The parsed table.</returns>
     public static TableBase Parse(string text)
     {
         var r = new SqlTokenReader(text);
         return Parse(r);
     }
 
+    /// <summary>
+    /// Parses a table from the token stream.
+    /// </summary>
+    /// <param name="r">The token reader.</param>
+    /// <returns>The parsed table.</returns>
     public static TableBase Parse(ITokenReader r)
     {
         if (r.Peek().IsEqualNoCase("lateral"))
@@ -47,7 +60,7 @@ public static class TableParser
             return FunctionTableParser.Parse(r, item);
         }
 
-        //table
+        // Assume it's a physical table
         return new PhysicalTable(item);
     }
 }
