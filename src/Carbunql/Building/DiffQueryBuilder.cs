@@ -4,13 +4,30 @@ using Carbunql.Values;
 
 namespace Carbunql.Building;
 
+/// <summary>
+/// Provides functionality to generate a query that compares two SQL select queries.
+/// </summary>
 public class DiffQueryBuilder
 {
+    /// <summary>
+    /// Executes the diff query generation process.
+    /// </summary>
+    /// <param name="expectsql">The expected SQL select query.</param>
+    /// <param name="actualsql">The actual SQL select query.</param>
+    /// <param name="keys">The keys used to join the two select queries.</param>
+    /// <returns>A SelectQuery representing the differences between the two input queries.</returns>
     public static SelectQuery Execute(string expectsql, string actualsql, string[] keys)
     {
         return Execute(SelectQueryParser.Parse(expectsql), SelectQueryParser.Parse(actualsql), keys);
     }
 
+    /// <summary>
+    /// Executes the diff query generation process.
+    /// </summary>
+    /// <param name="expectsql">The expected SelectQuery.</param>
+    /// <param name="actualsql">The actual SelectQuery.</param>
+    /// <param name="keys">The keys used to join the two queries.</param>
+    /// <returns>A SelectQuery representing the differences between the two input queries.</returns>
     public static SelectQuery Execute(SelectQuery expectsql, SelectQuery actualsql, string[] keys)
     {
         var sq = GenerateQueryAsChanged(expectsql, actualsql, keys);
@@ -27,10 +44,13 @@ public class DiffQueryBuilder
         var a = from.InnerJoin(actualsq).As("actual").On(e, keys);
 
         var expectColumns = expectsq.SelectClause!.Select(x => x.Alias).Where(x => !keys.Contains(x));
-        var acutalColumns = actualsq.SelectClause!.Select(x => x.Alias).Where(x => !keys.Contains(x));
-        var commonColumns = expectColumns.Where(x => acutalColumns.Contains(x));
+        var actualColumns = actualsq.SelectClause!.Select(x => x.Alias).Where(x => !keys.Contains(x));
+        var commonColumns = expectColumns.Where(x => actualColumns.Contains(x));
 
-        foreach (var item in keys) sq.Select(e, item);
+        foreach (var item in keys)
+        {
+            sq.Select(e, item);
+        }
         sq.Select("'update'").As("diff_type");
         CaseExpression? exp = null;
 
@@ -55,7 +75,10 @@ public class DiffQueryBuilder
             }
         }
 
-        if (exp != null) sq.Select(exp).As("remarks");
+        if (exp != null)
+        {
+            sq.Select(exp).As("remarks");
+        }
 
         var q = new SelectQuery();
         var (_, t) = q.From(sq).As("t");
@@ -72,7 +95,10 @@ public class DiffQueryBuilder
 
         var a = from.LeftJoin(actualsq).As("actual").On(e, keys);
 
-        foreach (var item in keys) sq.Select(e, item);
+        foreach (var item in keys)
+        {
+            sq.Select(e, item);
+        }
         sq.Select("'delete'").As("diff_type");
         sq.Select("'*deleted'").As("remarks");
         sq.Where(a, keys[0]).IsNull();
@@ -87,7 +113,10 @@ public class DiffQueryBuilder
 
         var e = from.LeftJoin(expectsq).As("expect").On(a, keys);
 
-        foreach (var item in keys) sq.Select(a, item);
+        foreach (var item in keys)
+        {
+            sq.Select(a, item);
+        }
         sq.Select("'insert'").As("diff_type");
         sq.Select("'*added'").As("remarks");
         sq.Where(e, keys[0]).IsNull();
