@@ -3,8 +3,16 @@ using Carbunql.Extensions;
 
 namespace Carbunql.Analysis;
 
+/// <summary>
+/// Provides functionality to parse CREATE TABLE queries in SQL.
+/// </summary>
 public static class CreateTableQueryParser
 {
+    /// <summary>
+    /// Parses the specified CREATE TABLE query string.
+    /// </summary>
+    /// <param name="text">The CREATE TABLE query string.</param>
+    /// <returns>The parsed CreateTableQuery object.</returns>
     public static CreateTableQuery Parse(string text)
     {
         var r = new SqlTokenReader(text);
@@ -12,14 +20,17 @@ public static class CreateTableQueryParser
 
         if (!r.Peek().IsEndToken())
         {
-            throw new NotSupportedException($"Parsing terminated despite the presence of unparsed tokens.(token:'{r.Peek()}')");
+            throw new NotSupportedException($"Parsing terminated despite the presence of unparsed tokens. (Token: '{r.Peek()}')");
         }
 
         return q;
     }
 
-    static IEnumerable<string> ConstraintTokens => new[] { "primary key", "unique", "foreign key", "check", "not null", "constraint" };
-
+    /// <summary>
+    /// Parses the CREATE TABLE query using the provided ITokenReader.
+    /// </summary>
+    /// <param name="r">The ITokenReader instance.</param>
+    /// <returns>The parsed CreateTableQuery object.</returns>
     public static CreateTableQuery Parse(ITokenReader r)
     {
         var t = ParseAsCreateTableCommand(r);
@@ -56,6 +67,16 @@ public static class CreateTableQueryParser
         return t;
     }
 
+    /// <summary>
+    /// The tokens representing constraints in CREATE TABLE queries.
+    /// </summary>
+    private static IEnumerable<string> ConstraintTokens => new[] { "primary key", "unique", "foreign key", "check", "not null", "constraint" };
+
+    /// <summary>
+    /// Parses the CREATE TABLE command.
+    /// </summary>
+    /// <param name="r">The ITokenReader instance.</param>
+    /// <returns>The parsed CreateTableQuery object.</returns>
     private static CreateTableQuery ParseAsCreateTableCommand(ITokenReader r)
     {
         var isTemporary = false;
@@ -70,7 +91,7 @@ public static class CreateTableQueryParser
         }
         else
         {
-            throw new NotSupportedException($"Token:{token}");
+            throw new NotSupportedException($"Invalid CREATE TABLE command. (Token: '{token}')");
         }
 
         token = r.Read();

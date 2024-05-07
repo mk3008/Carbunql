@@ -4,8 +4,16 @@ using Carbunql.Extensions;
 
 namespace Carbunql.Analysis;
 
+/// <summary>
+/// Provides functionality to parse SELECT queries in SQL.
+/// </summary>
 public static class SelectQueryParser
 {
+    /// <summary>
+    /// Parses the specified SQL query string as a SELECT query.
+    /// </summary>
+    /// <param name="text">The SQL query string.</param>
+    /// <returns>The parsed SelectQuery object.</returns>
     public static SelectQuery Parse(string text)
     {
         var r = new SqlTokenReader(text);
@@ -15,7 +23,7 @@ public static class SelectQueryParser
 
         if (!r.Peek().IsEndToken())
         {
-            throw new NotSupportedException($"Parsing terminated despite the presence of unparsed tokens.(token:'{r.Peek()}')");
+            throw new NotSupportedException($"Parsing terminated despite the presence of unparsed tokens. (Token: '{r.Peek()}')");
         }
 
         return sq;
@@ -28,6 +36,11 @@ public static class SelectQueryParser
         return v;
     }
 
+    /// <summary>
+    /// Parses the SELECT query using the provided ITokenReader.
+    /// </summary>
+    /// <param name="r">The ITokenReader instance.</param>
+    /// <returns>The parsed SelectQuery object.</returns>
     internal static SelectQuery Parse(ITokenReader r)
     {
         var sq = ParseMain(r);
@@ -44,6 +57,11 @@ public static class SelectQueryParser
         return sq;
     }
 
+    /// <summary>
+    /// Parses the main part of the SELECT query using the provided ITokenReader.
+    /// </summary>
+    /// <param name="r">The ITokenReader instance.</param>
+    /// <returns>The parsed SelectQuery object.</returns>
     private static SelectQuery ParseMain(ITokenReader r)
     {
         var sq = new SelectQuery();
@@ -84,11 +102,13 @@ public static class SelectQueryParser
         if (r.ReadOrDefault("having") == null) return null;
         return HavingClauseParser.Parse(r);
     }
+
     private static WindowClause? ParseWindowOrDefault(ITokenReader r)
     {
         if (r.ReadOrDefault("window") == null) return null;
         return WindowClauseParser.Parse(r);
     }
+
     private static OrderClause? ParseOrderOrDefault(ITokenReader r)
     {
         if (r.ReadOrDefault("order by") == null) return null;

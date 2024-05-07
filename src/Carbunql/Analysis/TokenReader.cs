@@ -3,8 +3,15 @@ using Cysharp.Text;
 
 namespace Carbunql.Analysis;
 
+/// <summary>
+/// Abstract class for reading tokens.
+/// </summary>
 public abstract class TokenReader
 {
+    /// <summary>
+    /// Initializes a new instance of the TokenReader class with the specified text.
+    /// </summary>
+    /// <param name="text">The text to be read.</param>
     public TokenReader(string text)
     {
         Reader = new SqlLexReader(text);
@@ -22,8 +29,15 @@ public abstract class TokenReader
 
     private SqlLexReader Reader { get; set; }
 
+    /// <summary>
+    /// Gets or sets the current bracket level.
+    /// </summary>
     public int CurrentBracketLevel { get; private set; } = 0;
 
+    /// <summary>
+    /// Reads the next token.
+    /// </summary>
+    /// <returns>The next token.</returns>
     public virtual string Read()
     {
         var lex = Reader.Read();
