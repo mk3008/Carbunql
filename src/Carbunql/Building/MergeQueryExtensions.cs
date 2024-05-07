@@ -4,8 +4,16 @@ using Carbunql.Values;
 
 namespace Carbunql.Building;
 
+/// <summary>
+/// Provides extension methods for building merge queries.
+/// </summary>
 public static class MergeQueryExtensions
 {
+    /// <summary>
+    /// Adds a 'not matched' insert clause to the merge query.
+    /// </summary>
+    /// <param name="source">The merge query.</param>
+    /// <param name="conditionBuilder">A function to build the condition for the insert clause.</param>
     public static void AddNotMatchedInsert(this MergeQuery source, Func<ValueBase>? conditionBuilder = null)
     {
         var m = source.ToMergeWhenInsert(Enumerable.Empty<string>());
@@ -15,11 +23,15 @@ public static class MergeQueryExtensions
         source.WhenClause.Add(m);
     }
 
+    /// <summary>
+    /// Adds a 'not matched' insert clause to the merge query with auto-numbering for keys.
+    /// </summary>
+    /// <param name="source">The merge query.</param>
     public static void AddNotMathcedInsertAsAutoNumber(this MergeQuery source)
     {
         var m = source.ToMergeWhenInsert(source.UsingClause.Keys);
 
-        //key1 is null and key2 is null and ... keyN is null
+        // key1 is null and key2 is null and ... keyN is null
         ValueBase? v = null;
         foreach (var item in source.UsingClause.Keys)
         {
@@ -41,6 +53,11 @@ public static class MergeQueryExtensions
         source.WhenClause.Add(m);
     }
 
+    /// <summary>
+    /// Adds a 'matched' update clause to the merge query.
+    /// </summary>
+    /// <param name="source">The merge query.</param>
+    /// <param name="conditionBuilder">A function to build the condition for the update clause.</param>
     public static void AddMatchedUpdate(this MergeQuery source, Func<ValueBase>? conditionBuilder = null)
     {
         var m = source.ToMergeWhenUpdate();
@@ -50,6 +67,11 @@ public static class MergeQueryExtensions
         source.WhenClause.Add(m);
     }
 
+    /// <summary>
+    /// Adds a 'matched' delete clause to the merge query.
+    /// </summary>
+    /// <param name="source">The merge query.</param>
+    /// <param name="conditionBuilder">A function to build the condition for the delete clause.</param>
     public static void AddMatchedDelete(this MergeQuery source, Func<ValueBase>? conditionBuilder = null)
     {
         var m = new MergeWhenDelete();

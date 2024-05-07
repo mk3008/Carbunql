@@ -3,8 +3,17 @@ using Carbunql.Definitions;
 
 namespace Carbunql.Building;
 
+/// <summary>
+/// Provides methods to execute migration queries between expected and actual SQL schemas.
+/// </summary>
 public class MigrationQueryBuilder
 {
+    /// <summary>
+    /// Executes migration queries between expected and actual SQL schemas.
+    /// </summary>
+    /// <param name="expectsql">The expected SQL schema.</param>
+    /// <param name="actualsql">The actual SQL schema.</param>
+    /// <returns>A list of definition query sets representing the migration queries.</returns>
     public static DefinitionQuerySetList Execute(string expectsql, string actualsql)
     {
         var expects = DefinitionQuerySetParser.Parse(expectsql).ToNormalize();
@@ -24,7 +33,7 @@ public class MigrationQueryBuilder
 
         foreach (var item in expects)
         {
-            var actual = actuals.Where(x => x.GetTableFullName() == item.GetTableFullName()).FirstOrDefault();
+            var actual = actuals.FirstOrDefault(x => x.GetTableFullName() == item.GetTableFullName());
 
             if (actual == null)
             {
@@ -37,10 +46,5 @@ public class MigrationQueryBuilder
         }
 
         return lst;
-        //= new List<DefinitionQuerySet>();
-        //foreach (var item in DefinitionQuerySetParser.Parse(actualsql))
-        //{
-        //	lst.Add(item.GenerateMigrationQuery(expectsql).MergeAlterTableQuery());
-        //}
     }
 }
