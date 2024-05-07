@@ -4,8 +4,16 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Analysis;
 
+/// <summary>
+/// Provides functionality to parse a set of definition queries in SQL.
+/// </summary>
 public static class DefinitionQuerySetParser
 {
+    /// <summary>
+    /// Parses the specified definition query string and returns a list of DefinitionQuerySet objects.
+    /// </summary>
+    /// <param name="text">The definition query string.</param>
+    /// <returns>A list of DefinitionQuerySet objects.</returns>
     public static DefinitionQuerySetList Parse(string text)
     {
         var r = new SqlTokenReader(text);
@@ -15,7 +23,7 @@ public static class DefinitionQuerySetParser
         {
             if (!r.Peek().IsEndToken())
             {
-                throw new NotSupportedException($"Parsing terminated despite the presence of unparsed tokens.(token:'{r.Peek()}')");
+                throw new NotSupportedException($"Parsing terminated despite the presence of unparsed tokens. (Token: '{r.Peek()}')");
             }
 
             if (!dic.ContainsKey(t.GetTableFullName()))
@@ -38,7 +46,7 @@ public static class DefinitionQuerySetParser
             }
             else
             {
-                throw new NotSupportedException();
+                throw new NotSupportedException($"Unsupported query type: {t.GetType().Name}");
             }
         }
 
@@ -47,6 +55,12 @@ public static class DefinitionQuerySetParser
         return lst;
     }
 
+    /// <summary>
+    /// Tries to parse the next query from the token reader.
+    /// </summary>
+    /// <param name="r">The SqlTokenReader instance.</param>
+    /// <param name="t">The parsed table object.</param>
+    /// <returns>True if parsing is successful, otherwise false.</returns>
     private static bool TryParse(SqlTokenReader r, [MaybeNullWhen(false)] out ITable t)
     {
         t = default;

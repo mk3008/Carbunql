@@ -25,8 +25,6 @@ public abstract class LexReader
 
     private int TextLength { get; init; }
 
-    //private bool IsEndOfText => TextLength <= Index;
-
     public bool TryPeek(char expect)
     {
         if (TryPeekChar(0, out var c) && c == expect)

@@ -4,8 +4,16 @@ using Carbunql.Extensions;
 
 namespace Carbunql.Analysis;
 
+/// <summary>
+/// Provides functionality to parse INSERT queries in SQL.
+/// </summary>
 public static class InsertQueryParser
 {
+    /// <summary>
+    /// Parses the specified INSERT query string.
+    /// </summary>
+    /// <param name="text">The INSERT query string.</param>
+    /// <returns>The parsed InsertQuery object.</returns>
     public static InsertQuery Parse(string text)
     {
         var r = new SqlTokenReader(text);
@@ -14,12 +22,17 @@ public static class InsertQueryParser
 
         if (!r.Peek().IsEndToken())
         {
-            throw new NotSupportedException($"Parsing terminated despite the presence of unparsed tokens.(token:'{r.Peek()}')");
+            throw new NotSupportedException($"Parsing terminated despite the presence of unparsed tokens. (Token: '{r.Peek()}')");
         }
 
         return iq;
     }
 
+    /// <summary>
+    /// Parses the INSERT query using the provided ITokenReader.
+    /// </summary>
+    /// <param name="r">The ITokenReader instance.</param>
+    /// <returns>The parsed InsertQuery object.</returns>
     internal static InsertQuery Parse(ITokenReader r)
     {
         if (r.Peek().IsEqualNoCase("with"))
@@ -44,9 +57,14 @@ public static class InsertQueryParser
         {
             return ParseMain(r);
         }
-        throw new NotSupportedException();
+        throw new NotSupportedException("Unsupported INSERT query format.");
     }
 
+    /// <summary>
+    /// Parses the main part of the INSERT query.
+    /// </summary>
+    /// <param name="r">The ITokenReader instance.</param>
+    /// <returns>The parsed InsertQuery object.</returns>
     internal static InsertQuery ParseMain(ITokenReader r)
     {
         var iq = new InsertQuery();

@@ -669,7 +669,7 @@ join TableB
             var item = QueryParser.Parse(text) as SelectQuery;
         });
 
-        Assert.Equal("Parsing terminated despite the presence of unparsed tokens.(token:'c')", e.Message);
+        Assert.Equal("Parsing terminated despite the presence of unparsed tokens. (Token: 'c')", e.Message);
     }
 
     [Fact]

@@ -4,8 +4,16 @@ using Carbunql.Extensions;
 
 namespace Carbunql.Analysis;
 
+/// <summary>
+/// Provides functionality to parse CREATE INDEX queries in SQL.
+/// </summary>
 public static class CreateIndexQueryParser
 {
+    /// <summary>
+    /// Parses the specified CREATE INDEX query string.
+    /// </summary>
+    /// <param name="text">The CREATE INDEX query string.</param>
+    /// <returns>The parsed CreateIndexQuery object.</returns>
     public static CreateIndexQuery Parse(string text)
     {
         var r = new SqlTokenReader(text);
@@ -13,12 +21,17 @@ public static class CreateIndexQueryParser
 
         if (!r.Peek().IsEndToken())
         {
-            throw new NotSupportedException($"Parsing terminated despite the presence of unparsed tokens.(token:'{r.Peek()}')");
+            throw new NotSupportedException($"Parsing terminated despite the presence of unparsed tokens. (Token: '{r.Peek()}')");
         }
 
         return q;
     }
 
+    /// <summary>
+    /// Parses the CREATE INDEX query using the provided ITokenReader.
+    /// </summary>
+    /// <param name="r">The ITokenReader instance.</param>
+    /// <returns>The parsed CreateIndexQuery object.</returns>
     public static CreateIndexQuery Parse(ITokenReader r)
     {
         var t = ParseAsCreateIndexCommand(r);
@@ -30,6 +43,11 @@ public static class CreateIndexQueryParser
         return t;
     }
 
+    /// <summary>
+    /// Parses the CREATE INDEX command.
+    /// </summary>
+    /// <param name="r">The ITokenReader instance.</param>
+    /// <returns>The parsed CreateIndexQuery object.</returns>
     private static CreateIndexQuery ParseAsCreateIndexCommand(ITokenReader r)
     {
         var isUnique = false;
@@ -44,7 +62,7 @@ public static class CreateIndexQueryParser
         }
         else
         {
-            throw new NotSupportedException($"Token:{token}");
+            throw new NotSupportedException($"Invalid CREATE INDEX command. (Token: '{token}')");
         }
 
         var indexName = string.Empty;
@@ -61,6 +79,11 @@ public static class CreateIndexQueryParser
         };
     }
 
+    /// <summary>
+    /// Parses the ON clause of the CREATE INDEX query.
+    /// </summary>
+    /// <param name="r">The ITokenReader instance.</param>
+    /// <returns>The parsed IndexOnClause object.</returns>
     private static IndexOnClause ParseAsOnClause(ITokenReader r)
     {
         r.Read("on");
@@ -85,6 +108,11 @@ public static class CreateIndexQueryParser
         return clause;
     }
 
+    /// <summary>
+    /// Parses the table name in the ON clause of the CREATE INDEX query.
+    /// </summary>
+    /// <param name="r">The ITokenReader instance.</param>
+    /// <returns>The parsed table name and schema as a tuple.</returns>
     private static (string schema, string name) ParseAsTableName(ITokenReader r)
     {
         var token = r.Read();

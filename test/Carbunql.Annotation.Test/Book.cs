@@ -1,3 +1,1 @@
-﻿using Carbunql.Annotations;
-
-namespace Carbunql.Annotation.Test;
+﻿namespace Carbunql.Annotation.Test;

@@ -4,31 +4,42 @@ using Cysharp.Text;
 namespace Carbunql.Analysis;
 
 /// <summary>
-/// LexReader class with SQL comment disabling.
+/// LexReader class extended for parsing SQL with comment handling.
 /// </summary>
 public class SqlLexReader : LexReader
 {
+    /// <summary>
+    /// Constructor for the SqlLexReader class.
+    /// </summary>
+    /// <param name="text">The SQL text to be parsed.</param>
     public SqlLexReader(string text) : base(text)
     {
     }
 
+    /// <summary>
+    /// Collection of tokens indicating SQL comments.
+    /// </summary>
     private static IEnumerable<string> CommentTokens { get; set; } = new string[] { "--", "/*" };
 
+    /// <summary>
+    /// Reads the next lexeme, skipping any SQL comments.
+    /// </summary>
+    /// <returns>The next lexeme after skipping any comments.</returns>
     protected override string ReadLex()
     {
         var lex = base.ReadLex();
 
-        //skip comment block
+        // Skip comment blocks
         while (lex.IsEqualNoCase(CommentTokens))
         {
             if (lex == "--")
             {
-                //line comment
+                // Line comment
                 ReadUntilLineEnd();
             }
             else
             {
-                //block comment
+                // Block comment
                 ReadUntilCloseBlockComment();
             }
             lex = base.ReadLex();
@@ -37,6 +48,10 @@ public class SqlLexReader : LexReader
         return lex;
     }
 
+    /// <summary>
+    /// Reads characters until the closing symbol of a block comment is found.
+    /// </summary>
+    /// <returns>The content of the block comment.</returns>
     private string ReadUntilCloseBlockComment()
     {
         var err = "Block comment is not closed";

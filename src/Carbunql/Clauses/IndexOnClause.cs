@@ -7,6 +7,7 @@ public class IndexOnClause : QueryCommandCollection<SortableItem>, ITable
 {
     public IndexOnClause(string table)
     {
+        Schema = string.Empty;
         Table = table;
     }
 
@@ -22,7 +23,8 @@ public class IndexOnClause : QueryCommandCollection<SortableItem>, ITable
         Table = t.Table;
 
     }
-    public string Schema { get; init; } = null;
+
+    public string Schema { get; init; }
 
     public string Table { get; init; }
 

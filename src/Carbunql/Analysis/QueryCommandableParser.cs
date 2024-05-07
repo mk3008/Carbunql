@@ -4,8 +4,16 @@ using Carbunql.Extensions;
 
 namespace Carbunql.Analysis;
 
+/// <summary>
+/// Provides functionality to parse various SQL query commands.
+/// </summary>
 public static class QueryCommandableParser
 {
+    /// <summary>
+    /// Parses the specified SQL query string.
+    /// </summary>
+    /// <param name="text">The SQL query string.</param>
+    /// <returns>The parsed QueryCommandable object.</returns>
     public static IQueryCommandable Parse(string text)
     {
         var r = new SqlTokenReader(text);
@@ -13,12 +21,17 @@ public static class QueryCommandableParser
 
         if (!r.Peek().IsEndToken())
         {
-            throw new NotSupportedException($"Parsing terminated despite the presence of unparsed tokens.(token:'{r.Peek()}')");
+            throw new NotSupportedException($"Parsing terminated despite the presence of unparsed tokens. (Token: '{r.Peek()}')");
         }
 
         return q;
     }
 
+    /// <summary>
+    /// Parses the SQL query using the provided ITokenReader.
+    /// </summary>
+    /// <param name="r">The ITokenReader instance.</param>
+    /// <returns>The parsed QueryCommandable object.</returns>
     public static IQueryCommandable Parse(ITokenReader r)
     {
         var token = r.Peek();
@@ -52,7 +65,7 @@ public static class QueryCommandableParser
                 return iq;
             }
 
-            throw new NotSupportedException();
+            throw new NotSupportedException($"Unsupported query command: '{token}'");
         }
         else
         {
@@ -66,7 +79,7 @@ public static class QueryCommandableParser
 
             if (token.IsEqualNoCase("alter table")) return AlterTableQueryParser.Parse(r);
 
-            throw new NotSupportedException();
+            throw new NotSupportedException($"Unsupported query command: '{token}'");
         }
     }
 }
