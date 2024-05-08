@@ -142,7 +142,7 @@ public class TableDefinitionClause : QueryCommandCollection<ITableDefinition>, I
         //disassemble
         foreach (var def in Items)
         {
-            if (def.TryDisasseble(out var constraint))
+            if (def.TryDisassemble(out var constraint))
             {
                 lst.Add(new AlterTableQuery(new AlterTableClause(this, constraint)));
             }
