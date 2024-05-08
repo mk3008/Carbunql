@@ -2,10 +2,21 @@
 
 namespace Carbunql.Clauses;
 
+/// <summary>
+/// Represents an abstract class for merge conditions in a SQL query.
+/// </summary>
 public abstract class MergeCondition : IQueryCommandable
 {
+    /// <summary>
+    /// Gets or sets the condition for the merge operation.
+    /// </summary>
     public ValueBase? Condition { get; set; }
 
+    /// <summary>
+    /// Gets the tokens representing the merge condition.
+    /// </summary>
+    /// <param name="parent">The parent token.</param>
+    /// <returns>The tokens representing the merge condition.</returns>
     public IEnumerable<Token> GetConditionTokens(Token? parent)
     {
         if (Condition == null) yield break;
@@ -13,6 +24,7 @@ public abstract class MergeCondition : IQueryCommandable
         foreach (var item in Condition.GetTokens(parent)) yield return item;
     }
 
+    /// <inheritdoc/>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         if (Condition != null)
@@ -24,6 +36,7 @@ public abstract class MergeCondition : IQueryCommandable
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         if (Condition != null)
@@ -35,6 +48,7 @@ public abstract class MergeCondition : IQueryCommandable
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<CommonTable> GetCommonTables()
     {
         if (Condition != null)
@@ -46,7 +60,16 @@ public abstract class MergeCondition : IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Gets the parameters associated with the merge condition.
+    /// </summary>
+    /// <returns>The parameters associated with the merge condition.</returns>
     public abstract IEnumerable<QueryParameter> GetParameters();
 
+    /// <summary>
+    /// Gets the tokens representing the merge condition.
+    /// </summary>
+    /// <param name="parent">The parent token.</param>
+    /// <returns>The tokens representing the merge condition.</returns>
     public abstract IEnumerable<Token> GetTokens(Token? parent);
 }

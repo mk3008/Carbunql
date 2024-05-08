@@ -4,9 +4,18 @@ using MessagePack;
 
 namespace Carbunql.Clauses;
 
+/// <summary>
+/// Represents a sortable item used in ORDER BY clauses in a query.
+/// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class SortableItem : IQueryCommandable
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SortableItem"/> class with the specified value, sort order, and null sorting behavior.
+    /// </summary>
+    /// <param name="value">The value to sort.</param>
+    /// <param name="isAscending">Specifies whether the sorting is ascending (true) or descending (false).</param>
+    /// <param name="nullSort">Specifies the behavior for sorting null values.</param>
     public SortableItem(ValueBase value, bool isAscending = true, NullSort nullSort = NullSort.Undefined)
     {
         Value = value;
@@ -14,12 +23,22 @@ public class SortableItem : IQueryCommandable
         NullSort = nullSort;
     }
 
+    /// <summary>
+    /// Gets the value to sort.
+    /// </summary>
     public ValueBase Value { get; init; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the sorting is ascending (true) or descending (false).
+    /// </summary>
     public bool IsAscending { get; set; } = true;
 
+    /// <summary>
+    /// Gets or sets the behavior for sorting null values.
+    /// </summary>
     public NullSort NullSort { get; set; } = NullSort.Undefined;
 
+    /// <inheritdoc/>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         foreach (var item in Value.GetInternalQueries())
@@ -28,6 +47,7 @@ public class SortableItem : IQueryCommandable
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         foreach (var item in Value.GetPhysicalTables())
@@ -36,6 +56,7 @@ public class SortableItem : IQueryCommandable
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<CommonTable> GetCommonTables()
     {
         foreach (var item in Value.GetCommonTables())
@@ -44,11 +65,13 @@ public class SortableItem : IQueryCommandable
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<QueryParameter> GetParameters()
     {
         return Value.GetParameters();
     }
 
+    /// <inheritdoc/>
     public IEnumerable<Token> GetTokens(Token? parent)
     {
         foreach (var item in Value.GetTokens(parent)) yield return item;

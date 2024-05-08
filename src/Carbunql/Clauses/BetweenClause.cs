@@ -3,9 +3,15 @@ using MessagePack;
 
 namespace Carbunql.Clauses;
 
+/// <summary>
+/// Represents a BETWEEN clause in SQL.
+/// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class BetweenClause : ValueBase
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BetweenClause"/> class.
+    /// </summary>
     public BetweenClause()
     {
         Value = null!;
@@ -14,6 +20,13 @@ public class BetweenClause : ValueBase
         IsNegative = false;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BetweenClause"/> class with the specified value, start, end, and negativity.
+    /// </summary>
+    /// <param name="value">The value to compare.</param>
+    /// <param name="start">The start of the range.</param>
+    /// <param name="end">The end of the range.</param>
+    /// <param name="isNegative">Specifies whether the BETWEEN clause is negated.</param>
     public BetweenClause(ValueBase value, ValueBase start, ValueBase end, bool isNegative)
     {
         Value = value;
@@ -22,14 +35,29 @@ public class BetweenClause : ValueBase
         IsNegative = isNegative;
     }
 
+    /// <summary>
+    /// Gets or sets the value to compare.
+    /// </summary>
     public ValueBase Value { get; init; }
 
+    /// <summary>
+    /// Gets or sets the start of the range.
+    /// </summary>
     public ValueBase Start { get; init; }
 
+    /// <summary>
+    /// Gets or sets the end of the range.
+    /// </summary>
     public ValueBase End { get; init; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the BETWEEN clause is negated.
+    /// </summary>
     public bool IsNegative { get; init; }
 
+    /// <summary>
+    /// Gets the internal queries associated with this clause.
+    /// </summary>
     protected override IEnumerable<SelectQuery> GetInternalQueriesCore()
     {
         foreach (var item in Value.GetInternalQueries())
@@ -46,6 +74,9 @@ public class BetweenClause : ValueBase
         }
     }
 
+    /// <summary>
+    /// Gets the parameters associated with this clause.
+    /// </summary>
     protected override IEnumerable<QueryParameter> GetParametersCore()
     {
         foreach (var item in Value.GetParameters())
@@ -62,6 +93,9 @@ public class BetweenClause : ValueBase
         }
     }
 
+    /// <summary>
+    /// Gets the physical tables associated with this clause.
+    /// </summary>
     protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()
     {
         foreach (var item in Value.GetPhysicalTables())
@@ -78,6 +112,9 @@ public class BetweenClause : ValueBase
         }
     }
 
+    /// <summary>
+    /// Gets the common tables associated with this clause.
+    /// </summary>
     protected override IEnumerable<CommonTable> GetCommonTablesCore()
     {
         foreach (var item in Value.GetCommonTables())
@@ -94,6 +131,9 @@ public class BetweenClause : ValueBase
         }
     }
 
+    /// <summary>
+    /// Gets the tokens representing this clause.
+    /// </summary>
     public override IEnumerable<Token> GetCurrentTokens(Token? parent)
     {
         foreach (var item in Value.GetTokens(parent)) yield return item;

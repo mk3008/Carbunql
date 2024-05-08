@@ -4,20 +4,36 @@ using System.Collections;
 
 namespace Carbunql.Clauses;
 
+// <summary>
+/// Represents a WITH clause in a query, containing a list of common tables.
+/// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class WithClause : IList<CommonTable>, IQueryCommandable
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="WithClause"/> class.
+    /// </summary>
     public WithClause()
     {
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="WithClause"/> class with the specified common tables.
+    /// </summary>
+    /// <param name="commons">The list of common tables.</param>
     public WithClause(IList<CommonTable> commons)
     {
         CommonTables.AddRange(commons);
     }
 
+    /// <summary>
+    /// Gets or sets the list of common tables in the WITH clause.
+    /// </summary>
     public List<CommonTable> CommonTables { get; private set; } = new();
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the WITH clause contains the 'RECURSIVE' keyword.
+    /// </summary>
     public bool HasRecursiveKeyword { get; set; } = false;
 
     public IEnumerable<Token> GetTokens(Token? parent, IEnumerable<CommonTable> commons)
@@ -52,6 +68,11 @@ public class WithClause : IList<CommonTable>, IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Retrieves the tokens associated with the WITH clause.
+    /// </summary>
+    /// <param name="parent">The parent token.</param>
+    /// <returns>An enumerable collection of tokens.</returns>
     public IEnumerable<Token> GetTokens(Token? parent)
     {
         foreach (var item in GetTokens(parent, CommonTables))
@@ -60,6 +81,10 @@ public class WithClause : IList<CommonTable>, IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Retrieves the query parameters associated with the WITH clause.
+    /// </summary>
+    /// <returns>An enumerable collection of query parameters.</returns>
     public IEnumerable<QueryParameter> GetParameters()
     {
         foreach (var ct in CommonTables)
@@ -71,6 +96,10 @@ public class WithClause : IList<CommonTable>, IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Retrieves the internal queries associated with the WITH clause.
+    /// </summary>
+    /// <returns>An enumerable collection of internal queries.</returns>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         foreach (var commonTable in CommonTables)
@@ -82,6 +111,10 @@ public class WithClause : IList<CommonTable>, IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Retrieves the physical tables associated with the WITH clause.
+    /// </summary>
+    /// <returns>An enumerable collection of physical tables.</returns>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         foreach (var commonTable in CommonTables)
@@ -93,6 +126,10 @@ public class WithClause : IList<CommonTable>, IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Retrieves the common tables associated with the WITH clause.
+    /// </summary>
+    /// <returns>An enumerable collection of common tables.</returns>
     public IEnumerable<CommonTable> GetCommonTables()
     {
         foreach (var commonTable in CommonTables)

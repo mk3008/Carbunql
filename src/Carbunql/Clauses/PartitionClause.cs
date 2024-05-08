@@ -3,17 +3,28 @@ using MessagePack;
 
 namespace Carbunql.Clauses;
 
+/// <summary>
+/// Represents a PARTITION BY clause in a SQL query.
+/// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class PartitionClause : QueryCommandCollection<ValueBase>, IQueryCommandable
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PartitionClause"/> class.
+    /// </summary>
     public PartitionClause() : base()
     {
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PartitionClause"/> class with the specified collection of values.
+    /// </summary>
+    /// <param name="collection">The collection of values.</param>
     public PartitionClause(List<ValueBase> collection) : base(collection)
     {
     }
 
+    /// <inheritdoc/>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         foreach (var value in Items)
@@ -25,6 +36,7 @@ public class PartitionClause : QueryCommandCollection<ValueBase>, IQueryCommanda
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         foreach (var value in Items)
@@ -36,6 +48,7 @@ public class PartitionClause : QueryCommandCollection<ValueBase>, IQueryCommanda
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<CommonTable> GetCommonTables()
     {
         foreach (var value in Items)
@@ -47,6 +60,7 @@ public class PartitionClause : QueryCommandCollection<ValueBase>, IQueryCommanda
         }
     }
 
+    /// <inheritdoc/>
     public override IEnumerable<Token> GetTokens(Token? parent)
     {
         if (!Items.Any()) yield break;

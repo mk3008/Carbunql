@@ -40,7 +40,7 @@ public class UpdateQuery : IQueryCommandable, IReturning, ICommentable
         }
         if (SetClause != null)
         {
-            foreach (var value in SetClause.Items)
+            foreach (var value in SetClause)
             {
                 foreach (var item in value.GetInternalQueries())
                 {
@@ -89,7 +89,7 @@ public class UpdateQuery : IQueryCommandable, IReturning, ICommentable
         }
         if (SetClause != null)
         {
-            foreach (var value in SetClause.Items)
+            foreach (var value in SetClause)
             {
                 foreach (var item in value.GetPhysicalTables())
                 {
@@ -138,7 +138,7 @@ public class UpdateQuery : IQueryCommandable, IReturning, ICommentable
         }
         if (SetClause != null)
         {
-            foreach (var value in SetClause.Items)
+            foreach (var value in SetClause)
             {
                 foreach (var item in value.GetCommonTables())
                 {

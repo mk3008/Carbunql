@@ -7,6 +7,9 @@ using System.Collections.Immutable;
 
 namespace Carbunql.Clauses;
 
+/// <summary>
+/// Base class for various types of tables in a query.
+/// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 [Union(0, typeof(FunctionTable))]
 [Union(1, typeof(PhysicalTable))]
@@ -14,46 +17,108 @@ namespace Carbunql.Clauses;
 [Union(3, typeof(LateralTable))]
 public abstract class TableBase : IQueryCommandable
 {
+    /// <summary>
+    /// Gets the tokens representing this table in a query.
+    /// </summary>
+    /// <param name="parent">The parent token.</param>
+    /// <returns>The tokens representing this table.</returns>
     public abstract IEnumerable<Token> GetTokens(Token? parent);
 
+    /// <summary>
+    /// Gets the default name of the table.
+    /// </summary>
+    /// <returns>The default name of the table.</returns>
     public virtual string GetDefaultName() => string.Empty;
 
+    /// <summary>
+    /// Converts the table to a selectable table with the specified alias.
+    /// </summary>
+    /// <param name="alias">The alias for the table.</param>
+    /// <returns>A selectable table representing this table with the specified alias.</returns>
     public virtual SelectableTable ToSelectable() => ToSelectable(GetDefaultName());
 
+    /// <summary>
+    /// Converts the table to a selectable table with the specified alias.
+    /// </summary>
+    /// <param name="alias">The alias for the table.</param>
+    /// <returns>A selectable table representing this table with the specified alias.</returns>
     public virtual SelectableTable ToSelectable(string alias)
     {
         return new SelectableTable(this, alias);
     }
 
+    /// <summary>
+    /// Converts the table to a selectable table with the specified alias and column aliases.
+    /// </summary>
+    /// <param name="alias">The alias for the table.</param>
+    /// <param name="columnAliases">The column aliases.</param>
+    /// <returns>A selectable table representing this table with the specified alias and column aliases.</returns>
     public virtual SelectableTable ToSelectable(string alias, IEnumerable<string> columnAliases)
     {
         return new SelectableTable(this, alias, columnAliases.ToValueCollection());
     }
 
+    /// <summary>
+    /// Converts the table to a selectable table with the specified alias and column aliases.
+    /// </summary>
+    /// <param name="alias">The alias for the table.</param>
+    /// <param name="columnAliases">The column aliases.</param>
+    /// <returns>A selectable table representing this table with the specified alias and column aliases.</returns>
     public virtual SelectableTable ToSelectable(string alias, ValueCollection columnAliases)
     {
         return new SelectableTable(this, alias, columnAliases);
     }
 
+    /// <summary>
+    /// Gets the parameters associated with this table.
+    /// </summary>
+    /// <returns>The parameters associated with this table.</returns>
     public virtual IEnumerable<QueryParameter> GetParameters()
     {
         yield break;
     }
 
+    /// <summary>
+    /// Gets the names of the columns in this table.
+    /// </summary>
+    /// <returns>The names of the columns in this table.</returns>
     public virtual IList<string> GetColumnNames()
     {
         return ImmutableList<string>.Empty;
     }
 
+    /// <summary>
+    /// Gets a value indicating whether this table is a select query.
+    /// </summary>
     public virtual bool IsSelectQuery => false;
 
+    /// <summary>
+    /// Gets the full name of the table.
+    /// </summary>
+    /// <returns>The full name of the table.</returns>
     public virtual string GetTableFullName() => "";
 
+    /// <summary>
+    /// Gets the select query associated with this table.
+    /// </summary>
+    /// <returns>The select query associated with this table.</returns>
     public virtual SelectQuery GetSelectQuery() => throw new NotSupportedException();
 
+    /// <summary>
+    /// Gets the internal queries associated with this table.
+    /// </summary>
+    /// <returns>The internal queries associated with this table.</returns>
     public abstract IEnumerable<SelectQuery> GetInternalQueries();
 
+    /// <summary>
+    /// Gets the physical tables associated with this table.
+    /// </summary>
+    /// <returns>The physical tables associated with this table.</returns>
     public abstract IEnumerable<PhysicalTable> GetPhysicalTables();
 
+    /// <summary>
+    /// Gets the common tables associated with this table.
+    /// </summary>
+    /// <returns>The common tables associated with this table.</returns>
     public abstract IEnumerable<CommonTable> GetCommonTables();
 }

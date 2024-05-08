@@ -3,8 +3,15 @@ using Carbunql.Values;
 
 namespace Carbunql.Clauses;
 
+/// <summary>
+/// Represents a returning clause in a query.
+/// </summary>
 public class ReturningClause : QueryCommandCollection<ValueBase>, IQueryCommandable
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ReturningClause"/> class with the specified value.
+    /// </summary>
+    /// <param name="value">The value to be returned.</param>
     public ReturningClause(ValueBase value)
     {
         if (value is ValueCollection collection)
@@ -20,6 +27,10 @@ public class ReturningClause : QueryCommandCollection<ValueBase>, IQueryCommanda
         }
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ReturningClause"/> class with the specified values.
+    /// </summary>
+    /// <param name="values">The values to be returned.</param>
     public ReturningClause(IEnumerable<ValueBase> values)
     {
         foreach (var item in values)
@@ -28,6 +39,7 @@ public class ReturningClause : QueryCommandCollection<ValueBase>, IQueryCommanda
         }
     }
 
+    /// <inheritdoc/>
     public override IEnumerable<Token> GetTokens(Token? parent)
     {
         var t = Token.Reserved(this, parent, "returning");
@@ -35,16 +47,19 @@ public class ReturningClause : QueryCommandCollection<ValueBase>, IQueryCommanda
         foreach (var item in base.GetTokens(t)) yield return item;
     }
 
+    /// <inheritdoc/>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         yield break;
     }
 
+    /// <inheritdoc/>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         yield break;
     }
 
+    /// <inheritdoc/>
     public IEnumerable<CommonTable> GetCommonTables()
     {
         yield break;

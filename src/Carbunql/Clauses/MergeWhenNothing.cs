@@ -1,13 +1,23 @@
 ﻿namespace Carbunql.Clauses;
 
+/// <summary>
+/// Represents a "WHEN MATCHED THEN DO NOTHING" or "WHEN NOT MATCHED THEN DO NOTHING" condition in a "MERGE" SQL statement.
+/// </summary>
 public class MergeWhenNothing : MergeCondition
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MergeWhenNothing"/> class.
+    /// </summary>
     public MergeWhenNothing()
     {
     }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether this condition is a match condition.
+    /// </summary>
     public bool IsMatchCondition { get; set; }
 
+    /// <inheritdoc/>
     public override IEnumerable<QueryParameter> GetParameters()
     {
         if (Condition != null)
@@ -19,6 +29,7 @@ public class MergeWhenNothing : MergeCondition
         }
     }
 
+    /// <inheritdoc/>
     public override IEnumerable<Token> GetTokens(Token? parent)
     {
         var txt = (IsMatchCondition) ? "when matched" : "when not matched";

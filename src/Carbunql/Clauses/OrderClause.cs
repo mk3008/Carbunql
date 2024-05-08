@@ -3,17 +3,28 @@ using MessagePack;
 
 namespace Carbunql.Clauses;
 
+/// <summary>
+/// Represents an order clause in a SQL query.
+/// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class OrderClause : QueryCommandCollection<IQueryCommandable>, IQueryCommandable
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="OrderClause"/> class.
+    /// </summary>
     public OrderClause() : base()
     {
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="OrderClause"/> class with the specified collection.
+    /// </summary>
+    /// <param name="collection">The collection of order items.</param>
     public OrderClause(List<IQueryCommandable> collection) : base(collection)
     {
     }
 
+    /// <inheritdoc/>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         foreach (var value in Items)
@@ -25,6 +36,7 @@ public class OrderClause : QueryCommandCollection<IQueryCommandable>, IQueryComm
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         foreach (var value in Items)
@@ -36,6 +48,7 @@ public class OrderClause : QueryCommandCollection<IQueryCommandable>, IQueryComm
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<CommonTable> GetCommonTables()
     {
         foreach (var value in Items)
@@ -47,6 +60,7 @@ public class OrderClause : QueryCommandCollection<IQueryCommandable>, IQueryComm
         }
     }
 
+    /// <inheritdoc/>
     public override IEnumerable<Token> GetTokens(Token? parent)
     {
         if (!Items.Any()) yield break;

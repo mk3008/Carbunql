@@ -4,15 +4,29 @@ using MessagePack;
 
 namespace Carbunql.Clauses;
 
+/// <summary>
+/// Represents a selectable table in a query.
+/// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class SelectableTable : IQueryCommandable, ISelectable
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SelectableTable"/> class with the specified table, alias, and column aliases.
+    /// </summary>
+    /// <param name="table">The table to be selected.</param>
+    /// <param name="alias">The alias for the selected table.</param>
     public SelectableTable(TableBase table, string alias)
     {
         Table = table;
         Alias = alias;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SelectableTable"/> class with the specified table, alias, and column aliases.
+    /// </summary>
+    /// <param name="table">The table to be selected.</param>
+    /// <param name="alias">The alias for the selected table.</param>
+    /// <param name="columnAliases">The column aliases for the selected table.</param>
     public SelectableTable(TableBase table, string alias, ValueCollection columnAliases)
     {
         Table = table;
@@ -20,8 +34,14 @@ public class SelectableTable : IQueryCommandable, ISelectable
         ColumnAliases = columnAliases;
     }
 
+    /// <summary>
+    /// Gets the table to be selected.
+    /// </summary>
     public TableBase Table { get; init; }
 
+    /// <summary>
+    /// Gets or sets the alias for the selected table.
+    /// </summary>
     public string Alias { get; private set; }
 
     public void SetAlias(string alias)
@@ -29,6 +49,9 @@ public class SelectableTable : IQueryCommandable, ISelectable
         this.Alias = alias;
     }
 
+    /// <summary>
+    /// Gets or sets the column aliases for the selected table.
+    /// </summary>
     public ValueCollection? ColumnAliases { get; init; }
 
     public IEnumerable<Token> GetAliasTokens(Token? parent)
@@ -47,6 +70,7 @@ public class SelectableTable : IQueryCommandable, ISelectable
         }
     }
 
+    /// <inheritdoc/>
     public virtual IEnumerable<Token> GetTokens(Token? parent)
     {
         foreach (var item in Table.GetTokens(parent)) yield return item;
@@ -66,6 +90,7 @@ public class SelectableTable : IQueryCommandable, ISelectable
         }
     }
 
+    /// <inheritdoc/>
     public virtual IEnumerable<QueryParameter> GetParameters()
     {
         foreach (var item in Table.GetParameters())
@@ -88,6 +113,7 @@ public class SelectableTable : IQueryCommandable, ISelectable
         return Table.GetColumnNames();
     }
 
+    /// <inheritdoc/>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         foreach (var item in Table.GetInternalQueries())
@@ -96,6 +122,7 @@ public class SelectableTable : IQueryCommandable, ISelectable
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         foreach (var item in Table.GetPhysicalTables())
@@ -104,6 +131,7 @@ public class SelectableTable : IQueryCommandable, ISelectable
         }
     }
 
+    /// <inheritdoc/>
     public virtual IEnumerable<CommonTable> GetCommonTables()
     {
         foreach (var item in Table.GetCommonTables())

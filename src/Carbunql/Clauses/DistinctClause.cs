@@ -4,23 +4,37 @@ using System.Collections;
 
 namespace Carbunql.Clauses;
 
+/// <summary>
+/// Represents a DISTINCT clause in a SQL query.
+/// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class DistinctClause : IList<ValueBase>, IQueryCommandable
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DistinctClause"/> class.
+    /// </summary>
     public DistinctClause()
     {
         Items = new();
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DistinctClause"/> class with the specified items.
+    /// </summary>
     public DistinctClause(IList<ValueBase> items)
     {
         Items = new();
         Items.AddRange(items);
     }
 
+    /// <summary>
+    /// Gets the items in the DISTINCT clause.
+    /// </summary>
     private List<ValueBase> Items { get; init; }
 
-
+    /// <summary>
+    /// Gets the internal queries associated with this DISTINCT clause.
+    /// </summary>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         foreach (var value in Items)
@@ -32,6 +46,9 @@ public class DistinctClause : IList<ValueBase>, IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Gets the physical tables associated with this DISTINCT clause.
+    /// </summary>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         foreach (var value in Items)
@@ -43,6 +60,9 @@ public class DistinctClause : IList<ValueBase>, IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Gets the common tables associated with this DISTINCT clause.
+    /// </summary>
     public IEnumerable<CommonTable> GetCommonTables()
     {
         foreach (var value in Items)
@@ -54,6 +74,9 @@ public class DistinctClause : IList<ValueBase>, IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Gets the tokens representing this DISTINCT clause.
+    /// </summary>
     public IEnumerable<Token> GetTokens(Token? parent)
     {
         var clause = Token.Reserved(this, parent, "distinct");
@@ -85,6 +108,9 @@ public class DistinctClause : IList<ValueBase>, IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Gets the parameters associated with this DISTINCT clause.
+    /// </summary>
     public IEnumerable<QueryParameter> GetParameters()
     {
         foreach (var item in Items)

@@ -3,10 +3,20 @@ using System.Collections;
 
 namespace Carbunql.Clauses;
 
+/// <summary>
+/// Represents a collection of conditions for a WHEN clause in a MERGE statement.
+/// </summary>
 public class WhenClause : IList<MergeCondition>, IQueryCommandable
 {
+    /// <summary>
+    /// Gets or sets the list of merge conditions.
+    /// </summary>
     public List<MergeCondition> Conditions { get; set; } = new();
 
+    /// <summary>
+    /// Retrieves the internal queries associated with this when clause.
+    /// </summary>
+    /// <returns>An enumerable collection of internal queries.</returns>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         foreach (var condition in Conditions)
@@ -18,6 +28,10 @@ public class WhenClause : IList<MergeCondition>, IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Retrieves the physical tables associated with this when clause.
+    /// </summary>
+    /// <returns>An enumerable collection of physical tables.</returns>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         foreach (var condition in Conditions)
@@ -29,6 +43,10 @@ public class WhenClause : IList<MergeCondition>, IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Retrieves the common tables associated with this when clause.
+    /// </summary>
+    /// <returns>An enumerable collection of common tables.</returns>
     public IEnumerable<CommonTable> GetCommonTables()
     {
         foreach (var condition in Conditions)
@@ -40,6 +58,10 @@ public class WhenClause : IList<MergeCondition>, IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Retrieves the query parameters associated with this when clause.
+    /// </summary>
+    /// <returns>An enumerable collection of query parameters.</returns>
     public IEnumerable<QueryParameter> GetParameters()
     {
         foreach (var item in Conditions)
@@ -51,11 +73,19 @@ public class WhenClause : IList<MergeCondition>, IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Retrieves the tokens associated with this when clause.
+    /// </summary>
+    /// <param name="parent">The parent token.</param>
+    /// <returns>An enumerable collection of tokens.</returns>
     public IEnumerable<Token> GetTokens(Token? parent)
     {
         foreach (var condition in Conditions)
         {
-            foreach (var item in condition.GetTokens(parent)) yield return item;
+            foreach (var item in condition.GetTokens(parent))
+            {
+                yield return item;
+            }
         }
     }
 

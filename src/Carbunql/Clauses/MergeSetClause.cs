@@ -2,8 +2,12 @@
 
 namespace Carbunql.Clauses;
 
+/// <summary>
+/// Represents a clause for the "SET" part of a "MERGE" SQL statement.
+/// </summary>
 public class MergeSetClause : QueryCommandCollection<ValueBase>, IQueryCommandable
 {
+    /// <inheritdoc/>
     public IEnumerable<CommonTable> GetCommonTables()
     {
         foreach (var value in Items)
@@ -15,6 +19,7 @@ public class MergeSetClause : QueryCommandCollection<ValueBase>, IQueryCommandab
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         foreach (var value in Items)
@@ -26,6 +31,7 @@ public class MergeSetClause : QueryCommandCollection<ValueBase>, IQueryCommandab
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         foreach (var value in Items)
@@ -37,6 +43,7 @@ public class MergeSetClause : QueryCommandCollection<ValueBase>, IQueryCommandab
         }
     }
 
+    /// <inheritdoc/>
     public override IEnumerable<Token> GetTokens(Token? parent)
     {
         foreach (var item in base.GetTokens(parent)) yield return item;

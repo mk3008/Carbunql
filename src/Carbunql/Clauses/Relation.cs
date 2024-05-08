@@ -3,9 +3,15 @@ using MessagePack;
 
 namespace Carbunql.Clauses;
 
+/// <summary>
+/// Represents a relation in a query.
+/// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class Relation : IQueryCommandable
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Relation"/> class.
+    /// </summary>
     public Relation()
     {
         JoinCommand = string.Empty;
@@ -13,12 +19,23 @@ public class Relation : IQueryCommandable
         Table = null!;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Relation"/> class with the specified query and join command.
+    /// </summary>
+    /// <param name="query">The selectable table.</param>
+    /// <param name="joinCommand">The join command.</param>
     public Relation(SelectableTable query, string joinCommand)
     {
         Table = query;
         JoinCommand = joinCommand;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Relation"/> class with the specified query, join command, and condition.
+    /// </summary>
+    /// <param name="query">The selectable table.</param>
+    /// <param name="joinCommand">The join command.</param>
+    /// <param name="condition">The join condition.</param>
     public Relation(SelectableTable query, string joinCommand, ValueBase condition)
     {
         Table = query;
@@ -26,12 +43,22 @@ public class Relation : IQueryCommandable
         Condition = condition;
     }
 
+    /// <summary>
+    /// Gets or sets the join command.
+    /// </summary>
     public string JoinCommand { get; init; }
 
+    /// <summary>
+    /// Gets or sets the join condition.
+    /// </summary>
     public ValueBase? Condition { get; set; }
 
+    /// <summary>
+    /// Gets or sets the selectable table.
+    /// </summary>
     public SelectableTable Table { get; init; }
 
+    /// <inheritdoc/>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         foreach (var item in Table.GetInternalQueries())
@@ -47,6 +74,7 @@ public class Relation : IQueryCommandable
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         foreach (var item in Table.GetPhysicalTables())
@@ -62,7 +90,7 @@ public class Relation : IQueryCommandable
         }
     }
 
-
+    /// <inheritdoc/>
     public IEnumerable<CommonTable> GetCommonTables()
     {
         foreach (var item in Table.GetCommonTables())
@@ -78,6 +106,7 @@ public class Relation : IQueryCommandable
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<QueryParameter> GetParameters()
     {
         foreach (var item in Table.GetParameters())
@@ -93,6 +122,7 @@ public class Relation : IQueryCommandable
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<Token> GetTokens(Token? parent)
     {
         yield return Token.Reserved(this, parent, JoinCommand);

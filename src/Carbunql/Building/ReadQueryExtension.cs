@@ -165,14 +165,14 @@ public static class ReadQueryExtension
     /// <returns>The SelectableTable representing the IReadQuery for insertion into the specified table.</returns>
     public static SelectableTable ToInsertTable(this IReadQuery source, string table)
     {
-        var s = source.GetSelectClause();
-        if (s == null)
+        var clause = source.GetSelectClause();
+        if (clause == null)
         {
             return new SelectableTable(new PhysicalTable(table), table);
         }
 
         var vals = new ValueCollection();
-        foreach (var item in s.Items)
+        foreach (var item in clause)
         {
             vals.Add(new ColumnValue(item.Alias));
         }
@@ -308,8 +308,8 @@ public static class ReadQueryExtension
     /// <exception cref="NotSupportedException"></exception>
     private static SetClause ToSetClause(this IReadQuery source, IEnumerable<string> keys, string queryAlias)
     {
-        var s = source.GetSelectClause() ?? throw new NotSupportedException("select clause is not found.");
-        var cols = s.Items.Where(x => !keys.Contains(x.Alias)).Select(x => x.Alias).ToList();
+        var selectclause = source.GetSelectClause() ?? throw new NotSupportedException("select clause is not found.");
+        var cols = selectclause.Where(x => !keys.Contains(x.Alias)).Select(x => x.Alias).ToList();
 
         var clause = new SetClause();
         foreach (var item in cols)
@@ -407,7 +407,7 @@ public static class ReadQueryExtension
     private static WhereClause ToWhereClauseAsDelete(this IReadQuery source, string alias)
     {
         var select = source.GetSelectClause();
-        var selectColumns = select!.Items!.Select(x => x.Alias);
+        var selectColumns = select!.Select(x => x.Alias);
 
         if (selectColumns == null || !selectColumns.Any()) throw new InvalidOperationException("Missing select clause.");
 
