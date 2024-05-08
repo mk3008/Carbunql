@@ -3,15 +3,26 @@ using Carbunql.Values;
 
 namespace Carbunql.Clauses;
 
+/// <summary>
+/// Represents a clause for the "INSERT" part of a "MERGE" SQL statement.
+/// </summary>
 public class MergeInsertClause : IQueryCommandable
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MergeInsertClause"/> class with the specified column aliases.
+    /// </summary>
+    /// <param name="columnAliases">The column aliases.</param>
     public MergeInsertClause(ValueCollection columnAliases)
     {
         ColumnAliases = columnAliases;
     }
 
+    /// <summary>
+    /// Gets the column aliases.
+    /// </summary>
     public ValueCollection ColumnAliases { get; init; }
 
+    /// <inheritdoc/>
     public virtual IEnumerable<Token> GetTokens(Token? parent)
     {
         var t = Token.Reserved(this, parent, "insert");
@@ -22,11 +33,13 @@ public class MergeInsertClause : IQueryCommandable
         yield return Token.ReservedBracketEnd(this, parent);
     }
 
+    /// <inheritdoc/>
     public virtual IEnumerable<QueryParameter> GetParameters()
     {
         return ColumnAliases.GetParameters();
     }
 
+    /// <inheritdoc/>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         foreach (var item in ColumnAliases.GetInternalQueries())
@@ -35,6 +48,7 @@ public class MergeInsertClause : IQueryCommandable
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         foreach (var item in ColumnAliases.GetPhysicalTables())
@@ -43,6 +57,7 @@ public class MergeInsertClause : IQueryCommandable
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<CommonTable> GetCommonTables()
     {
         foreach (var item in ColumnAliases.GetCommonTables())

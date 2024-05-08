@@ -1,14 +1,25 @@
 ﻿namespace Carbunql.Clauses;
 
+/// <summary>
+/// Represents a "WHEN MATCHED THEN UPDATE" condition in a "MERGE" SQL statement.
+/// </summary>
 public class MergeWhenUpdate : MergeCondition
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MergeWhenUpdate"/> class.
+    /// </summary>
+    /// <param name="query">The update query.</param>
     public MergeWhenUpdate(MergeUpdateQuery query)
     {
         Query = query;
     }
 
+    /// <summary>
+    /// Gets the update query.
+    /// </summary>
     public MergeUpdateQuery Query { get; init; }
 
+    /// <inheritdoc/>
     public override IEnumerable<QueryParameter> GetParameters()
     {
         foreach (var item in Query.GetParameters())
@@ -24,6 +35,7 @@ public class MergeWhenUpdate : MergeCondition
         }
     }
 
+    /// <inheritdoc/>
     public override IEnumerable<Token> GetTokens(Token? parent)
     {
         var t = Token.Reserved(this, parent, "when matched");

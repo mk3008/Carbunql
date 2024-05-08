@@ -4,14 +4,23 @@ using System.Collections;
 
 namespace Carbunql.Clauses;
 
+/// <summary>
+/// Represents a GROUP BY clause in a SQL query.
+/// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class GroupClause : IList<ValueBase>, IQueryCommandable
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GroupClause"/> class.
+    /// </summary>
     public GroupClause()
     {
         Items = new();
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GroupClause"/> class with the specified list of items.
+    /// </summary>
     public GroupClause(IList<ValueBase> items)
     {
         Items = new();
@@ -20,6 +29,9 @@ public class GroupClause : IList<ValueBase>, IQueryCommandable
 
     private List<ValueBase> Items { get; init; }
 
+    /// <summary>
+    /// Gets the internal queries associated with this GROUP BY clause.
+    /// </summary>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         foreach (var value in Items)
@@ -31,6 +43,9 @@ public class GroupClause : IList<ValueBase>, IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Gets the physical tables associated with this GROUP BY clause.
+    /// </summary>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         foreach (var value in Items)
@@ -42,6 +57,9 @@ public class GroupClause : IList<ValueBase>, IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Gets the common tables associated with this GROUP BY clause.
+    /// </summary>
     public IEnumerable<CommonTable> GetCommonTables()
     {
         foreach (var value in Items)
@@ -53,6 +71,9 @@ public class GroupClause : IList<ValueBase>, IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Gets the tokens representing this GROUP BY clause.
+    /// </summary>
     public IEnumerable<Token> GetTokens(Token? parent)
     {
         var clause = Token.Reserved(this, parent, "group by");
@@ -73,6 +94,9 @@ public class GroupClause : IList<ValueBase>, IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Gets the parameters associated with this GROUP BY clause.
+    /// </summary>
     public IEnumerable<QueryParameter> GetParameters()
     {
         foreach (var item in Items)

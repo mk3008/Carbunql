@@ -209,7 +209,7 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
         var queryset = new DefinitionQuerySet(ct);
 
         // alter table query normalize
-        foreach (var item in DefinitionClause.Disasseble())
+        foreach (var item in DefinitionClause.Disassemble())
         {
             if (!item.TrySet(ct.DefinitionClause))
             {

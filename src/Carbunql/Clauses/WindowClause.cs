@@ -4,20 +4,37 @@ using System.Collections;
 
 namespace Carbunql.Clauses;
 
+/// <summary>
+/// Represents a WINDOW clause in a query.
+/// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class WindowClause : IList<NamedWindowDefinition>, IQueryCommandable
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="WindowClause"/> class.
+    /// </summary>
     public WindowClause()
     {
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="WindowClause"/> class with the specified window definitions.
+    /// </summary>
+    /// <param name="definitions">The window definitions to be added to the clause.</param>
     public WindowClause(IList<NamedWindowDefinition> definitions)
     {
         NamedWindowDefinitions.AddRange(definitions);
     }
 
+    /// <summary>
+    /// Gets the list of named window definitions associated with this WINDOW clause.
+    /// </summary>
     public List<NamedWindowDefinition> NamedWindowDefinitions { get; private set; } = new();
 
+    /// <summary>
+    /// Retrieves the internal queries associated with this WINDOW clause.
+    /// </summary>
+    /// <returns>An enumerable collection of internal queries.</returns>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         foreach (var definition in NamedWindowDefinitions)
@@ -29,6 +46,10 @@ public class WindowClause : IList<NamedWindowDefinition>, IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Retrieves the query parameters associated with this WINDOW clause.
+    /// </summary>
+    /// <returns>An enumerable collection of query parameters.</returns>
     public IEnumerable<QueryParameter> GetParameters()
     {
         var prm = EmptyParameters.Get();
@@ -41,6 +62,10 @@ public class WindowClause : IList<NamedWindowDefinition>, IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Retrieves the physical tables associated with this WINDOW clause.
+    /// </summary>
+    /// <returns>An enumerable collection of physical tables.</returns>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         foreach (var definition in NamedWindowDefinitions)
@@ -52,6 +77,10 @@ public class WindowClause : IList<NamedWindowDefinition>, IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Retrieves the common tables associated with this WINDOW clause.
+    /// </summary>
+    /// <returns>An enumerable collection of common tables.</returns>
     public IEnumerable<CommonTable> GetCommonTables()
     {
         foreach (var definition in NamedWindowDefinitions)
@@ -63,6 +92,11 @@ public class WindowClause : IList<NamedWindowDefinition>, IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Retrieves the tokens associated with this WINDOW clause.
+    /// </summary>
+    /// <param name="parent">The parent token.</param>
+    /// <returns>An enumerable collection of tokens.</returns>
     public IEnumerable<Token> GetTokens(Token? parent)
     {
         if (!NamedWindowDefinitions.Any()) yield break;
@@ -70,12 +104,12 @@ public class WindowClause : IList<NamedWindowDefinition>, IQueryCommandable
         var clause = Token.Reserved(this, parent, "window");
         yield return clause;
 
-        var isFisrt = true;
+        var isFirst = true;
         foreach (var item in NamedWindowDefinitions)
         {
-            if (isFisrt)
+            if (isFirst)
             {
-                isFisrt = false;
+                isFirst = false;
             }
             else
             {

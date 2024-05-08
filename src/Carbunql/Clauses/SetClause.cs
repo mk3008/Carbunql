@@ -2,8 +2,12 @@
 
 namespace Carbunql.Clauses;
 
+/// <summary>
+/// Represents a SET clause in a query.
+/// </summary>
 public class SetClause : QueryCommandCollection<ValueBase>, IQueryCommandable
 {
+    /// <inheritdoc/>
     public IEnumerable<CommonTable> GetCommonTables()
     {
         foreach (var x in Items)
@@ -15,6 +19,7 @@ public class SetClause : QueryCommandCollection<ValueBase>, IQueryCommandable
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         foreach (var x in Items)
@@ -26,6 +31,7 @@ public class SetClause : QueryCommandCollection<ValueBase>, IQueryCommandable
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         foreach (var x in Items)
@@ -37,6 +43,7 @@ public class SetClause : QueryCommandCollection<ValueBase>, IQueryCommandable
         }
     }
 
+    /// <inheritdoc/>
     public override IEnumerable<Token> GetTokens(Token? parent)
     {
         Token clause = GetClauseToken(parent);

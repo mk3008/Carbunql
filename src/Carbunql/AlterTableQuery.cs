@@ -65,8 +65,8 @@ public class AlterTableQuery : IQueryCommandable, ICommentable, ITable
 
     public bool TrySet(TableDefinitionClause clause)
     {
-        if (AlterTableClause.Items.Count != 1) throw new InvalidOperationException();
-        var cmd = AlterTableClause.Items[0];
+        if (AlterTableClause.Count != 1) throw new InvalidOperationException();
+        var cmd = AlterTableClause[0];
         return cmd.TrySet(clause);
     }
 

@@ -1,11 +1,16 @@
 ﻿namespace Carbunql.Clauses;
 
+/// <summary>
+/// Represents a "WHEN MATCHED THEN DELETE" condition in a "MERGE" SQL statement.
+/// </summary>
 public class MergeWhenDelete : MergeCondition
 {
+    /// <inheritdoc/>
     public MergeWhenDelete()
     {
     }
 
+    /// <inheritdoc/>
     public override IEnumerable<QueryParameter> GetParameters()
     {
         if (Condition != null)
@@ -17,6 +22,7 @@ public class MergeWhenDelete : MergeCondition
         }
     }
 
+    /// <inheritdoc/>
     public override IEnumerable<Token> GetTokens(Token? parent)
     {
         var t = Token.Reserved(this, parent, "when matched");

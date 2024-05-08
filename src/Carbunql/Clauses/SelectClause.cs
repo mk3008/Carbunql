@@ -3,13 +3,23 @@ using MessagePack;
 
 namespace Carbunql.Clauses;
 
+/// <summary>
+/// Represents a SELECT clause in a query.
+/// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class SelectClause : QueryCommandCollection<SelectableItem>, IQueryCommandable
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SelectClause"/> class.
+    /// </summary>
     public SelectClause()
     {
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SelectClause"/> class with the specified collection of selectable items.
+    /// </summary>
+    /// <param name="collection">The collection of selectable items.</param>
     public SelectClause(List<SelectableItem> collection)
     {
         Items.AddRange(collection);
@@ -35,10 +45,17 @@ public class SelectClause : QueryCommandCollection<SelectableItem>, IQueryComman
         }
     }
 
+    /// <summary>
+    /// Gets or sets the distinct clause of the select query.
+    /// </summary>
     public DistinctClause? Distinct { get; set; }
 
+    /// <summary>
+    /// Gets or sets the top clause of the select query.
+    /// </summary>
     public TopClause? Top { get; set; }
 
+    /// <inheritdoc/>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         if (Distinct != null)
@@ -66,6 +83,7 @@ public class SelectClause : QueryCommandCollection<SelectableItem>, IQueryComman
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         if (Distinct != null)
@@ -93,6 +111,7 @@ public class SelectClause : QueryCommandCollection<SelectableItem>, IQueryComman
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<CommonTable> GetCommonTables()
     {
         if (Distinct != null)
@@ -120,6 +139,7 @@ public class SelectClause : QueryCommandCollection<SelectableItem>, IQueryComman
         }
     }
 
+    /// <inheritdoc/>
     public override IEnumerable<Token> GetTokens(Token? parent)
     {
         var clause = Token.Reserved(this, parent, "select");
@@ -144,6 +164,10 @@ public class SelectClause : QueryCommandCollection<SelectableItem>, IQueryComman
         foreach (var item in base.GetTokens(clause)) yield return item;
     }
 
+    /// <summary>
+    /// Filters out the columns in the SELECT clause that are not present in the specified collection of columns.
+    /// </summary>
+    /// <param name="columns">The collection of column names to filter in.</param>
     public void FilterInColumns(IEnumerable<string> columns)
     {
         var lst = this.Where(x => !columns.Contains(x.Alias)).ToList();

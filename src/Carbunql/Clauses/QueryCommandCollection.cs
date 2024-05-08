@@ -3,18 +3,35 @@ using System.Collections;
 
 namespace Carbunql.Clauses;
 
+/// <summary>
+/// Represents a collection of query commandable items.
+/// </summary>
+/// <typeparam name="T">The type of items in the collection, which must implement <see cref="IQueryCommandable"/>.</typeparam>
 [MessagePackObject(keyAsPropertyName: true)]
 public abstract class QueryCommandCollection<T> : IList<T> where T : IQueryCommandable
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="QueryCommandCollection{T}"/> class.
+    /// </summary>
     public QueryCommandCollection()
     {
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="QueryCommandCollection{T}"/> class with the specified collection of items.
+    /// </summary>
+    /// <param name="collection">The collection of items.</param>
     public QueryCommandCollection(List<T> collection)
     {
         Items.AddRange(collection);
     }
 
+    /// <summary>
+    /// Gets or sets the list of items in the collection.
+    /// </summary>
+    protected List<T> Items { get; set; } = new();
+
+    /// <inheritdoc/>
     public virtual IEnumerable<Token> GetTokens(Token? parent)
     {
         if (!Items.Any()) yield break;
@@ -34,6 +51,7 @@ public abstract class QueryCommandCollection<T> : IList<T> where T : IQueryComma
         }
     }
 
+    /// <inheritdoc/>
     public virtual IEnumerable<QueryParameter> GetParameters()
     {
         foreach (var item in Items)
@@ -44,8 +62,6 @@ public abstract class QueryCommandCollection<T> : IList<T> where T : IQueryComma
             }
         }
     }
-
-    public List<T> Items { get; set; } = new();
 
     #region implements IList<T>
     [IgnoreMember]
