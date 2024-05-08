@@ -4,8 +4,14 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Definitions;
 
+/// <summary>
+/// Represents a primary key constraint.
+/// </summary>
 public class PrimaryKeyConstraint : IConstraint
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PrimaryKeyConstraint"/> class with the specified schema, table, and column names.
+    /// </summary>
     public PrimaryKeyConstraint(string schema, string table, IEnumerable<string> columns)
     {
         Schema = schema;
@@ -13,6 +19,9 @@ public class PrimaryKeyConstraint : IConstraint
         PrimaryKeyMaps = columns.Select(x => new PrimaryKeyMap(x, string.Empty)).ToList();
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PrimaryKeyConstraint"/> class with the specified schema, table, and primary key maps.
+    /// </summary>
     public PrimaryKeyConstraint(string schema, string table, IEnumerable<PrimaryKeyMap> maps)
     {
         Schema = schema;
@@ -20,6 +29,9 @@ public class PrimaryKeyConstraint : IConstraint
         PrimaryKeyMaps = maps.ToList();
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PrimaryKeyConstraint"/> class with the specified table and column names.
+    /// </summary>
     public PrimaryKeyConstraint(ITable t, IEnumerable<string> columns)
     {
         Schema = t.Schema;
@@ -27,6 +39,9 @@ public class PrimaryKeyConstraint : IConstraint
         PrimaryKeyMaps = columns.Select(x => new PrimaryKeyMap(x, string.Empty)).ToList();
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PrimaryKeyConstraint"/> class with the specified table and primary key maps.
+    /// </summary>
     public PrimaryKeyConstraint(ITable t, IEnumerable<PrimaryKeyMap> maps)
     {
         Schema = t.Schema;
@@ -34,38 +49,71 @@ public class PrimaryKeyConstraint : IConstraint
         PrimaryKeyMaps = maps.ToList();
     }
 
+    /// <summary>
+    /// Gets or sets the name of the constraint.
+    /// </summary>
     public string ConstraintName { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Gets the list of primary key maps.
+    /// </summary>
     public List<PrimaryKeyMap> PrimaryKeyMaps { get; } = new();
 
+    /// <summary>
+    /// Gets the names of the columns associated with the primary key constraint.
+    /// </summary>
     public IEnumerable<string> ColumnNames => PrimaryKeyMaps.Select(x => x.ColumnName);
 
+    /// <summary>
+    /// Gets the name of the column.
+    /// </summary>
     public string ColumnName => string.Empty;
 
+    /// <summary>
+    /// Gets or sets the schema of the table.
+    /// </summary>
     public string Schema { get; init; }
 
+    /// <summary>
+    /// Gets or sets the name of the table.
+    /// </summary>
     public string Table { get; init; }
 
+    /// <summary>
+    /// Gets the common tables associated with the constraint.
+    /// </summary>
     public IEnumerable<CommonTable> GetCommonTables()
     {
         yield break;
     }
 
+    /// <summary>
+    /// Gets the internal queries associated with the constraint.
+    /// </summary>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         yield break;
     }
 
+    /// <summary>
+    /// Gets the parameters associated with the constraint.
+    /// </summary>
     public IEnumerable<QueryParameter> GetParameters()
     {
         yield break;
     }
 
+    /// <summary>
+    /// Gets the physical tables associated with the constraint.
+    /// </summary>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         yield break;
     }
 
+    /// <summary>
+    /// Generates tokens for the constraint.
+    /// </summary>
     public IEnumerable<Token> GetTokens(Token? parent)
     {
         if (!string.IsNullOrEmpty(ConstraintName))
@@ -84,27 +132,45 @@ public class PrimaryKeyConstraint : IConstraint
         yield return Token.ReservedBracketEnd(this, parent);
     }
 
+    /// <summary>
+    /// Attempts to apply the constraint to a table definition clause.
+    /// </summary>
     public bool TrySet(TableDefinitionClause clause)
     {
         return false;
     }
 
-    public bool TryDisasseble([MaybeNullWhen(false)] out IConstraint constraint)
+    /// <summary>
+    /// Attempts to disassemble the constraint.
+    /// </summary>
+    public bool TryDisassemble([MaybeNullWhen(false)] out IConstraint constraint)
     {
         constraint = this;
         return true;
     }
-
-    //public bool TryToIndex([MaybeNullWhen(false)] out CreateIndexQuery query)
-    //{
-    //	query = default;
-    //	return false;
-    //}
 }
 
-
-public readonly struct PrimaryKeyMap(string ColumnName, string PropertyName)
+/// <summary>
+/// Represents a mapping between a column name and a property name.
+/// </summary>
+public readonly struct PrimaryKeyMap
 {
-    public string ColumnName { get; } = ColumnName;
-    public string PropertyName { get; } = PropertyName;
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PrimaryKeyMap"/> struct with the specified column name and property name.
+    /// </summary>
+    public PrimaryKeyMap(string ColumnName, string PropertyName)
+    {
+        this.ColumnName = ColumnName;
+        this.PropertyName = PropertyName;
+    }
+
+    /// <summary>
+    /// Gets the name of the column.
+    /// </summary>
+    public string ColumnName { get; }
+
+    /// <summary>
+    /// Gets the name of the property.
+    /// </summary>
+    public string PropertyName { get; }
 }

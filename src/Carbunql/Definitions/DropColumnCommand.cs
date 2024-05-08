@@ -4,8 +4,16 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Definitions;
 
+/// <summary>
+/// Represents a command to drop a column from a table.
+/// </summary>
 public class DropColumnCommand : IAlterCommand
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DropColumnCommand"/> class with the specified table and column name.
+    /// </summary>
+    /// <param name="t">The table from which the column will be dropped.</param>
+    /// <param name="columnName">The name of the column to be dropped.</param>
     public DropColumnCommand(ITable t, string columnName)
     {
         ColumnName = columnName;
@@ -13,37 +21,65 @@ public class DropColumnCommand : IAlterCommand
         Table = t.Table;
     }
 
+    /// <summary>
+    /// Gets or sets the name of the column to be dropped.
+    /// </summary>
     public string ColumnName { get; set; }
 
+    /// <summary>
+    /// Gets or sets the schema of the table from which the column will be dropped.
+    /// </summary>
     public string Schema { get; init; }
 
+    /// <summary>
+    /// Gets or sets the name of the table from which the column will be dropped.
+    /// </summary>
     public string Table { get; init; } = string.Empty;
 
+    /// <summary>
+    /// Gets the names of the columns (currently empty).
+    /// </summary>
     public IEnumerable<string> GetColumnNames()
     {
         yield break;
     }
 
+    /// <summary>
+    /// Gets the common tables associated with the drop column command (currently empty).
+    /// </summary>
     public IEnumerable<CommonTable> GetCommonTables()
     {
         yield break;
     }
 
+    /// <summary>
+    /// Gets the internal queries associated with the drop column command (currently empty).
+    /// </summary>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         yield break;
     }
 
+    /// <summary>
+    /// Gets the parameters associated with the drop column command (currently empty).
+    /// </summary>
     public IEnumerable<QueryParameter> GetParameters()
     {
         yield break;
     }
 
+    /// <summary>
+    /// Gets the physical tables associated with the drop column command (currently empty).
+    /// </summary>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         yield break;
     }
 
+    /// <summary>
+    /// Gets the tokens representing the drop column command.
+    /// </summary>
+    /// <param name="parent">The parent token.</param>
     public IEnumerable<Token> GetTokens(Token? parent)
     {
         yield return new Token(this, parent, "drop", isReserved: true);
@@ -51,6 +87,11 @@ public class DropColumnCommand : IAlterCommand
         yield return new Token(this, parent, ColumnName);
     }
 
+    /// <summary>
+    /// Attempts to apply the drop column command to a table definition clause.
+    /// </summary>
+    /// <param name="clause">The table definition clause to which the command will be applied.</param>
+    /// <returns><c>true</c> if the command was successfully applied; otherwise, <c>false</c>.</returns>
     public bool TrySet(TableDefinitionClause clause)
     {
         var c = clause.OfType<ColumnDefinition>().Where(x => x.ColumnName == ColumnName).First();
@@ -58,6 +99,11 @@ public class DropColumnCommand : IAlterCommand
         return true;
     }
 
+    /// <summary>
+    /// Tries to convert the drop column command to a create index query.
+    /// </summary>
+    /// <param name="query">When this method returns, contains the create index query, if conversion succeeded; otherwise, <c>null</c>.</param>
+    /// <returns><c>true</c> if the conversion succeeded; otherwise, <c>false</c>.</returns>
     public bool TryToIndex([MaybeNullWhen(false)] out CreateIndexQuery query)
     {
         query = default;
