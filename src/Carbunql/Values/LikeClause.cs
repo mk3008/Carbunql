@@ -3,8 +3,17 @@ using Carbunql.Tables;
 
 namespace Carbunql.Values;
 
+/// <summary>
+/// Represents a LIKE clause in a query.
+/// </summary>
 public class LikeClause : ValueBase
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LikeClause"/> class with the specified value, argument, and negation indicator.
+    /// </summary>
+    /// <param name="value">The value to compare.</param>
+    /// <param name="argument">The argument to compare against.</param>
+    /// <param name="isNegative">Indicates whether the comparison is negated.</param>
     public LikeClause(ValueBase value, ValueBase argument, bool isNegative = false)
     {
         Value = value;
@@ -12,12 +21,22 @@ public class LikeClause : ValueBase
         IsNegative = isNegative;
     }
 
+    /// <summary>
+    /// Gets the value to compare.
+    /// </summary>
     public ValueBase Value { get; init; }
 
+    /// <summary>
+    /// Gets the argument to compare against.
+    /// </summary>
     public ValueBase Argument { get; init; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the comparison is negated.
+    /// </summary>
     public bool IsNegative { get; set; }
 
+    /// <inheritdoc/>
     protected override IEnumerable<SelectQuery> GetInternalQueriesCore()
     {
         foreach (var item in Value.GetInternalQueries())
@@ -30,6 +49,7 @@ public class LikeClause : ValueBase
         }
     }
 
+    /// <inheritdoc/>
     public override IEnumerable<Token> GetCurrentTokens(Token? parent)
     {
         foreach (var item in Value.GetTokens(parent)) yield return item;
@@ -40,6 +60,7 @@ public class LikeClause : ValueBase
         foreach (var item in Argument.GetTokens(parent)) yield return item;
     }
 
+    /// <inheritdoc/>
     protected override IEnumerable<QueryParameter> GetParametersCore()
     {
         foreach (var item in Value.GetParameters())
@@ -52,6 +73,7 @@ public class LikeClause : ValueBase
         }
     }
 
+    /// <inheritdoc/>
     protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()
     {
         foreach (var item in Value.GetPhysicalTables())
@@ -64,6 +86,7 @@ public class LikeClause : ValueBase
         }
     }
 
+    /// <inheritdoc/>
     protected override IEnumerable<CommonTable> GetCommonTablesCore()
     {
         foreach (var item in Value.GetCommonTables())

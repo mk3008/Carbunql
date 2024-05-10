@@ -4,29 +4,52 @@ using MessagePack;
 
 namespace Carbunql.Values;
 
+/// <summary>
+/// Represents a WHEN expression.
+/// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class WhenExpression : IQueryCommandable
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="WhenExpression"/> class with a condition and a value.
+    /// </summary>
+    /// <param name="condition">The condition for the WHEN expression.</param>
+    /// <param name="value">The value associated with the condition.</param>
     public WhenExpression(ValueBase condition, ValueBase value)
     {
         Condition = condition;
         Value = value;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="WhenExpression"/> class with only a value.
+    /// </summary>
+    /// <param name="value">The value associated with the WHEN expression.</param>
     public WhenExpression(ValueBase value)
     {
         Value = value;
     }
 
+    /// <summary>
+    /// Gets or sets the condition for the WHEN expression.
+    /// </summary>
     public ValueBase? Condition { get; init; }
 
+    /// <summary>
+    /// Gets or sets the value associated with the WHEN expression.
+    /// </summary>
     public ValueBase Value { get; private set; }
 
+    /// <summary>
+    /// Sets the value of the WHEN expression.
+    /// </summary>
+    /// <param name="value">The value to set.</param>
     public void SetValue(ValueBase value)
     {
         Value = value;
     }
 
+    /// <inheritdoc/>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         if (Condition != null)
@@ -42,6 +65,7 @@ public class WhenExpression : IQueryCommandable
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<Token> GetTokens(Token? parent)
     {
         if (Condition != null)
@@ -58,6 +82,7 @@ public class WhenExpression : IQueryCommandable
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<QueryParameter> GetParameters()
     {
         if (Condition != null)
@@ -73,6 +98,7 @@ public class WhenExpression : IQueryCommandable
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         if (Condition != null)
@@ -88,6 +114,7 @@ public class WhenExpression : IQueryCommandable
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<CommonTable> GetCommonTables()
     {
         if (Condition != null)

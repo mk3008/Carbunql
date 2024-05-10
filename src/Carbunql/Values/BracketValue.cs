@@ -4,21 +4,35 @@ using MessagePack;
 
 namespace Carbunql.Values;
 
+/// <summary>
+/// Represents a bracketed value.
+/// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class BracketValue : ValueBase
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BracketValue"/> class.
+    /// </summary>
     public BracketValue()
     {
         Inner = null!;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BracketValue"/> class with the specified inner value.
+    /// </summary>
+    /// <param name="inner">The inner value.</param>
     public BracketValue(ValueBase inner)
     {
         Inner = inner;
     }
 
+    /// <summary>
+    /// Gets or sets the inner value.
+    /// </summary>
     public ValueBase Inner { get; init; }
 
+    /// <inheritdoc/>
     protected override IEnumerable<SelectQuery> GetInternalQueriesCore()
     {
         foreach (var item in Inner.GetInternalQueries())
@@ -27,11 +41,13 @@ public class BracketValue : ValueBase
         }
     }
 
+    /// <inheritdoc/>
     protected override IEnumerable<QueryParameter> GetParametersCore()
     {
         return Inner.GetParameters();
     }
 
+    /// <inheritdoc/>
     protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()
     {
         foreach (var item in Inner.GetPhysicalTables())
@@ -40,6 +56,7 @@ public class BracketValue : ValueBase
         }
     }
 
+    /// <inheritdoc/>
     protected override IEnumerable<CommonTable> GetCommonTablesCore()
     {
         foreach (var item in Inner.GetCommonTables())
@@ -48,6 +65,7 @@ public class BracketValue : ValueBase
         }
     }
 
+    /// <inheritdoc/>
     public override IEnumerable<Token> GetCurrentTokens(Token? parent)
     {
         if (Inner == null) yield break;

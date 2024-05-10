@@ -6,9 +6,15 @@ using MessagePack;
 
 namespace Carbunql.Values;
 
+/// <summary>
+/// Represents a cast value.
+/// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class CastValue : ValueBase
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CastValue"/> class.
+    /// </summary>
     public CastValue()
     {
         Inner = null!;
@@ -16,6 +22,12 @@ public class CastValue : ValueBase
         Type = null!;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CastValue"/> class with the specified inner value, symbol, and type.
+    /// </summary>
+    /// <param name="inner">The inner value.</param>
+    /// <param name="symbol">The symbol.</param>
+    /// <param name="type">The type value.</param>
     public CastValue(ValueBase inner, string symbol, ValueBase type)
     {
         Inner = inner;
@@ -23,6 +35,12 @@ public class CastValue : ValueBase
         Type = type;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CastValue"/> class with the specified inner value, symbol, and type.
+    /// </summary>
+    /// <param name="inner">The inner value.</param>
+    /// <param name="symbol">The symbol.</param>
+    /// <param name="type">The type.</param>
     public CastValue(ValueBase inner, string symbol, string type)
     {
         Inner = inner;
@@ -30,12 +48,22 @@ public class CastValue : ValueBase
         Type = ValueParser.Parse(type);
     }
 
+    /// <summary>
+    /// Gets or sets the inner value.
+    /// </summary>
     public ValueBase Inner { get; init; }
 
+    /// <summary>
+    /// Gets or sets the symbol.
+    /// </summary>
     public string Symbol { get; init; }
 
+    /// <summary>
+    /// Gets or sets the type.
+    /// </summary>
     public ValueBase Type { get; init; }
 
+    /// <inheritdoc/>
     protected override IEnumerable<SelectQuery> GetInternalQueriesCore()
     {
         foreach (var item in Inner.GetInternalQueries())
@@ -48,6 +76,7 @@ public class CastValue : ValueBase
         }
     }
 
+    /// <inheritdoc/>
     public override IEnumerable<Token> GetCurrentTokens(Token? parent)
     {
         if (Symbol.IsEqualNoCase("as"))
@@ -69,6 +98,7 @@ public class CastValue : ValueBase
         }
     }
 
+    /// <inheritdoc/>
     protected override IEnumerable<QueryParameter> GetParametersCore()
     {
         foreach (var item in Inner.GetParameters())
@@ -81,6 +111,7 @@ public class CastValue : ValueBase
         }
     }
 
+    /// <inheritdoc/>
     protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()
     {
         foreach (var item in Inner.GetPhysicalTables())
@@ -93,6 +124,7 @@ public class CastValue : ValueBase
         }
     }
 
+    /// <inheritdoc/>
     protected override IEnumerable<CommonTable> GetCommonTablesCore()
     {
         foreach (var item in Inner.GetCommonTables())

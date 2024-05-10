@@ -4,25 +4,43 @@ using MessagePack;
 
 namespace Carbunql.Values;
 
+/// <summary>
+/// Represents an "AS" argument value.
+/// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class AsArgument : ValueBase
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AsArgument"/> class.
+    /// </summary>
     public AsArgument()
     {
         Value = null!;
         Type = null!;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AsArgument"/> class with the specified value and type.
+    /// </summary>
+    /// <param name="value">The value.</param>
+    /// <param name="type">The type.</param>
     public AsArgument(ValueBase value, ValueBase type)
     {
         Value = value;
         Type = type;
     }
 
+    /// <summary>
+    /// Gets or sets the value of the "AS" argument.
+    /// </summary>
     public ValueBase Value { get; init; }
 
+    /// <summary>
+    /// Gets or sets the type of the "AS" argument.
+    /// </summary>
     public ValueBase Type { get; init; }
 
+    /// <inheritdoc/>
     protected override IEnumerable<SelectQuery> GetInternalQueriesCore()
     {
         foreach (var item in Value.GetInternalQueries())
@@ -35,6 +53,7 @@ public class AsArgument : ValueBase
         }
     }
 
+    /// <inheritdoc/>
     public override IEnumerable<Token> GetCurrentTokens(Token? parent)
     {
         foreach (var item in Value.GetTokens(parent)) yield return item;
@@ -42,6 +61,7 @@ public class AsArgument : ValueBase
         foreach (var item in Type.GetTokens(parent)) yield return item;
     }
 
+    /// <inheritdoc/>
     protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()
     {
         foreach (var item in Value.GetPhysicalTables())
@@ -54,6 +74,7 @@ public class AsArgument : ValueBase
         }
     }
 
+    /// <inheritdoc/>
     protected override IEnumerable<CommonTable> GetCommonTablesCore()
     {
         foreach (var item in Value.GetCommonTables())
@@ -66,6 +87,7 @@ public class AsArgument : ValueBase
         }
     }
 
+    /// <inheritdoc/>
     protected override IEnumerable<QueryParameter> GetParametersCore()
     {
         foreach (var item in Value.GetParameters())

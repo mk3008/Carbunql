@@ -4,22 +4,39 @@ using MessagePack;
 
 namespace Carbunql.Values;
 
+/// <summary>
+/// Represents a case expression.
+/// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class CaseExpression : ValueBase
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CaseExpression"/> class.
+    /// </summary>
     public CaseExpression()
     {
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CaseExpression"/> class with the specified condition.
+    /// </summary>
+    /// <param name="condition">The condition of the case expression.</param>
     public CaseExpression(ValueBase condition)
     {
         CaseCondition = condition;
     }
 
+    /// <summary>
+    /// Gets or sets the condition of the case expression.
+    /// </summary>
     public ValueBase? CaseCondition { get; init; }
 
+    /// <summary>
+    /// Gets or sets the list of when expressions.
+    /// </summary>
     public List<WhenExpression> WhenExpressions { get; init; } = new();
 
+    /// <inheritdoc/>
     protected override IEnumerable<SelectQuery> GetInternalQueriesCore()
     {
         if (CaseCondition != null)
@@ -37,6 +54,8 @@ public class CaseExpression : ValueBase
             }
         }
     }
+
+    /// <inheritdoc/>
     protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()
     {
         if (CaseCondition != null)
@@ -55,6 +74,7 @@ public class CaseExpression : ValueBase
         }
     }
 
+    /// <inheritdoc/>
     protected override IEnumerable<CommonTable> GetCommonTablesCore()
     {
         if (CaseCondition != null)
@@ -73,6 +93,7 @@ public class CaseExpression : ValueBase
         }
     }
 
+    /// <inheritdoc/>
     public override IEnumerable<Token> GetCurrentTokens(Token? parent)
     {
         var current = Token.Reserved(this, parent, "case");
@@ -88,6 +109,7 @@ public class CaseExpression : ValueBase
         yield return Token.Reserved(this, parent, "end");
     }
 
+    /// <inheritdoc/>
     protected override IEnumerable<QueryParameter> GetParametersCore()
     {
         if (CaseCondition != null)
