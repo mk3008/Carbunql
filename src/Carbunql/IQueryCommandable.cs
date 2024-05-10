@@ -7,6 +7,9 @@ using MessagePack;
 
 namespace Carbunql;
 
+/// <summary>
+/// Interface for objects that can generate tokens, parameters, and internal queries for a query command.
+/// </summary>
 [Union(0, typeof(FromClause))]
 [Union(1, typeof(HavingClause))]
 [Union(2, typeof(LimitClause))]
@@ -55,40 +58,86 @@ namespace Carbunql;
 [Union(45, typeof(MergeWhenUpdate))]
 public interface IQueryCommandable
 {
+    /// <summary>
+    /// Retrieves tokens for the query command.
+    /// </summary>
     IEnumerable<Token> GetTokens(Token? parent);
 
+    /// <summary>
+    /// Retrieves parameters for the query command.
+    /// </summary>
     IEnumerable<QueryParameter> GetParameters();
 
+    /// <summary>
+    /// Retrieves internal queries.
+    /// </summary>
     IEnumerable<SelectQuery> GetInternalQueries();
 
+    /// <summary>
+    /// Retrieves physical tables.
+    /// </summary>
     IEnumerable<PhysicalTable> GetPhysicalTables();
 
+    /// <summary>
+    /// Retrieves common tables.
+    /// </summary>
     IEnumerable<CommonTable> GetCommonTables();
 }
 
+
+/// <summary>
+/// Extension methods for <see cref="IQueryCommandable"/> to facilitate command generation and conversion to text.
+/// </summary>
 public static class IQueryCommandableExtension
 {
+    /// <summary>
+    /// Retrieves tokens for the query command.
+    /// </summary>
+    /// <param name="source">The source <see cref="IQueryCommandable"/>.</param>
+    /// <returns>Tokens for the query command.</returns>
     public static IEnumerable<Token> GetTokens(this IQueryCommandable source)
     {
         return source.GetTokens(null);
     }
 
+    /// <summary>
+    /// Converts the query commandable to a <see cref="QueryCommand"/>.
+    /// </summary>
+    /// <param name="source">The source <see cref="IQueryCommandable"/>.</param>
+    /// <returns>A <see cref="QueryCommand"/>.</returns>
     public static QueryCommand ToCommand(this IQueryCommandable source)
     {
         var builder = new CommandTextBuilder();
         return new QueryCommand(builder.Execute(source), source.GetParameters());
     }
 
+    /// <summary>
+    /// Converts the query commandable to a <see cref="QueryCommand"/> using a custom <see cref="CommandTextBuilder"/>.
+    /// </summary>
+    /// <param name="source">The source <see cref="IQueryCommandable"/>.</param>
+    /// <param name="builder">The <see cref="CommandTextBuilder"/> instance to use.</param>
+    /// <returns>A <see cref="QueryCommand"/>.</returns>
     public static QueryCommand ToCommand(this IQueryCommandable source, CommandTextBuilder builder)
     {
         return new QueryCommand(builder.Execute(source), source.GetParameters());
     }
 
+    /// <summary>
+    /// Converts the query commandable to a one-line <see cref="QueryCommand"/>.
+    /// </summary>
+    /// <param name="source">The source <see cref="IQueryCommandable"/>.</param>
+    /// <returns>A one-line <see cref="QueryCommand"/>.</returns>
     public static QueryCommand ToOneLineCommand(this IQueryCommandable source)
     {
         return new QueryCommand(source.GetTokens().ToText(), source.GetParameters());
     }
 
+    /// <summary>
+    /// Converts the query commandable to text.
+    /// </summary>
+    /// <param name="source">The source <see cref="IQueryCommandable"/>.</param>
+    /// <param name="exportParameterInfo">Determines whether to export parameter information.</param>
+    /// <returns>Text representation of the query commandable.</returns>
     public static string ToText(this IQueryCommandable source, bool exportParameterInfo = true)
     {
         var cmd = source.ToCommand();
@@ -101,6 +150,11 @@ public static class IQueryCommandableExtension
         return head + text;
     }
 
+    /// <summary>
+    /// Converts the query commandable to a one-line text.
+    /// </summary>
+    /// <param name="source">The source <see cref="IQueryCommandable"/>.</param>
+    /// <returns>One-line text representation of the query commandable.</returns>
     public static string ToOneLineText(this IQueryCommandable source)
     {
         var cmd = source.ToOneLineCommand();

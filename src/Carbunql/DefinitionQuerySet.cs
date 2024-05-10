@@ -5,25 +5,45 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql;
 
+/// <summary>
+/// Represents a set of definition queries for a table.
+/// </summary>
 public class DefinitionQuerySet : ITable
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DefinitionQuerySet"/> class with the specified table name.
+    /// </summary>
+    /// <param name="table">The table name.</param>
     public DefinitionQuerySet(string table)
     {
         Table = table;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DefinitionQuerySet"/> class with the specified schema and table names.
+    /// </summary>
+    /// <param name="schema">The schema name.</param>
+    /// <param name="table">The table name.</param>
     public DefinitionQuerySet(string schema, string table)
     {
         Schema = schema;
         Table = table;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DefinitionQuerySet"/> class with the specified table.
+    /// </summary>
+    /// <param name="t">The table.</param>
     public DefinitionQuerySet(ITable t)
     {
         Schema = t.Schema;
         Table = t.Table;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DefinitionQuerySet"/> class with the specified drop table query.
+    /// </summary>
+    /// <param name="dropTableQuery">The drop table query.</param>
     public DefinitionQuerySet(DropTableQuery dropTableQuery)
     {
         Schema = dropTableQuery.Schema;
@@ -31,6 +51,10 @@ public class DefinitionQuerySet : ITable
         DropTableQuery = dropTableQuery;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DefinitionQuerySet"/> class with the specified create table query.
+    /// </summary>
+    /// <param name="createTableQuery">The create table query.</param>
     public DefinitionQuerySet(CreateTableQuery createTableQuery)
     {
         Schema = createTableQuery.Schema;
@@ -38,12 +62,21 @@ public class DefinitionQuerySet : ITable
         CreateTableQuery = createTableQuery;
     }
 
+    /// <summary>
+    /// Gets or sets the schema.
+    /// </summary>
     public string Schema { get; init; } = string.Empty;
 
+    /// <summary>
+    /// Gets or sets the table name.
+    /// </summary>
     public string Table { get; init; }
 
     private DropTableQuery? _dropTableQuery = null;
 
+    /// <summary>
+    /// Gets or sets the drop table query.
+    /// </summary>
     public DropTableQuery? DropTableQuery
     {
         get => _dropTableQuery;
@@ -67,6 +100,9 @@ public class DefinitionQuerySet : ITable
 
     private CreateTableQuery? _createTableQuery = null;
 
+    /// <summary>
+    /// Gets or sets the create table query.
+    /// </summary>
     public CreateTableQuery? CreateTableQuery
     {
         get => _createTableQuery;
@@ -88,8 +124,15 @@ public class DefinitionQuerySet : ITable
 
     private List<AlterTableQuery> _alterTableQueries = new List<AlterTableQuery>();
 
+    /// <summary>
+    /// Gets the read-only list of alter table queries.
+    /// </summary>
     public IReadOnlyList<AlterTableQuery> AlterTableQueries => _alterTableQueries.AsReadOnly();
 
+    /// <summary>
+    /// Adds an alter table query to the set.
+    /// </summary>
+    /// <param name="query">The alter table query to add.</param>
     public void AddAlterTableQuery(AlterTableQuery query)
     {
         if (DropTableQuery != null) throw new InvalidOperationException();
@@ -103,8 +146,15 @@ public class DefinitionQuerySet : ITable
 
     private List<IAlterIndexQuery> _alterIndexQueries = new List<IAlterIndexQuery>();
 
+    /// <summary>
+    /// Gets the read-only list of alter index queries.
+    /// </summary>
     public IReadOnlyList<IAlterIndexQuery> AlterIndexQueries => _alterIndexQueries.AsReadOnly();
 
+    /// <summary>
+    /// Adds an alter index query to the set.
+    /// </summary>
+    /// <param name="query">The alter index query to add.</param>
     public void AddAlterIndexQuery(IAlterIndexQuery query)
     {
         if (DropTableQuery != null) throw new InvalidOperationException();
@@ -115,15 +165,15 @@ public class DefinitionQuerySet : ITable
         }
         _alterIndexQueries.Add(query);
     }
-
-    //[Obsolete("use AlterIndexQueries")]
-    //public List<IAlterIndexQuery> CreateIndexQueries => AlterIndexQueries;
-
+    /// <summary>
+    /// Merges the alter table queries into a single alter table query.
+    /// </summary>
+    /// <returns>The current <see cref="DefinitionQuerySet"/> instance.</returns>
     public DefinitionQuerySet MergeAlterTableQuery()
     {
         var alt = new AlterTableQuery(new AlterTableClause(this));
 
-        //merge alter table query
+        // Merge alter table query
         foreach (var alterquery in AlterTableQueries)
         {
             foreach (var command in alterquery.AlterTableClause)
@@ -141,6 +191,11 @@ public class DefinitionQuerySet : ITable
         return this;
     }
 
+    /// <summary>
+    /// Normalizes the <see cref="DefinitionQuerySet"/>.
+    /// </summary>
+    /// <param name="doMergeAltarTablerQuery">Specifies whether to merge alter table queries.</param>
+    /// <returns>The normalized <see cref="DefinitionQuerySet"/>.</returns>
     public DefinitionQuerySet ToNormalize(bool doMergeAltarTablerQuery = true)
     {
         DefinitionQuerySet q;
@@ -175,6 +230,10 @@ public class DefinitionQuerySet : ITable
         return q;
     }
 
+    /// <summary>
+    /// Gets the column names from the table definition.
+    /// </summary>
+    /// <returns>The column names.</returns>
     public IEnumerable<string> GetColumnNames()
     {
         if (CreateTableQuery != null)
@@ -187,6 +246,12 @@ public class DefinitionQuerySet : ITable
         return Enumerable.Empty<string>();
     }
 
+    /// <summary>
+    /// Tries to get the column definition for the specified column name.
+    /// </summary>
+    /// <param name="columnName">The name of the column to get the definition for.</param>
+    /// <param name="column">When this method returns, contains the column definition, if found; otherwise, <c>null</c>.</param>
+    /// <returns><c>true</c> if the column definition was found; otherwise, <c>false</c>.</returns>
     public bool TryGetColumnDefinition(string columnName, [MaybeNullWhen(false)] out ColumnDefinition column)
     {
         column = null;
@@ -194,42 +259,47 @@ public class DefinitionQuerySet : ITable
 
         var def = CreateTableQuery.DefinitionClause;
 
-        column = def.OfType<ColumnDefinition>().Where(x => x.ColumnName == columnName).FirstOrDefault();
-        return column is not null;
+        column = def.OfType<ColumnDefinition>().FirstOrDefault(x => x.ColumnName == columnName);
+        return column != null;
     }
 
-    public DefinitionQuerySet GenerateMigrationQuery(DefinitionQuerySet expectQuerySet)
+    /// <summary>
+    /// Generates a migration query by comparing with an expected query set.
+    /// </summary>
+    /// <param name="expectedQuerySet">The expected query set to compare with.</param>
+    /// <returns>The migration query set.</returns>
+    public DefinitionQuerySet GenerateMigrationQuery(DefinitionQuerySet expectedQuerySet)
     {
         var queryset = new DefinitionQuerySet(this);
 
         // Normalize for easier comparison
         var actual = ToNormalize();
-        var expect = expectQuerySet.ToNormalize();
+        var expect = expectedQuerySet.ToNormalize();
         if (expect.CreateTableQuery is null) throw new InvalidOperationException("create table query is missing.");
         if (actual.CreateTableQuery is null) throw new InvalidOperationException("create table query is missing.");
 
         var actualcolumns = actual.GetColumnNames().ToList();
         var expectcolumns = expect.GetColumnNames().ToList();
 
-        //drop column
+        // Drop column
         foreach (var item in actualcolumns.Where(x => !expectcolumns.Contains(x)))
         {
             var clause = new AlterTableClause(expect.CreateTableQuery)
-            {
-                new DropColumnCommand(this, item)
-            };
+        {
+            new DropColumnCommand(this, item)
+        };
             queryset.AddAlterTableQuery(new AlterTableQuery(clause));
         }
 
-        //add column
+        // Add column
         foreach (var item in expectcolumns.Where(x => !actualcolumns.Contains(x)))
         {
             if (expect.TryGetColumnDefinition(item, out var column))
             {
                 var clause = new AlterTableClause(expect.CreateTableQuery)
-                {
-                    new AddColumnCommand(column)
-                };
+            {
+                new AddColumnCommand(column)
+            };
                 queryset.AddAlterTableQuery(new AlterTableQuery(clause));
             }
         }

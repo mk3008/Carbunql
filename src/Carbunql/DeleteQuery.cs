@@ -5,21 +5,46 @@ using MessagePack;
 
 namespace Carbunql;
 
+/// <summary>
+/// Represents a DELETE query.
+/// </summary>
 public class DeleteQuery : IQueryCommandable, IReturning, ICommentable
 {
+    /// <summary>
+    /// Gets or sets the delete clause.
+    /// </summary>
     public DeleteClause? DeleteClause { get; set; }
 
+    /// <summary>
+    /// Gets or sets the with clause.
+    /// </summary>
     public WithClause? WithClause { get; set; }
 
+    /// <summary>
+    /// Gets or sets the where clause.
+    /// </summary>
     public WhereClause? WhereClause { get; set; }
 
+    /// <summary>
+    /// Gets or sets the returning clause.
+    /// </summary>
     public ReturningClause? ReturningClause { get; set; }
 
+    /// <summary>
+    /// Gets or sets the comment clause.
+    /// </summary>
     [IgnoreMember]
     public CommentClause? CommentClause { get; set; }
 
+    /// <summary>
+    /// Gets or sets the parameters.
+    /// </summary>
     public IEnumerable<QueryParameter>? Parameters { get; set; }
 
+    /// <summary>
+    /// Gets the internal queries.
+    /// </summary>
+    /// <returns>Internal queries.</returns>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         if (DeleteClause != null)
@@ -52,6 +77,10 @@ public class DeleteQuery : IQueryCommandable, IReturning, ICommentable
         }
     }
 
+    /// <summary>
+    /// Gets the physical tables.
+    /// </summary>
+    /// <returns>Physical tables.</returns>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         if (DeleteClause != null)
@@ -84,6 +113,10 @@ public class DeleteQuery : IQueryCommandable, IReturning, ICommentable
         }
     }
 
+    /// <summary>
+    /// Gets the parameters.
+    /// </summary>
+    /// <returns>Query parameters.</returns>
     public virtual IEnumerable<QueryParameter> GetParameters()
     {
         if (Parameters != null)
@@ -95,6 +128,11 @@ public class DeleteQuery : IQueryCommandable, IReturning, ICommentable
         }
     }
 
+    /// <summary>
+    /// Gets the tokens.
+    /// </summary>
+    /// <param name="parent">Parent token.</param>
+    /// <returns>Tokens.</returns>
     public IEnumerable<Token> GetTokens(Token? parent)
     {
         if (DeleteClause == null) throw new NullReferenceException(nameof(DeleteClause));
@@ -109,6 +147,10 @@ public class DeleteQuery : IQueryCommandable, IReturning, ICommentable
         foreach (var item in ReturningClause.GetTokens(parent)) yield return item;
     }
 
+    /// <summary>
+    /// Gets the common tables.
+    /// </summary>
+    /// <returns>Common tables.</returns>
     public IEnumerable<CommonTable> GetCommonTables()
     {
         if (DeleteClause != null)

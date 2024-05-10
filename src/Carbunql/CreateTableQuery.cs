@@ -7,25 +7,45 @@ using System.Data;
 
 namespace Carbunql;
 
+/// <summary>
+/// Represents a query for creating a table.
+/// </summary>
 public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CreateTableQuery"/> class with the specified schema and table name.
+    /// </summary>
+    /// <param name="schema">The schema name.</param>
+    /// <param name="table">The table name.</param>
     public CreateTableQuery(string schema, string table)
     {
         Schema = schema;
         Table = table;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CreateTableQuery"/> class with the specified table name.
+    /// </summary>
+    /// <param name="table">The table name.</param>
     public CreateTableQuery(string table)
     {
         Table = table;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CreateTableQuery"/> class with the specified table interface.
+    /// </summary>
+    /// <param name="t">The table interface.</param>
     public CreateTableQuery(ITable t)
     {
         Schema = t.Schema;
         Table = t.Table;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CreateTableQuery"/> class with the specified table definition clause.
+    /// </summary>
+    /// <param name="clause">The table definition clause.</param>
     public CreateTableQuery(TableDefinitionClause clause)
     {
         Schema = clause.Schema;
@@ -33,23 +53,50 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
         DefinitionClause = clause;
     }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the table is temporary.
+    /// </summary>
     public bool IsTemporary { get; set; } = false;
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the table has the "if not exists" clause.
+    /// </summary>
     public bool HasIfNotExists { get; set; } = false;
 
+    /// <summary>
+    /// Gets or sets the schema of the table.
+    /// </summary>
     public string Schema { get; init; } = string.Empty;
 
+    /// <summary>
+    /// Gets the name of the table.
+    /// </summary>
     public string Table { get; init; }
 
+    /// <summary>
+    /// Gets or sets the table definition clause.
+    /// </summary>
     public TableDefinitionClause? DefinitionClause { get; set; } = null;
 
+    /// <summary>
+    /// Gets or sets the query.
+    /// </summary>
     public IReadQuery? Query { get; set; }
 
+    /// <summary>
+    /// Gets or sets the parameters.
+    /// </summary>
     public IEnumerable<QueryParameter>? Parameters { get; set; }
 
+    /// <summary>
+    /// Gets or sets the comment clause for the table.
+    /// </summary>
     [IgnoreMember]
     public CommentClause? CommentClause { get; set; }
 
+    /// <summary>
+    /// Gets internal queries.
+    /// </summary>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         if (Query != null)
@@ -61,6 +108,9 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
         }
     }
 
+    /// <summary>
+    /// Gets physical tables.
+    /// </summary>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         if (Query != null)
@@ -72,6 +122,9 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
         }
     }
 
+    /// <summary>
+    /// Gets query parameters.
+    /// </summary>
     public virtual IEnumerable<QueryParameter> GetParameters()
     {
         if (Parameters != null)
@@ -88,10 +141,13 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
             {
                 yield return item;
             }
-            yield break;
         }
     }
-
+    /// <summary>
+    /// Gets the token representing the create table operation.
+    /// </summary>
+    /// <param name="parent">The parent token.</param>
+    /// <returns>The token representing the create table operation.</returns>
     private Token GetCreateTableToken(Token? parent)
     {
         if (IsTemporary)
@@ -101,10 +157,13 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
         return Token.Reserved(this, parent, "create table");
     }
 
+    /// <summary>
+    /// Gets the tokens representing the create table query.
+    /// </summary>
+    /// <param name="parent">The parent token.</param>
+    /// <returns>The tokens representing the create table query.</returns>
     public IEnumerable<Token> GetTokens(Token? parent)
     {
-        //if (Query == null) throw new NullReferenceException(nameof(Query));
-
         if (CommentClause != null) foreach (var item in CommentClause.GetTokens(parent)) yield return item;
 
         var ct = GetCreateTableToken(parent);
@@ -141,6 +200,10 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
         throw new InvalidOperationException();
     }
 
+    /// <summary>
+    /// Gets the common tables.
+    /// </summary>
+    /// <returns>The common tables.</returns>
     public IEnumerable<CommonTable> GetCommonTables()
     {
         if (Query != null)
@@ -153,6 +216,10 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
         }
     }
 
+    /// <summary>
+    /// Converts the CreateTableQuery instance to a SelectQuery instance.
+    /// </summary>
+    /// <returns>The SelectQuery instance.</returns>
     public SelectQuery ToSelectQuery()
     {
         if (string.IsNullOrEmpty(this.GetTableFullName())) throw new NullReferenceException(nameof(Table));
@@ -186,6 +253,11 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
         throw new InvalidOperationException();
     }
 
+    /// <summary>
+    /// Converts the CreateTableQuery instance to a SelectQuery instance representing a count query.
+    /// </summary>
+    /// <param name="alias">The alias for the count.</param>
+    /// <returns>The SelectQuery instance representing a count query.</returns>
     public SelectQuery ToCountQuery(string alias = "row_count")
     {
         if (string.IsNullOrEmpty(this.GetTableFullName())) throw new NullReferenceException(nameof(Table));
@@ -196,6 +268,10 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
         return sq;
     }
 
+    /// <summary>
+    /// Converts the CreateTableQuery instance to a DefinitionQuerySet instance to normalize the query.
+    /// </summary>
+    /// <returns>The DefinitionQuerySet instance.</returns>
     public DefinitionQuerySet ToNormalize()
     {
         if (IsTemporary) throw new InvalidOperationException();
@@ -220,4 +296,3 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
         return queryset;
     }
 }
-

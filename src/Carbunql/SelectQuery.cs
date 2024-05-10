@@ -9,115 +9,206 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql;
 
+/// <summary>
+/// Represents a class that defines a select query.
+/// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SelectQuery"/> class.
+    /// </summary>
     public SelectQuery() { }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SelectQuery"/> class from the provided query string.
+    /// </summary>
+    /// <param name="query">The select query string.</param>
     public SelectQuery(string query)
     {
-        var q = SelectQueryParser.Parse(query);
-        WithClause = q.WithClause;
-        SelectClause = q.SelectClause;
-        FromClause = q.FromClause;
-        WhereClause = q.WhereClause;
-        GroupClause = q.GroupClause;
-        HavingClause = q.HavingClause;
-        WindowClause = q.WindowClause;
-        OperatableQueries = q.OperatableQueries;
-        OrderClause = q.OrderClause;
-        LimitClause = q.LimitClause;
+        var parsedQuery = SelectQueryParser.Parse(query);
+        WithClause = parsedQuery.WithClause;
+        SelectClause = parsedQuery.SelectClause;
+        FromClause = parsedQuery.FromClause;
+        WhereClause = parsedQuery.WhereClause;
+        GroupClause = parsedQuery.GroupClause;
+        HavingClause = parsedQuery.HavingClause;
+        WindowClause = parsedQuery.WindowClause;
+        OperatableQueries = parsedQuery.OperatableQueries;
+        OrderClause = parsedQuery.OrderClause;
+        LimitClause = parsedQuery.LimitClause;
     }
 
+    /// <summary>
+    /// Gets or sets the WITH clause of the select query.
+    /// </summary>
     public WithClause? WithClause { get; set; } = new();
 
+    /// <summary>
+    /// Gets or sets the SELECT clause of the select query.
+    /// </summary>
     public SelectClause? SelectClause { get; set; }
 
+    /// <summary>
+    /// Gets or sets the FROM clause of the select query.
+    /// </summary>
     public FromClause? FromClause { get; set; }
 
+    /// <summary>
+    /// Gets or sets the WHERE clause of the select query.
+    /// </summary>
     public WhereClause? WhereClause { get; set; }
 
+    /// <summary>
+    /// Gets or sets the GROUP BY clause of the select query.
+    /// </summary>
     public GroupClause? GroupClause { get; set; }
 
+    /// <summary>
+    /// Gets or sets the HAVING clause of the select query.
+    /// </summary>
     public HavingClause? HavingClause { get; set; }
 
+    /// <summary>
+    /// Gets or sets the WINDOW clause of the select query.
+    /// </summary>
     public WindowClause? WindowClause { get; set; }
 
+    /// <summary>
+    /// Gets or sets the comment clause of the select query.
+    /// </summary>
     [IgnoreMember]
     public CommentClause? CommentClause { get; set; }
 
+    /// <inheritdoc/>
     public override IEnumerable<Token> GetCurrentTokens(Token? parent)
     {
-        if (CommentClause != null) foreach (var item in CommentClause.GetTokens(parent)) yield return item;
+        if (CommentClause != null)
+        {
+            foreach (var item in CommentClause.GetTokens(parent))
+            {
+                yield return item;
+            }
+        }
 
         if (SelectClause == null) yield break;
 
         if (parent == null && WithClause != null)
         {
-            var lst = GetCommonTables();
-            foreach (var item in WithClause.GetTokens(parent, lst)) yield return item;
+            var commonTables = GetCommonTables();
+            foreach (var item in WithClause.GetTokens(parent, commonTables))
+            {
+                yield return item;
+            }
         }
-        foreach (var item in SelectClause.GetTokens(parent)) yield return item;
+
+        foreach (var item in SelectClause.GetTokens(parent))
+        {
+            yield return item;
+        }
 
         if (FromClause == null) yield break;
 
-        if (FromClause != null) foreach (var item in FromClause.GetTokens(parent)) yield return item;
-        if (WhereClause != null) foreach (var item in WhereClause.GetTokens(parent)) yield return item;
-        if (GroupClause != null) foreach (var item in GroupClause.GetTokens(parent)) yield return item;
-        if (HavingClause != null) foreach (var item in HavingClause.GetTokens(parent)) yield return item;
-        if (WindowClause != null) foreach (var item in WindowClause.GetTokens(parent)) yield return item;
+        if (FromClause != null)
+        {
+            foreach (var item in FromClause.GetTokens(parent))
+            {
+                yield return item;
+            }
+        }
+
+        if (WhereClause != null)
+        {
+            foreach (var item in WhereClause.GetTokens(parent))
+            {
+                yield return item;
+            }
+        }
+
+        if (GroupClause != null)
+        {
+            foreach (var item in GroupClause.GetTokens(parent))
+            {
+                yield return item;
+            }
+        }
+
+        if (HavingClause != null)
+        {
+            foreach (var item in HavingClause.GetTokens(parent))
+            {
+                yield return item;
+            }
+        }
+
+        if (WindowClause != null)
+        {
+            foreach (var item in WindowClause.GetTokens(parent))
+            {
+                yield return item;
+            }
+        }
     }
 
+    /// <inheritdoc/>
     public override WithClause? GetWithClause() => WithClause;
 
+    /// <inheritdoc/>
     public override SelectClause? GetSelectClause() => SelectClause;
 
+    /// <inheritdoc/>
     public override SelectQuery GetOrNewSelectQuery() => this;
 
+    /// <inheritdoc/>
     public override IEnumerable<QueryParameter> GetInnerParameters()
     {
-        var q = FromClause?.GetParameters();
-        if (q != null)
+        var fromClauseParameters = FromClause?.GetParameters();
+        if (fromClauseParameters != null)
         {
-            foreach (var item in q)
+            foreach (var item in fromClauseParameters)
             {
                 yield return item;
             }
         }
-        q = WhereClause?.GetParameters();
-        if (q != null)
+
+        var whereClauseParameters = WhereClause?.GetParameters();
+        if (whereClauseParameters != null)
         {
-            foreach (var item in q)
+            foreach (var item in whereClauseParameters)
             {
                 yield return item;
             }
         }
-        q = GroupClause?.GetParameters();
-        if (q != null)
+
+        var groupClauseParameters = GroupClause?.GetParameters();
+        if (groupClauseParameters != null)
         {
-            foreach (var item in q)
+            foreach (var item in groupClauseParameters)
             {
                 yield return item;
             }
         }
-        q = HavingClause?.GetParameters();
-        if (q != null)
+
+        var havingClauseParameters = HavingClause?.GetParameters();
+        if (havingClauseParameters != null)
         {
-            foreach (var item in q)
+            foreach (var item in havingClauseParameters)
             {
                 yield return item;
             }
         }
-        q = WindowClause?.GetParameters();
-        if (q != null)
+
+        var windowClauseParameters = WindowClause?.GetParameters();
+        if (windowClauseParameters != null)
         {
-            foreach (var item in q)
+            foreach (var item in windowClauseParameters)
             {
                 yield return item;
             }
         }
     }
 
+    /// <inheritdoc/>
     public override SelectableTable ToSelectableTable(IEnumerable<string>? columnAliases)
     {
         var vt = new VirtualTable(this);
@@ -128,12 +219,14 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         return new SelectableTable(vt, "q");
     }
 
+    /// <inheritdoc/>
     public override IEnumerable<string> GetColumnNames()
     {
         if (SelectClause == null) return Enumerable.Empty<string>();
         return SelectClause.Select(x => x.Alias);
     }
 
+    /// <inheritdoc/>
     public override IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         if (WithClause != null)
@@ -209,6 +302,8 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         }
     }
 
+
+    /// <inheritdoc/>
     public override IEnumerable<SelectQuery> GetInternalQueries()
     {
         if (WithClause != null)
@@ -286,6 +381,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<SelectableItem> GetSelectableItems()
     {
         if (SelectClause != null)
@@ -297,12 +393,14 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<SelectableTable> GetSelectableTables()
     {
         if (FromClause == null) yield break;
         foreach (var item in FromClause.GetSelectableTables()) yield return item;
     }
 
+    /// <inheritdoc/>
     public override IEnumerable<CommonTable> GetCommonTables()
     {
         if (WithClause != null)
@@ -377,6 +475,11 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         }
     }
 
+    /// <summary>
+    /// This method tries to convert the SelectQuery instance to a ValuesQuery instance.
+    /// </summary>
+    /// <param name="query">The resulting ValuesQuery if conversion succeeds; otherwise, default.</param>
+    /// <returns>True if the conversion succeeds; otherwise, false.</returns>
     public bool TryToValuesQuery([MaybeNullWhen(false)] out ValuesQuery query)
     {
         query = default;

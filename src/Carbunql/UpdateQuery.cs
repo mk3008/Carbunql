@@ -5,23 +5,51 @@ using MessagePack;
 
 namespace Carbunql;
 
+/// <summary>
+/// Represents an update query.
+/// </summary>
 public class UpdateQuery : IQueryCommandable, IReturning, ICommentable
 {
+    /// <summary>
+    /// Gets or sets the update clause.
+    /// </summary>
     public UpdateClause? UpdateClause { get; set; }
 
+    /// <summary>
+    /// Gets or sets the with clause.
+    /// </summary>
     public WithClause? WithClause { get; set; }
 
+    /// <summary>
+    /// Gets or sets the set clause.
+    /// </summary>
     public SetClause? SetClause { get; set; }
 
+    /// <summary>
+    /// Gets or sets the from clause.
+    /// </summary>
     public FromClause? FromClause { get; set; }
 
+    /// <summary>
+    /// Gets or sets the where clause.
+    /// </summary>
     public WhereClause? WhereClause { get; set; }
 
+    /// <summary>
+    /// Gets or sets the returning clause.
+    /// </summary>
     public ReturningClause? ReturningClause { get; set; }
 
+    /// <summary>
+    /// Gets or sets the comment clause.
+    /// </summary>
     [IgnoreMember]
     public CommentClause? CommentClause { get; set; }
 
+    /// <summary>
+    /// Retrieves internal queries contained within the update query.
+    /// </summary>
+    /// <returns>An enumerable collection of internal queries.</returns>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         if (WithClause != null)
@@ -71,6 +99,10 @@ public class UpdateQuery : IQueryCommandable, IReturning, ICommentable
         }
     }
 
+    /// <summary>
+    /// Retrieves the physical tables involved in the update query.
+    /// </summary>
+    /// <returns>An enumerable collection of physical tables.</returns>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         if (WithClause != null)
@@ -120,6 +152,10 @@ public class UpdateQuery : IQueryCommandable, IReturning, ICommentable
         }
     }
 
+    /// <summary>
+    /// Retrieves the common tables involved in the update query.
+    /// </summary>
+    /// <returns>An enumerable collection of common tables.</returns>
     public IEnumerable<CommonTable> GetCommonTables()
     {
         if (WithClause != null)
@@ -171,7 +207,11 @@ public class UpdateQuery : IQueryCommandable, IReturning, ICommentable
 
     public IEnumerable<QueryParameter>? Parameters { get; set; }
 
-    public virtual IEnumerable<QueryParameter> GetParameters()
+    /// <summary>
+    /// Retrieves the parameters used in the update query.
+    /// </summary>
+    /// <returns>An enumerable collection of query parameters.</returns>
+    public IEnumerable<QueryParameter> GetParameters()
     {
         if (WithClause != null)
         {
@@ -217,6 +257,11 @@ public class UpdateQuery : IQueryCommandable, IReturning, ICommentable
         }
     }
 
+    /// <summary>
+    /// Retrieves the tokens representing the update query.
+    /// </summary>
+    /// <param name="parent">The parent token.</param>
+    /// <returns>An enumerable collection of tokens.</returns>
     public IEnumerable<Token> GetTokens(Token? parent)
     {
         if (UpdateClause == null) throw new NullReferenceException(nameof(UpdateClause));

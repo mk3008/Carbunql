@@ -9,18 +9,32 @@ using MessagePack;
 
 namespace Carbunql;
 
+/// <summary>
+/// Represents a query that inserts multiple rows of values into a table.
+/// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class ValuesQuery : ReadQuery
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ValuesQuery"/> class.
+    /// </summary>
     public ValuesQuery()
     {
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ValuesQuery"/> class with specified rows.
+    /// </summary>
+    /// <param name="rows">The rows to be inserted.</param>
     public ValuesQuery(List<ValueCollection> rows)
     {
         Rows = rows;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ValuesQuery"/> class from the specified query string.
+    /// </summary>
+    /// <param name="query">The query string.</param>
     public ValuesQuery(string query)
     {
         var q = ValuesQueryParser.Parse(query);
@@ -29,7 +43,6 @@ public class ValuesQuery : ReadQuery
         OrderClause = q.OrderClause;
         LimitClause = q.LimitClause;
     }
-
 
     [Obsolete("This feature has been deprecated. Consider building it outside of class.")]
     public ValuesQuery(IEnumerable<object> matrix)
@@ -146,8 +159,12 @@ public class ValuesQuery : ReadQuery
         }
     }
 
+    /// <summary>
+    /// Gets or sets the rows to be inserted.
+    /// </summary>
     public List<ValueCollection> Rows { get; init; } = new();
 
+    /// <inheritdoc/>
     public override IEnumerable<Token> GetCurrentTokens(Token? parent)
     {
         var clause = Token.Reserved(this, parent, "values");
@@ -171,10 +188,13 @@ public class ValuesQuery : ReadQuery
         }
     }
 
+    /// <inheritdoc/>
     public override WithClause? GetWithClause() => null;
 
+    /// <inheritdoc/>
     public override SelectClause? GetSelectClause() => null;
 
+    /// <inheritdoc/>
     public override IEnumerable<SelectQuery> GetInternalQueries()
     {
         foreach (var row in Rows)
@@ -186,6 +206,7 @@ public class ValuesQuery : ReadQuery
         }
     }
 
+    /// <inheritdoc/>
     public override IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         foreach (var row in Rows)
@@ -197,6 +218,7 @@ public class ValuesQuery : ReadQuery
         }
     }
 
+    /// <inheritdoc/>
     public override IEnumerable<CommonTable> GetCommonTables()
     {
         foreach (var row in Rows)
@@ -208,11 +230,13 @@ public class ValuesQuery : ReadQuery
         }
     }
 
+    /// <inheritdoc/>
     public override SelectQuery GetOrNewSelectQuery()
     {
         return ToSelectQuery();
     }
 
+    /// <inheritdoc/>
     public override IEnumerable<QueryParameter> GetInnerParameters()
     {
         foreach (var item in Rows)
@@ -224,12 +248,21 @@ public class ValuesQuery : ReadQuery
         }
     }
 
+    /// <summary>
+    /// Converts the <see cref="ValuesQuery"/> to a plain <see cref="SelectQuery"/>.
+    /// </summary>
+    /// <returns>The resulting <see cref="SelectQuery"/>.</returns>
     public SelectQuery ToPlainSelectQuery()
     {
         var lst = GetDefaultColumnAliases();
         return ToPlainSelectQuery(lst);
     }
 
+    /// <summary>
+    /// Converts the <see cref="ValuesQuery"/> to a plain <see cref="SelectQuery"/> with specified column aliases.
+    /// </summary>
+    /// <param name="columnAlias">The column aliases.</param>
+    /// <returns>The resulting <see cref="SelectQuery"/>.</returns>
     public SelectQuery ToPlainSelectQuery(IEnumerable<string> columnAlias)
     {
         var columns = columnAlias.ToList();
@@ -251,12 +284,21 @@ public class ValuesQuery : ReadQuery
         return sq;
     }
 
+    /// <summary>
+    /// Converts the <see cref="ValuesQuery"/> to a <see cref="SelectQuery"/>.
+    /// </summary>
+    /// <returns>The resulting <see cref="SelectQuery"/>.</returns>
     public SelectQuery ToSelectQuery()
     {
         var lst = GetDefaultColumnAliases();
         return ToSelectQuery(lst);
     }
 
+    /// <summary>
+    /// Converts the <see cref="ValuesQuery"/> to a <see cref="SelectQuery"/> with specified column aliases.
+    /// </summary>
+    /// <param name="columnAlias">The column aliases.</param>
+    /// <returns>The resulting <see cref="SelectQuery"/>.</returns>
     public SelectQuery ToSelectQuery(IEnumerable<string> columnAlias)
     {
         var sq = new SelectQuery();
@@ -272,17 +314,11 @@ public class ValuesQuery : ReadQuery
         return sq;
     }
 
-    private List<string> GetDefaultColumnAliases()
-    {
-        if (!Rows.Any() || Rows.First().Count == 0) throw new Exception();
-        var cnt = Rows.First().Count;
-
-        var lst = new List<string>();
-        cnt.ForEach(x => lst.Add("c" + x));
-
-        return lst;
-    }
-
+    /// <summary>
+    /// Converts the <see cref="ValuesQuery"/> to a selectable table.
+    /// </summary>
+    /// <param name="columnAliases">The column aliases.</param>
+    /// <returns>The resulting selectable table.</returns>
     public override SelectableTable ToSelectableTable(IEnumerable<string>? columnAliases)
     {
         var vt = new VirtualTable(this);
@@ -297,8 +333,20 @@ public class ValuesQuery : ReadQuery
         }
     }
 
+    /// <inheritdoc/>
     public override IEnumerable<string> GetColumnNames()
     {
         return Enumerable.Empty<string>();
+    }
+
+    private List<string> GetDefaultColumnAliases()
+    {
+        if (!Rows.Any() || Rows.First().Count == 0) throw new Exception();
+        var cnt = Rows.First().Count;
+
+        var lst = new List<string>();
+        cnt.ForEach(x => lst.Add("c" + x));
+
+        return lst;
     }
 }

@@ -3,20 +3,36 @@ using Cysharp.Text;
 
 namespace Carbunql;
 
+/// <summary>
+/// Builds and formats command text.
+/// </summary>
 public class CommandTextBuilder
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CommandTextBuilder"/> class with the specified formatter.
+    /// </summary>
+    /// <param name="formatter">The token format logic to use.</param>
     public CommandTextBuilder(TokenFormatLogic formatter)
     {
         Formatter = formatter;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CommandTextBuilder"/> class with a default formatter.
+    /// </summary>
     public CommandTextBuilder()
     {
         Formatter = new TokenFormatLogic();
     }
 
+    /// <summary>
+    /// Gets or sets the logger action for logging messages.
+    /// </summary>
     public Action<string>? Logger { get; set; }
 
+    /// <summary>
+    /// Gets the token format logic used by the builder.
+    /// </summary>
     public TokenFormatLogic Formatter { get; init; }
 
     private Token? PrevToken { get; set; }
@@ -27,6 +43,9 @@ public class CommandTextBuilder
 
     private Dictionary<int, string> SpacerCache = new();
 
+    /// <summary>
+    /// Initializes the builder.
+    /// </summary>
     public void Init()
     {
         Level = 0;
@@ -34,11 +53,21 @@ public class CommandTextBuilder
         PrevToken = null;
     }
 
+    /// <summary>
+    /// Executes the command text building process using the provided <paramref name="cmd"/>.
+    /// </summary>
+    /// <param name="cmd">The query commandable object.</param>
+    /// <returns>The formatted command text.</returns>
     public string Execute(IQueryCommandable cmd)
     {
         return Execute(cmd.GetTokens());
     }
 
+    /// <summary>
+    /// Executes the command text building process using the provided <paramref name="tokens"/>.
+    /// </summary>
+    /// <param name="tokens">The tokens to use for building the command text.</param>
+    /// <returns>The formatted command text.</returns>
     public string Execute(IEnumerable<Token> tokens)
     {
         Init();
