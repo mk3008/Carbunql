@@ -4,25 +4,43 @@ using MessagePack;
 
 namespace Carbunql.Values;
 
+/// <summary>
+/// Represents a FROM argument.
+/// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class FromArgument : ValueBase
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FromArgument"/> class.
+    /// </summary>
     public FromArgument()
     {
         Unit = null!;
         Value = null!;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FromArgument"/> class with the specified unit and value.
+    /// </summary>
+    /// <param name="unit">The unit value.</param>
+    /// <param name="value">The value.</param>
     public FromArgument(ValueBase unit, ValueBase value)
     {
         Unit = unit;
         Value = value;
     }
 
+    /// <summary>
+    /// Gets or sets the unit value.
+    /// </summary>
     public ValueBase Unit { get; init; }
 
+    /// <summary>
+    /// Gets or sets the value.
+    /// </summary>
     public ValueBase Value { get; init; }
 
+    /// <inheritdoc/>
     protected override IEnumerable<SelectQuery> GetInternalQueriesCore()
     {
         foreach (var item in Unit.GetInternalQueries())
@@ -35,6 +53,7 @@ public class FromArgument : ValueBase
         }
     }
 
+    /// <inheritdoc/>
     public override IEnumerable<Token> GetCurrentTokens(Token? parent)
     {
         foreach (var item in Unit.GetTokens(parent)) yield return item;
@@ -42,6 +61,7 @@ public class FromArgument : ValueBase
         foreach (var item in Value.GetTokens(parent)) yield return item;
     }
 
+    /// <inheritdoc/>
     protected override IEnumerable<QueryParameter> GetParametersCore()
     {
         foreach (var item in Unit.GetParameters())
@@ -54,6 +74,7 @@ public class FromArgument : ValueBase
         }
     }
 
+    /// <inheritdoc/>
     protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()
     {
         foreach (var item in Unit.GetPhysicalTables())
@@ -66,6 +87,7 @@ public class FromArgument : ValueBase
         }
     }
 
+    /// <inheritdoc/>
     protected override IEnumerable<CommonTable> GetCommonTablesCore()
     {
         foreach (var item in Unit.GetCommonTables())

@@ -4,11 +4,18 @@ using MessagePack;
 
 namespace Carbunql.Values;
 
+/// <summary>
+/// Represents a FILTER clause.
+/// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class Filter : IQueryCommandable
 {
+    /// <summary>
+    /// Gets or sets the WHERE clause.
+    /// </summary>
     public WhereClause? WhereClause { get; set; }
 
+    /// <inheritdoc/>
     public IEnumerable<CommonTable> GetCommonTables()
     {
         if (WhereClause != null)
@@ -20,6 +27,7 @@ public class Filter : IQueryCommandable
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         if (WhereClause != null)
@@ -31,6 +39,7 @@ public class Filter : IQueryCommandable
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<QueryParameter> GetParameters()
     {
         if (WhereClause != null)
@@ -42,6 +51,7 @@ public class Filter : IQueryCommandable
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         if (WhereClause != null)
@@ -53,6 +63,7 @@ public class Filter : IQueryCommandable
         }
     }
 
+    /// <inheritdoc/>
     public IEnumerable<Token> GetTokens(Token? parent)
     {
         if (WhereClause == null) yield break;
