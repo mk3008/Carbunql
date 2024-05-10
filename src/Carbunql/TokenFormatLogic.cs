@@ -5,10 +5,21 @@ using Carbunql.Values;
 
 namespace Carbunql;
 
+/// <summary>
+/// Provides logic for formatting tokens in query writing.
+/// </summary>
 public class TokenFormatLogic
 {
+    /// <summary>
+    /// Gets or sets the logger action for logging.
+    /// </summary>
     public Action<string>? Logger { get; set; }
 
+    /// <summary>
+    /// Determines whether a line break should occur before writing the specified token.
+    /// </summary>
+    /// <param name="token">The token to evaluate.</param>
+    /// <returns>True if a line break is required before writing the token; otherwise, false.</returns>
     public virtual bool IsLineBreakOnBeforeWriteToken(Token token)
     {
         if (token.Text.IsEqualNoCase("with")) return true;
@@ -36,6 +47,11 @@ public class TokenFormatLogic
         return false;
     }
 
+    /// <summary>
+    /// Determines whether a line break should occur after writing the specified token.
+    /// </summary>
+    /// <param name="token">The token to evaluate.</param>
+    /// <returns>True if a line break is required after writing the token; otherwise, false.</returns>
     public virtual bool IsLineBreakOnAfterWriteToken(Token token)
     {
         if (token.Sender is OperatableQuery) return true;
@@ -61,6 +77,11 @@ public class TokenFormatLogic
         return false;
     }
 
+    /// <summary>
+    /// Determines whether the indent level should be incremented before writing the specified token.
+    /// </summary>
+    /// <param name="token">The token to evaluate.</param>
+    /// <returns>True if the indent level should be incremented before writing the token; otherwise, false.</returns>
     public virtual bool IsIncrementIndentOnBeforeWriteToken(Token token)
     {
         if (token.Sender is OperatableQuery) return false;
@@ -78,6 +99,11 @@ public class TokenFormatLogic
         return true;
     }
 
+    /// <summary>
+    /// Determines whether the indent level should be decremented before writing the specified token.
+    /// </summary>
+    /// <param name="token">The token to evaluate.</param>
+    /// <returns>True if the indent level should be decremented before writing the token; otherwise, false.</returns>
     public virtual bool IsDecrementIndentOnBeforeWriteToken(Token token)
     {
         if (token.Parent == null) return true;

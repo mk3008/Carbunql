@@ -6,17 +6,35 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql;
 
+/// <summary>
+/// Represents a query for inserting data into a table.
+/// </summary>
 public class InsertQuery : IQueryCommandable, IReturning, ICommentable
 {
+    /// <summary>
+    /// Gets or sets the insert clause.
+    /// </summary>
     public InsertClause? InsertClause { get; set; }
 
+    /// <summary>
+    /// Gets or sets the returning clause.
+    /// </summary>
     public ReturningClause? ReturningClause { get; set; }
 
+    /// <summary>
+    /// Gets or sets the comment clause.
+    /// </summary>
     [IgnoreMember]
     public CommentClause? CommentClause { get; set; }
 
+    /// <summary>
+    /// Gets or sets the query used to provide values for insertion.
+    /// </summary>
     public IReadQuery? Query { get; set; }
 
+    /// <summary>
+    /// Retrieves internal queries.
+    /// </summary>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         if (Query != null)
@@ -28,6 +46,9 @@ public class InsertQuery : IQueryCommandable, IReturning, ICommentable
         }
     }
 
+    /// <summary>
+    /// Retrieves physical tables.
+    /// </summary>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         if (Query != null)
@@ -39,6 +60,9 @@ public class InsertQuery : IQueryCommandable, IReturning, ICommentable
         }
     }
 
+    /// <summary>
+    /// Retrieves common tables.
+    /// </summary>
     public IEnumerable<CommonTable> GetCommonTables()
     {
         if (Query != null)
@@ -50,8 +74,14 @@ public class InsertQuery : IQueryCommandable, IReturning, ICommentable
         }
     }
 
+    /// <summary>
+    /// Retrieves query parameters.
+    /// </summary>
     public IEnumerable<QueryParameter>? Parameters { get; set; }
 
+    /// <summary>
+    /// Retrieves query parameters.
+    /// </summary>
     public virtual IEnumerable<QueryParameter> GetParameters()
     {
         if (Parameters != null)
@@ -63,6 +93,9 @@ public class InsertQuery : IQueryCommandable, IReturning, ICommentable
         }
     }
 
+    /// <summary>
+    /// Retrieves tokens.
+    /// </summary>
     public IEnumerable<Token> GetTokens(Token? parent)
     {
         if (Query == null) throw new NullReferenceException(nameof(Query));
@@ -77,6 +110,9 @@ public class InsertQuery : IQueryCommandable, IReturning, ICommentable
         foreach (var item in ReturningClause.GetTokens(parent)) yield return item;
     }
 
+    /// <summary>
+    /// Tries to convert to an insert query from a values query.
+    /// </summary>
     public bool TryConvertToInsertSelect([MaybeNullWhen(false)] out InsertQuery insertQuery)
     {
         insertQuery = default;
@@ -92,6 +128,9 @@ public class InsertQuery : IQueryCommandable, IReturning, ICommentable
         return false;
     }
 
+    /// <summary>
+    /// Tries to convert to an insert query from a select query.
+    /// </summary>
     public bool TryConvertToInsertValues([MaybeNullWhen(false)] out InsertQuery insertQuery)
     {
         insertQuery = default;

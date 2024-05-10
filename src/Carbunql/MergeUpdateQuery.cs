@@ -3,10 +3,20 @@ using Carbunql.Tables;
 
 namespace Carbunql;
 
+/// <summary>
+/// Represents a merge update query.
+/// </summary>
 public class MergeUpdateQuery : IQueryCommandable
 {
+    /// <summary>
+    /// Gets or sets the set clause for the merge update query.
+    /// </summary>
     public MergeSetClause? SetClause { get; set; }
 
+    /// <summary>
+    /// Retrieves the internal queries associated with the merge update query.
+    /// </summary>
+    /// <returns>The internal queries associated with the merge update query.</returns>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         if (SetClause != null)
@@ -18,6 +28,10 @@ public class MergeUpdateQuery : IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Retrieves the physical tables associated with the merge update query.
+    /// </summary>
+    /// <returns>The physical tables associated with the merge update query.</returns>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         if (SetClause != null)
@@ -29,6 +43,10 @@ public class MergeUpdateQuery : IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Retrieves the common tables associated with the merge update query.
+    /// </summary>
+    /// <returns>The common tables associated with the merge update query.</returns>
     public IEnumerable<CommonTable> GetCommonTables()
     {
         if (SetClause != null)
@@ -40,6 +58,10 @@ public class MergeUpdateQuery : IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Retrieves the parameters of the merge update query.
+    /// </summary>
+    /// <returns>The parameters of the merge update query.</returns>
     public virtual IEnumerable<QueryParameter> GetParameters()
     {
         if (SetClause != null)
@@ -51,6 +73,11 @@ public class MergeUpdateQuery : IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Retrieves the tokens associated with the merge update query.
+    /// </summary>
+    /// <param name="parent">The parent token.</param>
+    /// <returns>The tokens associated with the merge update query.</returns>
     public IEnumerable<Token> GetTokens(Token? parent)
     {
         if (SetClause == null) throw new NullReferenceException();

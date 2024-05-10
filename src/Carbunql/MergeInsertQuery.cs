@@ -4,12 +4,25 @@ using Carbunql.Values;
 
 namespace Carbunql;
 
+/// <summary>
+/// Represents a merge insert query.
+/// </summary>
 public class MergeInsertQuery : IQueryCommandable
 {
+    /// <summary>
+    /// Gets or sets the datasource for the merge insert query.
+    /// </summary>
     public ValueCollection? Datasource { get; set; }
 
+    /// <summary>
+    /// Gets or sets the destination for the merge insert query.
+    /// </summary>
     public ValueCollection? Destination { get; set; }
 
+    /// <summary>
+    /// Retrieves the parameters of the merge insert query.
+    /// </summary>
+    /// <returns>The parameters of the merge insert query.</returns>
     public virtual IEnumerable<QueryParameter> GetParameters()
     {
         if (Destination != null)
@@ -28,6 +41,10 @@ public class MergeInsertQuery : IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Retrieves the internal queries associated with the merge insert query.
+    /// </summary>
+    /// <returns>The internal queries associated with the merge insert query.</returns>
     public IEnumerable<SelectQuery> GetInternalQueries()
     {
         if (Datasource != null)
@@ -46,6 +63,10 @@ public class MergeInsertQuery : IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Retrieves the physical tables associated with the merge insert query.
+    /// </summary>
+    /// <returns>The physical tables associated with the merge insert query.</returns>
     public IEnumerable<PhysicalTable> GetPhysicalTables()
     {
         if (Datasource != null)
@@ -63,6 +84,11 @@ public class MergeInsertQuery : IQueryCommandable
             }
         }
     }
+
+    /// <summary>
+    /// Retrieves the common tables associated with the merge insert query.
+    /// </summary>
+    /// <returns>The common tables associated with the merge insert query.</returns>
     public IEnumerable<CommonTable> GetCommonTables()
     {
         if (Datasource != null)
@@ -81,6 +107,11 @@ public class MergeInsertQuery : IQueryCommandable
         }
     }
 
+    /// <summary>
+    /// Retrieves the tokens associated with the merge insert query.
+    /// </summary>
+    /// <param name="parent">The parent token.</param>
+    /// <returns>The tokens associated with the merge insert query.</returns>
     public IEnumerable<Token> GetTokens(Token? parent)
     {
         if (Destination == null) yield break;
