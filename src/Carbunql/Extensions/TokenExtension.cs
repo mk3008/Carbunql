@@ -2,8 +2,16 @@
 
 namespace Carbunql.Extensions;
 
+/// <summary>
+/// Provides extension methods for the Token type.
+/// </summary>
 public static class TokenExtension
 {
+    /// <summary>
+    /// Converts a collection of tokens into a single string.
+    /// </summary>
+    /// <param name="source">The collection of tokens.</param>
+    /// <returns>The string representation of the tokens.</returns>
     public static string ToText(this IEnumerable<Token> source)
     {
         var sb = ZString.CreateStringBuilder();
