@@ -10,7 +10,11 @@ using System.Diagnostics.CodeAnalysis;
 namespace Carbunql;
 
 /// <summary>
-/// Represents a class that defines a select query.
+/// Represents a class that defines a select query to retrieve data from a database.
+/// Using FromClause, you can specify the table to retrieve from.
+/// By specifying WhereClause, you can define retrieval conditions.
+/// You can specify the columns to retrieve using SelectClause.
+/// Additionally, you can specify clauses such as WithClause, GroupClause, and HavingClause.
 /// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
@@ -18,12 +22,20 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     /// <summary>
     /// Initializes a new instance of the <see cref="SelectQuery"/> class.
     /// </summary>
+    /// <remarks>
+    /// This constructor initializes a new instance of the SelectQuery class in an empty state.
+    /// After instantiation, additional processing is required to populate components such as the SELECT clause and FROM clause.
+    /// </remarks>
     public SelectQuery() { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="SelectQuery"/> class from the provided query string.
+    /// Initializes a new instance of the <see cref="SelectQuery"/> class from the provided SQL query string.
     /// </summary>
-    /// <param name="query">The select query string.</param>
+    /// <param name="query">The SQL select query string.</param>
+    /// <remarks>
+    /// This constructor parses the provided SQL query string and initializes the select query object with its components, such as SELECT, FROM, WHERE, GROUP BY, HAVING, and ORDER BY clauses.
+    /// The query string may contain additional clauses such as WITH, WINDOW, and LIMIT, which are also parsed and initialized if present.
+    /// </remarks>
     public SelectQuery(string query)
     {
         var parsedQuery = SelectQueryParser.Parse(query);
@@ -41,36 +53,43 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
 
     /// <summary>
     /// Gets or sets the WITH clause of the select query.
+    /// Common Table Expressions (CTE) are available.
     /// </summary>
     public WithClause? WithClause { get; set; } = new();
 
     /// <summary>
     /// Gets or sets the SELECT clause of the select query.
+    /// The SELECT clause specifies which columns to retrieve from the database.
     /// </summary>
     public SelectClause? SelectClause { get; set; }
 
     /// <summary>
     /// Gets or sets the FROM clause of the select query.
+    /// The FROM clause specifies the table, view, CTE (Common Table Expression), or subquery from which to retrieve data.
     /// </summary>
     public FromClause? FromClause { get; set; }
 
     /// <summary>
     /// Gets or sets the WHERE clause of the select query.
+    /// The WHERE clause specifies the conditions that must be met for a row to be returned by the query.
     /// </summary>
     public WhereClause? WhereClause { get; set; }
 
     /// <summary>
     /// Gets or sets the GROUP BY clause of the select query.
+    /// The GROUP BY clause is used to group rows that have the same values into summary rows.
     /// </summary>
     public GroupClause? GroupClause { get; set; }
 
     /// <summary>
     /// Gets or sets the HAVING clause of the select query.
+    /// The HAVING clause is used to filter groups that appear in the result set, typically used in conjunction with the GROUP BY clause.
     /// </summary>
     public HavingClause? HavingClause { get; set; }
 
     /// <summary>
     /// Gets or sets the WINDOW clause of the select query.
+    /// The WINDOW clause defines a window or set of rows for a query result.
     /// </summary>
     public WindowClause? WindowClause { get; set; }
 
@@ -301,7 +320,6 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             }
         }
     }
-
 
     /// <inheritdoc/>
     public override IEnumerable<SelectQuery> GetInternalQueries()

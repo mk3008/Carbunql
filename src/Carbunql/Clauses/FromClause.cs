@@ -4,26 +4,32 @@ using MessagePack;
 namespace Carbunql.Clauses;
 
 /// <summary>
-/// Represents a FROM clause in a SQL query.
+/// Represents a FROM clause in a SQL query, managing the selection of tables and relationships.
 /// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class FromClause : IQueryCommandable
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="FromClause"/> class with the specified root selectable table.
+    /// The root selectable table, referred to as the "root," represents the first table specified in the FROM clause of the query.
     /// </summary>
+    /// <param name="root">The root selectable table specified in the FROM clause.</param>
     public FromClause(SelectableTable root)
     {
         Root = root;
     }
 
     /// <summary>
-    /// Gets or sets the root selectable table in the FROM clause.
+    /// Gets or sets the root selectable table in the FROM clause. 
+    /// In Carbunql, this refers to the first table specified in the FROM clause, which is referred to as the "root."
     /// </summary>
     public SelectableTable Root { get; init; }
 
     /// <summary>
-    /// Gets or sets the list of relations in the FROM clause.
+    /// Gets or sets the list of relationships defined within the FROM clause.
+    /// These relationships define how the root selectable table is joined with other tables or relationships.
+    /// Relationships can be specified either against the root or against other relationships.
+    /// Relationships are specified exclusively within the FROM clause.
     /// </summary>
     public List<Relation>? Relations { get; set; }
 

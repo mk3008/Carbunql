@@ -24,7 +24,7 @@ public class SortableItem : IQueryCommandable
     }
 
     /// <summary>
-    /// Gets the value to sort.
+    /// Gets or sets the value or column to be selected. This can include expressions, inline queries, or simple column names.
     /// </summary>
     public ValueBase Value { get; init; }
 

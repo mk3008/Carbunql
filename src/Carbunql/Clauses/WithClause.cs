@@ -4,36 +4,49 @@ using System.Collections;
 
 namespace Carbunql.Clauses;
 
-// <summary>
-/// Represents a WITH clause in a query, containing a list of common tables.
+/// <summary>
+/// Represents a WITH clause in a query, which contains a list of common tables.
 /// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class WithClause : IList<CommonTable>, IQueryCommandable
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="WithClause"/> class.
+    /// Initializes a new instance of the <see cref="WithClause"/> class without any common tables defined.
+    /// Common tables can be added later using the AddCommonTable method.
     /// </summary>
     public WithClause()
     {
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="WithClause"/> class with the specified common tables.
+    /// Initializes a new instance of the <see cref="WithClause"/> class with the specified list of common tables.
     /// </summary>
-    /// <param name="commons">The list of common tables.</param>
+    /// <param name="commons">The list of common tables to include in the WITH clause.</param>
+    /// <remarks>
+    /// The WITH clause, also known as Common Table Expression (CTE), allows you to define temporary named result sets that can be referenced within the scope of the main query.
+    /// This constructor initializes the WITH clause with the provided list of common tables.
+    /// </remarks>
     public WithClause(IList<CommonTable> commons)
     {
         CommonTables.AddRange(commons);
     }
 
     /// <summary>
-    /// Gets or sets the list of common tables in the WITH clause.
+    /// Gets or sets the list of common tables included in the WITH clause.
     /// </summary>
-    public List<CommonTable> CommonTables { get; private set; } = new();
+    /// <remarks>
+    /// The WITH clause, also known as Common Table Expression (CTE), allows you to define temporary named result sets that can be referenced within the scope of the main query.
+    /// This property represents the list of common tables to be included in the WITH clause.
+    /// </remarks>
+    private List<CommonTable> CommonTables { get; set; } = new();
 
     /// <summary>
     /// Gets or sets a value indicating whether the WITH clause contains the 'RECURSIVE' keyword.
     /// </summary>
+    /// <remarks>
+    /// The 'RECURSIVE' keyword is used in a Common Table Expression (CTE) within a WITH clause to define a recursive CTE.
+    /// It specifies that the CTE can reference itself in its definition.
+    /// </remarks>
     public bool HasRecursiveKeyword { get; set; } = false;
 
     public IEnumerable<Token> GetTokens(Token? parent, IEnumerable<CommonTable> commons)

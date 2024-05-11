@@ -64,23 +64,28 @@ public interface IQueryCommandable
     IEnumerable<Token> GetTokens(Token? parent);
 
     /// <summary>
-    /// Retrieves parameters for the query command.
+    /// Retrieves SQL query parameters associated with the query command.
     /// </summary>
+    /// <returns>An enumerable collection of SQL query parameters.</returns>
     IEnumerable<QueryParameter> GetParameters();
 
     /// <summary>
-    /// Retrieves internal queries.
+    /// Retrieves internal queries within the main query.
+    /// Internal queries include the main query itself, as well as any inline or subqueries used within the SQL.
     /// </summary>
+    /// <returns>An enumerable collection of internal queries.</returns>
     IEnumerable<SelectQuery> GetInternalQueries();
 
     /// <summary>
-    /// Retrieves physical tables.
+    /// Retrieves physical tables from the database.
     /// </summary>
+    /// <returns>An enumerable collection of physical tables.</returns>
     IEnumerable<PhysicalTable> GetPhysicalTables();
 
     /// <summary>
-    /// Retrieves common tables.
+    /// Retrieves common tables (CTEs) defined in the query's WITH clause.
     /// </summary>
+    /// <returns>An enumerable collection of common tables (CTEs).</returns>
     IEnumerable<CommonTable> GetCommonTables();
 }
 

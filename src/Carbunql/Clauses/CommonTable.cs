@@ -8,12 +8,19 @@ namespace Carbunql.Clauses;
 /// <summary>
 /// Represents a common table expression (CTE) in SQL.
 /// </summary>
+/// <remarks>
+/// A Common Table Expression (CTE) is a temporary result set that can be referenced within a SELECT, INSERT, UPDATE, or DELETE statement.
+/// It allows for defining a named temporary result set that can be referenced multiple times in a query.
+/// </remarks>
 [MessagePackObject(keyAsPropertyName: true)]
 public class CommonTable : SelectableTable
+
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="CommonTable"/> class with the specified table and alias.
     /// </summary>
+    /// <param name="table">The virtual table represented by a query or subquery.</param>
+    /// <param name="alias">The alias assigned to the common table.</param>
     public CommonTable(TableBase table, string alias) : base(table, alias)
     {
     }
@@ -21,13 +28,20 @@ public class CommonTable : SelectableTable
     /// <summary>
     /// Initializes a new instance of the <see cref="CommonTable"/> class with the specified table, alias, and column aliases.
     /// </summary>
+    /// <param name="table">The virtual table represented by a query or subquery.</param>
+    /// <param name="alias">The alias assigned to the common table.</param>
+    /// <param name="columnAliases">The aliases assigned to the columns of the common table.</param>
     public CommonTable(TableBase table, string alias, ValueCollection columnAliases) : base(table, alias, columnAliases)
     {
     }
 
     /// <summary>
-    /// Gets or sets the materialization type of the common table expression.
+    /// Gets or sets the materialization type of the common table expression (CTE).
     /// </summary>
+    /// <remarks>
+    /// The materialization type indicates whether the CTE should be materialized or not.
+    /// In databases like PostgreSQL, the MATERIALIZED keyword is used to force materialization of the CTE, storing its result in a temporary table.
+    /// </remarks>
     public Materialized Materialized { get; set; } = Materialized.Undefined;
 
     /// <summary>

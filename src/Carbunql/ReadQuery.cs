@@ -5,8 +5,13 @@ using MessagePack;
 namespace Carbunql;
 
 /// <summary>
-/// Represents a query used for reading data from a database.
+/// Abstract base class for reading data.
+/// Inherit from this class to implement selection queries or value specification queries.
 /// </summary>
+/// <remarks>
+/// A selection query is a query used to retrieve data from a database.
+/// A values query is a query used to specify values.
+/// </remarks>
 [Union(0, typeof(SelectQuery))]
 [Union(1, typeof(ValuesQuery))]
 public abstract class ReadQuery : IReadQuery
@@ -15,28 +20,32 @@ public abstract class ReadQuery : IReadQuery
 
     /// <summary>
     /// Gets or sets the list of operatable queries associated with this read query.
+    /// Operatable queries, such as UNION or UNION ALL, are used to combine multiple read queries.
     /// </summary>
     public List<OperatableQuery> OperatableQueries { get; set; } = new();
 
     /// <summary>
-    /// Gets or sets the order clause of the query.
+    /// Gets or sets the ORDER BY clause of the query.
+    /// The ORDER BY clause is used to sort the result set in ascending or descending order.
     /// </summary>
     public OrderClause? OrderClause { get; set; }
 
     /// <summary>
-    /// Gets or sets the limit clause of the query.
+    /// Gets or sets the LIMIT clause of the query.
+    /// The LIMIT clause is used to constrain the number of rows returned by the query.
     /// </summary>
     public LimitClause? LimitClause { get; set; }
 
     /// <summary>
-    /// Adds an operatable value to the query.
+    /// Adds an operatable query to the read query.
+    /// Operatable queries, such as UNION or UNION ALL, are used to combine multiple read queries.
     /// </summary>
-    /// <param name="operator">The operator of the operatable value.</param>
+    /// <param name="operatorString">The operator used to combine queries. Please specify the operator as a string, such as "union" or "union all".</param>
     /// <param name="query">The query associated with the operatable value.</param>
-    /// <returns>The modified query.</returns>
-    public IReadQuery AddOperatableValue(string @operator, IReadQuery query)
+    /// <returns>The modified read query with the added operatable query.</returns>
+    public IReadQuery AddOperatableValue(string operatorString, IReadQuery query)
     {
-        OperatableQueries.Add(new OperatableQuery(@operator, query));
+        OperatableQueries.Add(new OperatableQuery(operatorString, query));
         return query;
     }
 
@@ -147,10 +156,11 @@ public abstract class ReadQuery : IReadQuery
     public abstract SelectableTable ToSelectableTable(IEnumerable<string>? columnAliases);
 
     /// <summary>
-    /// Adds a parameter to the query.
+    /// Adds a parameter to the parameter query.
+    /// Parameters are used to dynamically inject values into the query, typically to prevent SQL injection attacks.
     /// </summary>
     /// <param name="name">The name of the parameter.</param>
-    /// <param name="Value">The value of the parameter.</param>
+    /// <param name="value">The value of the parameter.</param>
     /// <returns>The name of the added parameter.</returns>
     public string AddParameter(string name, object? Value)
     {

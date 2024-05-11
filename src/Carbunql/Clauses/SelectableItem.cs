@@ -4,7 +4,7 @@ using MessagePack;
 namespace Carbunql.Clauses;
 
 /// <summary>
-/// Represents a selectable item in a query.
+/// Represents a selectable item, such as a value or column, in a query.
 /// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class SelectableItem : IQueryCommandable, ISelectable
@@ -21,12 +21,12 @@ public class SelectableItem : IQueryCommandable, ISelectable
     }
 
     /// <summary>
-    /// Gets or sets the value to be selected.
+    /// Gets or sets the value or column to be selected. This can include expressions, inline queries, or simple column names.
     /// </summary>
     public ValueBase Value { get; private set; }
 
     /// <summary>
-    /// Gets or sets the alias for the selected value.
+    /// Gets or sets the alias name for the selected value, which appears after the "AS" keyword in the query.
     /// </summary>
     public string Alias { get; private set; }
 

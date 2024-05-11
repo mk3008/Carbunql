@@ -33,24 +33,28 @@ public abstract class ValueBase : IQueryCommandable
     public virtual string GetDefaultName() => string.Empty;
 
     /// <summary>
-    /// Gets or sets the operatable value associated with this value.
+    /// Represents a value (column, literal value, inline scalar query, etc.) in a query.
+    /// It can include operators, allowing for operations between values.
+    /// If an operator is present, it concatenates with other values to behave as a single value.
     /// </summary>
     public OperatableValue? OperatableValue { get; set; }
 
     /// <summary>
-    /// Adds an operatable value with the specified operator and value.
+    /// Adds an operatable value with the specified operator and value to the end of the current value.
     /// </summary>
-    /// <param name="operator">The operator to add.</param>
+    /// <param name="operatorString">The operator symbol to add (e.g., '+', '-', '*').</param>
     /// <param name="value">The value to add.</param>
     /// <returns>The current instance of <see cref="ValueBase"/>.</returns>
-    public ValueBase AddOperatableValue(string @operator, ValueBase value)
+    public ValueBase AddOperatableValue(string operatorString, ValueBase value)
     {
+        // If the current value already has an operatable value, append the new operator and value to it.
         if (OperatableValue != null)
         {
-            OperatableValue.Value.AddOperatableValue(@operator, value);
+            OperatableValue.Value.AddOperatableValue(operatorString, value);
             return this;
         }
-        OperatableValue = new OperatableValue(@operator, value);
+        // If the current value does not have an operatable value, create a new one.
+        OperatableValue = new OperatableValue(operatorString, value);
         return this;
     }
 

@@ -5,7 +5,7 @@ using MessagePack;
 namespace Carbunql;
 
 /// <summary>
-/// Represents a query with an operator.
+/// Represents a query with an operator, such as UNION or UNION ALL.
 /// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class OperatableQuery : IQueryCommandable
@@ -22,7 +22,7 @@ public class OperatableQuery : IQueryCommandable
     }
 
     /// <summary>
-    /// Gets or sets the operator used in the query.
+    /// Gets or sets the operator used in the query, such as "UNION" or "UNION ALL".
     /// </summary>
     public string Operator { get; init; }
 

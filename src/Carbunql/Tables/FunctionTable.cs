@@ -11,15 +11,6 @@ namespace Carbunql.Tables;
 public class FunctionTable : TableBase
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="FunctionTable"/> class.
-    /// </summary>
-    public FunctionTable()
-    {
-        Name = string.Empty;
-        Argument = null!;
-    }
-
-    /// <summary>
     /// Initializes a new instance of the <see cref="FunctionTable"/> class with the specified name.
     /// </summary>
     /// <param name="name">The name of the function table.</param>
@@ -37,19 +28,16 @@ public class FunctionTable : TableBase
     public FunctionTable(string name, ValueBase args)
     {
         Name = name;
-        Argument = new ValueCollection
-        {
-            args
-        };
+        Argument = new ValueCollection { args };
     }
 
     /// <summary>
-    /// Gets or sets the name of the function.
+    /// Gets or sets the name of the function associated with the function table.
     /// </summary>
     public string Name { get; init; }
 
     /// <summary>
-    /// Gets or sets the arguments of the function.
+    /// Gets or sets the arguments of the function associated with the function table.
     /// </summary>
     public ValueCollection Argument { get; init; }
 

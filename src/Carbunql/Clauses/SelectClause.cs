@@ -4,13 +4,18 @@ using MessagePack;
 namespace Carbunql.Clauses;
 
 /// <summary>
-/// Represents a SELECT clause in a query.
+/// Represents a SELECT clause in a SQL query.
 /// </summary>
+/// <remarks>
+/// The SELECT clause specifies the columns to be returned in the query result set.
+/// It can include individual columns, expressions, or even aggregate functions.
+/// </remarks>
 [MessagePackObject(keyAsPropertyName: true)]
 public class SelectClause : QueryCommandCollection<SelectableItem>, IQueryCommandable
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="SelectClause"/> class.
+    /// Initializes a new instance of the <see cref="SelectClause"/> class without any selectable items defined.
+    /// To define selectable items, use the AddItem method after creating an instance.
     /// </summary>
     public SelectClause()
     {
@@ -19,7 +24,7 @@ public class SelectClause : QueryCommandCollection<SelectableItem>, IQueryComman
     /// <summary>
     /// Initializes a new instance of the <see cref="SelectClause"/> class with the specified collection of selectable items.
     /// </summary>
-    /// <param name="collection">The collection of selectable items.</param>
+    /// <param name="collection">The collection of selectable items representing the columns to be selected.</param>
     public SelectClause(List<SelectableItem> collection)
     {
         Items.AddRange(collection);
@@ -46,13 +51,21 @@ public class SelectClause : QueryCommandCollection<SelectableItem>, IQueryComman
     }
 
     /// <summary>
-    /// Gets or sets the distinct clause of the select query.
+    /// Gets or sets the DISTINCT clause of the select query.
     /// </summary>
+    /// <remarks>
+    /// The DISTINCT clause is used to remove duplicate rows from the result set of a SELECT query.
+    /// It specifies that only unique rows should be returned by the query.
+    /// </remarks>
     public DistinctClause? Distinct { get; set; }
 
     /// <summary>
-    /// Gets or sets the top clause of the select query.
+    /// Gets or sets the TOP clause of the select query.
     /// </summary>
+    /// <remarks>
+    /// The TOP clause is used to specify the number of rows to be returned from the result set of a SELECT query.
+    /// It limits the number of rows returned by the query to a specified number.
+    /// </remarks>
     public TopClause? Top { get; set; }
 
     /// <inheritdoc/>
@@ -165,12 +178,16 @@ public class SelectClause : QueryCommandCollection<SelectableItem>, IQueryComman
     }
 
     /// <summary>
-    /// Filters out the columns in the SELECT clause that are not present in the specified collection of columns.
+    /// Filters out the columns in the SELECT clause that are not present in the specified collection of column names.
     /// </summary>
     /// <param name="columns">The collection of column names to filter in.</param>
     public void FilterInColumns(IEnumerable<string> columns)
     {
-        var lst = this.Where(x => !columns.Contains(x.Alias)).ToList();
-        foreach (var item in lst) Remove(item);
+        // Removes columns that are not present in the specified collection of column names.
+        var toRemove = this.Where(column => !columns.Contains(column.Alias)).ToList();
+        foreach (var item in toRemove)
+        {
+            Remove(item);
+        }
     }
 }
