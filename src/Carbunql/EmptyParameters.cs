@@ -5,6 +5,7 @@ namespace Carbunql;
 /// <summary>
 /// Provides a utility for obtaining an empty set of parameters.
 /// </summary>
+[Obsolete]
 internal static class EmptyParameters
 {
     /// <summary>

@@ -4,13 +4,15 @@ using MessagePack;
 namespace Carbunql.Clauses;
 
 /// <summary>
-/// Represents a relation in a query.
+/// Represents a relationship between tables in a query.
+/// This class manages the join command and condition for joining tables in a query.
 /// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class Relation : IQueryCommandable
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="Relation"/> class.
+    /// Constructs a relation without specifying any join command, condition, or table.
     /// </summary>
     public Relation()
     {
@@ -20,10 +22,11 @@ public class Relation : IQueryCommandable
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Relation"/> class with the specified query and join command.
+    /// Initializes a new instance of the <see cref="Relation"/> class with the specified table and join command.
+    /// Constructs a relation with the specified table and join command.
     /// </summary>
     /// <param name="query">The selectable table.</param>
-    /// <param name="joinCommand">The join command.</param>
+    /// <param name="joinCommand">The join command (e.g., INNER JOIN, LEFT JOIN).</param>
     public Relation(SelectableTable query, string joinCommand)
     {
         Table = query;
@@ -31,10 +34,11 @@ public class Relation : IQueryCommandable
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Relation"/> class with the specified query, join command, and condition.
+    /// Initializes a new instance of the <see cref="Relation"/> class with the specified table, join command, and condition.
+    /// Constructs a relation with the specified table, join command, and condition.
     /// </summary>
     /// <param name="query">The selectable table.</param>
-    /// <param name="joinCommand">The join command.</param>
+    /// <param name="joinCommand">The join command (e.g., INNER JOIN, LEFT JOIN).</param>
     /// <param name="condition">The join condition.</param>
     public Relation(SelectableTable query, string joinCommand, ValueBase condition)
     {
@@ -44,17 +48,17 @@ public class Relation : IQueryCommandable
     }
 
     /// <summary>
-    /// Gets or sets the join command.
+    /// Gets or sets the join command (e.g., INNER JOIN, LEFT JOIN).
     /// </summary>
     public string JoinCommand { get; init; }
 
     /// <summary>
-    /// Gets or sets the join condition.
+    /// Gets or sets the join condition, which represents the condition used for joining tables.
     /// </summary>
     public ValueBase? Condition { get; set; }
 
     /// <summary>
-    /// Gets or sets the selectable table.
+    /// Gets or sets the selectable table involved in the relation, which represents the table being joined with.
     /// </summary>
     public SelectableTable Table { get; init; }
 

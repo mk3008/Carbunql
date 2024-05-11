@@ -8,7 +8,7 @@ using System.Collections.Immutable;
 namespace Carbunql.Clauses;
 
 /// <summary>
-/// Base class for various types of tables in a query.
+/// Represents the base class for various types of tables in a query, including physical tables, views, function tables, and lateral tables.
 /// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 [Union(0, typeof(FunctionTable))]

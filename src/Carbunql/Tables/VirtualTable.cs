@@ -4,7 +4,7 @@ using MessagePack;
 namespace Carbunql.Tables;
 
 /// <summary>
-/// Represents a virtual table.
+/// Represents a virtual table, which wraps a subquery and behaves like a table.
 /// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class VirtualTable : TableBase
@@ -14,7 +14,7 @@ public class VirtualTable : TableBase
     /// </summary>
     public VirtualTable()
     {
-        isSelectQuery = false;
+        _isSelectQuery = false;
         Query = null!;
     }
 
@@ -24,21 +24,21 @@ public class VirtualTable : TableBase
     /// <param name="query">The select query.</param>
     public VirtualTable(SelectQuery query)
     {
-        isSelectQuery = true;
+        _isSelectQuery = true;
         Query = query;
     }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="VirtualTable"/> class with the specified query.
     /// </summary>
-    /// <param name="query">The query.</param>
+    /// <param name="query">The query. It can be a select query, Values query, or any other query type.</param>
     public VirtualTable(IQueryCommandable query)
     {
-        isSelectQuery = query is SelectQuery;
+        _isSelectQuery = query is SelectQuery;
         Query = query;
     }
 
-    private readonly bool isSelectQuery;
+    private readonly bool _isSelectQuery;
 
     /// <summary>
     /// Gets or sets the query associated with the virtual table.
@@ -76,12 +76,12 @@ public class VirtualTable : TableBase
     }
 
     /// <inheritdoc/>
-    public override bool IsSelectQuery => isSelectQuery;
+    public override bool IsSelectQuery => _isSelectQuery;
 
     /// <inheritdoc/>
     public override SelectQuery GetSelectQuery()
     {
-        if (isSelectQuery) return (SelectQuery)Query;
+        if (_isSelectQuery) return (SelectQuery)Query;
         return base.GetSelectQuery();
     }
 

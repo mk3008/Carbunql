@@ -5,13 +5,14 @@ using MessagePack;
 namespace Carbunql.Clauses;
 
 /// <summary>
-/// Represents a selectable table in a query.
+/// Represents a table or subquery that can be selected in a SQL query. 
+/// It allows for specifying an alias to reference the table or subquery within the query.
 /// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class SelectableTable : IQueryCommandable, ISelectable
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="SelectableTable"/> class with the specified table, alias, and column aliases.
+    /// Initializes a new instance of the <see cref="SelectableTable"/> class with the specified table and alias.
     /// </summary>
     /// <param name="table">The table to be selected.</param>
     /// <param name="alias">The alias for the selected table.</param>
@@ -40,7 +41,7 @@ public class SelectableTable : IQueryCommandable, ISelectable
     public TableBase Table { get; init; }
 
     /// <summary>
-    /// Gets or sets the alias for the selected table.
+    /// Gets the alias for the selected table.
     /// </summary>
     public string Alias { get; private set; }
 

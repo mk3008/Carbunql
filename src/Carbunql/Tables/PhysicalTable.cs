@@ -5,23 +5,15 @@ using System.Collections.Immutable;
 namespace Carbunql.Tables;
 
 /// <summary>
-/// Represents a physical table.
+/// Represents a physical table in a database.
 /// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class PhysicalTable : TableBase
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="PhysicalTable"/> class.
-    /// </summary>
-    public PhysicalTable()
-    {
-        Table = string.Empty;
-    }
-
-    /// <summary>
     /// Initializes a new instance of the <see cref="PhysicalTable"/> class with the specified table name.
     /// </summary>
-    /// <param name="table">The name of the table.</param>
+    /// <param name="table">The name of the physical table.</param>
     public PhysicalTable(string table)
     {
         Table = table;
@@ -30,8 +22,8 @@ public class PhysicalTable : TableBase
     /// <summary>
     /// Initializes a new instance of the <see cref="PhysicalTable"/> class with the specified schema and table names.
     /// </summary>
-    /// <param name="schema">The schema name.</param>
-    /// <param name="table">The table name.</param>
+    /// <param name="schema">The schema name of the physical table.</param>
+    /// <param name="table">The name of the physical table.</param>
     public PhysicalTable(string schema, string table)
     {
         Schema = schema;

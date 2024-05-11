@@ -5,13 +5,18 @@ using System.Collections;
 namespace Carbunql.Clauses;
 
 /// <summary>
-/// Represents a WINDOW clause in a query.
+/// Represents a WINDOW clause in a SQL query.
 /// </summary>
+/// <remarks>
+/// The WINDOW clause defines window specifications for window functions used in the query.
+/// It allows specifying named windows, which can be referenced in window function calls.
+/// </remarks>
 [MessagePackObject(keyAsPropertyName: true)]
 public class WindowClause : IList<NamedWindowDefinition>, IQueryCommandable
+
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="WindowClause"/> class.
+    /// Initializes a new instance of the <see cref="WindowClause"/> class without any window definitions.
     /// </summary>
     public WindowClause()
     {
@@ -20,7 +25,7 @@ public class WindowClause : IList<NamedWindowDefinition>, IQueryCommandable
     /// <summary>
     /// Initializes a new instance of the <see cref="WindowClause"/> class with the specified window definitions.
     /// </summary>
-    /// <param name="definitions">The window definitions to be added to the clause.</param>
+    /// <param name="definitions">The window definitions to be added to the window clause.</param>
     public WindowClause(IList<NamedWindowDefinition> definitions)
     {
         NamedWindowDefinitions.AddRange(definitions);
@@ -52,7 +57,6 @@ public class WindowClause : IList<NamedWindowDefinition>, IQueryCommandable
     /// <returns>An enumerable collection of query parameters.</returns>
     public IEnumerable<QueryParameter> GetParameters()
     {
-        var prm = EmptyParameters.Get();
         foreach (var item in NamedWindowDefinitions)
         {
             foreach (var p in item.GetParameters())

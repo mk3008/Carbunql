@@ -10,7 +10,8 @@ using MessagePack;
 namespace Carbunql;
 
 /// <summary>
-/// Represents a query that inserts multiple rows of values into a table.
+/// Represents a query that retrieves multiple rows of values from a database.
+/// This type of query is typically used for inserting multiple rows of data into a table.
 /// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class ValuesQuery : ReadQuery
@@ -18,6 +19,10 @@ public class ValuesQuery : ReadQuery
     /// <summary>
     /// Initializes a new instance of the <see cref="ValuesQuery"/> class.
     /// </summary>
+    /// <remarks>
+    /// This constructor initializes a new instance of the ValuesQuery class in an empty state.
+    /// After instantiation, additional processing is required to populate the Rows property with values to be inserted.
+    /// </remarks>
     public ValuesQuery()
     {
     }
@@ -34,7 +39,11 @@ public class ValuesQuery : ReadQuery
     /// <summary>
     /// Initializes a new instance of the <see cref="ValuesQuery"/> class from the specified query string.
     /// </summary>
-    /// <param name="query">The query string.</param>
+    /// <param name="query">The query string to parse.</param>
+    /// <remarks>
+    /// This constructor initializes a new instance of the ValuesQuery class by parsing the provided query string.
+    /// The parsed components, such as the rows to be inserted, operatable queries, ORDER BY clause, and LIMIT clause, are assigned to the corresponding properties of the ValuesQuery object.
+    /// </remarks>
     public ValuesQuery(string query)
     {
         var q = ValuesQueryParser.Parse(query);

@@ -6,7 +6,7 @@ namespace Carbunql.Clauses;
 using System.Collections.Generic;
 
 /// <summary>
-/// Represents a WHERE clause in a query.
+/// Represents a WHERE clause in a SQL query.
 /// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
 public class WhereClause : IQueryCommandable
@@ -14,14 +14,14 @@ public class WhereClause : IQueryCommandable
     /// <summary>
     /// Initializes a new instance of the <see cref="WhereClause"/> class with the specified condition.
     /// </summary>
-    /// <param name="condition">The condition for the WHERE clause.</param>
+    /// <param name="condition">The boolean expression representing the condition for the WHERE clause.</param>
     public WhereClause(ValueBase condition)
     {
         Condition = condition;
     }
 
     /// <summary>
-    /// Gets or sets the condition associated with the WHERE clause.
+    /// Gets or sets the condition associated with the WHERE clause, which represents a boolean expression.
     /// </summary>
     public ValueBase Condition { get; init; }
 
