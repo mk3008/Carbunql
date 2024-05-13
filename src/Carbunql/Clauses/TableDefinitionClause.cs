@@ -39,6 +39,10 @@ public class TableDefinitionClause : QueryCommandCollection<ITableDefinition>, I
         Table = table;
     }
 
+    public IEnumerable<string> ColumnNames => this.Where(x => !string.IsNullOrEmpty(x.ColumnName)).Select(x => x.ColumnName);
+
+    public IEnumerable<string> PrimaryKeys => this.OfType<PrimaryKeyConstraint>().SelectMany(x => x.PrimaryKeyMaps.Select(y => y.ColumnName));
+
     /// <summary>
     /// Gets the tokens of the collection.
     /// </summary>

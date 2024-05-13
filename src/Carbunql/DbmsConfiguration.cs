@@ -202,7 +202,7 @@ public static class DbmsConfiguration
         }
         else
         {
-            throw new ArgumentException("Unsupported property type");
+            throw new ArgumentException($"Unsupported property type :{propertyType}");
         }
     }
 

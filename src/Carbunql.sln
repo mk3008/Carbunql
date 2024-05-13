@@ -27,7 +27,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demo.Migration", "..\demo\M
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demo.Parse", "..\demo\Parse\Demo.Parse.csproj", "{42FA31DD-B42A-4F88-BEDE-6BE9BF31BE2D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carbunql.Annotation.Test", "..\test\Carbunql.Annotation.Test\Carbunql.Annotation.Test.csproj", "{E76AE876-D280-401B-BE02-7500B608E320}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carbunql.Annotation.Test", "..\test\Carbunql.Annotation.Test\Carbunql.Annotation.Test.csproj", "{E76AE876-D280-401B-BE02-7500B608E320}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carbunql.TypeSafe", "Carbunql.TypeSafe\Carbunql.TypeSafe.csproj", "{8002213B-66D6-407E-BCD4-3E4092C24652}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carbunql.TypeSafe.Test", "..\test\Carbunql.TypeSafe.Test\Carbunql.TypeSafe.Test.csproj", "{EA3034E3-564E-46B4-9FA8-B0A10D9DCBCE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -87,6 +91,14 @@ Global
 		{E76AE876-D280-401B-BE02-7500B608E320}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E76AE876-D280-401B-BE02-7500B608E320}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E76AE876-D280-401B-BE02-7500B608E320}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8002213B-66D6-407E-BCD4-3E4092C24652}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8002213B-66D6-407E-BCD4-3E4092C24652}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8002213B-66D6-407E-BCD4-3E4092C24652}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8002213B-66D6-407E-BCD4-3E4092C24652}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA3034E3-564E-46B4-9FA8-B0A10D9DCBCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA3034E3-564E-46B4-9FA8-B0A10D9DCBCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA3034E3-564E-46B4-9FA8-B0A10D9DCBCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA3034E3-564E-46B4-9FA8-B0A10D9DCBCE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
