@@ -1,11 +1,9 @@
 ﻿using Carbunql.Annotations;
-using Carbunql.Clauses;
 using Carbunql.Building;
-using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
-using Carbunql.Values;
+using Carbunql.Clauses;
+using System.Data;
 using System.Data.Common;
-using System.Reflection;
+using System.Linq.Expressions;
 
 namespace Carbunql.TypeSafe;
 
@@ -112,6 +110,16 @@ Parameters count
         return this;
     }
 
+
+    public string ToValue(Expression exp, Func<object?, string> addParameter)
+    {
+        if (TryToValue(exp, addParameter, out var value))
+        {
+            return value;
+        }
+        throw new Exception();
+    }
+
     public bool TryToValue(Expression exp, Func<object?, string> addParameter, out string value)
     {
         value = string.Empty;
@@ -148,7 +156,23 @@ Parameters count
 
         if (exp is MemberExpression mem)
         {
-            if (mem.Expression is MemberExpression && typeof(ITableRowDefinition).IsAssignableFrom(mem.Expression.Type))
+            var tp = mem.Member.DeclaringType;
+
+            if (tp == typeof(Sql))
+            {
+                if (mem.Member.Name == nameof(Sql.Now))
+                {
+                    value = DbmsConfiguration.GetNowCommandLogic();
+                    return true;
+                }
+                if (mem.Member.Name == nameof(Sql.CurrentTimestamp))
+                {
+                    value = DbmsConfiguration.GetCurrentTimestampCommandLogic();
+                    return true;
+                }
+                throw new InvalidProgramException();
+            }
+            if (mem.Expression is MemberExpression && typeof(ITableRowDefinition).IsAssignableFrom(tp))
             {
                 //column
                 var table = ((MemberExpression)mem.Expression).Member.Name;
@@ -178,44 +202,156 @@ Parameters count
         }
         else if (exp is BinaryExpression be)
         {
-            if (be.NodeType == ExpressionType.Coalesce)
+            if (TryToValue(be.Left, addParameter, out var left) && TryToValue(be.Right, addParameter, out var right))
             {
-
-                if (TryToValue(be.Left, addParameter, out var left) && TryToValue(be.Right, addParameter, out var right))
+                if (be.NodeType == ExpressionType.Coalesce)
                 {
                     value = $"{DbmsConfiguration.CoalesceFunctionName}({left}, {right})";
                     return true;
                 }
+                if (be.NodeType == ExpressionType.Add)
+                {
+                    value = $"{left} + {right}";
+                    return true;
+                }
+                if (be.NodeType == ExpressionType.Subtract)
+                {
+                    value = $"{left} - {right}";
+                    return true;
+                }
+                if (be.NodeType == ExpressionType.Multiply)
+                {
+                    value = $"{left} * {right}";
+                    return true;
+                }
+                if (be.NodeType == ExpressionType.Divide)
+                {
+                    value = $"{left} / {right}";
+                    return true;
+                }
+                if (be.NodeType == ExpressionType.Modulo)
+                {
+                    value = DbmsConfiguration.GetModuloCommandLogic(left, right);
+                    return true;
+                }
             }
+        }
+        else if (exp is UnaryExpression ue)
+        {
+            if (TryToValue(ue.Operand, addParameter, out var val))
+            {
+                if (ue.NodeType == ExpressionType.Convert)
+                {
+                    var dbtype = DbmsConfiguration.ToDbType(ue.Type);
+                    value = $"cast({val} as {dbtype})";
+                    return true;
+                }
+            }
+        }
+        else if (exp is MethodCallExpression mce)
+        {
+            var args = mce.Arguments.Select(x => ToValue(x, addParameter));
 
+            var tp = mce.Method.DeclaringType?.FullName;
+
+            if (tp == typeof(Math).ToString())
+            {
+                if (mce.Method.Name == nameof(Math.Truncate))
+                {
+                    value = DbmsConfiguration.GetTruncateCommandLogic(args);
+                    return true;
+                }
+                if (mce.Method.Name == nameof(Math.Floor))
+                {
+                    value = DbmsConfiguration.GetFloorCommandLogic(args);
+                    return true;
+                }
+                if (mce.Method.Name == nameof(Math.Ceiling))
+                {
+                    value = DbmsConfiguration.GetCeilingCommandLogic(args);
+                    return true;
+                }
+                if (mce.Method.Name == nameof(Math.Round))
+                {
+                    value = DbmsConfiguration.GetRoundCommandLogic(args);
+                    return true;
+                }
+            }
+            if (tp == typeof(Sql).ToString())
+            {
+                //reserved command
+                if (mce.Method.Name == nameof(Sql.Raw))
+                {
+                    var arg = (ConstantExpression)mce.Arguments.First();
+                    value = arg.Value!.ToString()!;
+                    return true;
+                }
+                if (mce.Method.Name == nameof(Sql.RowNumber))
+                {
+                    if (mce.Arguments.Count == 0)
+                    {
+                        value = DbmsConfiguration.GetRowNumberCommandLogic();
+                        return true;
+                    }
+                    if (mce.Arguments.Count == 2)
+                    {
+                        var argList = mce.Arguments.ToList();
+                        var arg1st = (NewExpression)argList[0];
+                        var arg2nd = (NewExpression)argList[1];
+                        var arg1stText = string.Join(",", arg1st.Arguments.Select(x => ToValue(x, addParameter)));
+                        var arg2ndText = string.Join(",", arg2nd.Arguments.Select(x => ToValue(x, addParameter)));
+
+                        value = DbmsConfiguration.GetRowNumberPartitionByOrderByCommandLogic(arg1stText, arg2ndText);
+                        return true;
+                    }
+                }
+                if (mce.Method.Name == nameof(Sql.RowNumberOrderbyBy))
+                {
+                    var arg1st = (NewExpression)mce.Arguments.First();
+
+                    var arg1stText = string.Join(",", arg1st.Arguments.Select(x => ToValue(x, addParameter)));
+
+                    value = DbmsConfiguration.GetRowNumberOrderByCommandLogic(arg1stText);
+                    return true;
+                }
+                if (mce.Method.Name == nameof(Sql.RowNumberPartitionBy))
+                {
+                    var arg1st = (NewExpression)mce.Arguments.First();
+
+                    var arg1stText = string.Join(",", arg1st.Arguments.Select(x => ToValue(x, addParameter)));
+
+                    value = DbmsConfiguration.GetRowNumberPartitionByCommandLogic(arg1stText);
+                    return true;
+                }
+                throw new InvalidProgramException();
+            }
         }
         return false;
     }
 
-    private void Select(Type type, object? value, string alias, Func<string> getParameterName)
-    {
-        if (value == null)
-        {
-            this.Select(new LiteralValue()).As(alias);
-        }
-        else if (type == typeof(string) || type == typeof(DateTime))
-        {
-            var pname = getParameterName();
-            var val = AddParameter(DbmsConfiguration.PlaceholderIdentifier + pname, value);
+    //private void Select(Type type, object? value, string alias, Func<string> getParameterName)
+    //{
+    //    if (value == null)
+    //    {
+    //        this.Select(new LiteralValue()).As(alias);
+    //    }
+    //    else if (type == typeof(string) || type == typeof(DateTime))
+    //    {
+    //        var pname = getParameterName();
+    //        var val = AddParameter(DbmsConfiguration.PlaceholderIdentifier + pname, value);
 
-            this.Select(val).As(alias);
-        }
-        else
-        {
-            var val = new LiteralValue(value.ToString());
-            var dbtype = new LiteralValue(DbmsConfiguration.ToDbType(type));
-            var arg = new AsArgument(val, dbtype);
-            var functionValue = new FunctionValue("cast", arg);
+    //        this.Select(val).As(alias);
+    //    }
+    //    else
+    //    {
+    //        var val = new LiteralValue(value.ToString());
+    //        var dbtype = new LiteralValue(DbmsConfiguration.ToDbType(type));
+    //        var arg = new AsArgument(val, dbtype);
+    //        var functionValue = new FunctionValue("cast", arg);
 
-            this.Select(functionValue).As(alias);
-        }
-    }
-
+    //        this.Select(functionValue).As(alias);
+    //    }
+    //}
 }
 
 internal static class ExpressionExtension
@@ -279,4 +415,21 @@ public static class Sql
 
         return sq;
     }
+
+    public static string Raw(string command)
+    {
+        return command;
+    }
+
+    public static string CurrentTimestamp => string.Empty;
+
+    public static string Now => string.Empty;
+
+    public static string RowNumber() => string.Empty;
+
+    public static string RowNumber(object partition, object order) => string.Empty;
+
+    public static string RowNumberPartitionBy(object partition) => string.Empty;
+
+    public static string RowNumberOrderbyBy(object order) => string.Empty;
 }

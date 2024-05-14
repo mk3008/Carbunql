@@ -302,4 +302,81 @@ public static class DbmsConfiguration
     }
 
     public static Func<string, string> GetDefaultIndexNameLogic { get; set; } = GetDefaultIndexName;
+
+    private static string GetModuloCommand(string dividend, string divisor)
+    {
+        return dividend + " % " + divisor;
+    }
+
+    public static Func<string, string, string> GetModuloCommandLogic { get; set; } = GetModuloCommand;
+
+    private static string GetTruncateCommand(IEnumerable<string> values)
+    {
+        return $"trunc({string.Join(",", values)})";
+    }
+
+    public static Func<IEnumerable<string>, string> GetTruncateCommandLogic { get; set; } = GetTruncateCommand;
+
+    private static string GetCeilingCommand(IEnumerable<string> values)
+    {
+        return $"ceil({string.Join(",", values)})";
+    }
+
+    public static Func<IEnumerable<string>, string> GetCeilingCommandLogic { get; set; } = GetCeilingCommand;
+
+    private static string GetFloorCommand(IEnumerable<string> values)
+    {
+        return $"floor({string.Join(",", values)})";
+    }
+
+    public static Func<IEnumerable<string>, string> GetFloorCommandLogic { get; set; } = GetFloorCommand;
+
+    private static string GetRoundCommand(IEnumerable<string> values)
+    {
+        return $"round({string.Join(",", values)})";
+    }
+
+    public static Func<IEnumerable<string>, string> GetRoundCommandLogic { get; set; } = GetRoundCommand;
+
+    private static string GetNowCommand()
+    {
+        return $"now()";
+    }
+
+    public static Func<string> GetNowCommandLogic { get; set; } = GetNowCommand;
+
+    private static string GetCurrentTimestampCommand()
+    {
+        return $"current_timestamp";
+    }
+
+    public static Func<string> GetCurrentTimestampCommandLogic { get; set; } = GetCurrentTimestampCommand;
+
+    private static string GetRowNumberCommand()
+    {
+        return $"row_number() over()";
+    }
+
+    public static Func<string> GetRowNumberCommandLogic { get; set; } = GetRowNumberCommand;
+
+    private static string GetRowNumberPartitionByOrderByCommand(string partition, string order)
+    {
+        return $"row_number() over(partition by {partition} order by {order})";
+    }
+
+    public static Func<string, string, string> GetRowNumberPartitionByOrderByCommandLogic { get; set; } = GetRowNumberPartitionByOrderByCommand;
+
+    private static string GetRowNumberOrderByCommand(string order)
+    {
+        return $"row_number() over(order by {order})";
+    }
+
+    public static Func<string, string> GetRowNumberOrderByCommandLogic { get; set; } = GetRowNumberOrderByCommand;
+
+    private static string GetRowNumberPartitionByCommand(string partition)
+    {
+        return $"row_number() over(partition by {partition})";
+    }
+
+    public static Func<string, string> GetRowNumberPartitionByCommandLogic { get; set; } = GetRowNumberPartitionByCommand;
 }
