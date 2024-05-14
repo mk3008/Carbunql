@@ -181,8 +181,6 @@ public class WindowDefinition : IQueryCommandable
             yield break;
         }
 
-        if (PartitionBy == null && OrderBy == null) yield break;
-
         var bracket = Token.ReservedBracketStart(this, parent);
         yield return bracket;
 
