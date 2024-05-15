@@ -1,6 +1,8 @@
-﻿using Carbunql.Annotations;
+﻿using Carbunql.Analysis.Parser;
+using Carbunql.Annotations;
 using Carbunql.Building;
 using Carbunql.Clauses;
+using Carbunql.Values;
 using System.Data;
 using System.Data.Common;
 using System.Linq.Expressions;
@@ -149,8 +151,9 @@ Parameters count
             }
             else
             {
-                var dbtype = DbmsConfiguration.ToDbType(tp);
-                return $"cast({obj} as {dbtype})";
+                //var dbtype = DbmsConfiguration.ToDbType(tp);
+                //return $"cast({obj} as {dbtype})";
+                return obj!.ToString()!;
             }
         };
 
@@ -234,6 +237,36 @@ Parameters count
                     value = DbmsConfiguration.GetModuloCommandLogic(left, right);
                     return true;
                 }
+                if (be.NodeType == ExpressionType.Equal)
+                {
+                    value = value = $"{left} = {right}";
+                    return true;
+                }
+                if (be.NodeType == ExpressionType.NotEqual)
+                {
+                    value = value = $"{left} <> {right}";
+                    return true;
+                }
+                if (be.NodeType == ExpressionType.GreaterThan)
+                {
+                    value = value = $"{left} > {right}";
+                    return true;
+                }
+                if (be.NodeType == ExpressionType.GreaterThanOrEqual)
+                {
+                    value = value = $"{left} >= {right}";
+                    return true;
+                }
+                if (be.NodeType == ExpressionType.LessThan)
+                {
+                    value = value = $"{left} < {right}";
+                    return true;
+                }
+                if (be.NodeType == ExpressionType.LessThanOrEqual)
+                {
+                    value = value = $"{left} <= {right}";
+                    return true;
+                }
             }
         }
         else if (exp is UnaryExpression ue)
@@ -243,6 +276,18 @@ Parameters count
                 if (ue.NodeType == ExpressionType.Convert)
                 {
                     var dbtype = DbmsConfiguration.ToDbType(ue.Type);
+
+                    ////excludes excessive casts
+                    //if (val.StartsWith("cast("))
+                    //{
+                    //    var fv = (FunctionValue)ValueParser.Parse(val);
+                    //    if (fv.Arguments.Count == 1 && fv.Arguments[0] is AsArgument arg && dbtype == arg.Type.ToText())
+                    //    {
+                    //        value = val;
+                    //        return true;
+                    //    }
+                    //}
+
                     value = $"cast({val} as {dbtype})";
                     return true;
                 }
@@ -324,6 +369,34 @@ Parameters count
                     return true;
                 }
                 throw new InvalidProgramException();
+            }
+        }
+        else if (exp is ConditionalExpression cnd)
+        {
+            var test = ToValue(cnd.Test, addParameter);
+            var ifTrue = ToValue(cnd.IfTrue, addParameter);
+            var ifFalse = ToValue(cnd.IfFalse, addParameter);
+
+            if (ifFalse.StartsWith("case "))
+            {
+                var caseExpression = CaseExpressionParser.Parse(ifFalse);
+                if (caseExpression.CaseCondition is null)
+                {
+                    var we = WhenExpressionParser.Parse($"when {test} then {ifTrue}");
+                    caseExpression.WhenExpressions.Insert(0, we);
+                    value = caseExpression.ToText();
+                    return true;
+                }
+                else
+                {
+                    value = $"case when {test} then {ifTrue} else {ifFalse} end";
+                    return true;
+                }
+            }
+            else
+            {
+                value = $"case when {test} then {ifTrue} else {ifFalse} end";
+                return true;
             }
         }
         return false;

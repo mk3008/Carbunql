@@ -89,6 +89,10 @@ public static class ExpressionReader
         {
             return Analyze(be);
         }
+        else if (exp is ConditionalExpression ce)
+        {
+            return Analyze(ce);
+        }
         return $"not support : {exp.NodeType}";
     }
 
@@ -352,6 +356,25 @@ public static class ExpressionReader
         sb.AppendLine($"** ParameterInfo");
         sb.AppendLine($"Name\r\n    {info.Name}");
         sb.AppendLine($"ParameterType\r\n    {info.ParameterType.Name}");
+
+        return sb.ToString().RemoveLastReturn();
+    }
+
+    internal static string Analyze(ConditionalExpression exp)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"* MethodCallExpression");
+        sb.AppendLine($"NodeType\r\n    {exp.NodeType}");
+        sb.AppendLine($"Type\r\n    {exp.Type.Name}");
+
+        sb.AppendLine("Test");
+        sb.AppendLine(Analyze(exp.Test).InsertIndent());
+
+        sb.AppendLine("IfTrue");
+        sb.AppendLine(Analyze(exp.IfTrue).InsertIndent());
+
+        sb.AppendLine("IfFalse");
+        sb.AppendLine(Analyze(exp.IfFalse).InsertIndent());
 
         return sb.ToString().RemoveLastReturn();
     }
