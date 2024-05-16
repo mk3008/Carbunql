@@ -8,71 +8,11 @@ public class FluentSelectQuery : SelectQuery
 {
     public FluentSelectQuery Select<T>(Expression<Func<T>> expression) where T : class
     {
+#if DEBUG
         var analyzed = ExpressionReader.Analyze(expression);
+#endif
 
         var body = (NewExpression)expression.Body;
-
-        /*
-* LambdaExpression
-NodeType
-    Lambda
-Type
-    Func`1
-Name
-    ""
-ReturnType
-    <>f__AnonymousType0`1[System.Int32]
-Body
-    * NewExpression
-    NodeType
-        New
-    Type
-        <>f__AnonymousType0`1
-    Arguments.Count
-        1
-    - index : 0
-        * MemberExpression
-        NodeType
-            MemberAccess
-        Type
-            Int32
-        Member
-            ** MemberInfo
-            Name
-                sale_id
-            MemberType
-                Property
-        Expression
-            * MemberExpression
-            NodeType
-                MemberAccess
-            Type
-                sale
-            Member
-                ** MemberInfo
-                Name
-                    a
-                MemberType
-                    Field
-            Expression
-                * ConstantExpression
-                NodeType
-                    Constant
-                Type
-                    <>c__DisplayClass4_0
-                Value
-                    Carbunql.TypeSafe.Test.SingleTableTest+<>c__DisplayClass4_0
-    Members.Count
-        1
-    - index : 0
-        ** MemberInfo
-        Name
-            id
-        MemberType
-            Property
-Parameters count
-    0
-         */
 
         var parameterCount = this.GetParameters().Count();
         Func<object?, string> addParameter = (obj) =>
@@ -101,7 +41,36 @@ Parameters count
         return this;
     }
 
-    public string ToValue(Expression exp, Func<object?, string> addParameter)
+    public FluentSelectQuery Where(Expression<Func<bool>> expression)
+    {
+#if DEBUG
+        var analyzed = ExpressionReader.Analyze(expression);
+#endif
+
+        var body = (BinaryExpression)expression.Body;
+
+        var parameterCount = this.GetParameters().Count();
+        Func<object?, string> addParameter = (obj) =>
+        {
+            var pname = $"{DbmsConfiguration.PlaceholderIdentifier}p{parameterCount}";
+            parameterCount++;
+            AddParameter(pname, obj);
+            return pname;
+        };
+
+        var value = ToValue(body, addParameter);
+        if (body.NodeType == ExpressionType.OrElse)
+        {
+            this.Where($"({ToValue(body, addParameter)})");
+        }
+        else
+        {
+            this.Where(ToValue(body, addParameter));
+        }
+        return this;
+    }
+
+    private string ToValue(Expression exp, Func<object?, string> addParameter)
     {
         if (TryToValue(exp, addParameter, out var value))
         {
@@ -110,7 +79,7 @@ Parameters count
         throw new Exception();
     }
 
-    public bool TryToValue(Expression exp, Func<object?, string> addParameter, out string value)
+    private bool TryToValue(Expression exp, Func<object?, string> addParameter, out string value)
     {
         value = string.Empty;
 
@@ -255,6 +224,16 @@ Parameters count
                     value = value = $"{left} <= {right}";
                     return true;
                 }
+                if (be.NodeType == ExpressionType.AndAlso)
+                {
+                    value = value = $"{left} and {right}";
+                    return true;
+                }
+                if (be.NodeType == ExpressionType.OrElse)
+                {
+                    value = value = $"({left}) or ({right})";
+                    return true;
+                }
             }
         }
         else if (exp is UnaryExpression ue)
@@ -387,6 +366,9 @@ Parameters count
                 return true;
             }
         }
+
+        throw new InvalidOperationException(exp.ToString());
+
         return false;
     }
 

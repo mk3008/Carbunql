@@ -1,5 +1,4 @@
 using Carbunql.Clauses;
-using System.Diagnostics;
 using Xunit.Abstractions;
 
 namespace Carbunql.TypeSafe.Test;
@@ -12,6 +11,24 @@ public class SingleTableTest
     }
 
     private ITestOutputHelper Output { get; }
+
+    [Fact]
+    public void SelectAllTest()
+    {
+        var a = Sql.DefineTable<sale>();
+
+        var query = Sql.From(() => a);
+
+        var actual = query.ToText();
+        Output.WriteLine(query.ToText());
+
+        var expect = @"SELECT
+    *
+FROM
+    sale AS a";
+
+        Assert.Equal(expect, actual, true, true, true);
+    }
 
     [Fact]
     public void SelectTest()
