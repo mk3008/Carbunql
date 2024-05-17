@@ -523,6 +523,32 @@ FROM
         Assert.Equal(expect, actual, true, true, true);
     }
 
+    [Fact]
+    public void TrimTest()
+    {
+        var a = Sql.DefineTable<sale>();
+
+        var query = Sql.From(() => a)
+            .Select(() => new
+            {
+                v_start_trim = a.product_name.TrimStart(),
+                v_trim = a.product_name.Trim(),
+                v_end_trim = a.product_name.TrimEnd(),
+            });
+
+        var actual = query.ToText();
+        Output.WriteLine(actual);
+
+        var expect = @"SELECT
+    LTRIM(a.product_name) AS v_start_trim,
+    TRIM(a.product_name) AS v_trim,
+    RTRIM(a.product_name) AS v_end_trim
+FROM
+    sale AS a";
+
+        Assert.Equal(expect, actual, true, true, true);
+    }
+
     //    //procrastinate
     //    //[Fact]
     //    public void Switch()

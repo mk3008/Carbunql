@@ -263,47 +263,52 @@ public class FluentSelectQuery : SelectQuery
         {
             value = ParseSqlCommand(mce.Object, addParameter);
 
-            var arg = ToValue(mce.Arguments[0], addParameter);
-            if (mce.Method.Name == nameof(DateTime.AddYears))
+            if (mce.Arguments.Count == 1)
             {
-                return $"{value} + {arg} * interval '1 year'";
+                var arg = ToValue(mce.Arguments[0], addParameter);
+                if (mce.Method.Name == nameof(DateTime.AddYears))
+                {
+                    return $"{value} + {arg} * interval '1 year'";
+                }
+                if (mce.Method.Name == nameof(DateTime.AddMonths))
+                {
+                    return $"{value} + {arg} * interval '1 month'";
+                }
+                if (mce.Method.Name == nameof(DateTime.AddDays))
+                {
+                    return $"{value} + {arg} * interval '1 day'";
+                }
+                if (mce.Method.Name == nameof(DateTime.AddHours))
+                {
+                    return $"{value} + {arg} * interval '1 hour'";
+                }
+                if (mce.Method.Name == nameof(DateTime.AddMinutes))
+                {
+                    return $"{value} + {arg} * interval '1 minute'";
+                }
+                if (mce.Method.Name == nameof(DateTime.AddSeconds))
+                {
+                    return $"{value} + {arg} * interval '1 second'";
+                }
+                if (mce.Method.Name == nameof(DateTime.AddMilliseconds))
+                {
+                    return $"{value} + {arg} * interval '1 ms'";
+                }
+                if (mce.Method.Name == nameof(String.StartsWith))
+                {
+                    return $"{value} like {arg} || '%'";
+                }
+                if (mce.Method.Name == nameof(String.Contains))
+                {
+                    return $"{value} like '%' || {arg} || '%'";
+                }
+                if (mce.Method.Name == nameof(String.EndsWith))
+                {
+                    return $"{value} like {arg} || '%'";
+                }
+                throw new NotImplementedException();
             }
-            if (mce.Method.Name == nameof(DateTime.AddMonths))
-            {
-                return $"{value} + {arg} * interval '1 month'";
-            }
-            if (mce.Method.Name == nameof(DateTime.AddDays))
-            {
-                return $"{value} + {arg} * interval '1 day'";
-            }
-            if (mce.Method.Name == nameof(DateTime.AddHours))
-            {
-                return $"{value} + {arg} * interval '1 hour'";
-            }
-            if (mce.Method.Name == nameof(DateTime.AddMinutes))
-            {
-                return $"{value} + {arg} * interval '1 minute'";
-            }
-            if (mce.Method.Name == nameof(DateTime.AddSeconds))
-            {
-                return $"{value} + {arg} * interval '1 second'";
-            }
-            if (mce.Method.Name == nameof(DateTime.AddMilliseconds))
-            {
-                return $"{value} + {arg} * interval '1 ms'";
-            }
-            if (mce.Method.Name == nameof(String.StartsWith))
-            {
-                return $"{value} like {arg} || '%'";
-            }
-            if (mce.Method.Name == nameof(String.Contains))
-            {
-                return $"{value} like '%' || {arg} || '%'";
-            }
-            if (mce.Method.Name == nameof(String.EndsWith))
-            {
-                return $"{value} like {arg} || '%'";
-            }
+
             if (mce.Method.Name == nameof(String.TrimStart))
             {
                 return $"ltrim({value})";
