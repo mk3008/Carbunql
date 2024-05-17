@@ -1,6 +1,7 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Values;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Analysis.Parser;
 
@@ -17,6 +18,20 @@ public static class BracketValueParser
     public static bool IsBracketValue(string text)
     {
         return text == "(";
+    }
+
+    public static bool TryParse(string text, [MaybeNullWhen(false)] out ValueBase value)
+    {
+        var r = new SqlTokenReader(text);
+        var q = Parse(r);
+
+        if (!r.Peek().IsEndToken())
+        {
+            value = null;
+            return false;
+        }
+        value = q;
+        return true;
     }
 
     /// <summary>

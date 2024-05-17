@@ -115,6 +115,30 @@ FROM
     }
 
     [Fact]
+    public void BracketTest()
+    {
+        var a = Sql.DefineTable<sale>();
+
+        var query = Sql.From(() => a)
+            .Select(() => new
+            {
+                value1 = (a.unit_price + a.unit_price) * 3,
+                value2 = a.unit_price + (a.unit_price * 3)
+            });
+
+        var actual = query.ToText();
+        Output.WriteLine(actual);
+
+        var expect = @"SELECT
+    (a.unit_price + a.unit_price) * 3 AS value1,
+    a.unit_price + a.unit_price * 3 AS value2
+FROM
+    sale AS a";
+
+        Assert.Equal(expect, actual, true, true, true);
+    }
+
+    [Fact]
     public void VariableTest()
     {
         var a = Sql.DefineTable<sale>();
@@ -230,7 +254,8 @@ FROM
                 v_ceiling = Math.Ceiling(a.unit_price),
                 v_round_arg1 = Math.Round(a.unit_price),
                 v_round_arg2 = Math.Round(a.unit_price, 2),
-                test = Math.Truncate(a.unit_price * a.quantity),
+                test1 = Math.Truncate(a.unit_price * a.quantity),
+                test2 = Math.Truncate(a.unit_price + a.quantity),
             });
 
         var actual = query.ToText();
@@ -242,7 +267,8 @@ FROM
     CEIL(a.unit_price) AS v_ceiling,
     ROUND(a.unit_price) AS v_round_arg1,
     ROUND(a.unit_price, 2) AS v_round_arg2,
-    TRUNC(a.unit_price * CAST(a.quantity AS numeric)) AS test
+    TRUNC(a.unit_price * CAST(a.quantity AS numeric)) AS test1,
+    TRUNC(a.unit_price + CAST(a.quantity AS numeric)) AS test2
 FROM
     sale AS a";
 
