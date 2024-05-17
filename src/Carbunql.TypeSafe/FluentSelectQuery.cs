@@ -17,13 +17,17 @@ public class FluentSelectQuery : SelectQuery
 
         var body = (NewExpression)expression.Body;
 
-        var parameterDictionary = new Dictionary<object, string>();
-        var parameterCount = this.GetParameters().Count();
+        var prms = this.GetParameters().ToList();
+        var parameterCount = prms.Count();
         Func<object?, string> addParameter = (obj) =>
         {
-            if (obj != null && parameterDictionary.ContainsKey(obj))
+            if (obj != null)
             {
-                return parameterDictionary[obj];
+                var q = prms.Where(x => x.Value != null && x.Value.Equals(obj));
+                if (q.Any())
+                {
+                    return q.First().ParameterName;
+                }
             }
 
             var pname = $"{DbmsConfiguration.PlaceholderIdentifier}p{parameterCount}";
@@ -32,7 +36,7 @@ public class FluentSelectQuery : SelectQuery
 
             if (obj != null)
             {
-                parameterDictionary[obj] = pname;
+                prms.Add(new QueryParameter(pname, obj));
             }
 
             return pname;
@@ -61,27 +65,51 @@ public class FluentSelectQuery : SelectQuery
         var analyzed = ExpressionReader.Analyze(expression);
 #endif
 
-        var body = (BinaryExpression)expression.Body;
-
-        var parameterCount = this.GetParameters().Count();
+        var prms = this.GetParameters().ToList();
+        var parameterCount = prms.Count();
         Func<object?, string> addParameter = (obj) =>
         {
+            if (obj != null)
+            {
+                var q = prms.Where(x => x.Value != null && x.Value.Equals(obj));
+                if (q.Any())
+                {
+                    return q.First().ParameterName;
+                }
+            }
+
             var pname = $"{DbmsConfiguration.PlaceholderIdentifier}p{parameterCount}";
             parameterCount++;
             AddParameter(pname, obj);
+
+            if (obj != null)
+            {
+                prms.Add(new QueryParameter(pname, obj));
+            }
+
             return pname;
         };
 
-        var value = ToValue(body, addParameter);
-        if (body.NodeType == ExpressionType.OrElse)
+        if (expression.Body is MethodCallExpression mce)
         {
-            this.Where($"({value})");
+            this.Where(ToValue(mce, addParameter));
+            return this;
         }
-        else
+        else if (expression.Body is BinaryExpression be)
         {
-            this.Where(value);
+            var value = ToValue(be, addParameter);
+            if (be.NodeType == ExpressionType.OrElse)
+            {
+                this.Where($"({value})");
+            }
+            else
+            {
+                this.Where(value);
+            }
+            return this;
         }
-        return this;
+
+        throw new Exception();
     }
 
     private string RemoveRootBracketOrDefault(string value)
@@ -263,6 +291,30 @@ public class FluentSelectQuery : SelectQuery
             if (mce.Method.Name == nameof(DateTime.AddMilliseconds))
             {
                 return $"{value} + {arg} * interval '1 ms'";
+            }
+            if (mce.Method.Name == nameof(String.StartsWith))
+            {
+                return $"{value} like {arg} || '%'";
+            }
+            if (mce.Method.Name == nameof(String.Contains))
+            {
+                return $"{value} like '%' || {arg} || '%'";
+            }
+            if (mce.Method.Name == nameof(String.EndsWith))
+            {
+                return $"{value} like {arg} || '%'";
+            }
+            if (mce.Method.Name == nameof(String.TrimStart))
+            {
+                return $"ltrim({value})";
+            }
+            if (mce.Method.Name == nameof(String.Trim))
+            {
+                return $"trim({value})";
+            }
+            if (mce.Method.Name == nameof(String.TrimEnd))
+            {
+                return $"rtrim({value})";
             }
             throw new Exception();
         }

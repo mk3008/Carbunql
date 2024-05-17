@@ -150,6 +150,34 @@ WHERE
         Assert.Equal(expect, actual, true, true, true);
     }
 
+    [Fact]
+    public void LikeTest()
+    {
+        var a = Sql.DefineTable<sale>();
+
+        var query = Sql.From(() => a)
+            .Where(() => a.product_name.StartsWith("a"))
+            .Where(() => a.product_name.Contains("a"))
+            .Where(() => a.product_name.EndsWith("a"));
+
+        var actual = query.ToText();
+        Output.WriteLine(query.ToText());
+
+        var expect = @"/*
+  :p0 = 'a'
+*/
+SELECT
+    *
+FROM
+    sale AS a
+WHERE
+    a.product_name LIKE :p0 || '%'
+    AND a.product_name LIKE '%' || :p0 || '%'
+    AND a.product_name LIKE :p0 || '%'";
+
+        Assert.Equal(expect, actual, true, true, true);
+    }
+
     public record sale(
         int? sale_id,
         string product_name,
