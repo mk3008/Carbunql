@@ -17,12 +17,24 @@ public class FluentSelectQuery : SelectQuery
 
         var body = (NewExpression)expression.Body;
 
+        var parameterDictionary = new Dictionary<object, string>();
         var parameterCount = this.GetParameters().Count();
         Func<object?, string> addParameter = (obj) =>
         {
+            if (obj != null && parameterDictionary.ContainsKey(obj))
+            {
+                return parameterDictionary[obj];
+            }
+
             var pname = $"{DbmsConfiguration.PlaceholderIdentifier}p{parameterCount}";
             parameterCount++;
             AddParameter(pname, obj);
+
+            if (obj != null)
+            {
+                parameterDictionary[obj] = pname;
+            }
+
             return pname;
         };
 
@@ -215,7 +227,7 @@ public class FluentSelectQuery : SelectQuery
             {
                 return CreateSqlCommand(memberExpression);
             }
-            throw new NotSupportedException();
+            return ToValue(memberExpression, addParameter);
         }
 
         // 現在の式が MethodCallExpression かどうかを確認し、子を探索
@@ -375,6 +387,27 @@ public class FluentSelectQuery : SelectQuery
     {
         switch (mce.Method.Name)
         {
+            case nameof(Sql.DateTruncYear):
+                return $"date_trunc('year', {ToValue(mce.Arguments[0], addParameter)})";
+
+            case nameof(Sql.DateTruncQuarter):
+                return $"date_trunc('quarter', {ToValue(mce.Arguments[0], addParameter)})";
+
+            case nameof(Sql.DateTruncMonth):
+                return $"date_trunc('month', {ToValue(mce.Arguments[0], addParameter)})";
+
+            case nameof(Sql.DateTruncDay):
+                return $"date_trunc('day', {ToValue(mce.Arguments[0], addParameter)})";
+
+            case nameof(Sql.DateTruncHour):
+                return $"date_trunc('hour', {ToValue(mce.Arguments[0], addParameter)})";
+
+            case nameof(Sql.DateTruncMinute):
+                return $"date_trunc('minute', {ToValue(mce.Arguments[0], addParameter)})";
+
+            case nameof(Sql.DateTruncSecond):
+                return $"date_trunc('second', {ToValue(mce.Arguments[0], addParameter)})";
+
             case nameof(Sql.Raw):
                 if (mce.Arguments.First() is ConstantExpression argRaw)
                 {

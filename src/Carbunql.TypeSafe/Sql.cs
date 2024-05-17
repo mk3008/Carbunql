@@ -44,6 +44,20 @@ public static class Sql
 
     public static DateTime Now => new DateTime();
 
+    public static DateTime DateTruncYear(DateTime d) => new DateTime();
+
+    public static DateTime DateTruncQuarter(DateTime d) => new DateTime();
+
+    public static DateTime DateTruncMonth(DateTime d) => new DateTime();
+
+    public static DateTime DateTruncDay(DateTime d) => new DateTime();
+
+    public static DateTime DateTruncHour(DateTime d) => new DateTime();
+
+    public static DateTime DateTruncMinute(DateTime d) => new DateTime();
+
+    public static DateTime DateTruncSecond(DateTime d) => new DateTime();
+
     public static string RowNumber() => string.Empty;
 
     public static string RowNumber(object partition, object order) => string.Empty;

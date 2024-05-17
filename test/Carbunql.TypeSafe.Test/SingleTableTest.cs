@@ -250,21 +250,42 @@ FROM
     {
         var a = Sql.DefineTable<sale>();
 
+        var d = new DateTime(2000, 10, 20);
+
         var query = Sql.From(() => a)
             .Select(() => new
             {
+                v_trunc_year = Sql.DateTruncYear(d),
+                v_trunc_quarter = Sql.DateTruncQuarter(d),
+                v_trunc_month = Sql.DateTruncMonth(d),
+                v_trunc_day = Sql.DateTruncDay(d),
+                v_trunc_hour = Sql.DateTruncHour(d),
+                v_trunc_minute = Sql.DateTruncMinute(d),
+                v_trunc_second = Sql.DateTruncSecond(d),
+                v_calc = d.AddMonths(1),
                 v_now = Sql.Now,
                 v_add_month = Sql.Now.AddMonths(1),
-                v_bridge = Sql.Now.AddYears(1).AddMonths(1).AddDays(-1).AddHours(1).AddMinutes(1).AddSeconds(1).AddMilliseconds(1),
+                v_test = Sql.Now.AddYears(1).AddMonths(1).AddDays(-1).AddHours(1).AddMinutes(1).AddSeconds(1).AddMilliseconds(1),
             });
 
         var actual = query.ToText();
         Output.WriteLine(actual);
 
-        var expect = @"SELECT
+        var expect = @"/*
+  :p0 = 2000/10/20 0:00:00
+*/
+SELECT
+    DATE_TRUNC('year', :p0) AS v_trunc_year,
+    DATE_TRUNC('quarter', :p0) AS v_trunc_quarter,
+    DATE_TRUNC('month', :p0) AS v_trunc_month,
+    DATE_TRUNC('day', :p0) AS v_trunc_day,
+    DATE_TRUNC('hour', :p0) AS v_trunc_hour,
+    DATE_TRUNC('minute', :p0) AS v_trunc_minute,
+    DATE_TRUNC('second', :p0) AS v_trunc_second,
+    :p0 + 1 * INTERVAL '1 month' AS v_calc,
     CAST(NOW() AS timestamp) AS v_now,
     CAST(NOW() AS timestamp) + 1 * INTERVAL '1 month' AS v_add_month,
-    CAST(NOW() AS timestamp) + 1 * INTERVAL '1 year' + 1 * INTERVAL '1 month' + -1 * INTERVAL '1 day' + 1 * INTERVAL '1 hour' + 1 * INTERVAL '1 minute' + 1 * INTERVAL '1 second' + 1 * INTERVAL '1 ms' AS v_bridge
+    CAST(NOW() AS timestamp) + 1 * INTERVAL '1 year' + 1 * INTERVAL '1 month' + -1 * INTERVAL '1 day' + 1 * INTERVAL '1 hour' + 1 * INTERVAL '1 minute' + 1 * INTERVAL '1 second' + 1 * INTERVAL '1 ms' AS v_test
 FROM
     sale AS a";
 
