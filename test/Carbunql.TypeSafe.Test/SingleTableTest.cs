@@ -165,16 +165,20 @@ FROM
         Output.WriteLine(actual);
 
         var expect = @"/*
-  :p0 = 'test'
-  :p1 = 2000/01/01 10:10:00
+  :p0 = 1
+  :p1 = 10
+  :p2 = 0.1
+  :p3 = True
+  :p4 = 'test'
+  :p5 = 2000/01/01 10:10:00
 */
 SELECT
-    1 AS id,
-    10 AS value,
-    0.1 AS rate,
-    True AS tf_value,
-    :p0 AS remarks,
-    :p1 AS created_at
+    :p0 AS id,
+    :p1 AS value,
+    :p2 AS rate,
+    :p3 AS tf_value,
+    :p4 AS remarks,
+    :p5 AS created_at
 FROM
     sale AS a";
 

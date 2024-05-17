@@ -46,12 +46,15 @@ WHERE
         var actual = query.ToText();
         Output.WriteLine(query.ToText());
 
-        var expect = @"SELECT
+        var expect = @"/*
+  :p0 = 1
+*/
+SELECT
     *
 FROM
     sale AS a
 WHERE
-    a.sale_id = CAST(1 AS integer)";
+    a.sale_id = CAST(:p0 AS integer)";
 
         Assert.Equal(expect, actual, true, true, true);
     }

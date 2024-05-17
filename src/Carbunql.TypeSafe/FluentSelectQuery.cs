@@ -62,11 +62,11 @@ public class FluentSelectQuery : SelectQuery
         var value = ToValue(body, addParameter);
         if (body.NodeType == ExpressionType.OrElse)
         {
-            this.Where($"({ToValue(body, addParameter)})");
+            this.Where($"({value})");
         }
         else
         {
-            this.Where(ToValue(body, addParameter));
+            this.Where(value);
         }
         return this;
     }
@@ -145,7 +145,7 @@ public class FluentSelectQuery : SelectQuery
             if (mem.Expression is ConstantExpression ce)
             {
                 //variable
-                value = fn(mem.CompileAndInvoke(), mem.Type);
+                value = addParameter(mem.CompileAndInvoke());
                 return true;
             }
         }
