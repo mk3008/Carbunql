@@ -265,6 +265,17 @@ public class FluentSelectQuery : SelectQuery
 
             if (mce.Arguments.Count == 1)
             {
+                if (mce.Method.Name == nameof(String.ToString))
+                {
+                    Func<object?, string> adder = (obj) =>
+                    {
+                        var v = ConverToDbDateFormat(obj!.ToString()!);
+                        return addParameter(v);
+                    };
+                    var fmv = ToValue(mce.Arguments[0], adder);
+                    return $"to_char({value}, {fmv})";
+                }
+
                 var arg = ToValue(mce.Arguments[0], addParameter);
                 if (mce.Method.Name == nameof(DateTime.AddYears))
                 {
@@ -320,6 +331,10 @@ public class FluentSelectQuery : SelectQuery
             if (mce.Method.Name == nameof(String.TrimEnd))
             {
                 return $"rtrim({value})";
+            }
+            if (mce.Method.Name == nameof(String.ToString))
+            {
+                return CreateCastStatement(value, typeof(string));
             }
             throw new Exception();
         }
@@ -558,5 +573,29 @@ public class FluentSelectQuery : SelectQuery
         {
             return $"case when {test} then {ifTrue} else {ifFalse} end";
         }
+    }
+
+    static string ConverToDbDateFormat(string csharpFormat)
+    {
+        var replacements = new Dictionary<string, string>
+        {
+            {"yyyy", "YYYY"},
+            {"MM", "MM"},
+            {"dd", "DD"},
+            {"HH", "HH24"},
+            {"mm", "MI"},
+            {"ss", "SS"},
+            {"ffffff", "US"},
+            {"fff", "MS"}
+        };
+
+        string dbformat = csharpFormat;
+
+        foreach (var pair in replacements)
+        {
+            dbformat = dbformat.Replace(pair.Key, pair.Value);
+        }
+
+        return dbformat;
     }
 }

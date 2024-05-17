@@ -549,6 +549,38 @@ FROM
         Assert.Equal(expect, actual, true, true, true);
     }
 
+    [Fact]
+    public void ToStringTest()
+    {
+        var a = Sql.DefineTable<sale>();
+
+        var query = Sql.From(() => a)
+            .Select(() => new
+            {
+                product_name = a.product_name.ToString(),
+                sale_id = a.sale_id.ToString(),
+                created_at = a.created_at.ToString("yyyy/MM/dd HH:mm:ss.ffffff"),
+                created_at2 = a.created_at.ToString("yyyy/MM/dd HH:mm:ss.fff"),
+            });
+
+        var actual = query.ToText();
+        Output.WriteLine(actual);
+
+        var expect = @"/*
+  :p0 = 'YYYY/MM/DD HH24:MI:SS.US'
+  :p1 = 'YYYY/MM/DD HH24:MI:SS.MS'
+*/
+SELECT
+    CAST(a.product_name AS text) AS product_name,
+    CAST(a.sale_id AS text) AS sale_id,
+    TO_CHAR(a.created_at, :p0) AS created_at,
+    TO_CHAR(a.created_at, :p1) AS created_at2
+FROM
+    sale AS a";
+
+        Assert.Equal(expect, actual, true, true, true);
+    }
+
     //    //procrastinate
     //    //[Fact]
     //    public void Switch()
@@ -623,12 +655,13 @@ FROM
         int? sale_id,
         string product_name,
         int quantity,
-        decimal unit_price
+        decimal unit_price,
+        DateTime created_at
     ) : ITableRowDefinition
     {
         // no arguments constructor.
         // Since it is used as a definition, it has no particular meaning as a value.
-        public sale() : this(0, "", 0, 0) { }
+        public sale() : this(0, "", 0, 0, DateTime.Now) { }
 
         // interface property
         TableDefinitionClause ITableRowDefinition.TableDefinition { get; set; } = null!;
