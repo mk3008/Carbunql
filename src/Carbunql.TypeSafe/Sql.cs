@@ -42,7 +42,7 @@ public static class Sql
 
     public static string CurrentTimestamp => string.Empty;
 
-    public static string Now => string.Empty;
+    public static DateTime Now => new DateTime();
 
     public static string RowNumber() => string.Empty;
 

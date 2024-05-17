@@ -753,4 +753,18 @@ public class ValueParserTest
 
         Assert.Equal(text, v.ToText());
     }
+
+    [Fact]
+    public void Interval()
+    {
+        var text = @"interval '1 year'";
+
+        var v = ValueParser.Parse(text);
+        Monitor.Log(v);
+
+        var lst = v.GetTokens().ToList();
+        Assert.Equal(2, lst.Count);
+
+        Assert.Equal(text, v.ToText());
+    }
 }

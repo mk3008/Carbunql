@@ -2,6 +2,7 @@
 using Carbunql.Building;
 using Carbunql.Clauses;
 using Carbunql.Values;
+using System.Data.Common;
 using System.Linq.Expressions;
 
 namespace Carbunql.TypeSafe;
@@ -192,7 +193,9 @@ public class FluentSelectQuery : SelectQuery
                 value = CreateSqlCommand(mce, addParameter);
                 return true;
             }
-            throw new InvalidProgramException(exp.ToString());
+
+            value = ParseSqlCommand(exp, addParameter);
+            return true;
         }
         else if (exp is ConditionalExpression cnd)
         {
@@ -201,6 +204,58 @@ public class FluentSelectQuery : SelectQuery
         }
 
         throw new InvalidOperationException(exp.ToString());
+    }
+
+    private string ParseSqlCommand(Expression expression, Func<object?, string> addParameter)
+    {
+        var value = string.Empty;
+        if (expression is MemberExpression memberExpression)
+        {
+            if (memberExpression.Member.DeclaringType == typeof(Sql))
+            {
+                return CreateSqlCommand(memberExpression);
+            }
+            throw new NotSupportedException();
+        }
+
+        // 現在の式が MethodCallExpression かどうかを確認し、子を探索
+        if (expression is MethodCallExpression mce && mce.Object != null)
+        {
+            value = ParseSqlCommand(mce.Object, addParameter);
+
+            var arg = ToValue(mce.Arguments[0], addParameter);
+            if (mce.Method.Name == nameof(DateTime.AddYears))
+            {
+                return $"{value} + {arg} * interval '1 year'";
+            }
+            if (mce.Method.Name == nameof(DateTime.AddMonths))
+            {
+                return $"{value} + {arg} * interval '1 month'";
+            }
+            if (mce.Method.Name == nameof(DateTime.AddDays))
+            {
+                return $"{value} + {arg} * interval '1 day'";
+            }
+            if (mce.Method.Name == nameof(DateTime.AddHours))
+            {
+                return $"{value} + {arg} * interval '1 hour'";
+            }
+            if (mce.Method.Name == nameof(DateTime.AddMinutes))
+            {
+                return $"{value} + {arg} * interval '1 minute'";
+            }
+            if (mce.Method.Name == nameof(DateTime.AddSeconds))
+            {
+                return $"{value} + {arg} * interval '1 second'";
+            }
+            if (mce.Method.Name == nameof(DateTime.AddMilliseconds))
+            {
+                return $"{value} + {arg} * interval '1 ms'";
+            }
+            throw new Exception();
+        }
+
+        throw new Exception();
     }
 
     private static string GetValue(ExpressionType nodeType, string left, string right)
@@ -297,7 +352,12 @@ public class FluentSelectQuery : SelectQuery
     private string CreateCastStatement(UnaryExpression ue, Func<object?, string> addParameter)
     {
         var value = ToValue(ue.Operand, addParameter);
-        var dbtype = DbmsConfiguration.ToDbType(ue.Type);
+        return CreateCastStatement(value, ue.Type);
+    }
+
+    private string CreateCastStatement(string value, Type type)
+    {
+        var dbtype = DbmsConfiguration.ToDbType(type);
         return $"cast({value} as {dbtype})";
     }
 
@@ -305,7 +365,7 @@ public class FluentSelectQuery : SelectQuery
     {
         return mem.Member.Name switch
         {
-            nameof(Sql.Now) => DbmsConfiguration.GetNowCommandLogic(),
+            nameof(Sql.Now) => CreateCastStatement(DbmsConfiguration.GetNowCommandLogic(), typeof(DateTime)),
             nameof(Sql.CurrentTimestamp) => DbmsConfiguration.GetCurrentTimestampCommandLogic(),
             _ => throw new NotSupportedException($"The member '{mem.Member.Name}' is not supported.")
         };

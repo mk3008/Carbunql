@@ -246,6 +246,32 @@ FROM
     }
 
     [Fact]
+    public void DatetimeTest()
+    {
+        var a = Sql.DefineTable<sale>();
+
+        var query = Sql.From(() => a)
+            .Select(() => new
+            {
+                v_now = Sql.Now,
+                v_add_month = Sql.Now.AddMonths(1),
+                v_bridge = Sql.Now.AddYears(1).AddMonths(1).AddDays(-1).AddHours(1).AddMinutes(1).AddSeconds(1).AddMilliseconds(1),
+            });
+
+        var actual = query.ToText();
+        Output.WriteLine(actual);
+
+        var expect = @"SELECT
+    CAST(NOW() AS timestamp) AS v_now,
+    CAST(NOW() AS timestamp) + 1 * INTERVAL '1 month' AS v_add_month,
+    CAST(NOW() AS timestamp) + 1 * INTERVAL '1 year' + 1 * INTERVAL '1 month' + -1 * INTERVAL '1 day' + 1 * INTERVAL '1 hour' + 1 * INTERVAL '1 minute' + 1 * INTERVAL '1 second' + 1 * INTERVAL '1 ms' AS v_bridge
+FROM
+    sale AS a";
+
+        Assert.Equal(expect, actual, true, true, true);
+    }
+
+    [Fact]
     public void CSharpFunction_Math()
     {
         var a = Sql.DefineTable<sale>();
@@ -321,7 +347,7 @@ FROM
         Output.WriteLine(actual);
 
         var expect = @"SELECT
-    NOW() AS now_command,
+    CAST(NOW() AS timestamp) AS now_command,
     current_timestamp AS timestamp_commend,
     ROW_NUMBER() OVER() AS row_num,
     ROW_NUMBER() OVER(

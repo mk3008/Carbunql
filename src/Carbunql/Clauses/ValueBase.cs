@@ -24,6 +24,7 @@ namespace Carbunql.Clauses;
 [Union(11, typeof(ParameterValue))]
 [Union(12, typeof(QueryContainer))]
 [Union(13, typeof(ValueCollection))]
+[Union(14, typeof(Interval))]
 public abstract class ValueBase : IQueryCommandable
 {
     /// <summary>

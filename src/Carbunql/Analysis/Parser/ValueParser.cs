@@ -109,6 +109,12 @@ public static class ValueParser
 
         if (string.IsNullOrEmpty(item)) throw new EndOfStreamException();
 
+        if (item.IsEqualNoCase("interval"))
+        {
+            r.Read();
+            return new Interval(Parse(r));
+        }
+
         if (NegativeValueParser.IsNegativeValue(item))
         {
             return NegativeValueParser.Parse(r);
