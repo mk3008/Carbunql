@@ -124,9 +124,7 @@ public class FluentSelectQuery : SelectQuery
         }
         else if (exp is BinaryExpression be)
         {
-            var left = ToValue(be.Left, addParameter);
-            var right = ToValue(be.Right, addParameter);
-            return ToValue(be.NodeType, left, right);
+            return be.ToValue(ToValue, addParameter);
         }
         else if (exp is UnaryExpression ue)
         {
@@ -146,83 +144,6 @@ public class FluentSelectQuery : SelectQuery
         }
 
         throw new InvalidProgramException(exp.ToString());
-    }
-
-    private string ToValue(ExpressionType nodeType, string left, string right)
-    {
-        var opPrecedence = GetPrecedenceFromExpressionType(nodeType);
-
-        var leftValue = ValueParser.Parse(left);
-        var rightValue = ValueParser.Parse(right);
-
-        // Enclose expressions in parentheses based on operator precedence or specific conditions
-        if (nodeType == ExpressionType.OrElse)
-        {
-            if (leftValue.GetOperators().Any())
-            {
-                left = $"({left})";
-            }
-            if (rightValue.GetOperators().Any())
-            {
-                right = $"({right})";
-            }
-        }
-        else if (opPrecedence == 2)
-        {
-            if (leftValue.GetOperators().Any(x => GetOperatorPrecedence(x) < opPrecedence))
-            {
-                left = $"({left})";
-            }
-            if (rightValue.GetOperators().Any(x => GetOperatorPrecedence(x) < opPrecedence))
-            {
-                right = $"({right})";
-            }
-        }
-
-        // Return the formatted expression based on the operation type
-        return nodeType switch
-        {
-            ExpressionType.Coalesce => $"{DbmsConfiguration.CoalesceFunctionName}({left}, {right})",
-            ExpressionType.Add => $"{left} + {right}",
-            ExpressionType.Subtract => $"{left} - {right}",
-            ExpressionType.Multiply => $"{left} * {right}",
-            ExpressionType.Divide => $"{left} / {right}",
-            ExpressionType.Modulo => $"{DbmsConfiguration.GetModuloCommandLogic(left, right)}",
-            ExpressionType.Equal => $"{left} = {right}",
-            ExpressionType.NotEqual => $"{left} <> {right}",
-            ExpressionType.GreaterThan => $"{left} > {right}",
-            ExpressionType.GreaterThanOrEqual => $"{left} >= {right}",
-            ExpressionType.LessThan => $"{left} < {right}",
-            ExpressionType.LessThanOrEqual => $"{left} <= {right}",
-            ExpressionType.AndAlso => $"{left} and {right}",
-            ExpressionType.OrElse => $"{left} or {right}",
-            _ => throw new NotSupportedException($"Unsupported expression type: {nodeType}")
-        };
-    }
-
-    private static int GetOperatorPrecedence(string operatorText)
-    {
-        return operatorText switch
-        {
-            "+" => 1,
-            "-" => 1,
-            "*" => 2,
-            "/" => 2,
-            _ => 0,
-        };
-    }
-
-    private static int GetPrecedenceFromExpressionType(ExpressionType nodeType)
-    {
-        var operatorText = nodeType switch
-        {
-            ExpressionType.Add => "+",
-            ExpressionType.Subtract => "-",
-            ExpressionType.Multiply => "*",
-            ExpressionType.Divide => "/",
-            _ => string.Empty,
-        };
-        return GetOperatorPrecedence(operatorText);
     }
 
     private string CreateCastStatement(UnaryExpression ue, Func<object?, string> addParameter)
