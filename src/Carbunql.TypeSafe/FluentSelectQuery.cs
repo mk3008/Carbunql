@@ -129,6 +129,10 @@ public class FluentSelectQuery : SelectQuery
         {
             return cnd.ToValue(ToValue, addParameter);
         }
+        else if (exp is ParameterExpression prm)
+        {
+            return prm.ToValue(ToValue, addParameter);
+        }
 
         throw new InvalidProgramException(exp.ToString());
     }

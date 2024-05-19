@@ -27,6 +27,10 @@ internal static class MemberExpressionExtension
             //variable
             return addParameter(mem.CompileAndInvoke());
         }
+        if (mem.Expression is MemberExpression me)
+        {
+            return me.ToValue(mainConverter, addParameter);
+        }
 
         throw new NotSupportedException($"Member.Name:{mem.Member.Name}, Member.DeclaringType:{mem.Member.DeclaringType}");
     }

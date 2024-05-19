@@ -1,5 +1,6 @@
 ﻿using Carbunql.Analysis.Parser;
 using Carbunql.Values;
+using System.Collections;
 using System.Linq.Expressions;
 
 namespace Carbunql.TypeSafe.Extensions;
@@ -250,29 +251,114 @@ internal static class MethodCallExpressionExtension
     {
         if (mce.Object != null)
         {
-            var value = mainConverter(mce.Object, addParameter);
-
             if (mce.Arguments.Count == 1)
             {
-                var arg = mainConverter(mce.Arguments[0], addParameter);
-                if (mce.Method.Name == nameof(String.StartsWith))
+                if (mce.Method.DeclaringType == typeof(string))
                 {
-                    return $"{value} like {arg} || '%'";
+                    var value = mainConverter(mce.Object, addParameter);
+
+                    var arg = mainConverter(mce.Arguments[0], addParameter);
+                    if (mce.Method.Name == nameof(String.StartsWith))
+                    {
+                        return $"{value} like {arg} || '%'";
+                    }
+                    if (mce.Method.Name == nameof(String.Contains))
+                    {
+                        return $"{value} like '%' || {arg} || '%'";
+                    }
+                    if (mce.Method.Name == nameof(String.EndsWith))
+                    {
+                        return $"{value} like {arg} || '%'";
+                    }
                 }
-                if (mce.Method.Name == nameof(String.Contains))
+                if (IsGenericList(mce.Object.Type))
                 {
-                    return $"{value} like '%' || {arg} || '%'";
-                }
-                if (mce.Method.Name == nameof(String.EndsWith))
-                {
-                    return $"{value} like {arg} || '%'";
+                    //The IN clause itself is not suitable for parameter queries, so the collection will be forcibly expanded.
+                    //If you want to parameterize it, use the ANY function, etc.
+                    var args = new List<string>();
+                    Func<object?, string> argumentsDecoder = collection =>
+                    {
+                        if (collection != null && IsGenericList(collection.GetType()))
+                        {
+                            foreach (var item in (IEnumerable)collection)
+                            {
+                                args.Add(AddParameter(item, addParameter));
+                            }
+                        }
+                        return string.Empty;
+                    };
+
+                    _ = mainConverter(mce.Object, argumentsDecoder);
+
+                    var left = mainConverter(mce.Arguments[0], addParameter);
+                    if (mce.Method.Name == nameof(String.Contains))
+                    {
+                        return $"{left} in({string.Join(",", args)})";
+                    }
                 }
             }
 
-            throw new NotSupportedException($"Object:{mce.Object.Type.FullName}, Method:{mce.Method.Name}, Arguments:{mce.Arguments.Count}, Type:{mce.Type}");
+            throw new NotSupportedException($"Object:{mce.Object.Type.FullName}, Method.Type:{mce.Method.DeclaringType}, Method.Method:{mce.Method.Name}, Arguments:{mce.Arguments.Count}, Type:{mce.Type}");
+        }
+        else
+        {
+            if (mce.Arguments.Count == 2)
+            {
+                if (mce.Method.DeclaringType == typeof(Enumerable))
+                {
+                    if (mce.Method.Name == nameof(Enumerable.Any))
+                    {
+                        return ToAnyClauseValue(mce, mainConverter, addParameter);
+                    }
+                }
+            }
+            throw new NotSupportedException($"Object:NULL, Method.Type:{mce.Method.DeclaringType}, Method.Name:{mce.Method.Name}, Arguments:{mce.Arguments.Count}, Type:{mce.Type}");
+        }
+    }
+
+    private static string ToAnyClauseValue(this MethodCallExpression mce
+        , Func<Expression, Func<object?, string>, string> mainConverter
+        , Func<object?, string> addParameter)
+    {
+        // Format:
+        // Array.Any(x => (table.column == x))
+        // or
+        // Array.Any(x => (x == table.column))
+
+        var lambda = (LambdaExpression)mce.Arguments[1];
+        var variableName = lambda.Parameters[0].Name!;
+
+        var arrayParameterName = mainConverter(mce.Arguments[0], addParameter);
+
+        // Hook the parameter name and return in the format any(PARAMETER)
+        var hasAnyCommand = false;
+        Func<object?, string> interceptor = x =>
+        {
+            if (variableName.Equals(x))
+            {
+                hasAnyCommand = true;
+                return $"any({arrayParameterName})";
+            }
+            throw new InvalidProgramException();
+        };
+
+        var body = (BinaryExpression)lambda.Body;
+        if (body.NodeType != ExpressionType.Equal) throw new InvalidProgramException();
+
+        // Adjust to make the ANY function appear on the right side
+        var left = mainConverter(body.Left, interceptor);
+        if (hasAnyCommand)
+        {
+            return $"{mainConverter(body.Right, interceptor)} = {left}";
         }
 
-        throw new NotSupportedException($"Object:NULL, Method:{mce.Method.Name}, Arguments:{mce.Arguments.Count}, Type:{mce.Type}");
+        var right = mainConverter(body.Right, interceptor);
+        if (hasAnyCommand)
+        {
+            return $"{left} = {right}";
+        }
+
+        throw new InvalidProgramException();
     }
 
     private static string ToDateTimeValue(this MethodCallExpression mce
@@ -366,5 +452,56 @@ internal static class MethodCallExpressionExtension
         }
 
         return dbformat;
+    }
+
+    private static bool IsGenericList(Type? type)
+    {
+        if (type == null) return false;
+
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IList<>))
+        {
+            return true;
+        }
+
+        foreach (Type intf in type.GetInterfaces())
+        {
+            if (intf.IsGenericType && intf.GetGenericTypeDefinition() == typeof(IList<>))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static string AddParameter(Object? value
+       , Func<object?, string> addParameter)
+    {
+        if (value == null)
+        {
+            return "null";
+        }
+
+        var tp = value.GetType();
+
+        if (tp == typeof(string))
+        {
+            if (string.IsNullOrEmpty(value.ToString()))
+            {
+                return "''";
+            }
+            else
+            {
+                return addParameter(value);
+            }
+        }
+        else if (tp == typeof(DateTime))
+        {
+            return addParameter(value);
+        }
+        else
+        {
+            return value.ToString()!;
+        }
     }
 }

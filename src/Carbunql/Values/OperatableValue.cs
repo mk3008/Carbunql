@@ -24,7 +24,7 @@ public class OperatableValue : IQueryCommandable
     /// <summary>
     /// Gets or sets the operator to apply to the value.
     /// </summary>
-    public string Operator { get; init; }
+    public string Operator { get; init ; }
 
     /// <summary>
     /// Gets or sets the value to which the operator is applied.

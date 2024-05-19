@@ -178,6 +178,81 @@ WHERE
         Assert.Equal(expect, actual, true, true, true);
     }
 
+    [Fact]
+    public void InTest()
+    {
+        var idArray = new List<int>() { 1, 2, 3, 4 };
+
+        var a = Sql.DefineTable<sale>();
+
+        var query = Sql.From(() => a)
+            .Where(() => idArray.Contains(a.sale_id!.Value));
+
+        var actual = query.ToText();
+        Output.WriteLine(query.ToText());
+
+        var expect = @"SELECT
+    *
+FROM
+    sale AS a
+WHERE
+    a.sale_id IN (1, 2, 3, 4)";
+
+        Assert.Equal(expect, actual, true, true, true);
+    }
+
+    [Fact]
+    public void AnyTest()
+    {
+        var idArray = new List<int>() { 1, 2, 3, 4 };
+
+        var a = Sql.DefineTable<sale>();
+
+        var query = Sql.From(() => a)
+            .Where(() => idArray.Any(x => a.sale_id!.Value == x));
+
+        var actual = query.ToText();
+        Output.WriteLine(query.ToText());
+
+        var expect = @"/*
+  :p0 = System.Collections.Generic.List`1[System.Int32]
+*/
+SELECT
+    *
+FROM
+    sale AS a
+WHERE
+    a.sale_id = ANY(:p0)";
+
+        Assert.Equal(expect, actual, true, true, true);
+    }
+
+    [Fact]
+    public void AnyTest_Right()
+    {
+        var idArray = new List<int>() { 1, 2, 3, 4 };
+
+        var a = Sql.DefineTable<sale>();
+
+        var query = Sql.From(() => a)
+            .Where(() => idArray.Any(x => x == a.sale_id!.Value));
+
+        var actual = query.ToText();
+        Output.WriteLine(query.ToText());
+
+        var expect = @"/*
+  :p0 = System.Collections.Generic.List`1[System.Int32]
+*/
+SELECT
+    *
+FROM
+    sale AS a
+WHERE
+    a.sale_id = ANY(:p0)";
+
+        Assert.Equal(expect, actual, true, true, true);
+    }
+
     public record sale(
         int? sale_id,
         string product_name,
