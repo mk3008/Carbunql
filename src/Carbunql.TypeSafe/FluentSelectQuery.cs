@@ -110,48 +110,17 @@ public class FluentSelectQuery : SelectQuery
 
     private string ToValue(Expression exp, Func<object?, string> addParameter)
     {
-        Func<object?, Type, string> fn = (obj, tp) =>
-        {
-            if (obj == null)
-            {
-                return "null";
-            }
-            else if (tp == typeof(string))
-            {
-                if (string.IsNullOrEmpty(obj.ToString()))
-                {
-                    return "''";
-                }
-                else
-                {
-                    return addParameter(obj);
-                }
-            }
-            else if (tp == typeof(DateTime))
-            {
-                return addParameter(obj);
-            }
-            else
-            {
-                //var dbtype = DbmsConfiguration.ToDbType(tp);
-                //return $"cast({obj} as {dbtype})";
-                return obj!.ToString()!;
-            }
-        };
-
         if (exp is MemberExpression mem)
         {
             return mem.ToValue(ToValue, addParameter);
         }
         else if (exp is ConstantExpression ce)
         {
-            // static value
-            return fn(ce.Value, ce.Type);
+            return ce.ToValue(ToValue, addParameter);
         }
         else if (exp is NewExpression ne)
         {
-            // ex. new Datetime
-            return fn(ne.CompileAndInvoke(), ne.Type);
+            return ne.ToValue(ToValue, addParameter);
         }
         else if (exp is BinaryExpression be)
         {
