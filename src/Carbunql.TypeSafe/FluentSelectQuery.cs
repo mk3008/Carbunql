@@ -128,11 +128,7 @@ public class FluentSelectQuery : SelectQuery
         }
         else if (exp is UnaryExpression ue)
         {
-            if (ue.NodeType == ExpressionType.Convert)
-            {
-                return CreateCastStatement(ue, addParameter);
-            }
-            throw new InvalidProgramException(exp.ToString());
+            return ue.ToValue(ToValue, addParameter);
         }
         else if (exp is MethodCallExpression mce)
         {
@@ -146,11 +142,6 @@ public class FluentSelectQuery : SelectQuery
         throw new InvalidProgramException(exp.ToString());
     }
 
-    private string CreateCastStatement(UnaryExpression ue, Func<object?, string> addParameter)
-    {
-        var value = ToValue(ue.Operand, addParameter);
-        return CreateCastStatement(value, ue.Type);
-    }
 
     internal static string CreateCastStatement(string value, Type type)
     {
