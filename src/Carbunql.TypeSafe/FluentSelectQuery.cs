@@ -86,26 +86,17 @@ public class FluentSelectQuery : SelectQuery
             return pname;
         };
 
-        if (expression.Body is MethodCallExpression mce)
-        {
-            this.Where(ToValue(mce, addParameter));
-            return this;
-        }
-        else if (expression.Body is BinaryExpression be)
-        {
-            var value = ToValue(be, addParameter);
-            if (be.NodeType == ExpressionType.OrElse)
-            {
-                this.Where($"({value})");
-            }
-            else
-            {
-                this.Where(value);
-            }
-            return this;
-        }
+        var value = ToValue(expression.Body, addParameter);
 
-        throw new Exception();
+        if (expression.Body is BinaryExpression be && be.NodeType == ExpressionType.OrElse)
+        {
+            this.Where($"({value})");
+        }
+        else
+        {
+            this.Where(value);
+        }
+        return this;
     }
 
     private string ToValue(Expression exp, Func<object?, string> addParameter)
@@ -146,30 +137,6 @@ public class FluentSelectQuery : SelectQuery
     {
         var dbtype = DbmsConfiguration.ToDbType(type);
         return $"cast({value} as {dbtype})";
-    }
-
-    internal static string ConverToDbDateFormat(string csharpFormat)
-    {
-        var replacements = new Dictionary<string, string>
-        {
-            {"yyyy", "YYYY"},
-            {"MM", "MM"},
-            {"dd", "DD"},
-            {"HH", "HH24"},
-            {"mm", "MI"},
-            {"ss", "SS"},
-            {"ffffff", "US"},
-            {"fff", "MS"}
-        };
-
-        string dbformat = csharpFormat;
-
-        foreach (var pair in replacements)
-        {
-            dbformat = dbformat.Replace(pair.Key, pair.Value);
-        }
-
-        return dbformat;
     }
 
     private string RemoveRootBracketOrDefault(string value)

@@ -216,7 +216,7 @@ internal static class MethodCallExpressionExtension
                 {
                     Func<object?, string> typeCaster = (obj) =>
                     {
-                        var v = FluentSelectQuery.ConverToDbDateFormat(obj!.ToString()!);
+                        var v = ConverToDbDateFormat(obj!.ToString()!);
                         return addParameter(v);
                     };
                     var typedArg = mainConverter(mce.Arguments[0], typeCaster);
@@ -342,5 +342,29 @@ internal static class MethodCallExpressionExtension
             }
         }
         return value;
+    }
+
+    private static string ConverToDbDateFormat(string csharpFormat)
+    {
+        var replacements = new Dictionary<string, string>
+        {
+            {"yyyy", "YYYY"},
+            {"MM", "MM"},
+            {"dd", "DD"},
+            {"HH", "HH24"},
+            {"mm", "MI"},
+            {"ss", "SS"},
+            {"ffffff", "US"},
+            {"fff", "MS"}
+        };
+
+        string dbformat = csharpFormat;
+
+        foreach (var pair in replacements)
+        {
+            dbformat = dbformat.Replace(pair.Key, pair.Value);
+        }
+
+        return dbformat;
     }
 }
