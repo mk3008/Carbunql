@@ -12,11 +12,5 @@ internal static class ExpressionExtension
         return compiledLambda.DynamicInvoke();
     }
 
-    internal static object? CompileAndInvoke(this MemberExpression exp)
-    {
-        var delegateType = typeof(Func<>).MakeGenericType(exp.Type);
-        var lambda = Expression.Lambda(delegateType, exp);
-        var compiledLambda = lambda.Compile();
-        return compiledLambda.DynamicInvoke();
-    }
+
 }

@@ -141,26 +141,7 @@ public class FluentSelectQuery : SelectQuery
 
         if (exp is MemberExpression mem)
         {
-            var tp = mem.Member.DeclaringType;
-
-            if (tp == typeof(Sql))
-            {
-                // ex. Sql.Now, Sql.CurrentTimestamp
-                return CreateSqlCommand(mem);
-            }
-            if (mem.Expression is MemberExpression && typeof(ITableRowDefinition).IsAssignableFrom(tp))
-            {
-                //column
-                var table = ((MemberExpression)mem.Expression).Member.Name;
-                var column = mem.Member.Name;
-                return $"{table}.{column}";
-            }
-            if (mem.Expression is ConstantExpression ce)
-            {
-                //variable
-                return addParameter(mem.CompileAndInvoke());
-            }
-            throw new InvalidProgramException(exp.ToString());
+            return mem.ToValue(ToValue, addParameter);
         }
         else if (exp is ConstantExpression ce)
         {
@@ -285,16 +266,6 @@ public class FluentSelectQuery : SelectQuery
     {
         var dbtype = DbmsConfiguration.ToDbType(type);
         return $"cast({value} as {dbtype})";
-    }
-
-    private string CreateSqlCommand(MemberExpression mem)
-    {
-        return mem.Member.Name switch
-        {
-            nameof(Sql.Now) => CreateCastStatement(DbmsConfiguration.GetNowCommandLogic(), typeof(DateTime)),
-            nameof(Sql.CurrentTimestamp) => DbmsConfiguration.GetCurrentTimestampCommandLogic(),
-            _ => throw new NotSupportedException($"The member '{mem.Member.Name}' is not supported.")
-        };
     }
 
     private string CreateCaseStatement(ConditionalExpression cnd, Func<object?, string> addParameter)

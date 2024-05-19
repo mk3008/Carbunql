@@ -38,7 +38,7 @@ internal static class MethodCallExpressionExtension
             return ToDateTimeValue(mce, mainConverter, addParameter);
         }
 
-        throw new NotSupportedException($"Type:{mce.Type}, DeclaringType:{mce.Method.DeclaringType}");
+        throw new NotSupportedException($"Type:{mce.Type}, Method.DeclaringType:{mce.Method.DeclaringType}");
     }
 
     private static string CreateMathCommand(this MethodCallExpression mce
