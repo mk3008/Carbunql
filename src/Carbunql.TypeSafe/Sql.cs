@@ -44,19 +44,19 @@ public static class Sql
 
     public static DateTime Now => new DateTime();
 
-    public static DateTime DateTruncYear(DateTime d) => new DateTime();
+    public static DateTime DateTruncateToYear(DateTime d) => new DateTime();
 
-    public static DateTime DateTruncQuarter(DateTime d) => new DateTime();
+    public static DateTime DateTruncateToQuarter(DateTime d) => new DateTime();
 
-    public static DateTime DateTruncMonth(DateTime d) => new DateTime();
+    public static DateTime DateTruncToMonth(DateTime d) => new DateTime();
 
-    public static DateTime DateTruncDay(DateTime d) => new DateTime();
+    public static DateTime DateTruncateToDay(DateTime d) => new DateTime();
 
-    public static DateTime DateTruncHour(DateTime d) => new DateTime();
+    public static DateTime DateTruncateToHour(DateTime d) => new DateTime();
 
-    public static DateTime DateTruncMinute(DateTime d) => new DateTime();
+    public static DateTime DateTruncateToMinute(DateTime d) => new DateTime();
 
-    public static DateTime DateTruncSecond(DateTime d) => new DateTime();
+    public static DateTime DateTruncateToSecond(DateTime d) => new DateTime();
 
     public static string RowNumber() => string.Empty;
 
