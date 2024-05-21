@@ -6,8 +6,8 @@ namespace Carbunql.TypeSafe.Extensions;
 internal static class BinaryExpressionExtension
 {
     internal static string ToValue(this BinaryExpression be
-       , Func<Expression, Func<object?, string>, string> mainConverter
-       , Func<object?, string> addParameter)
+       , Func<Expression, Func<string, object?, string>, string> mainConverter
+       , Func<string, object?, string> addParameter)
     {
         var left = mainConverter(be.Left, addParameter);
         var right = mainConverter(be.Right, addParameter);

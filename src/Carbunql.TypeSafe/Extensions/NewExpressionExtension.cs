@@ -5,8 +5,8 @@ namespace Carbunql.TypeSafe.Extensions;
 internal static class NewExpressionExtension
 {
     internal static string ToValue(this NewExpression ne
-        , Func<Expression, Func<object?, string>, string> mainConverter
-        , Func<object?, string> addParameter)
+        , Func<Expression, Func<string, object?, string>, string> mainConverter
+        , Func<string, object?, string> addParameter)
     {
         var obj = ne.CompileAndInvoke();
         var tp = ne.Type;
@@ -23,12 +23,12 @@ internal static class NewExpressionExtension
             }
             else
             {
-                return addParameter(obj);
+                return addParameter(string.Empty, obj);
             }
         }
         else if (tp == typeof(DateTime))
         {
-            return addParameter(obj);
+            return addParameter(string.Empty, obj);
         }
         else
         {

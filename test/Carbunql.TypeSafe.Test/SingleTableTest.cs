@@ -166,20 +166,20 @@ FROM
         Output.WriteLine(actual);
 
         var expect = @"/*
-  :p0 = 1
-  :p1 = 10
-  :p2 = 0.1
-  :p3 = True
-  :p4 = 'test'
-  :p5 = 2000/01/01 10:10:00
+  :id = 1
+  :value = 10
+  :rate = 0.1
+  :tf_value = True
+  :remarks = 'test'
+  :created_at = 2000/01/01 10:10:00
 */
 SELECT
-    :p0 AS id,
-    :p1 AS value,
-    :p2 AS rate,
-    :p3 AS tf_value,
-    :p4 AS remarks,
-    :p5 AS created_at
+    :id AS id,
+    :value AS value,
+    :rate AS rate,
+    :tf_value AS tf_value,
+    :remarks AS remarks,
+    :created_at AS created_at
 FROM
     sale AS a";
 
@@ -270,16 +270,16 @@ FROM
         Output.WriteLine(actual);
 
         var expect = @"/*
-  :p0 = 2000/10/20 0:00:00
+  :d = 2000/10/20 0:00:00
 */
 SELECT
-    DATE_TRUNC('year', :p0) AS v_trunc_year,
-    DATE_TRUNC('quarter', :p0) AS v_trunc_quarter,
-    DATE_TRUNC('month', :p0) AS v_trunc_month,
-    DATE_TRUNC('day', :p0) AS v_trunc_day,
-    DATE_TRUNC('hour', :p0) AS v_trunc_hour,
-    DATE_TRUNC('minute', :p0) AS v_trunc_minute,
-    DATE_TRUNC('second', :p0) AS v_trunc_second,
+    DATE_TRUNC('year', :d) AS v_trunc_year,
+    DATE_TRUNC('quarter', :d) AS v_trunc_quarter,
+    DATE_TRUNC('month', :d) AS v_trunc_month,
+    DATE_TRUNC('day', :d) AS v_trunc_day,
+    DATE_TRUNC('hour', :d) AS v_trunc_hour,
+    DATE_TRUNC('minute', :d) AS v_trunc_minute,
+    DATE_TRUNC('second', :d) AS v_trunc_second,
     DATE_TRUNC('month', CAST(NOW() AS timestamp)) + 1 * INTERVAL '1 month' + -1 * INTERVAL '1 day' AS last_date_of_month
 FROM
     sale AS a";
@@ -312,16 +312,16 @@ FROM
         Output.WriteLine(actual);
 
         var expect = @"/*
-  :p0 = 2000/10/20 0:00:00
+  :d = 2000/10/20 0:00:00
 */
 SELECT
-    DATE_TRUNC('year', :p0) AS v_trunc_year,
-    DATE_TRUNC('quarter', :p0) AS v_trunc_quarter,
-    DATE_TRUNC('month', :p0) AS v_trunc_month,
-    DATE_TRUNC('day', :p0) AS v_trunc_day,
-    DATE_TRUNC('hour', :p0) AS v_trunc_hour,
-    DATE_TRUNC('minute', :p0) AS v_trunc_minute,
-    DATE_TRUNC('second', :p0) AS v_trunc_second,
+    DATE_TRUNC('year', :d) AS v_trunc_year,
+    DATE_TRUNC('quarter', :d) AS v_trunc_quarter,
+    DATE_TRUNC('month', :d) AS v_trunc_month,
+    DATE_TRUNC('day', :d) AS v_trunc_day,
+    DATE_TRUNC('hour', :d) AS v_trunc_hour,
+    DATE_TRUNC('minute', :d) AS v_trunc_minute,
+    DATE_TRUNC('second', :d) AS v_trunc_second,
     DATE_TRUNC('month', CAST(NOW() AS timestamp)) + 1 * INTERVAL '1 month' + -1 * INTERVAL '1 day' AS last_date_of_month,
     DATE_TRUNC('month', CAST(NOW() AS timestamp)) + INTERVAL '1 month - 1 day' AS last_date_of_month2
 FROM

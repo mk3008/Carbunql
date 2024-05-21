@@ -5,8 +5,8 @@ namespace Carbunql.TypeSafe.Extensions;
 internal static class ConstantExpressionExtension
 {
     internal static string ToValue(this ConstantExpression ce
-        , Func<Expression, Func<object?, string>, string> mainConverter
-        , Func<object?, string> addParameter)
+        , Func<Expression, Func<string, object?, string>, string> mainConverter
+        , Func<string, object?, string> addParameter)
     {
         var obj = ce.Value;
         var tp = ce.Type;
@@ -23,12 +23,12 @@ internal static class ConstantExpressionExtension
             }
             else
             {
-                return addParameter(obj);
+                return addParameter(string.Empty, obj);
             }
         }
         else if (tp == typeof(DateTime))
         {
-            return addParameter(obj);
+            return addParameter(string.Empty, obj);
         }
         else
         {

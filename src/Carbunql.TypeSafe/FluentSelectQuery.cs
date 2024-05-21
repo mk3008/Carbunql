@@ -16,30 +16,7 @@ public class FluentSelectQuery : SelectQuery
 
         var body = (NewExpression)expression.Body;
 
-        var prms = this.GetParameters().ToList();
-        var parameterCount = prms.Count();
-        Func<object?, string> addParameter = (obj) =>
-        {
-            if (obj != null)
-            {
-                var q = prms.Where(x => x.Value != null && x.Value.Equals(obj));
-                if (q.Any())
-                {
-                    return q.First().ParameterName;
-                }
-            }
-
-            var pname = $"{DbmsConfiguration.PlaceholderIdentifier}p{parameterCount}";
-            parameterCount++;
-            AddParameter(pname, obj);
-
-            if (obj != null)
-            {
-                prms.Add(new QueryParameter(pname, obj));
-            }
-
-            return pname;
-        };
+        var prmManager = new ParameterManager(GetParameters(), AddParameter);
 
         if (body.Members != null)
         {
@@ -47,7 +24,7 @@ public class FluentSelectQuery : SelectQuery
             for (var i = 0; i < cnt; i++)
             {
                 var alias = body.Members[i].Name;
-                var value = ToValue(body.Arguments[i], addParameter);
+                var value = ToValue(body.Arguments[i], prmManager.AddParaemter);
                 this.Select(RemoveRootBracketOrDefault(value)).As(alias);
             }
         }
@@ -61,32 +38,9 @@ public class FluentSelectQuery : SelectQuery
         var analyzed = ExpressionReader.Analyze(expression);
 #endif
 
-        var prms = this.GetParameters().ToList();
-        var parameterCount = prms.Count();
-        Func<object?, string> addParameter = (obj) =>
-        {
-            if (obj != null)
-            {
-                var q = prms.Where(x => x.Value != null && x.Value.Equals(obj));
-                if (q.Any())
-                {
-                    return q.First().ParameterName;
-                }
-            }
+        var prmManager = new ParameterManager(GetParameters(), AddParameter);
 
-            var pname = $"{DbmsConfiguration.PlaceholderIdentifier}p{parameterCount}";
-            parameterCount++;
-            AddParameter(pname, obj);
-
-            if (obj != null)
-            {
-                prms.Add(new QueryParameter(pname, obj));
-            }
-
-            return pname;
-        };
-
-        var value = ToValue(expression.Body, addParameter);
+        var value = ToValue(expression.Body, prmManager.AddParaemter);
 
         if (expression.Body is BinaryExpression be && be.NodeType == ExpressionType.OrElse)
         {
@@ -99,7 +53,7 @@ public class FluentSelectQuery : SelectQuery
         return this;
     }
 
-    private string ToValue(Expression exp, Func<object?, string> addParameter)
+    private string ToValue(Expression exp, Func<string, object?, string> addParameter)
     {
         if (exp is MemberExpression mem)
         {

@@ -8,8 +8,8 @@ namespace Carbunql.TypeSafe.Extensions;
 internal static class MethodCallExpressionExtension
 {
     internal static string ToValue(this MethodCallExpression mce
-        , Func<Expression, Func<object?, string>, string> mainConverter
-        , Func<object?, string> addParameter)
+        , Func<Expression, Func<string, object?, string>, string> mainConverter
+        , Func<string, object?, string> addParameter)
     {
         // DeclaringType
         if (mce.Method.DeclaringType == typeof(Math))
@@ -43,8 +43,8 @@ internal static class MethodCallExpressionExtension
     }
 
     private static string CreateMathCommand(this MethodCallExpression mce
-        , Func<Expression, Func<object?, string>, string> mainConverter
-        , Func<object?, string> addParameter)
+        , Func<Expression, Func<string, object?, string>, string> mainConverter
+        , Func<string, object?, string> addParameter)
     {
         var args = mce.Arguments.Select(x => RemoveRootBracketOrDefault(mainConverter(x, addParameter)));
 
@@ -59,8 +59,8 @@ internal static class MethodCallExpressionExtension
     }
 
     private static string CreateDateTimeExtensionCommand(MethodCallExpression mce
-        , Func<Expression, Func<object?, string>, string> mainConverter
-        , Func<object?, string> addParameter)
+        , Func<Expression, Func<string, object?, string>, string> mainConverter
+        , Func<string, object?, string> addParameter)
     {
         switch (mce.Method.Name)
         {
@@ -96,8 +96,8 @@ internal static class MethodCallExpressionExtension
     }
 
     private static string CreateSqlCommand(this MethodCallExpression mce
-        , Func<Expression, Func<object?, string>, string> mainConverter
-        , Func<object?, string> addParameter)
+        , Func<Expression, Func<string, object?, string>, string> mainConverter
+        , Func<string, object?, string> addParameter)
     {
         switch (mce.Method.Name)
         {
@@ -185,8 +185,8 @@ internal static class MethodCallExpressionExtension
     }
 
     private static string ToStringValue(this MethodCallExpression mce
-        , Func<Expression, Func<object?, string>, string> mainConverter
-        , Func<object?, string> addParameter)
+        , Func<Expression, Func<string, object?, string>, string> mainConverter
+        , Func<string, object?, string> addParameter)
     {
         if (mce.Object != null)
         {
@@ -215,10 +215,10 @@ internal static class MethodCallExpressionExtension
             {
                 if (mce.Method.Name == nameof(String.ToString))
                 {
-                    Func<object?, string> typeCaster = (obj) =>
+                    Func<string, object?, string> typeCaster = (key, value) =>
                     {
-                        var v = ConverToDbDateFormat(obj!.ToString()!);
-                        return addParameter(v);
+                        var v = ConverToDbDateFormat(value!.ToString()!);
+                        return addParameter(key, v);
                     };
                     var typedArg = mainConverter(mce.Arguments[0], typeCaster);
                     return $"to_char({value}, {typedArg})";
@@ -246,8 +246,8 @@ internal static class MethodCallExpressionExtension
     }
 
     private static string ToBoolValue(this MethodCallExpression mce
-        , Func<Expression, Func<object?, string>, string> mainConverter
-        , Func<object?, string> addParameter)
+        , Func<Expression, Func<string, object?, string>, string> mainConverter
+        , Func<string, object?, string> addParameter)
     {
         if (mce.Object != null)
         {
@@ -276,7 +276,7 @@ internal static class MethodCallExpressionExtension
                     //The IN clause itself is not suitable for parameter queries, so the collection will be forcibly expanded.
                     //If you want to parameterize it, use the ANY function, etc.
                     var args = new List<string>();
-                    Func<object?, string> argumentsDecoder = collection =>
+                    Func<string, object?, string> argumentsDecoder = (_, collection) =>
                     {
                         if (collection != null && IsGenericList(collection.GetType()))
                         {
@@ -317,8 +317,8 @@ internal static class MethodCallExpressionExtension
     }
 
     private static string ToAnyClauseValue(this MethodCallExpression mce
-        , Func<Expression, Func<object?, string>, string> mainConverter
-        , Func<object?, string> addParameter)
+        , Func<Expression, Func<string, object?, string>, string> mainConverter
+        , Func<string, object?, string> addParameter)
     {
         // Format:
         // Array.Any(x => (table.column == x))
@@ -332,7 +332,7 @@ internal static class MethodCallExpressionExtension
 
         // Hook the parameter name and return in the format any(PARAMETER)
         var hasAnyCommand = false;
-        Func<object?, string> interceptor = x =>
+        Func<string, object?, string> interceptor = (_, x) =>
         {
             if (variableName.Equals(x))
             {
@@ -362,8 +362,8 @@ internal static class MethodCallExpressionExtension
     }
 
     private static string ToDateTimeValue(this MethodCallExpression mce
-        , Func<Expression, Func<object?, string>, string> mainConverter
-        , Func<object?, string> addParameter)
+        , Func<Expression, Func<string, object?, string>, string> mainConverter
+        , Func<string, object?, string> addParameter)
     {
         if (mce!.Object != null)
         {
@@ -409,7 +409,7 @@ internal static class MethodCallExpressionExtension
         {
             if (mce.Arguments.Count == 1)
             {
-                Func<object?, string> echo = x => x!.ToString()!;
+                Func<string, object?, string> echo = (_, x) => x!.ToString()!;
                 return mce.ToValue(mainConverter, echo);
             }
 
@@ -475,7 +475,7 @@ internal static class MethodCallExpressionExtension
     }
 
     private static string AddParameter(Object? value
-       , Func<object?, string> addParameter)
+       , Func<string, object?, string> addParameter)
     {
         if (value == null)
         {
@@ -492,12 +492,12 @@ internal static class MethodCallExpressionExtension
             }
             else
             {
-                return addParameter(value);
+                return addParameter(string.Empty, value);
             }
         }
         else if (tp == typeof(DateTime))
         {
-            return addParameter(value);
+            return addParameter(string.Empty, value);
         }
         else
         {

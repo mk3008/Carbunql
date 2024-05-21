@@ -47,14 +47,14 @@ WHERE
         Output.WriteLine(query.ToText());
 
         var expect = @"/*
-  :p0 = 1
+  :id = 1
 */
 SELECT
     *
 FROM
     sale AS a
 WHERE
-    a.sale_id = CAST(:p0 AS integer)";
+    a.sale_id = CAST(:id AS integer)";
 
         Assert.Equal(expect, actual, true, true, true);
     }
@@ -215,14 +215,14 @@ WHERE
         Output.WriteLine(query.ToText());
 
         var expect = @"/*
-  :p0 = System.Collections.Generic.List`1[System.Int32]
+  :id_array = System.Collections.Generic.List`1[System.Int32]
 */
 SELECT
     *
 FROM
     sale AS a
 WHERE
-    a.sale_id = ANY(:p0)";
+    a.sale_id = ANY(:id_array)";
 
         Assert.Equal(expect, actual, true, true, true);
     }
@@ -241,14 +241,14 @@ WHERE
         Output.WriteLine(query.ToText());
 
         var expect = @"/*
-  :p0 = System.Collections.Generic.List`1[System.Int32]
+  :id_array = System.Collections.Generic.List`1[System.Int32]
 */
 SELECT
     *
 FROM
     sale AS a
 WHERE
-    a.sale_id = ANY(:p0)";
+    a.sale_id = ANY(:id_array)";
 
         Assert.Equal(expect, actual, true, true, true);
     }

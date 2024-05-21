@@ -5,8 +5,8 @@ namespace Carbunql.TypeSafe.Extensions;
 internal static class MemberExpressionExtension
 {
     internal static string ToValue(this MemberExpression mem
-        , Func<Expression, Func<object?, string>, string> mainConverter
-        , Func<object?, string> addParameter)
+        , Func<Expression, Func<string, object?, string>, string> mainConverter
+        , Func<string, object?, string> addParameter)
     {
         var tp = mem.Member.DeclaringType;
 
@@ -25,7 +25,7 @@ internal static class MemberExpressionExtension
         if (mem.Expression is ConstantExpression ce)
         {
             //variable
-            return addParameter(mem.CompileAndInvoke());
+            return addParameter(mem.Member.Name, mem.CompileAndInvoke());
         }
         if (mem.Expression is MemberExpression me)
         {

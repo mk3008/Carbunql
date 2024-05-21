@@ -5,8 +5,8 @@ namespace Carbunql.TypeSafe.Extensions;
 internal static class UnaryExpressionExtension
 {
     internal static string ToValue(this UnaryExpression ue
-        , Func<Expression, Func<object?, string>, string> mainConverter
-        , Func<object?, string> addParameter)
+        , Func<Expression, Func<string, object?, string>, string> mainConverter
+        , Func<string, object?, string> addParameter)
     {
         if (ue.NodeType == ExpressionType.Convert)
         {
@@ -16,8 +16,8 @@ internal static class UnaryExpressionExtension
     }
 
     private static string ToConvertValue(UnaryExpression ue
-        , Func<Expression, Func<object?, string>, string> mainConverter
-        , Func<object?, string> addParameter)
+        , Func<Expression, Func<string, object?, string>, string> mainConverter
+        , Func<string, object?, string> addParameter)
     {
         var value = mainConverter(ue.Operand, addParameter);
         return FluentSelectQuery.CreateCastStatement(value, ue.Type);
