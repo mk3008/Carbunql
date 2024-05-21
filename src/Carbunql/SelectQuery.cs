@@ -110,8 +110,6 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             }
         }
 
-        if (SelectClause == null) yield break;
-
         if (parent == null && WithClause != null)
         {
             var commonTables = GetCommonTables();
@@ -121,9 +119,20 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             }
         }
 
-        foreach (var item in SelectClause.GetTokens(parent))
+        if (SelectClause == null)
         {
-            yield return item;
+            // If SelectClause is not specified,
+            // all columns are assumed to be selected.
+            var clause = Token.Reserved(this, parent, "select");
+            yield return clause;
+            yield return new Token(this, clause, "*");
+        }
+        else
+        {
+            foreach (var item in SelectClause.GetTokens(parent))
+            {
+                yield return item;
+            }
         }
 
         if (FromClause == null) yield break;

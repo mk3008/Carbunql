@@ -1,4 +1,5 @@
 ﻿using Carbunql.Clauses;
+using Carbunql.Definitions;
 using Carbunql.Tables;
 
 namespace Carbunql.Building;
@@ -73,6 +74,12 @@ public static class QueryBaseExtension
     public static FromClause From(this SelectQuery source, string schema, string table)
     {
         var selectableTable = new PhysicalTable(schema, table).ToSelectable();
+        return source.From(selectableTable);
+    }
+
+    public static FromClause From(this SelectQuery source, ITable table)
+    {
+        var selectableTable = new PhysicalTable(table.Schema, table.Table).ToSelectable();
         return source.From(selectableTable);
     }
 

@@ -74,6 +74,8 @@ public class TokenFormatLogic
             if (token.Sender is AlterTableClause) return true;
         }
 
+
+
         return false;
     }
 
@@ -93,6 +95,7 @@ public class TokenFormatLogic
         if (token.Parent != null && token.Parent.Sender is ValuesQuery) return false;
         if (token.Sender is FunctionValue) return false;
         if (token.Sender is FunctionTable) return false;
+        if (token.Sender is Interval) return false;
         if (token.Text.IsEqualNoCase("filter")) return false;
         if (token.Text.IsEqualNoCase("over")) return false;
 
