@@ -1,4 +1,5 @@
 ﻿using Carbunql.Clauses;
+using Carbunql.Definitions;
 using Carbunql.Tables;
 
 namespace Carbunql.Building;
@@ -31,6 +32,12 @@ public static class FromClauseExtension
     public static Relation InnerJoin(this FromClause source, IReadQuery query)
     {
         var st = query.ToSelectableTable();
+        return source.InnerJoin(st);
+    }
+
+    public static Relation InnerJoin(this FromClause source, ITable table)
+    {
+        var st = new PhysicalTable(table.Schema, table.Table).ToSelectable();
         return source.InnerJoin(st);
     }
 
@@ -140,6 +147,12 @@ public static class FromClauseExtension
         return source.Join(table, "left join");
     }
 
+    public static Relation LeftJoin(this FromClause source, ITable table)
+    {
+        var st = new PhysicalTable(table.Schema, table.Table).ToSelectable();
+        return source.LeftJoin(st);
+    }
+
     /// <summary>
     /// Performs a right join with the specified query, converting it to a selectable table.
     /// </summary>
@@ -199,6 +212,12 @@ public static class FromClauseExtension
         return source.Join(table, "right join");
     }
 
+    public static Relation RightJoin(this FromClause source, ITable table)
+    {
+        var st = new PhysicalTable(table.Schema, table.Table).ToSelectable();
+        return source.RightJoin(st);
+    }
+
     /// <summary>
     /// Performs a cross join with the specified query, converting it to a selectable table.
     /// </summary>
@@ -256,6 +275,12 @@ public static class FromClauseExtension
     public static Relation CrossJoin(this FromClause source, SelectableTable table)
     {
         return source.Join(table, "cross join");
+    }
+
+    public static Relation CrossJoin(this FromClause source, ITable table)
+    {
+        var st = new PhysicalTable(table.Schema, table.Table).ToSelectable();
+        return source.CrossJoin(st);
     }
 
     /// <summary>
