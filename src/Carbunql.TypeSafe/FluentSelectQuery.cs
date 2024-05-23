@@ -1,4 +1,5 @@
 ﻿using Carbunql.Analysis.Parser;
+using Carbunql.Annotations;
 using Carbunql.Building;
 using Carbunql.TypeSafe.Extensions;
 using Carbunql.Values;
@@ -49,7 +50,18 @@ public class FluentSelectQuery : SelectQuery
 
         var condition = ToValue(conditionExpression.Body, prmManager.AddParaemter);
 
-        this.FromClause!.InnerJoin(table.TableDefinition).As(tableAlias).On(_ => ValueParser.Parse(condition));
+        if (table.CreateTableQuery.Query != null)
+        {
+            this.FromClause!.InnerJoin(table.CreateTableQuery.Query).As(tableAlias).On(_ => ValueParser.Parse(condition));
+        }
+        else if (table.CreateTableQuery.DefinitionClause != null)
+        {
+            this.FromClause!.InnerJoin(table.CreateTableQuery.DefinitionClause).As(tableAlias).On(_ => ValueParser.Parse(condition));
+        }
+        else
+        {
+            throw new NotSupportedException();
+        }
 
         return this;
     }
@@ -71,7 +83,18 @@ public class FluentSelectQuery : SelectQuery
 
         var condition = ToValue(conditionExpression.Body, prmManager.AddParaemter);
 
-        this.FromClause!.LeftJoin(table.TableDefinition).As(tableAlias).On(_ => ValueParser.Parse(condition));
+        if (table.CreateTableQuery.Query != null)
+        {
+            this.FromClause!.LeftJoin(table.CreateTableQuery.Query).As(tableAlias).On(_ => ValueParser.Parse(condition));
+        }
+        else if (table.CreateTableQuery.DefinitionClause != null)
+        {
+            this.FromClause!.LeftJoin(table.CreateTableQuery.DefinitionClause).As(tableAlias).On(_ => ValueParser.Parse(condition));
+        }
+        else
+        {
+            throw new NotSupportedException();
+        }
 
         return this;
     }
@@ -93,7 +116,18 @@ public class FluentSelectQuery : SelectQuery
 
         var condition = ToValue(conditionExpression.Body, prmManager.AddParaemter);
 
-        this.FromClause!.RightJoin(table.TableDefinition).As(tableAlias).On(_ => ValueParser.Parse(condition));
+        if (table.CreateTableQuery.Query != null)
+        {
+            this.FromClause!.RightJoin(table.CreateTableQuery.Query).As(tableAlias).On(_ => ValueParser.Parse(condition));
+        }
+        else if (table.CreateTableQuery.DefinitionClause != null)
+        {
+            this.FromClause!.RightJoin(table.CreateTableQuery.DefinitionClause).As(tableAlias).On(_ => ValueParser.Parse(condition));
+        }
+        else
+        {
+            throw new NotSupportedException();
+        }
 
         return this;
     }
@@ -107,7 +141,18 @@ public class FluentSelectQuery : SelectQuery
         var compiledExpression = tableExpression.Compile();
         var table = compiledExpression();
 
-        this.FromClause!.CrossJoin(table.TableDefinition).As(tableAlias);
+        if (table.CreateTableQuery.Query != null)
+        {
+            this.FromClause!.CrossJoin(table.CreateTableQuery.Query).As(tableAlias);
+        }
+        else if (table.CreateTableQuery.DefinitionClause != null)
+        {
+            this.FromClause!.CrossJoin(table.CreateTableQuery.DefinitionClause).As(tableAlias);
+        }
+        else
+        {
+            throw new NotSupportedException();
+        }
 
         return this;
     }
@@ -189,4 +234,51 @@ public class FluentSelectQuery : SelectQuery
         }
         return value;
     }
+
+    /// <summary>
+    /// Compiles a FluentSelectQuery for a specified table row definition type.
+    /// </summary>
+    /// <typeparam name="T">The type of the table row definition.</typeparam>
+    /// <returns>A compiled FluentSelectQuery of type T.</returns>
+    /// <exception cref="InvalidProgramException">
+    /// Thrown when the select clause does not include all required columns of the table row definition type.
+    /// </exception>
+    public FluentSelectQuery<T> Compile<T>() where T : ITableRowDefinition, new()
+    {
+        var q = new FluentSelectQuery<T>();
+
+        // Copy clauses and parameters to the new query object
+        q.WithClause = WithClause;
+        q.SelectClause = SelectClause;
+        q.FromClause = FromClause;
+        q.WhereClause = WhereClause;
+        q.GroupClause = GroupClause;
+        q.HavingClause = HavingClause;
+        q.WindowClause = WindowClause;
+        q.OperatableQueries = OperatableQueries;
+        q.OrderClause = OrderClause;
+        q.LimitClause = LimitClause;
+        q.Parameters = Parameters;
+
+        var clause = TableDefinitionClauseFactory.Create<T>();
+
+        if (q.SelectClause != null)
+        {
+            // Check if all properties of T are specified in the select clause
+            var aliases = q.GetSelectableItems().Select(x => x.Alias).ToHashSet();
+            var missingColumns = clause.ColumnNames.Where(item => !aliases.Contains(item)).ToList();
+
+            if (missingColumns.Any())
+            {
+                // If there are missing columns, include all of them in the error message
+                throw new InvalidProgramException($"'{typeof(T).Name}' is not compatible. The following columns are missing: {string.Join(", ", missingColumns)}");
+            }
+        }
+
+        return q;
+    }
+}
+
+public class FluentSelectQuery<T> : FluentSelectQuery where T : ITableRowDefinition, new()
+{
 }

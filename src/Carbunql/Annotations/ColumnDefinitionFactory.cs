@@ -65,7 +65,7 @@ public static class ColumnDefinitionFactory
     internal static List<ColumnDefinition> CreateAsParentProperties(ITable t, PropertyInfo prop)
     {
         var parentType = prop.PropertyType;
-        var parentclause = TableDefinitionClauseFactory.CreateTableDefinitionClause(parentType);
+        var parentclause = TableDefinitionClauseFactory.Create(parentType);
         var parentPkeyMaps = PrimaryKeyConstraintFactory.Create(parentType).PrimaryKeyMaps;
         if (!parentPkeyMaps.Any()) throw new InvalidProgramException();
 

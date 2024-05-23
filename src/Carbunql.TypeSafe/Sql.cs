@@ -13,10 +13,36 @@ namespace Carbunql.TypeSafe;
 /// </summary
 public static class Sql
 {
+    public static T DefineTable<T>(SelectQuery query) where T : ITableRowDefinition, new()
+    {
+        var instance = new T();
+
+        var info = TableInfoFactory.Create(typeof(T));
+
+        instance.CreateTableQuery = query.ToCreateTableQuery("_" + info.Table, isTemporary: true);
+        return instance;
+    }
+
+    public static T DefineTable<T>(FluentSelectQuery<T> query) where T : ITableRowDefinition, new()
+    {
+        var instance = new T();
+
+        var info = TableInfoFactory.Create(typeof(T));
+
+        instance.CreateTableQuery = query.ToCreateTableQuery("_" + info.Table, isTemporary: true);
+        return instance;
+    }
+
+    public static T DefineTable<T>(Func<FluentSelectQuery<T>> builder) where T : ITableRowDefinition, new()
+    {
+        return DefineTable<T>(builder.Invoke());
+    }
+
     public static T DefineTable<T>() where T : ITableRowDefinition, new()
     {
         var instance = new T();
-        instance.TableDefinition = TableDefinitionClauseFactory.Create<T>();
+        var clause = TableDefinitionClauseFactory.Create<T>();
+        instance.CreateTableQuery = new CreateTableQuery(clause);
         return instance;
     }
 
@@ -30,7 +56,14 @@ public static class Sql
         var compiledExpression = expression.Compile();
         var result = compiledExpression();
 
-        sq.From(result.TableDefinition).As(alias);
+        if (result.CreateTableQuery.Query != null)
+        {
+            sq.From(result.CreateTableQuery.Query).As(alias);
+        }
+        else if (result.CreateTableQuery.DefinitionClause != null)
+        {
+            sq.From(result.CreateTableQuery.DefinitionClause).As(alias);
+        }
 
         return sq;
     }
@@ -64,5 +97,14 @@ public static class Sql
 
     public static string RowNumberPartitionBy(object partition) => string.Empty;
 
-    public static string RowNumberOrderbyBy(object order) => string.Empty;
+    public static string RowNumberOrderBy(object order) => string.Empty;
+}
+
+public struct CTEDefinition
+{
+    public string Name { get; set; }
+
+    public Type RowType { get; set; }
+
+    public string Query { get; set; }
 }

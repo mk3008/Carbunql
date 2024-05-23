@@ -161,7 +161,7 @@ internal static class MethodCallExpressionExtension
                 }
                 throw new ArgumentException("Invalid arguments count for RowNumber.");
 
-            case nameof(Sql.RowNumberOrderbyBy):
+            case nameof(Sql.RowNumberOrderBy):
                 if (mce.Arguments.First() is NewExpression argOrderbyBy)
                 {
                     var argOrderbyByText = string.Join(",", argOrderbyBy.Arguments.Select(x => mainConverter(x, addParameter)));

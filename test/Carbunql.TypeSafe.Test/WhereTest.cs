@@ -265,6 +265,6 @@ WHERE
         public sale() : this(0, "", 0, 0) { }
 
         // interface property
-        TableDefinitionClause ITableRowDefinition.TableDefinition { get; set; } = null!;
+        CreateTableQuery ITableRowDefinition.CreateTableQuery { get; set; } = null!;
     }
 }

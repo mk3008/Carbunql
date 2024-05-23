@@ -399,7 +399,7 @@ FROM
                 row_num = Sql.RowNumber(),
                 row_num_partiton_order = Sql.RowNumber(new { a.product_name, a.unit_price }, new { a.quantity, a.sale_id }),
                 row_num_partition = Sql.RowNumberPartitionBy(new { a.product_name, a.unit_price }),
-                row_num_order = Sql.RowNumberOrderbyBy(new { a.product_name, a.unit_price })
+                row_num_order = Sql.RowNumberOrderBy(new { a.product_name, a.unit_price })
             });
 
         var actual = query.ToText();
@@ -702,6 +702,6 @@ FROM
         public sale() : this(0, "", 0, 0, DateTime.Now) { }
 
         // interface property
-        TableDefinitionClause ITableRowDefinition.TableDefinition { get; set; } = null!;
+        CreateTableQuery ITableRowDefinition.CreateTableQuery { get; set; } = null!;
     }
 }
