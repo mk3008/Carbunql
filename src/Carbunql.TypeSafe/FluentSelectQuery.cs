@@ -246,7 +246,7 @@ public class FluentSelectQuery : SelectQuery
     /// <exception cref="InvalidProgramException">
     /// Thrown when the select clause does not include all required columns of the table row definition type.
     /// </exception>
-    public FluentSelectQuery<T> Compile<T>() where T : ITableRowDefinition, new()
+    public FluentSelectQuery<T> Compile<T>(bool force = false) where T : ITableRowDefinition, new()
     {
         var q = new FluentSelectQuery<T>();
 
@@ -265,9 +265,36 @@ public class FluentSelectQuery : SelectQuery
 
         var clause = TableDefinitionClauseFactory.Create<T>();
 
+        if (force)
+        {
+            CorrectSelectClause(q, clause);
+        }
+
         TypeValidate<T>(q, clause);
 
         return q;
+    }
+
+    private static void CorrectSelectClause(SelectQuery q, TableDefinitionClause clause)
+    {
+        if (q.SelectClause != null)
+        {
+            // Check if all properties of T are specified in the select clause
+            var aliases = q.GetSelectableItems().Select(x => x.Alias).ToHashSet();
+            var missingColumns = clause.OfType<ColumnDefinition>().Where(x => !aliases.Contains(x.ColumnName));
+
+            // 不足する列を自動的に足す
+            foreach (var item in missingColumns)
+            {
+                q.Select($"cast(null as {item.ColumnType.ToText()})").As(item.ColumnName);
+            }
+            return;
+        }
+        else
+        {
+            //補正をせず終了
+            return;
+        }
     }
 
     private static void TypeValidate<T>(SelectQuery q, TableDefinitionClause clause)
@@ -281,7 +308,7 @@ public class FluentSelectQuery : SelectQuery
             if (missingColumns.Any())
             {
                 // If there are missing columns, include all of them in the error message
-                throw new InvalidProgramException($"'{typeof(T).Name}' is not compatible. The following columns are missing: {string.Join(", ", missingColumns)}");
+                throw new InvalidProgramException($"The select query is not compatible with '{typeof(T).Name}'. The following columns are missing: {string.Join(", ", missingColumns)}");
             }
             return;
         }
@@ -296,13 +323,13 @@ public class FluentSelectQuery : SelectQuery
             }
             else if (!actual.Equals(expect))
             {
-                throw new InvalidProgramException($"'{typeof(T).Name}' is not compatible. Expect: {expect}, Actual: {actual}");
+                throw new InvalidProgramException($"The select query is not compatible with '{typeof(T).Name}'. Expect: {expect}, Actual: {actual}");
             }
             return;
         }
         else
         {
-            throw new InvalidProgramException($"'{typeof(T).Name}' is not compatible. FromClause is null.");
+            throw new InvalidProgramException($"The select query is not compatible with '{typeof(T).Name}'. FromClause is null.");
         }
     }
 }

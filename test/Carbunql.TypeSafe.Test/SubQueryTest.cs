@@ -157,7 +157,7 @@ FROM
         var ex = Assert.Throws<InvalidProgramException>(() => query.Compile<order_detail>());
         Output.WriteLine(ex.Message);
 
-        Assert.Equal("'order_detail' is not compatible. Expect: order_detail, Actual: order", ex.Message);
+        Assert.Equal("The select query is not compatible with 'order_detail'. Expect: order_detail, Actual: order", ex.Message);
     }
 
     [Fact]
@@ -195,7 +195,28 @@ FROM
         var ex = Assert.Throws<InvalidProgramException>(() => query.Compile<order>());
         Output.WriteLine(ex.Message);
 
-        Assert.Equal("'order' is not compatible. The following columns are missing: order_date, customer_name, store_id", ex.Message);
+        Assert.Equal("The select query is not compatible with 'order'. The following columns are missing: order_date, customer_name, store_id", ex.Message);
+    }
+
+    [Fact]
+    public void Compile_ForceCorrect()
+    {
+        var o = Sql.DefineTable<order>();
+
+        var query = Sql.From(() => o).Select(() => new { o.order_id }).Compile<order>(true);
+
+        var actual = query.ToText();
+        Output.WriteLine(actual);
+
+        var expect = @"SELECT
+    o.order_id,
+    CAST(null AS timestamp) AS order_date,
+    CAST(null AS text) AS customer_name,
+    CAST(null AS integer) AS store_id
+FROM
+    order AS o";
+
+        Assert.Equal(expect, actual, true, true, true);
     }
 
     public record product(int product_id, string name, decimal price) : ITableRowDefinition
