@@ -32,6 +32,86 @@ public class FluentSelectQuery : SelectQuery
         return this;
     }
 
+    public FluentSelectQuery InnerJoin<T>(Expression<Func<T>> tableExpression, Expression<Func<bool>> conditionExpression) where T : ITableRowDefinition
+    {
+#if DEBUG
+        var analyzed = ExpressionReader.Analyze(conditionExpression);
+#endif
+
+        var tableAlias = ((MemberExpression)tableExpression.Body).Member.Name;
+
+        //execute
+        var compiledExpression = tableExpression.Compile();
+        var table = compiledExpression();
+
+
+        var prmManager = new ParameterManager(GetParameters(), AddParameter);
+
+        var condition = ToValue(conditionExpression.Body, prmManager.AddParaemter);
+
+        this.FromClause!.InnerJoin(table.TableDefinition).As(tableAlias).On(_ => ValueParser.Parse(condition));
+
+        return this;
+    }
+
+    public FluentSelectQuery LeftJoin<T>(Expression<Func<T>> tableExpression, Expression<Func<bool>> conditionExpression) where T : ITableRowDefinition
+    {
+#if DEBUG
+        var analyzed = ExpressionReader.Analyze(conditionExpression);
+#endif
+
+        var tableAlias = ((MemberExpression)tableExpression.Body).Member.Name;
+
+        //execute
+        var compiledExpression = tableExpression.Compile();
+        var table = compiledExpression();
+
+
+        var prmManager = new ParameterManager(GetParameters(), AddParameter);
+
+        var condition = ToValue(conditionExpression.Body, prmManager.AddParaemter);
+
+        this.FromClause!.LeftJoin(table.TableDefinition).As(tableAlias).On(_ => ValueParser.Parse(condition));
+
+        return this;
+    }
+
+    public FluentSelectQuery RightJoin<T>(Expression<Func<T>> tableExpression, Expression<Func<bool>> conditionExpression) where T : ITableRowDefinition
+    {
+#if DEBUG
+        var analyzed = ExpressionReader.Analyze(conditionExpression);
+#endif
+
+        var tableAlias = ((MemberExpression)tableExpression.Body).Member.Name;
+
+        //execute
+        var compiledExpression = tableExpression.Compile();
+        var table = compiledExpression();
+
+
+        var prmManager = new ParameterManager(GetParameters(), AddParameter);
+
+        var condition = ToValue(conditionExpression.Body, prmManager.AddParaemter);
+
+        this.FromClause!.RightJoin(table.TableDefinition).As(tableAlias).On(_ => ValueParser.Parse(condition));
+
+        return this;
+    }
+
+    public FluentSelectQuery CrossJoin<T>(Expression<Func<T>> tableExpression) where T : ITableRowDefinition
+    {
+
+        var tableAlias = ((MemberExpression)tableExpression.Body).Member.Name;
+
+        //execute
+        var compiledExpression = tableExpression.Compile();
+        var table = compiledExpression();
+
+        this.FromClause!.CrossJoin(table.TableDefinition).As(tableAlias);
+
+        return this;
+    }
+
     public FluentSelectQuery Where(Expression<Func<bool>> expression)
     {
 #if DEBUG
