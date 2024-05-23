@@ -4,9 +4,9 @@ using Xunit.Abstractions;
 
 namespace Carbunql.TypeSafe.Test;
 
-public class CTETest
+public class SubQueryTest
 {
-    public CTETest(ITestOutputHelper output)
+    public SubQueryTest(ITestOutputHelper output)
     {
         Output = output;
     }
@@ -145,6 +145,19 @@ FROM
     order AS o";
 
         Assert.Equal(expect, actual, true, true, true);
+    }
+
+    [Fact]
+    public void Compile_SelectAll_Exception()
+    {
+        var o = Sql.DefineTable<order>();
+
+        var query = Sql.From(() => o);
+
+        var ex = Assert.Throws<InvalidProgramException>(() => query.Compile<order_detail>());
+        Output.WriteLine(ex.Message);
+
+        Assert.Equal("'order_detail' is not compatible. Expect: order_detail, Actual: order", ex.Message);
     }
 
     [Fact]

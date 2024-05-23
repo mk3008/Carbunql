@@ -1,6 +1,9 @@
 ﻿using Carbunql.Analysis.Parser;
 using Carbunql.Annotations;
 using Carbunql.Building;
+using Carbunql.Clauses;
+using Carbunql.Definitions;
+using Carbunql.Tables;
 using Carbunql.TypeSafe.Extensions;
 using Carbunql.Values;
 using System.Linq.Expressions;
@@ -262,6 +265,13 @@ public class FluentSelectQuery : SelectQuery
 
         var clause = TableDefinitionClauseFactory.Create<T>();
 
+        TypeValidate<T>(q, clause);
+
+        return q;
+    }
+
+    private static void TypeValidate<T>(SelectQuery q, TableDefinitionClause clause)
+    {
         if (q.SelectClause != null)
         {
             // Check if all properties of T are specified in the select clause
@@ -273,9 +283,27 @@ public class FluentSelectQuery : SelectQuery
                 // If there are missing columns, include all of them in the error message
                 throw new InvalidProgramException($"'{typeof(T).Name}' is not compatible. The following columns are missing: {string.Join(", ", missingColumns)}");
             }
+            return;
         }
+        else if (q.FromClause != null)
+        {
+            var actual = q.FromClause.Root.Table.GetTableFullName();
+            var expect = clause.GetTableFullName();
 
-        return q;
+            if (q.FromClause.Root.Table is VirtualTable v && v.Query is SelectQuery vq)
+            {
+                TypeValidate<T>(vq, clause);
+            }
+            else if (!actual.Equals(expect))
+            {
+                throw new InvalidProgramException($"'{typeof(T).Name}' is not compatible. Expect: {expect}, Actual: {actual}");
+            }
+            return;
+        }
+        else
+        {
+            throw new InvalidProgramException($"'{typeof(T).Name}' is not compatible. FromClause is null.");
+        }
     }
 }
 
