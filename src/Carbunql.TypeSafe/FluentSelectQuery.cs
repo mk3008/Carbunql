@@ -48,23 +48,10 @@ public class FluentSelectQuery : SelectQuery
         var compiledExpression = tableExpression.Compile();
         var table = compiledExpression();
 
-
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
-
         var condition = ToValue(conditionExpression.Body, prmManager.AddParaemter);
 
-        if (table.CreateTableQuery.Query != null)
-        {
-            this.FromClause!.InnerJoin(table.CreateTableQuery.Query).As(tableAlias).On(_ => ValueParser.Parse(condition));
-        }
-        else if (table.CreateTableQuery.DefinitionClause != null)
-        {
-            this.FromClause!.InnerJoin(table.CreateTableQuery.DefinitionClause).As(tableAlias).On(_ => ValueParser.Parse(condition));
-        }
-        else
-        {
-            throw new NotSupportedException();
-        }
+        table.Datasource.BuildJoinClause(this, "inner join", tableAlias, condition);
 
         return this;
     }
@@ -81,23 +68,10 @@ public class FluentSelectQuery : SelectQuery
         var compiledExpression = tableExpression.Compile();
         var table = compiledExpression();
 
-
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
-
         var condition = ToValue(conditionExpression.Body, prmManager.AddParaemter);
 
-        if (table.CreateTableQuery.Query != null)
-        {
-            this.FromClause!.LeftJoin(table.CreateTableQuery.Query).As(tableAlias).On(_ => ValueParser.Parse(condition));
-        }
-        else if (table.CreateTableQuery.DefinitionClause != null)
-        {
-            this.FromClause!.LeftJoin(table.CreateTableQuery.DefinitionClause).As(tableAlias).On(_ => ValueParser.Parse(condition));
-        }
-        else
-        {
-            throw new NotSupportedException();
-        }
+        table.Datasource.BuildJoinClause(this, "left join", tableAlias, condition);
 
         return this;
     }
@@ -114,23 +88,10 @@ public class FluentSelectQuery : SelectQuery
         var compiledExpression = tableExpression.Compile();
         var table = compiledExpression();
 
-
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
-
         var condition = ToValue(conditionExpression.Body, prmManager.AddParaemter);
 
-        if (table.CreateTableQuery.Query != null)
-        {
-            this.FromClause!.RightJoin(table.CreateTableQuery.Query).As(tableAlias).On(_ => ValueParser.Parse(condition));
-        }
-        else if (table.CreateTableQuery.DefinitionClause != null)
-        {
-            this.FromClause!.RightJoin(table.CreateTableQuery.DefinitionClause).As(tableAlias).On(_ => ValueParser.Parse(condition));
-        }
-        else
-        {
-            throw new NotSupportedException();
-        }
+        table.Datasource.BuildJoinClause(this, "right join", tableAlias, condition);
 
         return this;
     }
@@ -144,18 +105,7 @@ public class FluentSelectQuery : SelectQuery
         var compiledExpression = tableExpression.Compile();
         var table = compiledExpression();
 
-        if (table.CreateTableQuery.Query != null)
-        {
-            this.FromClause!.CrossJoin(table.CreateTableQuery.Query).As(tableAlias);
-        }
-        else if (table.CreateTableQuery.DefinitionClause != null)
-        {
-            this.FromClause!.CrossJoin(table.CreateTableQuery.DefinitionClause).As(tableAlias);
-        }
-        else
-        {
-            throw new NotSupportedException();
-        }
+        table.Datasource.BuildJoinClause(this, "cross join", tableAlias);
 
         return this;
     }
@@ -277,24 +227,22 @@ public class FluentSelectQuery : SelectQuery
 
     private static void CorrectSelectClause(SelectQuery q, TableDefinitionClause clause)
     {
-        if (q.SelectClause != null)
+        if (q.SelectClause == null)
         {
-            // Check if all properties of T are specified in the select clause
-            var aliases = q.GetSelectableItems().Select(x => x.Alias).ToHashSet();
-            var missingColumns = clause.OfType<ColumnDefinition>().Where(x => !aliases.Contains(x.ColumnName));
+            // End without making corrections
+            return;
+        }
 
-            // 不足する列を自動的に足す
-            foreach (var item in missingColumns)
-            {
-                q.Select($"cast(null as {item.ColumnType.ToText()})").As(item.ColumnName);
-            }
-            return;
-        }
-        else
+        // Check if all properties of T are specified in the select clause
+        var aliases = q.GetSelectableItems().Select(x => x.Alias).ToHashSet();
+        var missingColumns = clause.OfType<ColumnDefinition>().Where(x => !aliases.Contains(x.ColumnName));
+
+        // Automatically add missing columns
+        foreach (var item in missingColumns)
         {
-            //補正をせず終了
-            return;
+            q.Select($"cast(null as {item.ColumnType.ToText()})").As(item.ColumnName);
         }
+        return;
     }
 
     private static void TypeValidate<T>(SelectQuery q, TableDefinitionClause clause)
@@ -336,4 +284,8 @@ public class FluentSelectQuery : SelectQuery
 
 public class FluentSelectQuery<T> : FluentSelectQuery where T : ITableRowDefinition, new()
 {
+    public T ToTable()
+    {
+        throw new InvalidOperationException();
+    }
 }

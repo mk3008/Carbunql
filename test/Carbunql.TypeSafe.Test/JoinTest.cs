@@ -1,5 +1,4 @@
-﻿using Carbunql.Clauses;
-using Xunit.Abstractions;
+﻿using Xunit.Abstractions;
 
 namespace Carbunql.TypeSafe.Test;
 
@@ -88,7 +87,7 @@ FROM
         public product() : this(0, "", 0) { }
 
         // interface property
-        CreateTableQuery ITableRowDefinition.CreateTableQuery { get; set; } = null!;
+        IDatasource ITableRowDefinition.Datasource { get; set; } = null!;
     }
 
     public record store(int store_id, string name, string location) : ITableRowDefinition
@@ -98,7 +97,7 @@ FROM
         public store() : this(0, "", "") { }
 
         // interface property
-        CreateTableQuery ITableRowDefinition.CreateTableQuery { get; set; } = null!;
+        IDatasource ITableRowDefinition.Datasource { get; set; } = null!;
     }
 
     public record order(int order_id, DateTime order_date, string customer_name, int store_id, List<order_detail> order_details) : ITableRowDefinition
@@ -108,7 +107,7 @@ FROM
         public order() : this(0, DateTime.Now, "", 0, new List<order_detail>()) { }
 
         // interface property
-        CreateTableQuery ITableRowDefinition.CreateTableQuery { get; set; } = null!;
+        IDatasource ITableRowDefinition.Datasource { get; set; } = null!;
     }
 
     public record order_detail(int order_detail_id, int order_id, int product_id, int quantity, decimal price) : ITableRowDefinition
@@ -118,6 +117,6 @@ FROM
         public order_detail() : this(0, 0, 0, 0, 0) { }
 
         // interface property
-        CreateTableQuery ITableRowDefinition.CreateTableQuery { get; set; } = null!;
+        IDatasource ITableRowDefinition.Datasource { get; set; } = null!;
     }
 }

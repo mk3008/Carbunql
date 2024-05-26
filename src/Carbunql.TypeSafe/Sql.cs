@@ -1,11 +1,7 @@
-﻿using Carbunql.Analysis.Parser;
-using Carbunql.Annotations;
-using Carbunql.Building;
-using System.Data;
+﻿using Carbunql.Annotations;
 using System.Linq.Expressions;
 
 namespace Carbunql.TypeSafe;
-
 
 /// <summary>
 /// Only function definitions are written for use in expression trees.
@@ -13,36 +9,84 @@ namespace Carbunql.TypeSafe;
 /// </summary
 public static class Sql
 {
-    public static T DefineTable<T>(SelectQuery query) where T : ITableRowDefinition, new()
+    private static T DefineCTE<T>(Expression<Func<FluentSelectQuery<T>>> expression, Materialized materialization) where T : ITableRowDefinition, new()
+    {
+#if DEBUG
+        var analyze = ExpressionReader.Analyze(expression);
+        // Debug analysis for the expression
+#endif
+        if (expression.Body is MemberExpression body)
+        {
+            // Compile and execute the expression
+            var compiledExpression = expression.Compile();
+            var result = compiledExpression();
+
+            if (result is SelectQuery sq)
+            {
+                var variableName = body.Member.Name;
+
+                var instance = new T();
+                instance.Datasource = new CTEDatasoure(variableName, sq)
+                {
+                    Materialized = materialization
+                };
+
+                return instance;
+            }
+            else
+            {
+                throw new NotSupportedException("The provided expression did not result in a SelectQuery.");
+            }
+        }
+        throw new NotSupportedException("Expression body is not a MemberExpression.");
+    }
+
+
+    public static T DefineCTE<T>(Expression<Func<FluentSelectQuery<T>>> expression) where T : ITableRowDefinition, new()
+    {
+        return DefineCTE(expression, Materialized.Undefined);
+    }
+
+    public static T DefineMaterializedCTE<T>(Expression<Func<FluentSelectQuery<T>>> expression) where T : ITableRowDefinition, new()
+    {
+        return DefineCTE(expression, Materialized.Materialized);
+    }
+
+    public static T DefineNotMaterializedCTE<T>(Expression<Func<FluentSelectQuery<T>>> expression) where T : ITableRowDefinition, new()
+    {
+        return DefineCTE(expression, Materialized.NotMaterialized);
+    }
+
+    public static T DefineSubQuery<T>(SelectQuery query) where T : ITableRowDefinition, new()
     {
         var instance = new T();
 
-        var info = TableInfoFactory.Create(typeof(T));
+        //var info = TableInfoFactory.Create(typeof(T));
 
-        instance.CreateTableQuery = query.ToCreateTableQuery("_" + info.Table, isTemporary: true);
+        instance.Datasource = new QueryDatasource(query);
         return instance;
     }
 
-    public static T DefineTable<T>(FluentSelectQuery<T> query) where T : ITableRowDefinition, new()
+    public static T DefineSubQuery<T>(FluentSelectQuery<T> query) where T : ITableRowDefinition, new()
     {
         var instance = new T();
 
-        var info = TableInfoFactory.Create(typeof(T));
+        //var info = TableInfoFactory.Create(typeof(T));
 
-        instance.CreateTableQuery = query.ToCreateTableQuery("_" + info.Table, isTemporary: true);
+        instance.Datasource = new QueryDatasource(query);
         return instance;
     }
 
-    public static T DefineTable<T>(Func<FluentSelectQuery<T>> builder) where T : ITableRowDefinition, new()
+    public static T DefineSubQuery<T>(Func<FluentSelectQuery<T>> builder) where T : ITableRowDefinition, new()
     {
-        return DefineTable<T>(builder.Invoke());
+        return DefineSubQuery<T>(builder.Invoke());
     }
 
     public static T DefineTable<T>() where T : ITableRowDefinition, new()
     {
         var instance = new T();
         var clause = TableDefinitionClauseFactory.Create<T>();
-        instance.CreateTableQuery = new CreateTableQuery(clause);
+        instance.Datasource = new PhysicalTableDatasource(clause);
         return instance;
     }
 
@@ -56,14 +100,7 @@ public static class Sql
         var compiledExpression = expression.Compile();
         var result = compiledExpression();
 
-        if (result.CreateTableQuery.Query != null)
-        {
-            sq.From(result.CreateTableQuery.Query).As(alias);
-        }
-        else if (result.CreateTableQuery.DefinitionClause != null)
-        {
-            sq.From(result.CreateTableQuery.DefinitionClause).As(alias);
-        }
+        result.Datasource.BuildFromClause(sq, alias);
 
         return sq;
     }
@@ -98,13 +135,4 @@ public static class Sql
     public static string RowNumberPartitionBy(object partition) => string.Empty;
 
     public static string RowNumberOrderBy(object order) => string.Empty;
-}
-
-public struct CTEDefinition
-{
-    public string Name { get; set; }
-
-    public Type RowType { get; set; }
-
-    public string Query { get; set; }
 }

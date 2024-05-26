@@ -1,4 +1,3 @@
-using Carbunql.Clauses;
 using Carbunql.TypeSafe.Extensions;
 using Xunit.Abstractions;
 
@@ -702,6 +701,6 @@ FROM
         public sale() : this(0, "", 0, 0, DateTime.Now) { }
 
         // interface property
-        CreateTableQuery ITableRowDefinition.CreateTableQuery { get; set; } = null!;
+        IDatasource ITableRowDefinition.Datasource { get; set; } = null!;
     }
 }

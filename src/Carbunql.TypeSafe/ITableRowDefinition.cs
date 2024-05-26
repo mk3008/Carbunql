@@ -5,5 +5,5 @@ namespace Carbunql.TypeSafe;
 public interface ITableRowDefinition
 {
     [IgnoreMapping]
-    CreateTableQuery CreateTableQuery { get; set; }
+    IDatasource Datasource { get; set; }
 }

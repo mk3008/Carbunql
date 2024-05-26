@@ -1,4 +1,5 @@
 ﻿using Carbunql.Clauses;
+using Carbunql.Definitions;
 using MessagePack;
 using System.Collections.Immutable;
 
@@ -28,6 +29,12 @@ public class PhysicalTable : TableBase
     {
         Schema = schema;
         Table = table;
+    }
+
+    public PhysicalTable(ITable tb)
+    {
+        Schema = tb.Schema;
+        Table = tb.Table;
     }
 
     /// <summary>

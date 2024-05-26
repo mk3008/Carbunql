@@ -1,5 +1,4 @@
-﻿using Carbunql.Clauses;
-using Xunit.Abstractions;
+﻿using Xunit.Abstractions;
 
 namespace Carbunql.TypeSafe.Test;
 
@@ -265,6 +264,6 @@ WHERE
         public sale() : this(0, "", 0, 0) { }
 
         // interface property
-        CreateTableQuery ITableRowDefinition.CreateTableQuery { get; set; } = null!;
+        IDatasource ITableRowDefinition.Datasource { get; set; } = null!;
     }
 }
