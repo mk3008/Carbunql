@@ -1,4 +1,5 @@
 ﻿using Carbunql.Analysis.Parser;
+using Carbunql.Extensions;
 using System.Linq.Expressions;
 
 namespace Carbunql.TypeSafe.Extensions;
@@ -24,11 +25,12 @@ internal static class BinaryExpressionExtension
         // Enclose expressions in parentheses based on operator precedence or specific conditions
         if (nodeType == ExpressionType.OrElse)
         {
-            if (leftValue.GetOperators().Any())
+            // If an AND condition exists, enclose the whole in parentheses.
+            if (leftValue.GetOperators().Where(x => x.IsEqualNoCase("and")).Any())
             {
                 left = $"({left})";
             }
-            if (rightValue.GetOperators().Any())
+            if (rightValue.GetOperators().Where(x => x.IsEqualNoCase("and")).Any())
             {
                 right = $"({right})";
             }
@@ -61,7 +63,7 @@ internal static class BinaryExpressionExtension
             ExpressionType.LessThan => $"{left} < {right}",
             ExpressionType.LessThanOrEqual => $"{left} <= {right}",
             ExpressionType.AndAlso => $"{left} and {right}",
-            ExpressionType.OrElse => $"{left} or {right}",
+            ExpressionType.OrElse => $"({left} or {right})",
             _ => throw new NotSupportedException($"Unsupported expression type: {nodeType}")
         };
     }
