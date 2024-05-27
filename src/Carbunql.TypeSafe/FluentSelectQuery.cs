@@ -120,14 +120,8 @@ public class FluentSelectQuery : SelectQuery
 
         var value = ToValue(expression.Body, prmManager.AddParaemter);
 
-        if (expression.Body is BinaryExpression be && be.NodeType == ExpressionType.OrElse)
-        {
-            this.Where($"({value})");
-        }
-        else
-        {
-            this.Where(value);
-        }
+        this.Where(value);
+
         return this;
     }
 

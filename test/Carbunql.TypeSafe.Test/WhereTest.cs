@@ -119,7 +119,34 @@ WHERE
 FROM
     sale AS a
 WHERE
-    ((a.quantity = 1) OR (a.unit_price = 2))";
+    (a.quantity = 1 OR a.unit_price = 2)";
+
+        Assert.Equal(expect, actual, true, true, true);
+    }
+
+    [Fact]
+    public void AndOrTest()
+    {
+        var a = Sql.DefineDataSet<sale>();
+
+        var query = Sql.From(() => a)
+            .Where(() =>
+                (a.quantity == 1 && a.unit_price == 1 || a.unit_price == 2)
+                && (a.unit_price == 2 || a.quantity == 1 && a.unit_price == 1)
+                && (a.unit_price == 1 || a.unit_price == 2)
+            );
+
+        var actual = query.ToText();
+        Output.WriteLine(query.ToText());
+
+        var expect = @"SELECT
+    *
+FROM
+    sale AS a
+WHERE
+    ((a.quantity = 1 AND a.unit_price = 1) OR a.unit_price = 2)
+    AND (a.unit_price = 2 OR (a.quantity = 1 AND a.unit_price = 1))
+    AND (a.unit_price = 1 OR a.unit_price = 2)";
 
         Assert.Equal(expect, actual, true, true, true);
     }
