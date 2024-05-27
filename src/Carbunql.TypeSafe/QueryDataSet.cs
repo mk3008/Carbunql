@@ -1,26 +1,23 @@
 ﻿using Carbunql.Analysis.Parser;
 using Carbunql.Building;
-using Carbunql.Clauses;
-using Carbunql.Definitions;
-using Carbunql.Tables;
 
 namespace Carbunql.TypeSafe;
 
-public class PhysicalTableDatasource(ITable tb) : IDatasource
+public class QueryDataSet(SelectQuery query) : IDataSet
 {
-    public SelectableTable Table { get; set; } = new PhysicalTable(tb).ToSelectable();
+    public SelectQuery Query { get; init; } = query;
 
-    public bool IsCTE => false;
+    public List<string> Columns { get; init; } = query.GetColumnNames().ToList();
 
     public SelectQuery BuildFromClause(SelectQuery query, string alias)
     {
-        query.From(Table).As(alias);
+        query.From(Query).As(alias);
         return query;
     }
 
     public SelectQuery BuildJoinClause(SelectQuery query, string join, string alias, string condition)
     {
-        var r = query.FromClause!.Join(Table, join).As(alias);
+        var r = query.FromClause!.Join(Query.ToSelectableTable(), join).As(alias);
         if (!string.IsNullOrEmpty(condition))
         {
             r.On(_ => ValueParser.Parse(condition));

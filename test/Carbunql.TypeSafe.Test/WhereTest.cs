@@ -14,7 +14,7 @@ public class WhereTest
     [Fact]
     public void WhereStaticValue()
     {
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var query = Sql.From(() => a)
             .Where(() => a.sale_id == 1);
@@ -35,7 +35,7 @@ WHERE
     [Fact]
     public void WhereStaticVariable()
     {
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var id = 1;
 
@@ -61,7 +61,7 @@ WHERE
     [Fact]
     public void Multiple()
     {
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var query = Sql.From(() => a)
             .Where(() => a.quantity == 1)
@@ -84,7 +84,7 @@ WHERE
     [Fact]
     public void AndTest()
     {
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var query = Sql.From(() => a)
             .Where(() => a.quantity == 1 && a.unit_price == 2);
@@ -106,7 +106,7 @@ WHERE
     [Fact]
     public void OrTest()
     {
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var query = Sql.From(() => a)
             .Where(() => a.quantity == 1 || a.unit_price == 2);
@@ -127,7 +127,7 @@ WHERE
     [Fact]
     public void BracketTest()
     {
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var query = Sql.From(() => a)
             .Where(() =>
@@ -152,7 +152,7 @@ WHERE
     [Fact]
     public void LikeTest()
     {
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var query = Sql.From(() => a)
             .Where(() => a.product_name.StartsWith("a"))
@@ -182,7 +182,7 @@ WHERE
     {
         var idArray = new List<int>() { 1, 2, 3, 4 };
 
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var query = Sql.From(() => a)
             .Where(() => idArray.Contains(a.sale_id!.Value));
@@ -205,7 +205,7 @@ WHERE
     {
         var idArray = new List<int>() { 1, 2, 3, 4 };
 
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var query = Sql.From(() => a)
             .Where(() => idArray.Any(x => a.sale_id!.Value == x));
@@ -231,7 +231,7 @@ WHERE
     {
         var idArray = new List<int>() { 1, 2, 3, 4 };
 
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var query = Sql.From(() => a)
             .Where(() => idArray.Any(x => x == a.sale_id!.Value));
@@ -257,13 +257,13 @@ WHERE
         string product_name,
         int quantity,
         decimal unit_price
-    ) : ITableRowDefinition
+    ) : IDataRow
     {
         // no arguments constructor.
         // Since it is used as a definition, it has no particular meaning as a value.
         public sale() : this(0, "", 0, 0) { }
 
         // interface property
-        IDatasource ITableRowDefinition.Datasource { get; set; } = null!;
+        IDataSet IDataRow.DataSet { get; set; } = null!;
     }
 }

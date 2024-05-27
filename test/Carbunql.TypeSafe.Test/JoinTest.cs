@@ -14,10 +14,10 @@ public class JoinTest
     [Fact]
     public void InnerJoin()
     {
-        var od = Sql.DefineTable<order_detail>();
-        var o = Sql.DefineTable<order>();
-        var p = Sql.DefineTable<product>();
-        var s = Sql.DefineTable<store>();
+        var od = Sql.DefineDataSet<order_detail>();
+        var o = Sql.DefineDataSet<order>();
+        var p = Sql.DefineDataSet<product>();
+        var s = Sql.DefineDataSet<store>();
 
         var query = Sql.From(() => od)
                         .InnerJoin(() => o, () => o.order_id == od.order_id)
@@ -41,8 +41,8 @@ FROM
     [Fact]
     public void LeftJoin()
     {
-        var o = Sql.DefineTable<order>();
-        var od = Sql.DefineTable<order_detail>();
+        var o = Sql.DefineDataSet<order>();
+        var od = Sql.DefineDataSet<order_detail>();
 
         var query = Sql.From(() => o)
                         .LeftJoin(() => od, () => o.order_id == od.order_id);
@@ -62,8 +62,8 @@ FROM
     [Fact]
     public void CrossJoin()
     {
-        var p = Sql.DefineTable<product>();
-        var s = Sql.DefineTable<store>();
+        var p = Sql.DefineDataSet<product>();
+        var s = Sql.DefineDataSet<store>();
 
         var query = Sql.From(() => p)
                         .CrossJoin(() => s);
@@ -80,43 +80,43 @@ FROM
         Assert.Equal(expect, actual, true, true, true);
     }
 
-    public record product(int product_id, string name, decimal price) : ITableRowDefinition
+    public record product(int product_id, string name, decimal price) : IDataRow
     {
         // no arguments constructor.
         // Since it is used as a definition, it has no particular meaning as a value.
         public product() : this(0, "", 0) { }
 
         // interface property
-        IDatasource ITableRowDefinition.Datasource { get; set; } = null!;
+        IDataSet IDataRow.DataSet { get; set; } = null!;
     }
 
-    public record store(int store_id, string name, string location) : ITableRowDefinition
+    public record store(int store_id, string name, string location) : IDataRow
     {
         // no arguments constructor.
         // Since it is used as a definition, it has no particular meaning as a value.
         public store() : this(0, "", "") { }
 
         // interface property
-        IDatasource ITableRowDefinition.Datasource { get; set; } = null!;
+        IDataSet IDataRow.DataSet { get; set; } = null!;
     }
 
-    public record order(int order_id, DateTime order_date, string customer_name, int store_id, List<order_detail> order_details) : ITableRowDefinition
+    public record order(int order_id, DateTime order_date, string customer_name, int store_id, List<order_detail> order_details) : IDataRow
     {
         // no arguments constructor.
         // Since it is used as a definition, it has no particular meaning as a value.
         public order() : this(0, DateTime.Now, "", 0, new List<order_detail>()) { }
 
         // interface property
-        IDatasource ITableRowDefinition.Datasource { get; set; } = null!;
+        IDataSet IDataRow.DataSet { get; set; } = null!;
     }
 
-    public record order_detail(int order_detail_id, int order_id, int product_id, int quantity, decimal price) : ITableRowDefinition
+    public record order_detail(int order_detail_id, int order_id, int product_id, int quantity, decimal price) : IDataRow
     {
         // no arguments constructor.
         // Since it is used as a definition, it has no particular meaning as a value.
         public order_detail() : this(0, 0, 0, 0, 0) { }
 
         // interface property
-        IDatasource ITableRowDefinition.Datasource { get; set; } = null!;
+        IDataSet IDataRow.DataSet { get; set; } = null!;
     }
 }

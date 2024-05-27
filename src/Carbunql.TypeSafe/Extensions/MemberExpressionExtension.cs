@@ -15,7 +15,7 @@ internal static class MemberExpressionExtension
             // ex. Sql.Now, Sql.CurrentTimestamp
             return CreateSqlCommand(mem);
         }
-        if (mem.Expression is MemberExpression && typeof(ITableRowDefinition).IsAssignableFrom(tp))
+        if (mem.Expression is MemberExpression && typeof(IDataRow).IsAssignableFrom(tp))
         {
             //column
             var table = ((MemberExpression)mem.Expression).Member.Name;

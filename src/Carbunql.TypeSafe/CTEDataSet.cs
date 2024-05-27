@@ -3,7 +3,7 @@ using Carbunql.Building;
 
 namespace Carbunql.TypeSafe;
 
-public class CTEDatasoure(string name, SelectQuery query) : IDatasource
+public class CTEDataSet(string name, SelectQuery query) : IDataSet
 {
     public string Name { get; set; } = name;
 
@@ -11,14 +11,13 @@ public class CTEDatasoure(string name, SelectQuery query) : IDatasource
 
     public SelectQuery Query { get; init; } = query;
 
-    public bool IsCTE => true;
+    public List<string> Columns { get; init; } = query.GetColumnNames().ToList();
 
     public SelectQuery BuildFromClause(SelectQuery query, string alias)
     {
         var cte = query.With(Query).As(Name);
         cte.Materialized = Materialized;
-
-        query.From(cte).As(alias);
+        query.From(new CTETable(cte).ToSelectable()).As(alias);
         return query;
     }
 

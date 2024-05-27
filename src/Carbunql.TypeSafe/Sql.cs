@@ -1,4 +1,5 @@
 ﻿using Carbunql.Annotations;
+using System.ComponentModel.Design;
 using System.Linq.Expressions;
 
 namespace Carbunql.TypeSafe;
@@ -9,7 +10,7 @@ namespace Carbunql.TypeSafe;
 /// </summary
 public static class Sql
 {
-    private static T DefineCTE<T>(Expression<Func<FluentSelectQuery<T>>> expression, Materialized materialization) where T : ITableRowDefinition, new()
+    private static T DefineDataSet<T>(Expression<Func<FluentSelectQuery<T>>> expression, Materialized materialization) where T : IDataRow, new()
     {
 #if DEBUG
         var analyze = ExpressionReader.Analyze(expression);
@@ -26,7 +27,7 @@ public static class Sql
                 var variableName = body.Member.Name;
 
                 var instance = new T();
-                instance.Datasource = new CTEDatasoure(variableName, sq)
+                instance.DataSet = new CTEDataSet(variableName, sq)
                 {
                     Materialized = materialization
                 };
@@ -38,59 +39,94 @@ public static class Sql
                 throw new NotSupportedException("The provided expression did not result in a SelectQuery.");
             }
         }
+        else if (expression.Body is MethodCallExpression me)
+        {
+            var compiledExpression = expression.Compile();
+            var result = compiledExpression();
+            if (result is SelectQuery sq)
+            {
+                var instance = new T();
+                instance.DataSet = new QueryDataSet(sq);
+                return instance;
+            }
+            else
+            {
+                throw new NotSupportedException("The provided expression did not result in a SelectQuery.");
+            }
+        }
         throw new NotSupportedException("Expression body is not a MemberExpression.");
     }
 
-
-    public static T DefineCTE<T>(Expression<Func<FluentSelectQuery<T>>> expression) where T : ITableRowDefinition, new()
+    public static T2 DefineDataSet<T1, T2>(Expression<Func<FluentSelectQuery<T1>>> expression, Func<FluentSelectQuery<T1>, FluentSelectQuery<T2>> editor) where T1 : IDataRow, new() where T2 : IDataRow, new()
     {
-        return DefineCTE(expression, Materialized.Undefined);
+#if DEBUG
+        var analyze = ExpressionReader.Analyze(expression);
+        // Debug analysis for the expression
+#endif
+        var compiledExpression = expression.Compile();
+        var result = compiledExpression();
+        if (result is FluentSelectQuery<T1> sq)
+        {
+            var edited = editor(sq);
+
+            var instance = new T2();
+
+            instance.DataSet = new QueryDataSet(edited);
+            return instance;
+        }
+        else
+        {
+            throw new NotSupportedException("The provided expression did not result in a SelectQuery.");
+        }
     }
 
-    public static T DefineMaterializedCTE<T>(Expression<Func<FluentSelectQuery<T>>> expression) where T : ITableRowDefinition, new()
+    public static T DefineDataSet<T>(Expression<Func<FluentSelectQuery<T>>> expression) where T : IDataRow, new()
     {
-        return DefineCTE(expression, Materialized.Materialized);
+        return DefineDataSet(expression, Materialized.Undefined);
     }
 
-    public static T DefineNotMaterializedCTE<T>(Expression<Func<FluentSelectQuery<T>>> expression) where T : ITableRowDefinition, new()
+    public static T DefineMaterializedDataSet<T>(Expression<Func<FluentSelectQuery<T>>> expression) where T : IDataRow, new()
     {
-        return DefineCTE(expression, Materialized.NotMaterialized);
+        return DefineDataSet(expression, Materialized.Materialized);
     }
 
-    public static T DefineSubQuery<T>(SelectQuery query) where T : ITableRowDefinition, new()
+    public static T DefineNotMaterializedDataSet<T>(Expression<Func<FluentSelectQuery<T>>> expression) where T : IDataRow, new()
+    {
+        return DefineDataSet(expression, Materialized.NotMaterialized);
+    }
+
+    public static T DefineSubQuery<T>(SelectQuery query) where T : IDataRow, new()
     {
         var instance = new T();
 
         //var info = TableInfoFactory.Create(typeof(T));
 
-        instance.Datasource = new QueryDatasource(query);
+        instance.DataSet = new QueryDataSet(query);
         return instance;
     }
 
-    public static T DefineSubQuery<T>(FluentSelectQuery<T> query) where T : ITableRowDefinition, new()
+    public static T DefineSubQuery<T>(FluentSelectQuery<T> query) where T : IDataRow, new()
     {
         var instance = new T();
 
-        //var info = TableInfoFactory.Create(typeof(T));
-
-        instance.Datasource = new QueryDatasource(query);
+        instance.DataSet = new QueryDataSet(query);
         return instance;
     }
 
-    public static T DefineSubQuery<T>(Func<FluentSelectQuery<T>> builder) where T : ITableRowDefinition, new()
+    public static T DefineSubQuery<T>(Func<FluentSelectQuery<T>> builder) where T : IDataRow, new()
     {
         return DefineSubQuery<T>(builder.Invoke());
     }
 
-    public static T DefineTable<T>() where T : ITableRowDefinition, new()
+    public static T DefineDataSet<T>() where T : IDataRow, new()
     {
         var instance = new T();
         var clause = TableDefinitionClauseFactory.Create<T>();
-        instance.Datasource = new PhysicalTableDatasource(clause);
+        instance.DataSet = new PhysicalTableDataSet(clause, clause.GetColumnNames());
         return instance;
     }
 
-    public static FluentSelectQuery From<T>(Expression<Func<T>> expression) where T : ITableRowDefinition
+    public static FluentSelectQuery From<T>(Expression<Func<T>> expression) where T : IDataRow
     {
         var sq = new FluentSelectQuery();
 
@@ -100,7 +136,7 @@ public static class Sql
         var compiledExpression = expression.Compile();
         var result = compiledExpression();
 
-        result.Datasource.BuildFromClause(sq, alias);
+        result.DataSet.BuildFromClause(sq, alias);
 
         return sq;
     }

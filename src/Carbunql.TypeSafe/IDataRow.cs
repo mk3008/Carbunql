@@ -2,8 +2,8 @@
 
 namespace Carbunql.TypeSafe;
 
-public interface ITableRowDefinition
+public interface IDataRow
 {
     [IgnoreMapping]
-    IDatasource Datasource { get; set; }
+    IDataSet DataSet { get; set; }
 }

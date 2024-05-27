@@ -1,8 +1,8 @@
 ﻿namespace Carbunql.TypeSafe;
 
-public interface IDatasource
+public interface IDataSet
 {
-    bool IsCTE { get; }
+    public List<string> Columns { get; }
 
     SelectQuery BuildFromClause(SelectQuery query, string alias);
 
