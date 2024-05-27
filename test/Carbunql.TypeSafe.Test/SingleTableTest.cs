@@ -1,4 +1,3 @@
-using Carbunql.Clauses;
 using Carbunql.TypeSafe.Extensions;
 using Xunit.Abstractions;
 
@@ -16,7 +15,7 @@ public class SingleTableTest
     [Fact]
     public void SelectAllTest()
     {
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var query = Sql.From(() => a);
 
@@ -34,7 +33,7 @@ FROM
     [Fact]
     public void SelectTest()
     {
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var query = Sql.From(() => a)
             .Select(() => new
@@ -56,7 +55,7 @@ FROM
     [Fact]
     public void AliasTest()
     {
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var query = Sql.From(() => a)
             .Select(() => new
@@ -82,7 +81,7 @@ FROM
     [Fact]
     public void LiteralTest()
     {
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var query = Sql.From(() => a)
             .Select(() => new
@@ -118,7 +117,7 @@ FROM
     [Fact]
     public void BracketTest()
     {
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var query = Sql.From(() => a)
             .Select(() => new
@@ -142,7 +141,7 @@ FROM
     [Fact]
     public void VariableTest()
     {
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var id = 1;
         var value = (long)10;
@@ -193,7 +192,7 @@ FROM
     [Fact]
     public void CSharpFunction_Coalesce()
     {
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var query = Sql.From(() => a)
             .Select(() => new
@@ -217,7 +216,7 @@ FROM
     [Fact]
     public void CSharpFunction_Operator()
     {
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var query = Sql.From(() => a)
             .Select(() => new
@@ -249,7 +248,7 @@ FROM
     [Fact]
     public void DatetimeTest_SqlCommand()
     {
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var d = new DateTime(2000, 10, 20);
 
@@ -290,7 +289,7 @@ FROM
     [Fact]
     public void DatetimeTest_SqlExtension()
     {
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var d = new DateTime(2000, 10, 20);
 
@@ -333,7 +332,7 @@ FROM
     [Fact]
     public void CSharpFunction_Math()
     {
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var query = Sql.From(() => a)
             .Select(() => new
@@ -367,7 +366,7 @@ FROM
     [Fact]
     public void RawCommand()
     {
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var query = Sql.From(() => a)
             .Select(() => new
@@ -389,7 +388,7 @@ FROM
     [Fact]
     public void ReservedCommand()
     {
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var query = Sql.From(() => a)
             .Select(() => new
@@ -399,7 +398,7 @@ FROM
                 row_num = Sql.RowNumber(),
                 row_num_partiton_order = Sql.RowNumber(new { a.product_name, a.unit_price }, new { a.quantity, a.sale_id }),
                 row_num_partition = Sql.RowNumberPartitionBy(new { a.product_name, a.unit_price }),
-                row_num_order = Sql.RowNumberOrderbyBy(new { a.product_name, a.unit_price })
+                row_num_order = Sql.RowNumberOrderBy(new { a.product_name, a.unit_price })
             });
 
         var actual = query.ToText();
@@ -436,7 +435,7 @@ FROM
     [Fact]
     public void Trinomial()
     {
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var query = Sql.From(() => a)
             .Select(() => new
@@ -486,7 +485,7 @@ FROM
     [Fact]
     public void Trinomial_When()
     {
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var query = Sql.From(() => a)
             .Select(() => new
@@ -516,7 +515,7 @@ FROM
     [Fact]
     public void Trinomial_Nest()
     {
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var query = Sql.From(() => a)
             .Select(() => new
@@ -564,7 +563,7 @@ FROM
     [Fact]
     public void TrimTest()
     {
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var query = Sql.From(() => a)
             .Select(() => new
@@ -590,7 +589,7 @@ FROM
     [Fact]
     public void ToStringTest()
     {
-        var a = Sql.DefineTable<sale>();
+        var a = Sql.DefineDataSet<sale>();
 
         var query = Sql.From(() => a)
             .Select(() => new
@@ -695,13 +694,13 @@ FROM
         int quantity,
         decimal unit_price,
         DateTime created_at
-    ) : ITableRowDefinition
+    ) : IDataRow
     {
         // no arguments constructor.
         // Since it is used as a definition, it has no particular meaning as a value.
         public sale() : this(0, "", 0, 0, DateTime.Now) { }
 
         // interface property
-        TableDefinitionClause ITableRowDefinition.TableDefinition { get; set; } = null!;
+        IDataSet IDataRow.DataSet { get; set; } = null!;
     }
 }

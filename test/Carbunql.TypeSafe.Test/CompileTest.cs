@@ -2,9 +2,9 @@
 
 namespace Carbunql.TypeSafe.Test;
 
-public class JoinTest
+public class CompileTest
 {
-    public JoinTest(ITestOutputHelper output)
+    public CompileTest(ITestOutputHelper output)
     {
         Output = output;
     }
@@ -12,70 +12,94 @@ public class JoinTest
     private ITestOutputHelper Output { get; }
 
     [Fact]
-    public void InnerJoin()
+    public void Compile_SelectAll()
     {
-        var od = Sql.DefineDataSet<order_detail>();
         var o = Sql.DefineDataSet<order>();
-        var p = Sql.DefineDataSet<product>();
-        var s = Sql.DefineDataSet<store>();
 
-        var query = Sql.From(() => od)
-                        .InnerJoin(() => o, () => o.order_id == od.order_id)
-                        .InnerJoin(() => p, () => od.product_id == p.product_id)
-                        .InnerJoin(() => s, () => o.store_id == s.store_id);
+        var query = Sql.From(() => o).Compile<order>();
 
         var actual = query.ToText();
         Output.WriteLine(actual);
 
         var expect = @"SELECT
-    *
+    o.order_id,
+    o.order_date,
+    o.customer_name,
+    o.store_id
 FROM
-    order_detail AS od
-    INNER JOIN order AS o ON o.order_id = od.order_id
-    INNER JOIN product AS p ON od.product_id = p.product_id
-    INNER JOIN store AS s ON o.store_id = s.store_id";
+    order AS o";
 
         Assert.Equal(expect, actual, true, true, true);
     }
 
     [Fact]
-    public void LeftJoin()
+    public void Compile_SelectAll_Exception()
     {
         var o = Sql.DefineDataSet<order>();
-        var od = Sql.DefineDataSet<order_detail>();
 
-        var query = Sql.From(() => o)
-                        .LeftJoin(() => od, () => o.order_id == od.order_id);
+        var query = Sql.From(() => o);
+
+        var ex = Assert.Throws<InvalidProgramException>(() => query.Compile<order_detail>());
+        Output.WriteLine(ex.Message);
+
+        Assert.Equal("The select query is not compatible with 'order_detail'. Expect: order_detail, Actual: order", ex.Message);
+    }
+
+    [Fact]
+    public void Compile_Excess()
+    {
+        var o = Sql.DefineDataSet<order>();
+
+        var query = Sql.From(() => o).Select(() => new { o.order_id, o.store_id, o.order_date, o.customer_name, memo = "test" }).Compile<order>();
 
         var actual = query.ToText();
         Output.WriteLine(actual);
 
-        var expect = @"SELECT
-    *
+        var expect = @"/*
+  :p0 = 'test'
+*/
+SELECT
+    o.order_id,
+    o.store_id,
+    o.order_date,
+    o.customer_name,
+    :p0 AS memo
 FROM
-    order AS o
-    LEFT JOIN order_detail AS od ON o.order_id = od.order_id";
+    order AS o";
 
         Assert.Equal(expect, actual, true, true, true);
     }
 
     [Fact]
-    public void CrossJoin()
+    public void Compile_Undersized()
     {
-        var p = Sql.DefineDataSet<product>();
-        var s = Sql.DefineDataSet<store>();
+        var o = Sql.DefineDataSet<order>();
 
-        var query = Sql.From(() => p)
-                        .CrossJoin(() => s);
+        var query = Sql.From(() => o).Select(() => new { o.order_id });
+
+        var ex = Assert.Throws<InvalidProgramException>(() => query.Compile<order>());
+        Output.WriteLine(ex.Message);
+
+        Assert.Equal("The select query is not compatible with 'order'. The following columns are missing: order_date, customer_name, store_id", ex.Message);
+    }
+
+    [Fact]
+    public void Compile_ForceCorrect()
+    {
+        var o = Sql.DefineDataSet<order>();
+
+        var query = Sql.From(() => o).Select(() => new { o.order_id }).Compile<order>(true);
 
         var actual = query.ToText();
         Output.WriteLine(actual);
 
         var expect = @"SELECT
-    *
+    o.order_id,
+    CAST(null AS timestamp) AS order_date,
+    CAST(null AS text) AS customer_name,
+    CAST(null AS integer) AS store_id
 FROM
-    product AS p
-    CROSS JOIN store AS s";
+    order AS o";
 
         Assert.Equal(expect, actual, true, true, true);
     }

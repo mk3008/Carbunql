@@ -1,5 +1,9 @@
 ﻿using Carbunql.Analysis.Parser;
+using Carbunql.Annotations;
 using Carbunql.Building;
+using Carbunql.Clauses;
+using Carbunql.Definitions;
+using Carbunql.Tables;
 using Carbunql.TypeSafe.Extensions;
 using Carbunql.Values;
 using System.Linq.Expressions;
@@ -32,7 +36,7 @@ public class FluentSelectQuery : SelectQuery
         return this;
     }
 
-    public FluentSelectQuery InnerJoin<T>(Expression<Func<T>> tableExpression, Expression<Func<bool>> conditionExpression) where T : ITableRowDefinition
+    public FluentSelectQuery InnerJoin<T>(Expression<Func<T>> tableExpression, Expression<Func<bool>> conditionExpression) where T : IDataRow
     {
 #if DEBUG
         var analyzed = ExpressionReader.Analyze(conditionExpression);
@@ -44,17 +48,15 @@ public class FluentSelectQuery : SelectQuery
         var compiledExpression = tableExpression.Compile();
         var table = compiledExpression();
 
-
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
-
         var condition = ToValue(conditionExpression.Body, prmManager.AddParaemter);
 
-        this.FromClause!.InnerJoin(table.TableDefinition).As(tableAlias).On(_ => ValueParser.Parse(condition));
+        table.DataSet.BuildJoinClause(this, "inner join", tableAlias, condition);
 
         return this;
     }
 
-    public FluentSelectQuery LeftJoin<T>(Expression<Func<T>> tableExpression, Expression<Func<bool>> conditionExpression) where T : ITableRowDefinition
+    public FluentSelectQuery LeftJoin<T>(Expression<Func<T>> tableExpression, Expression<Func<bool>> conditionExpression) where T : IDataRow
     {
 #if DEBUG
         var analyzed = ExpressionReader.Analyze(conditionExpression);
@@ -66,17 +68,15 @@ public class FluentSelectQuery : SelectQuery
         var compiledExpression = tableExpression.Compile();
         var table = compiledExpression();
 
-
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
-
         var condition = ToValue(conditionExpression.Body, prmManager.AddParaemter);
 
-        this.FromClause!.LeftJoin(table.TableDefinition).As(tableAlias).On(_ => ValueParser.Parse(condition));
+        table.DataSet.BuildJoinClause(this, "left join", tableAlias, condition);
 
         return this;
     }
 
-    public FluentSelectQuery RightJoin<T>(Expression<Func<T>> tableExpression, Expression<Func<bool>> conditionExpression) where T : ITableRowDefinition
+    public FluentSelectQuery RightJoin<T>(Expression<Func<T>> tableExpression, Expression<Func<bool>> conditionExpression) where T : IDataRow
     {
 #if DEBUG
         var analyzed = ExpressionReader.Analyze(conditionExpression);
@@ -88,17 +88,15 @@ public class FluentSelectQuery : SelectQuery
         var compiledExpression = tableExpression.Compile();
         var table = compiledExpression();
 
-
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
-
         var condition = ToValue(conditionExpression.Body, prmManager.AddParaemter);
 
-        this.FromClause!.RightJoin(table.TableDefinition).As(tableAlias).On(_ => ValueParser.Parse(condition));
+        table.DataSet.BuildJoinClause(this, "right join", tableAlias, condition);
 
         return this;
     }
 
-    public FluentSelectQuery CrossJoin<T>(Expression<Func<T>> tableExpression) where T : ITableRowDefinition
+    public FluentSelectQuery CrossJoin<T>(Expression<Func<T>> tableExpression) where T : IDataRow
     {
 
         var tableAlias = ((MemberExpression)tableExpression.Body).Member.Name;
@@ -107,7 +105,7 @@ public class FluentSelectQuery : SelectQuery
         var compiledExpression = tableExpression.Compile();
         var table = compiledExpression();
 
-        this.FromClause!.CrossJoin(table.TableDefinition).As(tableAlias);
+        table.DataSet.BuildJoinClause(this, "cross join", tableAlias);
 
         return this;
     }
@@ -188,5 +186,127 @@ public class FluentSelectQuery : SelectQuery
             }
         }
         return value;
+    }
+
+    /// <summary>
+    /// Compiles a FluentSelectQuery for a specified table row definition type.
+    /// </summary>
+    /// <typeparam name="T">The type of the table row definition.</typeparam>
+    /// <returns>A compiled FluentSelectQuery of type T.</returns>
+    /// <exception cref="InvalidProgramException">
+    /// Thrown when the select clause does not include all required columns of the table row definition type.
+    /// </exception>
+    public FluentSelectQuery<T> Compile<T>(bool force = false) where T : IDataRow, new()
+    {
+        var q = new FluentSelectQuery<T>();
+
+        // Copy clauses and parameters to the new query object
+        q.WithClause = WithClause;
+        q.SelectClause = SelectClause;
+        q.FromClause = FromClause;
+        q.WhereClause = WhereClause;
+        q.GroupClause = GroupClause;
+        q.HavingClause = HavingClause;
+        q.WindowClause = WindowClause;
+        q.OperatableQueries = OperatableQueries;
+        q.OrderClause = OrderClause;
+        q.LimitClause = LimitClause;
+        q.Parameters = Parameters;
+
+        var clause = TableDefinitionClauseFactory.Create<T>();
+
+        if (force)
+        {
+            CorrectSelectClause(q, clause);
+        }
+
+        TypeValidate<T>(q, clause);
+
+        if (SelectClause == null)
+        {
+            foreach (var item in clause.OfType<ColumnDefinition>())
+            {
+                q.Select(q.FromClause!.Root, item.ColumnName);
+            }
+        };
+
+        return q;
+    }
+
+    private static void CorrectSelectClause(SelectQuery q, TableDefinitionClause clause)
+    {
+        if (q.SelectClause == null)
+        {
+            // End without making corrections
+            return;
+        }
+
+        // Check if all properties of T are specified in the select clause
+        var aliases = q.GetSelectableItems().Select(x => x.Alias).ToHashSet();
+        var missingColumns = clause.OfType<ColumnDefinition>().Where(x => !aliases.Contains(x.ColumnName));
+
+        // Automatically add missing columns
+        foreach (var item in missingColumns)
+        {
+            q.Select($"cast(null as {item.ColumnType.ToText()})").As(item.ColumnName);
+        }
+        return;
+    }
+
+    private static void TypeValidate<T>(SelectQuery q, TableDefinitionClause clause)
+    {
+        if (q.SelectClause != null)
+        {
+            // Check if all properties of T are specified in the select clause
+            var aliases = q.GetSelectableItems().Select(x => x.Alias).ToHashSet();
+            var missingColumns = clause.ColumnNames.Where(item => !aliases.Contains(item)).ToList();
+
+            if (missingColumns.Any())
+            {
+                // If there are missing columns, include all of them in the error message
+                throw new InvalidProgramException($"The select query is not compatible with '{typeof(T).Name}'. The following columns are missing: {string.Join(", ", missingColumns)}");
+            }
+            return;
+        }
+        else if (q.FromClause != null)
+        {
+            var actual = q.FromClause.Root.Table.GetTableFullName();
+            var expect = clause.GetTableFullName();
+
+            if (q.FromClause.Root.Table is VirtualTable v && v.Query is SelectQuery vq)
+            {
+                TypeValidate<T>(vq, clause);
+            }
+            else if (q.FromClause.Root.Table is CTETable ct)
+            {
+                // Check if all properties of T are specified in the select clause
+                var aliases = ct.GetColumnNames().ToHashSet();
+                var missingColumns = clause.ColumnNames.Where(item => !aliases.Contains(item)).ToList();
+
+                if (missingColumns.Any())
+                {
+                    // If there are missing columns, include all of them in the error message
+                    throw new InvalidProgramException($"The select query is not compatible with '{typeof(T).Name}'. The following columns are missing: {string.Join(", ", missingColumns)}");
+                }
+                return;
+            }
+            else if (!actual.Equals(expect))
+            {
+                throw new InvalidProgramException($"The select query is not compatible with '{typeof(T).Name}'. Expect: {expect}, Actual: {actual}");
+            }
+            return;
+        }
+        else
+        {
+            throw new InvalidProgramException($"The select query is not compatible with '{typeof(T).Name}'. FromClause is null.");
+        }
+    }
+}
+
+public class FluentSelectQuery<T> : FluentSelectQuery where T : IDataRow, new()
+{
+    public T ToTable()
+    {
+        throw new InvalidOperationException();
     }
 }

@@ -2,80 +2,123 @@
 
 namespace Carbunql.TypeSafe.Test;
 
-public class JoinTest
+public class CTETest
 {
-    public JoinTest(ITestOutputHelper output)
+    public CTETest(ITestOutputHelper output)
     {
         Output = output;
     }
 
     private ITestOutputHelper Output { get; }
 
-    [Fact]
-    public void InnerJoin()
+    private FluentSelectQuery<order> SelectTodayOrder()
     {
-        var od = Sql.DefineDataSet<order_detail>();
         var o = Sql.DefineDataSet<order>();
-        var p = Sql.DefineDataSet<product>();
-        var s = Sql.DefineDataSet<store>();
-
-        var query = Sql.From(() => od)
-                        .InnerJoin(() => o, () => o.order_id == od.order_id)
-                        .InnerJoin(() => p, () => od.product_id == p.product_id)
-                        .InnerJoin(() => s, () => o.store_id == s.store_id);
-
-        var actual = query.ToText();
-        Output.WriteLine(actual);
-
-        var expect = @"SELECT
-    *
-FROM
-    order_detail AS od
-    INNER JOIN order AS o ON o.order_id = od.order_id
-    INNER JOIN product AS p ON od.product_id = p.product_id
-    INNER JOIN store AS s ON o.store_id = s.store_id";
-
-        Assert.Equal(expect, actual, true, true, true);
+        var query = Sql.From(() => o).Where(() => o.order_date == Sql.Now);
+        return query.Compile<order>();
     }
 
     [Fact]
-    public void LeftJoin()
+    public void CTE()
     {
-        var o = Sql.DefineDataSet<order>();
-        var od = Sql.DefineDataSet<order_detail>();
+        // Assign to a variable
+        var today_order = SelectTodayOrder();
+
+        // Pass the variable using an Expression
+        var o = Sql.DefineDataSet(() => today_order);
 
         var query = Sql.From(() => o)
-                        .LeftJoin(() => od, () => o.order_id == od.order_id);
+                .Select(() => new { o.store_id });
 
         var actual = query.ToText();
         Output.WriteLine(actual);
 
-        var expect = @"SELECT
-    *
+        var expect = @"WITH
+    today_order AS (
+        SELECT
+            o.order_id,
+            o.order_date,
+            o.customer_name,
+            o.store_id
+        FROM
+            order AS o
+        WHERE
+            o.order_date = CAST(NOW() AS timestamp)
+    )
+SELECT
+    o.store_id
 FROM
-    order AS o
-    LEFT JOIN order_detail AS od ON o.order_id = od.order_id";
+    today_order AS o";
 
         Assert.Equal(expect, actual, true, true, true);
     }
 
     [Fact]
-    public void CrossJoin()
+    public void CTE_Materialized()
     {
-        var p = Sql.DefineDataSet<product>();
-        var s = Sql.DefineDataSet<store>();
+        // Assign to a variable
+        var filtered_order = SelectTodayOrder();
 
-        var query = Sql.From(() => p)
-                        .CrossJoin(() => s);
+        // Pass the variable using an Expression
+        var o = Sql.DefineMaterializedDataSet(() => filtered_order);
+
+        var query = Sql.From(() => o)
+                .Select(() => new { o.store_id });
 
         var actual = query.ToText();
         Output.WriteLine(actual);
 
-        var expect = @"SELECT
-    *
+        var expect = @"WITH
+    filtered_order AS MATERIALIZED (
+        SELECT
+            o.order_id,
+            o.order_date,
+            o.customer_name,
+            o.store_id
+        FROM
+            order AS o
+        WHERE
+            o.order_date = CAST(NOW() AS timestamp)
+    )
+SELECT
+    o.store_id
 FROM
-    product AS p
-    CROSS JOIN store AS s";
+    filtered_order AS o";
+
+        Assert.Equal(expect, actual, true, true, true);
+    }
+
+    [Fact]
+    public void CTE_NotMaterialized()
+    {
+        // Assign to a variable
+        var filtered_order = SelectTodayOrder();
+
+        // Pass the variable using an Expression
+        var o = Sql.DefineNotMaterializedDataSet(() => filtered_order);
+
+        var query = Sql.From(() => o)
+                .Select(() => new { o.store_id });
+
+        var actual = query.ToText();
+        Output.WriteLine(actual);
+
+        var expect = @"WITH
+    filtered_order AS NOT MATERIALIZED (
+        SELECT
+            o.order_id,
+            o.order_date,
+            o.customer_name,
+            o.store_id
+        FROM
+            order AS o
+        WHERE
+            o.order_date = CAST(NOW() AS timestamp)
+    )
+SELECT
+    o.store_id
+FROM
+    filtered_order AS o";
 
         Assert.Equal(expect, actual, true, true, true);
     }

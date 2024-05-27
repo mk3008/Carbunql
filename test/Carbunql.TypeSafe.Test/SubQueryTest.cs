@@ -2,80 +2,128 @@
 
 namespace Carbunql.TypeSafe.Test;
 
-public class JoinTest
+public class SubQueryTest
 {
-    public JoinTest(ITestOutputHelper output)
+    public SubQueryTest(ITestOutputHelper output)
     {
         Output = output;
     }
 
     private ITestOutputHelper Output { get; }
 
-    [Fact]
-    public void InnerJoin()
+    private FluentSelectQuery<order> SelectOrderByStoreId(int store_id)
     {
-        var od = Sql.DefineDataSet<order_detail>();
         var o = Sql.DefineDataSet<order>();
-        var p = Sql.DefineDataSet<product>();
-        var s = Sql.DefineDataSet<store>();
+        var query = Sql.From(() => o)
+            .Where(() => o.store_id == store_id);
+        return query.Compile<order>();
+    }
 
-        var query = Sql.From(() => od)
-                        .InnerJoin(() => o, () => o.order_id == od.order_id)
-                        .InnerJoin(() => p, () => od.product_id == p.product_id)
-                        .InnerJoin(() => s, () => o.store_id == s.store_id);
-
-        var actual = query.ToText();
-        Output.WriteLine(actual);
-
-        var expect = @"SELECT
-    *
-FROM
-    order_detail AS od
-    INNER JOIN order AS o ON o.order_id = od.order_id
-    INNER JOIN product AS p ON od.product_id = p.product_id
-    INNER JOIN store AS s ON o.store_id = s.store_id";
-
-        Assert.Equal(expect, actual, true, true, true);
+    private FluentSelectQuery<order> SelectOrder()
+    {
+        var o = Sql.DefineDataSet<order>();
+        var query = Sql.From(() => o);
+        return query.Compile<order>();
     }
 
     [Fact]
-    public void LeftJoin()
+    public void SubQuery()
     {
-        var o = Sql.DefineDataSet<order>();
-        var od = Sql.DefineDataSet<order_detail>();
+        var o = Sql.DefineDataSet(() => SelectOrder());
 
         var query = Sql.From(() => o)
-                        .LeftJoin(() => od, () => o.order_id == od.order_id);
+                .Select(() => new { o.store_id });
 
         var actual = query.ToText();
         Output.WriteLine(actual);
 
         var expect = @"SELECT
-    *
+    o.store_id
 FROM
-    order AS o
-    LEFT JOIN order_detail AS od ON o.order_id = od.order_id";
+    (
+        SELECT
+            o.order_id,
+            o.order_date,
+            o.customer_name,
+            o.store_id
+        FROM
+            order AS o
+    ) AS o";
 
         Assert.Equal(expect, actual, true, true, true);
     }
 
     [Fact]
-    public void CrossJoin()
+    public void SubQuery_Parameter()
     {
-        var p = Sql.DefineDataSet<product>();
-        var s = Sql.DefineDataSet<store>();
+        var o = Sql.DefineDataSet(() => SelectOrderByStoreId(1));
 
-        var query = Sql.From(() => p)
-                        .CrossJoin(() => s);
+        var query = Sql.From(() => o)
+                .Select(() => new { o.store_id });
 
         var actual = query.ToText();
         Output.WriteLine(actual);
 
-        var expect = @"SELECT
-    *
+        var expect = @"/*
+  :store_id = 1
+*/
+SELECT
+    o.store_id
 FROM
-    product AS p
-    CROSS JOIN store AS s";
+    (
+        SELECT
+            o.order_id,
+            o.order_date,
+            o.customer_name,
+            o.store_id
+        FROM
+            order AS o
+        WHERE
+            o.store_id = :store_id
+    ) AS o";
+
+        Assert.Equal(expect, actual, true, true, true);
+    }
+
+    [Fact]
+    public void SubQuery_Edit()
+    {
+        var o = Sql.DefineDataSet(() => SelectOrder(), all_order =>
+        {
+            var x = Sql.DefineDataSet(() => all_order);
+            return Sql.From(() => x).Where(() => x.store_id == 1).Compile<order>();
+        });
+
+        var query = Sql.From(() => o)
+                .Select(() => new { o.store_id });
+
+        var actual = query.ToText();
+        Output.WriteLine(actual);
+
+        var expect = @"WITH
+    all_order AS (
+        SELECT
+            o.order_id,
+            o.order_date,
+            o.customer_name,
+            o.store_id
+        FROM
+            order AS o
+    )
+SELECT
+    o.store_id
+FROM
+    (
+        SELECT
+            x.order_id,
+            x.order_date,
+            x.customer_name,
+            x.store_id
+        FROM
+            all_order AS x
+        WHERE
+            x.store_id = 1
+    ) AS o";
 
         Assert.Equal(expect, actual, true, true, true);
     }
