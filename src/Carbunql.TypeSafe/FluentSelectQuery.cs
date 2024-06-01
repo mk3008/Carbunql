@@ -3,9 +3,11 @@ using Carbunql.Annotations;
 using Carbunql.Building;
 using Carbunql.Clauses;
 using Carbunql.Definitions;
+using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.TypeSafe.Extensions;
 using Carbunql.Values;
+using System.Data;
 using System.Linq.Expressions;
 
 namespace Carbunql.TypeSafe;
@@ -17,23 +19,61 @@ public class FluentSelectQuery : SelectQuery
 #if DEBUG
         var analyzed = ExpressionReader.Analyze(expression);
 #endif
-
-        var body = (NewExpression)expression.Body;
-
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
 
-        if (body.Members != null)
+        if (expression.Body is MemberExpression mem)
         {
-            var cnt = body.Members.Count();
-            for (var i = 0; i < cnt; i++)
+            var c = mem.CompileAndInvoke();
+            if (c is IDataRow dr)
             {
-                var alias = body.Members[i].Name;
-                var value = ToValue(body.Arguments[i], prmManager.AddParaemter);
-                this.Select(RemoveRootBracketOrDefault(value)).As(alias);
+                foreach (var item in dr.DataSet.Columns)
+                {
+                    //Do not add duplicate columns
+                    if (SelectClause != null && SelectClause.Where(x => x.Alias.IsEqualNoCase(item)).FirstOrDefault() != null)
+                    {
+                        continue;
+                    }
+
+                    //add
+                    this.Select(mem.Member.Name, item);
+                }
+                return this;
             }
+            throw new InvalidProgramException();
+
+        }
+        else if (expression.Body is NewExpression ne)
+        {
+            if (ne.Members != null)
+            {
+                var columns = GetColumnNames();
+
+                var cnt = ne.Members.Count();
+                for (var i = 0; i < cnt; i++)
+                {
+                    var alias = ne.Members[i].Name;
+
+                    //Remove duplicate columns before adding
+                    if (SelectClause != null)
+                    {
+                        //remove
+                        var col = SelectClause.Where(x => x.Alias.IsEqualNoCase(alias)).FirstOrDefault();
+                        if (col != null)
+                        {
+                            SelectClause!.Remove(col);
+                        }
+                    }
+
+                    //add
+                    var value = ToValue(ne.Arguments[i], prmManager.AddParaemter);
+                    this.Select(RemoveRootBracketOrDefault(value)).As(alias);
+                }
+                return this;
+            }
+
         }
 
-        return this;
+        throw new InvalidProgramException();
     }
 
     public FluentSelectQuery InnerJoin<T>(Expression<Func<T>> tableExpression, Expression<Func<bool>> conditionExpression) where T : IDataRow

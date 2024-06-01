@@ -95,29 +95,6 @@ public static class Sql
         return DefineDataSet(expression, Materialized.NotMaterialized);
     }
 
-    public static T DefineSubQuery<T>(SelectQuery query) where T : IDataRow, new()
-    {
-        var instance = new T();
-
-        //var info = TableInfoFactory.Create(typeof(T));
-
-        instance.DataSet = new QueryDataSet(query);
-        return instance;
-    }
-
-    public static T DefineSubQuery<T>(FluentSelectQuery<T> query) where T : IDataRow, new()
-    {
-        var instance = new T();
-
-        instance.DataSet = new QueryDataSet(query);
-        return instance;
-    }
-
-    public static T DefineSubQuery<T>(Func<FluentSelectQuery<T>> builder) where T : IDataRow, new()
-    {
-        return DefineSubQuery<T>(builder.Invoke());
-    }
-
     public static T DefineDataSet<T>() where T : IDataRow, new()
     {
         var instance = new T();
