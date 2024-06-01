@@ -56,7 +56,10 @@ public static class PrimaryKeyConstraintFactory
                     DbmsConfiguration.ConvertToDefaultPrimaryKeyColumnLogic(table),
                     DbmsConfiguration.ConvertToDefaultPrimaryKeyPropertyLogic(type)
             );
-            columns = new List<PrimaryKeyMap> { map };
+            if (!string.IsNullOrEmpty(map.PropertyName))
+            {
+                columns = new List<PrimaryKeyMap> { map };
+            }
         }
         if (string.IsNullOrEmpty(constraintName))
         {

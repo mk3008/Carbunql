@@ -284,7 +284,7 @@ public static class DbmsConfiguration
     {
         var prop = table.GetProperties().Where(x => x.Name.IsEqualNoCase(table.Name + "id") || x.Name.IsEqualNoCase(table.Name + "_id")).FirstOrDefault();
         if (prop != null) return prop.Name;
-        throw new InvalidProgramException();
+        return string.Empty;
     }
 
     public static Func<Type, string> ConvertToDefaultPrimaryKeyPropertyLogic { get; set; } = ConvertToDefaultPrimaryKeyProperty;
