@@ -26,7 +26,7 @@ public class CTEDataSet(string name, SelectQuery query) : IDataSet
         var cte = query.With(Query).As(Name);
         cte.Materialized = Materialized;
 
-        var r = query.FromClause!.Join(cte, join).As(alias);
+        var r = query.FromClause!.Join(cte.ToPhysicalTable().ToSelectable(), join).As(alias);
         if (!string.IsNullOrEmpty(condition))
         {
             r.On(_ => ValueParser.Parse(condition));

@@ -19,11 +19,20 @@ public class FluentSelectQuery : SelectQuery
 #if DEBUG
         var analyzed = ExpressionReader.Analyze(expression);
 #endif
-        var prmManager = new ParameterManager(GetParameters(), AddParameter);
+        var mergedParameter = QueryParameterMerger.Merge(GetParameters());
+
+        var prmManager = new ParameterManager(mergedParameter, AddParameter);
 
         if (expression.Body is MemberExpression mem)
         {
+            var table = mem.Member.Name;
             var c = mem.CompileAndInvoke();
+
+            if (!GetSelectableTables().Where(x => x.Alias == table).Any())
+            {
+                throw new InvalidProgramException($"A dataset that is not defined in the FROM clause has been referenced. Name:{table}");
+            }
+
             if (c is IDataRow dr)
             {
                 foreach (var item in dr.DataSet.Columns)
@@ -35,7 +44,7 @@ public class FluentSelectQuery : SelectQuery
                     }
 
                     //add
-                    this.Select(mem.Member.Name, item);
+                    this.Select(table, item);
                 }
                 return this;
             }
