@@ -12,13 +12,21 @@ public class ExistsTest
 
     private ITestOutputHelper Output { get; }
 
+    private FluentSelectQuery<store> SelectStoreOfJapan()
+    {
+        var localtion = "japan";
+        var s = Sql.DefineDataSet<store>();
+        var query = Sql.From(() => s).Where(() => s.location == localtion);
+        return query.Compile<store>();
+    }
+
     [Fact]
     public void Exists()
     {
         var o = Sql.DefineDataSet<order>();
 
         var query = Sql.From(() => o)
-            .Exists(Sql.DefineDataSet<store>, x => x.store_id == o.store_id);
+            .Exists<store>(x => x.store_id == o.store_id);
 
         var actual = query.ToText();
         Output.WriteLine(query.ToText());
@@ -46,7 +54,7 @@ WHERE
         var o = Sql.DefineDataSet<order>();
 
         var query = Sql.From(() => o)
-            .NotExists(Sql.DefineDataSet<store>, x => x.store_id == o.store_id);
+            .NotExists<store>(x => x.store_id == o.store_id);
 
         var actual = query.ToText();
         Output.WriteLine(query.ToText());
@@ -101,6 +109,46 @@ WHERE
         WHERE
             x.store_id = o.store_id
     ))";
+
+        Assert.Equal(expect, actual, true, true, true);
+    }
+
+    [Fact]
+    public void ExistsSubQuery()
+    {
+        var o = Sql.DefineDataSet<order>();
+
+        var query = Sql.From(() => o)
+            .Exists(SelectStoreOfJapan, x => x.store_id == o.store_id);
+
+        var actual = query.ToText();
+        Output.WriteLine(query.ToText());
+
+        var expect = @"/*
+  :localtion = 'japan'
+*/
+SELECT
+    *
+FROM
+    order AS o
+WHERE
+    EXISTS (
+        SELECT
+            *
+        FROM
+            (
+                SELECT
+                    s.store_id,
+                    s.name,
+                    s.location
+                FROM
+                    store AS s
+                WHERE
+                    s.location = :localtion
+            ) AS x
+        WHERE
+            x.store_id = o.store_id
+    )";
 
         Assert.Equal(expect, actual, true, true, true);
     }
