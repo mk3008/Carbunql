@@ -1,4 +1,5 @@
 ﻿using Carbunql.Annotations;
+using Carbunql.Building;
 using System.ComponentModel.Design;
 using System.Linq.Expressions;
 
@@ -117,6 +118,17 @@ public static class Sql
 
         return sq;
     }
+
+    public static bool Exists<T>(Func<T> getDataSet, Expression<Func<T, bool>> expression) where T : IDataRow, new()
+    {
+        return true;
+    }
+
+    public static bool NotExists<T>(Func<T> getDataSet, Expression<Func<T, bool>> expression) where T : IDataRow, new()
+    {
+        return true;
+    }
+
 
     public static string Raw(string command)
     {

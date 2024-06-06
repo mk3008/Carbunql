@@ -31,7 +31,10 @@ internal static class MemberExpressionExtension
         {
             return me.ToValue(mainConverter, addParameter);
         }
-
+        if (mem.Expression is ParameterExpression pe)
+        {
+            return $"{pe.Name}.{mem.Member.Name}";
+        }
         throw new NotSupportedException($"Member.Name:{mem.Member.Name}, Member.DeclaringType:{mem.Member.DeclaringType}");
     }
 

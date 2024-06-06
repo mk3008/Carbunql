@@ -63,7 +63,7 @@ internal class ParameterManager
         return new Result(tmpkey, false);
     }
 
-    public string AddParaemter(string key, object? value)
+    public string AddParameter(string key, object? value)
     {
         var nameInfo = GenerateParameterName(key, value);
 

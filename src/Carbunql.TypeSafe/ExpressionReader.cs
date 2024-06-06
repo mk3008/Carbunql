@@ -93,7 +93,29 @@ public static class ExpressionReader
         {
             return Analyze(ce);
         }
+        else if (exp is InvocationExpression ie)
+        {
+            return Analyze(ie);
+        }
         return $"not support : {exp.NodeType}";
+    }
+
+    public static string Analyze(InvocationExpression exp)
+    {
+        var sb = new StringBuilder();
+
+        sb.AppendLine($"* InvocationExpression");
+        sb.AppendLine($"NodeType\r\n    {exp.NodeType}");
+        sb.AppendLine($"Type\r\n    {exp.Type.Name}");
+        sb.AppendLine($"Expression\r\n    {exp.Expression}");
+
+        sb.AppendLine("Arguments");
+        foreach (var argument in exp.Arguments)
+        {
+            sb.AppendLine($"    {argument}");
+        }
+
+        return sb.ToString();
     }
 
     internal static string Analyze(MethodCallExpression exp)
