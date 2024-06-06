@@ -174,18 +174,18 @@ public class FluentSelectQuery : SelectQuery
         return this;
     }
 
-    public FluentSelectQuery Exists<T>(Func<T> getDataSet, Expression<Func<T, bool>> expression) where T : IDataRow, new()
+    public FluentSelectQuery Exists<T>(Expression<Func<T, bool>> expression) where T : IDataRow, new()
     {
-        var dataset = getDataSet();
-
 #if DEBUG
         var analyzed = ExpressionReader.Analyze(expression);
 #endif
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
         var value = ToValue(expression.Body, prmManager.AddParameter);
 
-        var fsql = Sql.From(() => dataset);
-        fsql.FromClause!.As(expression.Parameters[0].Name!);
+        var clause = TableDefinitionClauseFactory.Create<T>();
+
+        var fsql = new SelectQuery();
+        fsql.From(clause).As(expression.Parameters[0].Name!);
         fsql.Where(value);
 
         this.Where(fsql.ToExists());
@@ -193,7 +193,26 @@ public class FluentSelectQuery : SelectQuery
         return this;
     }
 
-    public FluentSelectQuery NotExists<T>(Func<T> getDataSet, Expression<Func<T, bool>> expression) where T : IDataRow, new()
+    public FluentSelectQuery NotExists<T>(Expression<Func<T, bool>> expression) where T : IDataRow, new()
+    {
+#if DEBUG
+        var analyzed = ExpressionReader.Analyze(expression);
+#endif
+        var prmManager = new ParameterManager(GetParameters(), AddParameter);
+        var value = ToValue(expression.Body, prmManager.AddParameter);
+
+        var clause = TableDefinitionClauseFactory.Create<T>();
+
+        var fsql = new SelectQuery();
+        fsql.From(clause).As(expression.Parameters[0].Name!);
+        fsql.Where(value);
+
+        this.Where(fsql.ToNotExists());
+
+        return this;
+    }
+
+    public FluentSelectQuery Exists<T>(Func<FluentSelectQuery<T>> getDataSet, Expression<Func<T, bool>> expression) where T : IDataRow, new()
     {
         var dataset = getDataSet();
 
@@ -203,11 +222,11 @@ public class FluentSelectQuery : SelectQuery
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
         var value = ToValue(expression.Body, prmManager.AddParameter);
 
-        var fsql = Sql.From(() => dataset);
-        fsql.FromClause!.As(expression.Parameters[0].Name!);
+        var fsql = new SelectQuery();
+        fsql.From(dataset).As(expression.Parameters[0].Name!);
         fsql.Where(value);
 
-        this.Where(fsql.ToNotExists());
+        this.Where(fsql.ToExists());
 
         return this;
     }
