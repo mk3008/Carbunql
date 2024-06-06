@@ -23,7 +23,7 @@ public static class TableDefinitionClauseFactory
         return clause;
     }
 
-    internal static TableDefinitionClause Create(Type type)
+    public static TableDefinitionClause Create(Type type)
     {
         var info = TableInfoFactory.Create(type);
 

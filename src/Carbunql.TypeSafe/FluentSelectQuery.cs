@@ -74,7 +74,7 @@ public class FluentSelectQuery : SelectQuery
                     }
 
                     //add
-                    var value = ToValue(ne.Arguments[i], prmManager.AddParaemter);
+                    var value = ToValue(ne.Arguments[i], prmManager.AddParameter);
                     this.Select(RemoveRootBracketOrDefault(value)).As(alias);
                 }
                 return this;
@@ -98,7 +98,7 @@ public class FluentSelectQuery : SelectQuery
         var table = compiledExpression();
 
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
-        var condition = ToValue(conditionExpression.Body, prmManager.AddParaemter);
+        var condition = ToValue(conditionExpression.Body, prmManager.AddParameter);
 
         table.DataSet.BuildJoinClause(this, "inner join", tableAlias, condition);
 
@@ -118,7 +118,7 @@ public class FluentSelectQuery : SelectQuery
         var table = compiledExpression();
 
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
-        var condition = ToValue(conditionExpression.Body, prmManager.AddParaemter);
+        var condition = ToValue(conditionExpression.Body, prmManager.AddParameter);
 
         table.DataSet.BuildJoinClause(this, "left join", tableAlias, condition);
 
@@ -138,7 +138,7 @@ public class FluentSelectQuery : SelectQuery
         var table = compiledExpression();
 
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
-        var condition = ToValue(conditionExpression.Body, prmManager.AddParaemter);
+        var condition = ToValue(conditionExpression.Body, prmManager.AddParameter);
 
         table.DataSet.BuildJoinClause(this, "right join", tableAlias, condition);
 
@@ -167,14 +167,52 @@ public class FluentSelectQuery : SelectQuery
 
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
 
-        var value = ToValue(expression.Body, prmManager.AddParaemter);
+        var value = ToValue(expression.Body, prmManager.AddParameter);
 
         this.Where(value);
 
         return this;
     }
 
-    private string ToValue(Expression exp, Func<string, object?, string> addParameter)
+    public FluentSelectQuery Exists<T>(Func<T> getDataSet, Expression<Func<T, bool>> expression) where T : IDataRow, new()
+    {
+        var dataset = getDataSet();
+
+#if DEBUG
+        var analyzed = ExpressionReader.Analyze(expression);
+#endif
+        var prmManager = new ParameterManager(GetParameters(), AddParameter);
+        var value = ToValue(expression.Body, prmManager.AddParameter);
+
+        var fsql = Sql.From(() => dataset);
+        fsql.FromClause!.As(expression.Parameters[0].Name!);
+        fsql.Where(value);
+
+        this.Where(fsql.ToExists());
+
+        return this;
+    }
+
+    public FluentSelectQuery NotExists<T>(Func<T> getDataSet, Expression<Func<T, bool>> expression) where T : IDataRow, new()
+    {
+        var dataset = getDataSet();
+
+#if DEBUG
+        var analyzed = ExpressionReader.Analyze(expression);
+#endif
+        var prmManager = new ParameterManager(GetParameters(), AddParameter);
+        var value = ToValue(expression.Body, prmManager.AddParameter);
+
+        var fsql = Sql.From(() => dataset);
+        fsql.FromClause!.As(expression.Parameters[0].Name!);
+        fsql.Where(value);
+
+        this.Where(fsql.ToNotExists());
+
+        return this;
+    }
+
+    internal string ToValue(Expression exp, Func<string, object?, string> addParameter)
     {
         if (exp is MemberExpression mem)
         {

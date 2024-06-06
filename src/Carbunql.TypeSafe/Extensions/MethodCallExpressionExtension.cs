@@ -1,4 +1,6 @@
 ﻿using Carbunql.Analysis.Parser;
+using Carbunql.Annotations;
+using Carbunql.Building;
 using Carbunql.Values;
 using System.Collections;
 using System.Linq.Expressions;
@@ -176,6 +178,29 @@ internal static class MethodCallExpressionExtension
                     return DbmsConfiguration.GetRowNumberPartitionByCommandLogic(argPartitionByText);
                 }
                 break;
+
+            case nameof(Sql.Exists):
+            case nameof(Sql.NotExists):
+                var ue = (UnaryExpression)mce.Arguments[1];
+                var expression = (LambdaExpression)ue.Operand;
+                var tp = expression.Parameters[0].Type;
+
+                var clause = TableDefinitionClauseFactory.Create(tp);
+
+                var fsql = new FluentSelectQuery();
+                var (f, x) = fsql.From(clause).As(expression.Parameters[0].Name!);
+                var prmManager = new ParameterManager(fsql.GetParameters(), fsql.AddParameter);
+                var value = fsql.ToValue(expression.Body, prmManager.AddParameter);
+                fsql.Where(value);
+
+                if (mce.Method.Name == nameof(Sql.Exists))
+                {
+                    return fsql.ToExists().ToText();
+                }
+                else
+                {
+                    return fsql.ToNotExists().ToText();
+                }
 
             default:
                 throw new ArgumentException($"Unsupported method call: {mce.Method.Name}");
