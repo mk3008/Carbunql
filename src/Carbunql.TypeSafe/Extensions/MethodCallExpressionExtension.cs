@@ -1,6 +1,7 @@
 ﻿using Carbunql.Analysis.Parser;
 using Carbunql.Annotations;
 using Carbunql.Building;
+using Carbunql.Extensions;
 using Carbunql.Values;
 using System.Collections;
 using System.Linq.Expressions;
@@ -181,32 +182,82 @@ internal static class MethodCallExpressionExtension
 
             case nameof(Sql.Exists):
             case nameof(Sql.NotExists):
-                var ue = (UnaryExpression)mce.Arguments[1];
-                var expression = (LambdaExpression)ue.Operand;
-                var tp = expression.Parameters[0].Type;
+                return ToExistsClause(mce);
 
-                var clause = TableDefinitionClauseFactory.Create(tp);
+            case nameof(Sql.Sum):
+                return Aggregate(mce, mainConverter, addParameter, "sum");
 
-                var fsql = new FluentSelectQuery();
-                var (f, x) = fsql.From(clause).As(expression.Parameters[0].Name!);
-                var prmManager = new ParameterManager(fsql.GetParameters(), fsql.AddParameter);
-                var value = fsql.ToValue(expression.Body, prmManager.AddParameter);
-                fsql.Where(value);
+            case nameof(Sql.Count):
+                return Aggregate(mce, mainConverter, addParameter, "count");
 
-                if (mce.Method.Name == nameof(Sql.Exists))
-                {
-                    return fsql.ToExists().ToText();
-                }
-                else
-                {
-                    return fsql.ToNotExists().ToText();
-                }
+            case nameof(Sql.Min):
+                return Aggregate(mce, mainConverter, addParameter, "min");
+            case nameof(Sql.Max):
+                return Aggregate(mce, mainConverter, addParameter, "max");
+            case nameof(Sql.Average):
+                return Aggregate(mce, mainConverter, addParameter, "avg");
 
             default:
                 throw new ArgumentException($"Unsupported method call: {mce.Method.Name}");
         }
 
         throw new ArgumentException("Invalid argument type for SQL command processing.");
+    }
+
+    private static string Aggregate(MethodCallExpression mce
+        , Func<Expression, Func<string, object?, string>, string> mainConverter
+        , Func<string, object?, string> addParameter
+        , string aggregateFunction)
+    {
+#if DEBUG
+        var analyze = ExpressionReader.Analyze(mce);
+#endif
+
+        if (aggregateFunction.IsEqualNoCase("count"))
+        {
+            return $"{aggregateFunction}(*)";
+        }
+
+        var ue = (UnaryExpression)mce.Arguments[0];
+        var expression = (LambdaExpression)ue.Operand;
+
+        if (expression.Body is BinaryExpression be)
+        {
+            var value = be.ToValue(mainConverter, addParameter);
+            return $"{aggregateFunction}({value})";
+        }
+        if (expression.Body is MemberExpression me)
+        {
+            var value = me.ToValue(mainConverter, addParameter);
+            return $"{aggregateFunction}({value})";
+        }
+
+        throw new NotSupportedException();
+
+    }
+
+    private static string ToExistsClause(MethodCallExpression mce)
+    {
+        var ue = (UnaryExpression)mce.Arguments[1];
+        var expression = (LambdaExpression)ue.Operand;
+        var tp = expression.Parameters[0].Type;
+
+        var clause = TableDefinitionClauseFactory.Create(tp);
+
+        var fsql = new FluentSelectQuery();
+        var (f, x) = fsql.From(clause).As(expression.Parameters[0].Name!);
+        var prmManager = new ParameterManager(fsql.GetParameters(), fsql.AddParameter);
+        var value = fsql.ToValue(expression.Body, prmManager.AddParameter);
+        fsql.Where(value);
+
+        if (mce.Method.Name == nameof(Sql.Exists))
+        {
+            return fsql.ToExists().ToText();
+        }
+        else
+        {
+            return fsql.ToNotExists().ToText();
+        }
     }
 
     private static string ToStringValue(this MethodCallExpression mce

@@ -9,6 +9,7 @@ using Carbunql.TypeSafe.Extensions;
 using Carbunql.Values;
 using System.Data;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 
 namespace Carbunql.TypeSafe;
 
@@ -25,6 +26,7 @@ public class FluentSelectQuery : SelectQuery
 
         if (expression.Body is MemberExpression mem)
         {
+            // DataSet.*
             var table = mem.Member.Name;
             var c = mem.CompileAndInvoke();
 
@@ -79,7 +81,70 @@ public class FluentSelectQuery : SelectQuery
                 }
                 return this;
             }
+        }
 
+        throw new InvalidProgramException();
+    }
+
+    public FluentSelectQuery Count<T>(Expression<Func<T>> expression) where T : class
+    {
+        return Aggregate(expression, "count");
+    }
+
+    public FluentSelectQuery Sum<T>(Expression<Func<T>> expression) where T : class
+    {
+        return Aggregate(expression, "sum");
+    }
+
+    private FluentSelectQuery Aggregate<T>(Expression<Func<T>> expression, string aggregateFunction) where T : class
+    {
+#if DEBUG
+        var analyzed = ExpressionReader.Analyze(expression);
+#endif
+        var mergedParameter = QueryParameterMerger.Merge(GetParameters());
+
+        var prmManager = new ParameterManager(mergedParameter, AddParameter);
+
+        if (expression.Body is NewExpression ne)
+        {
+            if (ne.Members != null)
+            {
+                var cnt = ne.Members.Count();
+                for (var i = 0; i < cnt; i++)
+                {
+                    var alias = ne.Members[i].Name;
+                    var value = ToValue(ne.Arguments[i], prmManager.AddParameter);
+                    this.Select($"{aggregateFunction}({value})").As(alias);
+                }
+                return this;
+            }
+        }
+        throw new InvalidProgramException();
+    }
+
+    public FluentSelectQuery GroupBy<T>(Expression<Func<T>> expression) where T : class
+    {
+#if DEBUG
+        var analyzed = ExpressionReader.Analyze(expression);
+#endif
+        var mergedParameter = QueryParameterMerger.Merge(GetParameters());
+
+        var prmManager = new ParameterManager(mergedParameter, AddParameter);
+
+        if (expression.Body is NewExpression ne)
+        {
+            if (ne.Members != null)
+            {
+                var cnt = ne.Members.Count();
+                for (var i = 0; i < cnt; i++)
+                {
+                    var alias = ne.Members[i].Name;
+                    var value = ToValue(ne.Arguments[i], prmManager.AddParameter);
+                    var s = ValueParser.Parse(RemoveRootBracketOrDefault(value));
+                    this.Group(s);
+                }
+                return this;
+            }
         }
 
         throw new InvalidProgramException();
