@@ -153,21 +153,27 @@ public static class Sql
 
     public static DateTime DateTruncateToSecond(DateTime d) => new DateTime();
 
-    public static string RowNumber() => string.Empty;
+    public static int RowNumber() => 0;
 
-    public static string RowNumber(object partition, object order) => string.Empty;
-
-    public static string RowNumberPartitionBy(object partition) => string.Empty;
-
-    public static string RowNumberOrderBy(object order) => string.Empty;
+    public static int RowNumber(Expression<Func<object?>> partition, Expression<Func<object?>> order) => throw new InvalidProgramException();
 
     public static int Count() => throw new InvalidProgramException();
 
+    public static int Count(Expression<Func<object?>> partition, Expression<Func<object?>> order) => throw new InvalidProgramException();
+
     public static T Sum<T>(Expression<Func<T>> expression) => throw new InvalidProgramException();
+
+    public static T Sum<T>(Expression<Func<T>> expression, Expression<Func<object?>> partition, Expression<Func<object?>> order) => throw new InvalidProgramException();
 
     public static T Average<T>(Expression<Func<T>> expression) => throw new InvalidProgramException();
 
+    public static T Average<T>(Expression<Func<T>> expression, Expression<Func<object?>> partition, Expression<Func<object?>> order) => throw new InvalidProgramException();
+
     public static T Max<T>(Expression<Func<T>> expression) => throw new InvalidProgramException();
 
+    public static T Max<T>(Expression<Func<T>> expression, Expression<Func<object?>> partition, Expression<Func<object?>> order) => throw new InvalidProgramException();
+
     public static T Min<T>(Expression<Func<T>> expression) => throw new InvalidProgramException();
+
+    public static T Min<T>(Expression<Func<T>> expression, Expression<Func<object?>> partition, Expression<Func<object?>> order) => throw new InvalidProgramException();
 }
