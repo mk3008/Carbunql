@@ -53,4 +53,15 @@ public static class GroupClauseExtension
         source.GroupClause ??= new();
         source.GroupClause.Add(item);
     }
+
+    /// <summary>
+    /// Adds a grouping clause to the select query using the specified selectable item.
+    /// </summary>
+    /// <param name="source">The select query.</param>
+    /// <param name="value">The valuebase item to group by.</param>
+    public static void Group(this SelectQuery source, ValueBase item)
+    {
+        source.GroupClause ??= new();
+        source.GroupClause.Add(item);
+    }
 }

@@ -160,4 +160,14 @@ public static class Sql
     public static string RowNumberPartitionBy(object partition) => string.Empty;
 
     public static string RowNumberOrderBy(object order) => string.Empty;
+
+    public static int Count() => throw new InvalidProgramException();
+
+    public static T Sum<T>(Expression<Func<T>> expression) => throw new InvalidProgramException();
+
+    public static T Average<T>(Expression<Func<T>> expression) => throw new InvalidProgramException();
+
+    public static T Max<T>(Expression<Func<T>> expression) => throw new InvalidProgramException();
+
+    public static T Min<T>(Expression<Func<T>> expression) => throw new InvalidProgramException();
 }
