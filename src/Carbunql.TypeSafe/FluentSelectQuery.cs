@@ -9,7 +9,6 @@ using Carbunql.TypeSafe.Extensions;
 using Carbunql.Values;
 using System.Data;
 using System.Linq.Expressions;
-using System.Text.RegularExpressions;
 
 namespace Carbunql.TypeSafe;
 
@@ -76,7 +75,7 @@ public class FluentSelectQuery : SelectQuery
                     }
 
                     //add
-                    var value = ToValue(ne.Arguments[i], prmManager.AddParameter);
+                    var value = ne.Arguments[i].ToValue(prmManager.AddParameter);
                     this.Select(RemoveRootBracketOrDefault(value)).As(alias);
                 }
                 return this;
@@ -84,16 +83,6 @@ public class FluentSelectQuery : SelectQuery
         }
 
         throw new InvalidProgramException();
-    }
-
-    public FluentSelectQuery Count<T>(Expression<Func<T>> expression) where T : class
-    {
-        return Aggregate(expression, "count");
-    }
-
-    public FluentSelectQuery Sum<T>(Expression<Func<T>> expression) where T : class
-    {
-        return Aggregate(expression, "sum");
     }
 
     private FluentSelectQuery Aggregate<T>(Expression<Func<T>> expression, string aggregateFunction) where T : class
@@ -113,7 +102,7 @@ public class FluentSelectQuery : SelectQuery
                 for (var i = 0; i < cnt; i++)
                 {
                     var alias = ne.Members[i].Name;
-                    var value = ToValue(ne.Arguments[i], prmManager.AddParameter);
+                    var value = ne.Arguments[i].ToValue(prmManager.AddParameter);
                     this.Select($"{aggregateFunction}({value})").As(alias);
                 }
                 return this;
@@ -138,8 +127,7 @@ public class FluentSelectQuery : SelectQuery
                 var cnt = ne.Members.Count();
                 for (var i = 0; i < cnt; i++)
                 {
-                    var alias = ne.Members[i].Name;
-                    var value = ToValue(ne.Arguments[i], prmManager.AddParameter);
+                    var value = ne.Arguments[i].ToValue(prmManager.AddParameter);
                     var s = ValueParser.Parse(RemoveRootBracketOrDefault(value));
                     this.Group(s);
                 }
@@ -163,7 +151,7 @@ public class FluentSelectQuery : SelectQuery
         var table = compiledExpression();
 
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
-        var condition = ToValue(conditionExpression.Body, prmManager.AddParameter);
+        var condition = conditionExpression.Body.ToValue(prmManager.AddParameter);
 
         table.DataSet.BuildJoinClause(this, "inner join", tableAlias, condition);
 
@@ -183,7 +171,7 @@ public class FluentSelectQuery : SelectQuery
         var table = compiledExpression();
 
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
-        var condition = ToValue(conditionExpression.Body, prmManager.AddParameter);
+        var condition = conditionExpression.Body.ToValue(prmManager.AddParameter);
 
         table.DataSet.BuildJoinClause(this, "left join", tableAlias, condition);
 
@@ -203,7 +191,7 @@ public class FluentSelectQuery : SelectQuery
         var table = compiledExpression();
 
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
-        var condition = ToValue(conditionExpression.Body, prmManager.AddParameter);
+        var condition = conditionExpression.Body.ToValue(prmManager.AddParameter);
 
         table.DataSet.BuildJoinClause(this, "right join", tableAlias, condition);
 
@@ -232,7 +220,7 @@ public class FluentSelectQuery : SelectQuery
 
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
 
-        var value = ToValue(expression.Body, prmManager.AddParameter);
+        var value = expression.Body.ToValue(prmManager.AddParameter);
 
         this.Where(value);
 
@@ -245,7 +233,7 @@ public class FluentSelectQuery : SelectQuery
         var analyzed = ExpressionReader.Analyze(expression);
 #endif
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
-        var value = ToValue(expression.Body, prmManager.AddParameter);
+        var value = expression.Body.ToValue(prmManager.AddParameter);
 
         var clause = TableDefinitionClauseFactory.Create<T>();
 
@@ -264,7 +252,7 @@ public class FluentSelectQuery : SelectQuery
         var analyzed = ExpressionReader.Analyze(expression);
 #endif
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
-        var value = ToValue(expression.Body, prmManager.AddParameter);
+        var value = expression.Body.ToValue(prmManager.AddParameter);
 
         var clause = TableDefinitionClauseFactory.Create<T>();
 
@@ -285,7 +273,7 @@ public class FluentSelectQuery : SelectQuery
         var analyzed = ExpressionReader.Analyze(expression);
 #endif
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
-        var value = ToValue(expression.Body, prmManager.AddParameter);
+        var value = expression.Body.ToValue(prmManager.AddParameter);
 
         var fsql = new SelectQuery();
         fsql.From(dataset).As(expression.Parameters[0].Name!);
@@ -294,44 +282,6 @@ public class FluentSelectQuery : SelectQuery
         this.Where(fsql.ToExists());
 
         return this;
-    }
-
-    internal string ToValue(Expression exp, Func<string, object?, string> addParameter)
-    {
-        if (exp is MemberExpression mem)
-        {
-            return mem.ToValue(ToValue, addParameter);
-        }
-        else if (exp is ConstantExpression ce)
-        {
-            return ce.ToValue(ToValue, addParameter);
-        }
-        else if (exp is NewExpression ne)
-        {
-            return ne.ToValue(ToValue, addParameter);
-        }
-        else if (exp is BinaryExpression be)
-        {
-            return be.ToValue(ToValue, addParameter);
-        }
-        else if (exp is UnaryExpression ue)
-        {
-            return ue.ToValue(ToValue, addParameter);
-        }
-        else if (exp is MethodCallExpression mce)
-        {
-            return mce.ToValue(ToValue, addParameter);
-        }
-        else if (exp is ConditionalExpression cnd)
-        {
-            return cnd.ToValue(ToValue, addParameter);
-        }
-        else if (exp is ParameterExpression prm)
-        {
-            return prm.ToValue(ToValue, addParameter);
-        }
-
-        throw new InvalidProgramException(exp.ToString());
     }
 
     internal static string CreateCastStatement(string value, Type type)

@@ -22,11 +22,11 @@ public class GroupTest
                 {
                     od.order_id,
                     total_price = Sql.Sum(() => od.quantity * od.price),
-                    total_amount = Sql.Sum(() => od.quantity),
+                    total_quantity = Sql.Sum(() => od.quantity),
                     count = Sql.Count(),
-                    avg_amount = Sql.Average(() => od.quantity),
-                    min_amount = Sql.Min(() => od.quantity),
-                    max_amount = Sql.Max(() => od.quantity),
+                    avg_quantity = Sql.Average(() => od.quantity),
+                    min_quantity = Sql.Min(() => od.quantity),
+                    max_quantity = Sql.Max(() => od.quantity),
                 })
                 .GroupBy(() => new
                 {
@@ -39,11 +39,11 @@ public class GroupTest
         var expect = @"SELECT
     od.order_id,
     SUM(CAST(od.quantity AS numeric) * od.price) AS total_price,
-    SUM(od.quantity) AS total_amount,
+    SUM(od.quantity) AS total_quantity,
     COUNT(*) AS count,
-    AVG(od.quantity) AS avg_amount,
-    MIN(od.quantity) AS min_amount,
-    MAX(od.quantity) AS max_amount
+    AVG(od.quantity) AS avg_quantity,
+    MIN(od.quantity) AS min_quantity,
+    MAX(od.quantity) AS max_quantity
 FROM
     order_detail AS od
 GROUP BY

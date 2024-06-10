@@ -386,7 +386,7 @@ FROM
     }
 
     [Fact]
-    public void ReservedCommand()
+    public void Now_Timestamp()
     {
         var a = Sql.DefineDataSet<sale>();
 
@@ -395,10 +395,6 @@ FROM
             {
                 now_command = Sql.Now,
                 timestamp_commend = Sql.CurrentTimestamp,
-                row_num = Sql.RowNumber(),
-                row_num_partiton_order = Sql.RowNumber(new { a.product_name, a.unit_price }, new { a.quantity, a.sale_id }),
-                row_num_partition = Sql.RowNumberPartitionBy(new { a.product_name, a.unit_price }),
-                row_num_order = Sql.RowNumberOrderBy(new { a.product_name, a.unit_price })
             });
 
         var actual = query.ToText();
@@ -406,26 +402,7 @@ FROM
 
         var expect = @"SELECT
     CAST(NOW() AS timestamp) AS now_command,
-    current_timestamp AS timestamp_commend,
-    ROW_NUMBER() OVER() AS row_num,
-    ROW_NUMBER() OVER(
-        PARTITION BY
-            a.product_name,
-            a.unit_price
-        ORDER BY
-            a.quantity,
-            a.sale_id
-    ) AS row_num_partiton_order,
-    ROW_NUMBER() OVER(
-        PARTITION BY
-            a.product_name,
-            a.unit_price
-    ) AS row_num_partition,
-    ROW_NUMBER() OVER(
-        ORDER BY
-            a.product_name,
-            a.unit_price
-    ) AS row_num_order
+    current_timestamp AS timestamp_commend
 FROM
     sale AS a";
 
