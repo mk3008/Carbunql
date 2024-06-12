@@ -5,7 +5,27 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<LangVersion>12.0</LangVersion>
+		<Version>0.0.1</Version>
+		<Authors>mk3008net</Authors>
+		<Description>This library allows for TypeSafe SQL building, enables independent definition and reuse of subqueries and CTEs, and supports unit testing without the need for tables.</Description>
+		<Copyright>mk3008net</Copyright>
+		<PackageProjectUrl>https://github.com/mk3008/Carbunql</PackageProjectUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<RepositoryUrl>https://github.com/mk3008/Carbunql.git</RepositoryUrl>
+		<PackageTags>sql;builder;typesafe;test;cte;reuse</PackageTags>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Include="..\..\LICENSE">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	  <None Include="..\..\README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\Carbunql\Carbunql.csproj" />
