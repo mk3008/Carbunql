@@ -78,8 +78,34 @@ public class FluentSelectQuery : SelectQuery
                     var value = ne.Arguments[i].ToValue(prmManager.AddParameter);
                     this.Select(RemoveRootBracketOrDefault(value)).As(alias);
                 }
-                return this;
             }
+            return this;
+        }
+        else if (expression.Body is MemberInitExpression mie)
+        {
+            foreach (var binding in mie.Bindings)
+            {
+                if (binding is MemberAssignment ma)
+                {
+                    var alias = ma.Member.Name;
+
+                    // Remove duplicate columns before adding
+                    if (SelectClause != null)
+                    {
+                        // Remove
+                        var col = SelectClause.Where(x => x.Alias.IsEqualNoCase(alias)).FirstOrDefault();
+                        if (col != null)
+                        {
+                            SelectClause!.Remove(col);
+                        }
+                    }
+
+                    // Add
+                    var value = ma.Expression.ToValue(prmManager.AddParameter);
+                    this.Select(RemoveRootBracketOrDefault(value)).As(alias);
+                }
+            }
+            return this;
         }
 
         throw new InvalidProgramException();
@@ -284,6 +310,27 @@ public class FluentSelectQuery : SelectQuery
         return this;
     }
 
+    public FluentSelectQuery With(Expression<Func<FluentSelectQuery>> expression)
+    {
+#if DEBUG
+        var analyzed = ExpressionReader.Analyze(expression);
+#endif
+
+        var prmManager = new ParameterManager(GetParameters(), AddParameter);
+
+        var me = (MemberExpression)expression.Body;
+
+        var alias = me.Member.Name;
+
+        var ce = (ConstantExpression)me.Expression!;
+
+        var fsql = expression.Compile().Invoke();
+
+        this.With(fsql).As(alias);
+
+        return this;
+    }
+
     internal static string CreateCastStatement(string value, Type type)
     {
         var dbtype = DbmsConfiguration.ToDbType(type);
@@ -420,8 +467,52 @@ public class FluentSelectQuery : SelectQuery
 
 public class FluentSelectQuery<T> : FluentSelectQuery where T : IDataRow, new()
 {
-    public T ToTable()
+    public FluentSelectQuery()
     {
-        throw new InvalidOperationException();
+    }
+
+    public FluentSelectQuery(IEnumerable<T> source)
+    {
+        var info = TableInfoFactory.Create(typeof(T));
+
+        var props = PropertySelector.SelectLiteralProperties<T>()
+            .Select(prop => new
+            {
+                Property = prop,
+                ColumnDefinition = ColumnDefinitionFactory.CreateFromLiteralProperty(typeof(T), info, prop),
+            });
+
+        var vq = new ValuesQuery();
+        foreach (var row in source)
+        {
+            var lst = new List<ValueBase>();
+            foreach (var item in props)
+            {
+                var val = item.Property.GetValue(row);
+                if (val == null)
+                {
+                    lst.Add(ValueParser.Parse($"cast(null as {item.ColumnDefinition.ColumnType.ToText()})"));
+                }
+                else if (item.Property.PropertyType == typeof(string) || item.Property.PropertyType == typeof(DateTime))
+                {
+                    lst.Add(ValueParser.Parse($"cast('{val.ToString()}' as {item.ColumnDefinition.ColumnType.ToText()})"));
+                }
+                else if (item.Property.PropertyType == typeof(int) || item.Property.PropertyType == typeof(long) || item.Property.PropertyType == typeof(decimal))
+                {
+                    lst.Add(ValueParser.Parse(val.ToString()!));
+                }
+                else
+                {
+                    lst.Add(ValueParser.Parse($"cast({val} as {item.ColumnDefinition.ColumnType.ToText()})"));
+                }
+            }
+            vq.Rows.Add(new ValueCollection(lst));
+        }
+
+        var columns = props.Select(x => x.ColumnDefinition.ColumnName);
+
+        var (f, v) = this.From(vq.ToSelectableTable(columns)).As("v");
+
+        foreach (var item in columns) this.Select(v, item);
     }
 }

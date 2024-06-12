@@ -1,6 +1,4 @@
 ﻿using Carbunql.Annotations;
-using Carbunql.Building;
-using System.ComponentModel.Design;
 using System.Linq.Expressions;
 
 namespace Carbunql.TypeSafe;
@@ -41,6 +39,21 @@ public static class Sql
             }
         }
         else if (expression.Body is MethodCallExpression me)
+        {
+            var compiledExpression = expression.Compile();
+            var result = compiledExpression();
+            if (result is SelectQuery sq)
+            {
+                var instance = new T();
+                instance.DataSet = new QueryDataSet(sq);
+                return instance;
+            }
+            else
+            {
+                throw new NotSupportedException("The provided expression did not result in a SelectQuery.");
+            }
+        }
+        else if (expression.Body is InvocationExpression ie)
         {
             var compiledExpression = expression.Compile();
             var result = compiledExpression();
