@@ -29,9 +29,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demo.Parse", "..\demo\Parse
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carbunql.Annotation.Test", "..\test\Carbunql.Annotation.Test\Carbunql.Annotation.Test.csproj", "{E76AE876-D280-401B-BE02-7500B608E320}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carbunql.TypeSafe", "Carbunql.TypeSafe\Carbunql.TypeSafe.csproj", "{8002213B-66D6-407E-BCD4-3E4092C24652}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carbunql.TypeSafe", "Carbunql.TypeSafe\Carbunql.TypeSafe.csproj", "{8002213B-66D6-407E-BCD4-3E4092C24652}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carbunql.TypeSafe.Test", "..\test\Carbunql.TypeSafe.Test\Carbunql.TypeSafe.Test.csproj", "{EA3034E3-564E-46B4-9FA8-B0A10D9DCBCE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carbunql.TypeSafe.Test", "..\test\Carbunql.TypeSafe.Test\Carbunql.TypeSafe.Test.csproj", "{EA3034E3-564E-46B4-9FA8-B0A10D9DCBCE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypeSafeBuild", "..\demo\TypeSafeBuild\TypeSafeBuild.csproj", "{680F4563-4F6A-454C-B769-5FF7F768B7FF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -99,6 +101,10 @@ Global
 		{EA3034E3-564E-46B4-9FA8-B0A10D9DCBCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA3034E3-564E-46B4-9FA8-B0A10D9DCBCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA3034E3-564E-46B4-9FA8-B0A10D9DCBCE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{680F4563-4F6A-454C-B769-5FF7F768B7FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{680F4563-4F6A-454C-B769-5FF7F768B7FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{680F4563-4F6A-454C-B769-5FF7F768B7FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{680F4563-4F6A-454C-B769-5FF7F768B7FF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

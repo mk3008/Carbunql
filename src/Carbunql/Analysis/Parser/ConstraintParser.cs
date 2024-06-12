@@ -1,8 +1,7 @@
-﻿using Carbunql.Analysis.Parser;
-using Carbunql.Definitions;
+﻿using Carbunql.Definitions;
 using Carbunql.Extensions;
 
-namespace Carbunql.Analysis;
+namespace Carbunql.Analysis.Parser;
 
 /// <summary>
 /// Parses a constraint from token streams.

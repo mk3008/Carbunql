@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Data;
 using System.Reflection;
 
 namespace Carbunql.Annotations;
@@ -6,7 +7,7 @@ namespace Carbunql.Annotations;
 /// <summary>
 /// Utility class for selecting properties of a type based on certain criteria.
 /// </summary>
-internal class PropertySelector
+public class PropertySelector
 {
     private static List<Type> LiteralTypes = new List<Type> {
             typeof(int),
@@ -54,6 +55,8 @@ internal class PropertySelector
         // Include properties whose type is not literal and can be a parent.
         var props = SelectProperties<T>()
             .Where(prop => !LiteralTypes.Contains(prop.PropertyType))
+            .Where(prop => !Attribute.IsDefined(prop, typeof(IgnoreMappingAttribute)))
+            .Where(prop => !typeof(IDataSet).IsAssignableFrom(prop.PropertyType))
             .Where(prop => Attribute.IsDefined(prop, typeof(ParentRelationColumnAttribute))
                             || prop.PropertyType.GetInterface(nameof(IEnumerable)) == null);
 
