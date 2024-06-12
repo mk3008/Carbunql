@@ -40,7 +40,7 @@ internal class Program
             new Sale{sale_id = 4, product_name = "tea", unit_price = 309, quantity = 7, tax_rate = 0.08},
             new Sale{sale_id = 5, product_name = "coffee", unit_price = 555, quantity = 9, tax_rate = 0.08},
             new Sale{sale_id = 6, product_name = "cola", unit_price = 456, quantity = 2, tax_rate = 0.08},
-        ]);
+        ]).Comment("test data");
     }
 
     private static FluentSelectQuery<SaleWithTax> SelectSaleWithTaxQuery()
@@ -58,6 +58,7 @@ internal class Program
         var q = Sql.DefineDataSet(() => getSubQuery());
 
         var query = Sql.From(() => q)
+            .Comment("Calculate tax on a line-by-line basis")
             .Select(() => q)
             .Select(() => new SaleWithTax
             {
@@ -114,6 +115,7 @@ internal class Program
         var q = Sql.DefineDataSet(() => getSubQuery());
 
         var query = Sql.From(() => q)
+            .Comment("Calculate tax by tax rate")
             .Select(() => q)
             .Select(() => new TaxSummary
             {
@@ -143,6 +145,7 @@ internal class Program
         var q = Sql.DefineDataSet(() => getSubQuery());
 
         var query = Sql.From(() => q)
+            .Comment("If the tax amount per line does not match the tax amount per tax rate, it will be adjusted.\r\nThe priority for adjustments will be in descending order of the rounded down fraction.")
             .Select(() => q)
             .Select(() => new SaleReport
             {

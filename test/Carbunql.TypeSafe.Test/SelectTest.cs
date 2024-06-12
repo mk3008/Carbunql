@@ -115,6 +115,31 @@ FROM
         IDataSet IDataRow.DataSet { get; set; } = null!;
     }
 
+    [Fact]
+    public void Comment()
+    {
+        var od = Sql.DefineDataSet<order_detail>();
+
+        var query = Sql.From(() => od)
+            .Select(() => od)
+            .Comment("test");
+
+        var actual = query.ToText();
+        Output.WriteLine(actual);
+
+        var expect = @"/* test */
+SELECT
+    od.order_detail_id,
+    od.order_id,
+    od.product_id,
+    od.quantity,
+    od.price
+FROM
+    order_detail AS od";
+
+        Assert.Equal(expect, actual, true, true, true);
+    }
+
     public record order : IDataRow
     {
         public int order_id { get; set; }
