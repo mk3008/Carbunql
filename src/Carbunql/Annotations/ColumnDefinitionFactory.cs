@@ -33,7 +33,7 @@ public static class ColumnDefinitionFactory
         return props.ToList();
     }
 
-    internal static ColumnDefinition CreateFromLiteralProperty(Type type, ITable t, PropertyInfo prop)
+    public static ColumnDefinition CreateFromLiteralProperty(Type type, ITable t, PropertyInfo prop)
     {
         var attribute = (ColumnAttribute?)Attribute.GetCustomAttribute(prop, typeof(ColumnAttribute));
 

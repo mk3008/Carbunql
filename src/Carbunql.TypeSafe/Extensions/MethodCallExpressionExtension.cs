@@ -245,6 +245,11 @@ internal static class MethodCallExpressionExtension
      , Func<string, object?, string> addParameter
      , Expression argument)
     {
+#if DEBUG
+        // Analyze the expression tree for debugging purposes
+        var analyze = ExpressionReader.Analyze(argument);
+#endif
+
         var functionName = "partition by";
 
         var ue = (UnaryExpression)argument;

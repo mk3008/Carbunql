@@ -1,4 +1,4 @@
-﻿namespace Carbunql.TypeSafe;
+﻿namespace Carbunql;
 
 public interface IDataSet
 {
