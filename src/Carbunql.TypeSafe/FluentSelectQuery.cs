@@ -111,6 +111,12 @@ public class FluentSelectQuery : SelectQuery
         throw new InvalidProgramException();
     }
 
+    public virtual FluentSelectQuery Comment(string comment)
+    {
+        this.AddComment(comment);
+        return this;
+    }
+
     private FluentSelectQuery Aggregate<T>(Expression<Func<T>> expression, string aggregateFunction) where T : class
     {
 #if DEBUG
@@ -374,6 +380,7 @@ public class FluentSelectQuery : SelectQuery
         q.OrderClause = OrderClause;
         q.LimitClause = LimitClause;
         q.Parameters = Parameters;
+        q.CommentClause = CommentClause;
 
         var clause = TableDefinitionClauseFactory.Create<T>();
 
@@ -471,6 +478,7 @@ public class FluentSelectQuery<T> : FluentSelectQuery where T : IDataRow, new()
     {
     }
 
+
     public FluentSelectQuery(IEnumerable<T> source)
     {
         var info = TableInfoFactory.Create(typeof(T));
@@ -514,5 +522,11 @@ public class FluentSelectQuery<T> : FluentSelectQuery where T : IDataRow, new()
         var (f, v) = this.From(vq.ToSelectableTable(columns)).As("v");
 
         foreach (var item in columns) this.Select(v, item);
+    }
+
+    public override FluentSelectQuery<T> Comment(string comment)
+    {
+        base.Comment(comment);
+        return this;
     }
 }
