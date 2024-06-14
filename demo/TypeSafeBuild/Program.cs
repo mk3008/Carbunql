@@ -5,6 +5,16 @@ internal class Program
 {
     private static void Main(string[] args)
     {
+        // The easiest way to use
+        Console.WriteLine(SelectSale().ToText());
+        Console.WriteLine(";");
+
+        Console.WriteLine(SelectFilterdSale().ToText());
+        Console.WriteLine(";");
+
+        Console.WriteLine(SelectFilterdSaleWithTestData().ToText());
+        Console.WriteLine(";");
+
         // Select Sale Data
         Console.WriteLine(SelectSaleTestDataQuery().ToText());
         Console.WriteLine(";");
@@ -31,6 +41,25 @@ internal class Program
     }
 
 
+    private static FluentSelectQuery<Sale> SelectSale()
+    {
+        // select * from sale
+        var s = Sql.DefineDataSet<Sale>();
+        return Sql.From(() => s);
+    }
+
+    private static FluentSelectQuery<Sale> SelectFilterdSale()
+    {
+        // Give the query a name
+        var all_sale = SelectSale;
+        // Define the query as a dataset and give it an alias name
+        var sl = Sql.DefineDataSet(() => all_sale());
+
+        return Sql.From(() => sl)
+            .Where(() => sl.sale_id == 1);
+    }
+
+
     private static FluentSelectQuery<Sale> SelectSaleTestDataQuery()
     {
         return new FluentSelectQuery<Sale>([
@@ -42,6 +71,21 @@ internal class Program
             new Sale{sale_id = 6, product_name = "cola", unit_price = 456, quantity = 2, tax_rate = 0.08},
         ]).Comment("test data");
     }
+
+    private static FluentSelectQuery<Sale> SelectFilterdSaleWithTestData()
+    {
+
+        var query = SelectFilterdSale();
+
+        // Important: Give your test data the same name as your table name
+        var sale = SelectSaleTestDataQuery();
+
+        // Add test data to the WITH clause
+        query.With(() => sale);
+
+        return query;
+    }
+
 
     private static FluentSelectQuery<SaleWithTax> SelectSaleWithTaxQuery()
     {

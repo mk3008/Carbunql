@@ -244,7 +244,7 @@ public class FluentSelectQuery : SelectQuery
         return this;
     }
 
-    public FluentSelectQuery Where(Expression<Func<bool>> expression)
+    public virtual FluentSelectQuery Where(Expression<Func<bool>> expression)
     {
 #if DEBUG
         var analyzed = ExpressionReader.Analyze(expression);
@@ -259,7 +259,7 @@ public class FluentSelectQuery : SelectQuery
         return this;
     }
 
-    public FluentSelectQuery Exists<T>(Expression<Func<T, bool>> expression) where T : IDataRow, new()
+    public virtual FluentSelectQuery Exists<T>(Expression<Func<T, bool>> expression) where T : IDataRow, new()
     {
 #if DEBUG
         var analyzed = ExpressionReader.Analyze(expression);
@@ -278,7 +278,7 @@ public class FluentSelectQuery : SelectQuery
         return this;
     }
 
-    public FluentSelectQuery NotExists<T>(Expression<Func<T, bool>> expression) where T : IDataRow, new()
+    public virtual FluentSelectQuery NotExists<T>(Expression<Func<T, bool>> expression) where T : IDataRow, new()
     {
 #if DEBUG
         var analyzed = ExpressionReader.Analyze(expression);
@@ -297,7 +297,7 @@ public class FluentSelectQuery : SelectQuery
         return this;
     }
 
-    public FluentSelectQuery Exists<T>(Func<FluentSelectQuery<T>> getDataSet, Expression<Func<T, bool>> expression) where T : IDataRow, new()
+    public virtual FluentSelectQuery Exists<T>(Func<FluentSelectQuery<T>> getDataSet, Expression<Func<T, bool>> expression) where T : IDataRow, new()
     {
         var dataset = getDataSet();
 
@@ -527,6 +527,24 @@ public class FluentSelectQuery<T> : FluentSelectQuery where T : IDataRow, new()
     public override FluentSelectQuery<T> Comment(string comment)
     {
         base.Comment(comment);
+        return this;
+    }
+
+    public override FluentSelectQuery<T> Where(Expression<Func<bool>> expression)
+    {
+        base.Where(expression);
+        return this;
+    }
+
+    public override FluentSelectQuery<T> Exists<T1>(Expression<Func<T1, bool>> expression)
+    {
+        base.Exists(expression);
+        return this;
+    }
+
+    public override FluentSelectQuery<T> Exists<T1>(Func<FluentSelectQuery<T1>> getDataSet, Expression<Func<T1, bool>> expression)
+    {
+        base.Exists(getDataSet, expression);
         return this;
     }
 }

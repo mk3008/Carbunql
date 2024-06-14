@@ -117,9 +117,9 @@ public static class Sql
         return instance;
     }
 
-    public static FluentSelectQuery From<T>(Expression<Func<T>> expression) where T : IDataRow
+    public static FluentSelectQuery<T> From<T>(Expression<Func<T>> expression) where T : IDataRow, new()
     {
-        var sq = new FluentSelectQuery();
+        var sq = new FluentSelectQuery<T>();
 
         var alias = ((MemberExpression)expression.Body).Member.Name;
 
