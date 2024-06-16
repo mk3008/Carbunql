@@ -117,32 +117,6 @@ public class FluentSelectQuery : SelectQuery
         return this;
     }
 
-    private FluentSelectQuery Aggregate<T>(Expression<Func<T>> expression, string aggregateFunction) where T : class
-    {
-#if DEBUG
-        var analyzed = ExpressionReader.Analyze(expression);
-#endif
-        var mergedParameter = QueryParameterMerger.Merge(GetParameters());
-
-        var prmManager = new ParameterManager(mergedParameter, AddParameter);
-
-        if (expression.Body is NewExpression ne)
-        {
-            if (ne.Members != null)
-            {
-                var cnt = ne.Members.Count();
-                for (var i = 0; i < cnt; i++)
-                {
-                    var alias = ne.Members[i].Name;
-                    var value = ne.Arguments[i].ToValue(prmManager.AddParameter);
-                    this.Select($"{aggregateFunction}({value})").As(alias);
-                }
-                return this;
-            }
-        }
-        throw new InvalidProgramException();
-    }
-
     public FluentSelectQuery GroupBy<T>(Expression<Func<T>> expression) where T : class
     {
 #if DEBUG
@@ -203,6 +177,7 @@ public class FluentSelectQuery : SelectQuery
         var table = compiledExpression();
 
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
+
         var condition = conditionExpression.Body.ToValue(prmManager.AddParameter);
 
         table.DataSet.BuildJoinClause(this, "left join", tableAlias, condition);
@@ -223,6 +198,7 @@ public class FluentSelectQuery : SelectQuery
         var table = compiledExpression();
 
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
+
         var condition = conditionExpression.Body.ToValue(prmManager.AddParameter);
 
         table.DataSet.BuildJoinClause(this, "right join", tableAlias, condition);
@@ -265,6 +241,7 @@ public class FluentSelectQuery : SelectQuery
         var analyzed = ExpressionReader.Analyze(expression);
 #endif
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
+
         var value = expression.Body.ToValue(prmManager.AddParameter);
 
         var clause = TableDefinitionClauseFactory.Create<T>();
@@ -284,6 +261,7 @@ public class FluentSelectQuery : SelectQuery
         var analyzed = ExpressionReader.Analyze(expression);
 #endif
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
+
         var value = expression.Body.ToValue(prmManager.AddParameter);
 
         var clause = TableDefinitionClauseFactory.Create<T>();
@@ -305,6 +283,7 @@ public class FluentSelectQuery : SelectQuery
         var analyzed = ExpressionReader.Analyze(expression);
 #endif
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
+
         var value = expression.Body.ToValue(prmManager.AddParameter);
 
         var fsql = new SelectQuery();

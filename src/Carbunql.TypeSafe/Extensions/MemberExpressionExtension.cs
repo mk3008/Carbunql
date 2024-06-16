@@ -5,7 +5,6 @@ namespace Carbunql.TypeSafe.Extensions;
 internal static class MemberExpressionExtension
 {
     internal static string ToValue(this MemberExpression mem
-        , Func<Expression, Func<string, object?, string>, string> mainConverter
         , Func<string, object?, string> addParameter)
     {
         var tp = mem.Member.DeclaringType;
@@ -18,8 +17,10 @@ internal static class MemberExpressionExtension
         if (mem.Expression is MemberExpression && typeof(IDataRow).IsAssignableFrom(tp))
         {
             //column
-            var table = ((MemberExpression)mem.Expression).Member.Name;
+            var tableMember = (MemberExpression)mem.Expression;
+            var table = tableMember.Member.Name;
             var column = mem.Member.Name;
+
             return $"{table}.{column}";
         }
         if (mem.Expression is ConstantExpression ce)
@@ -29,7 +30,7 @@ internal static class MemberExpressionExtension
         }
         if (mem.Expression is MemberExpression me)
         {
-            return me.ToValue(mainConverter, addParameter);
+            return me.ToValue(addParameter);
         }
         if (mem.Expression is ParameterExpression pe)
         {

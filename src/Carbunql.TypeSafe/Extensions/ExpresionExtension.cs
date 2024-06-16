@@ -8,35 +8,35 @@ public static class ExpresionExtension
     {
         if (exp is MemberExpression mem)
         {
-            return mem.ToValue(ToValue, addParameter);
+            return mem.ToValue(addParameter);
         }
         else if (exp is ConstantExpression ce)
         {
-            return ce.ToValue(ToValue, addParameter);
+            return ce.ToValue(addParameter);
         }
         else if (exp is NewExpression ne)
         {
-            return ne.ToValue(ToValue, addParameter);
+            return ne.ToValue(addParameter);
         }
         else if (exp is BinaryExpression be)
         {
-            return be.ToValue(ToValue, addParameter);
+            return be.ToValue(addParameter);
         }
         else if (exp is UnaryExpression ue)
         {
-            return ue.ToValue(ToValue, addParameter);
+            return ue.ToValue(addParameter);
         }
         else if (exp is MethodCallExpression mce)
         {
-            return mce.ToValue(ToValue, addParameter);
+            return mce.ToValue(addParameter);
         }
         else if (exp is ConditionalExpression cnd)
         {
-            return cnd.ToValue(ToValue, addParameter);
+            return cnd.ToValue(addParameter);
         }
         else if (exp is ParameterExpression prm)
         {
-            return prm.ToValue(ToValue, addParameter);
+            return prm.ToValue(addParameter);
         }
 
         throw new InvalidProgramException(exp.ToString());

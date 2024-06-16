@@ -1,4 +1,5 @@
-﻿using Xunit.Abstractions;
+﻿using Carbunql.Annotations;
+using Xunit.Abstractions;
 
 namespace Carbunql.TypeSafe.Test;
 
@@ -13,7 +14,7 @@ public class ModelNameFormatTest
     private ITestOutputHelper Output { get; }
 
     [Fact]
-    public void SnakeCase_OmitSelectClause()
+    public void OmitSelectClause()
     {
         var sd = Sql.DefineDataSet<StoreData>();
 
@@ -25,13 +26,13 @@ public class ModelNameFormatTest
         var expect = @"SELECT
     *
 FROM
-    store_data AS sd";
+    StoreData AS sd";
 
         Assert.Equal(expect, actual, true, true, true);
     }
 
     [Fact]
-    public void SnakeCase_SelectAll()
+    public void SelectAll()
     {
         var sd = Sql.DefineDataSet<StoreData>();
 
@@ -42,16 +43,16 @@ FROM
         Output.WriteLine(actual);
 
         var expect = @"SELECT
-    sd.store_data_id,
-    sd.store_name
+    sd.StoreDataId,
+    sd.StoreName
 FROM
-    store_data AS sd";
+    StoreData AS sd";
 
         Assert.Equal(expect, actual, true, true, true);
     }
 
     [Fact]
-    public void SnakeCase_SelectColumn()
+    public void SelectColumn()
     {
         var sd = Sql.DefineDataSet<StoreData>();
 
@@ -66,10 +67,28 @@ FROM
         Output.WriteLine(actual);
 
         var expect = @"SELECT
-    sd.store_data_id,
-    sd.store_name
+    sd.StoreDataId,
+    sd.StoreName
 FROM
-    store_data AS sd";
+    StoreData AS sd";
+
+        Assert.Equal(expect, actual, true, true, true);
+    }
+
+    [Fact]
+    public void TableNameFromAttribute()
+    {
+        var s = Sql.DefineDataSet<Store>();
+
+        var query = Sql.From(() => s);
+
+        var actual = query.ToText();
+        Output.WriteLine(actual);
+
+        var expect = @"SELECT
+    *
+FROM
+    public.stores AS s";
 
         Assert.Equal(expect, actual, true, true, true);
     }
@@ -82,4 +101,12 @@ FROM
         IDataSet IDataRow.DataSet { get; set; } = null!;
     }
 
+    [Table([nameof(store_id)], Schema = "public", Table = "stores")]
+    public record Store : IDataRow
+    {
+        public int store_id { get; set; }
+        public string store_name { get; set; } = string.Empty;
+        // interface property
+        IDataSet IDataRow.DataSet { get; set; } = null!;
+    }
 }

@@ -111,9 +111,16 @@ public static class Sql
 
     public static T DefineDataSet<T>() where T : IDataRow, new()
     {
+        var atr = (TableAttribute?)Attribute.GetCustomAttribute(typeof(T), typeof(TableAttribute));
+
+        var schema = string.IsNullOrEmpty(atr?.Schema) ? string.Empty : atr.Schema;
+        var table = string.IsNullOrEmpty(atr?.Table) ? typeof(T).Name : atr.Table;
+        var info = new TableInfo(table) { Schema = schema };
+
+        var columnNames = PropertySelector.SelectLiteralProperties<T>().Select(x => x.Name);
+
         var instance = new T();
-        var clause = TableDefinitionClauseFactory.Create<T>();
-        instance.DataSet = new PhysicalTableDataSet(clause, clause.GetColumnNames());
+        instance.DataSet = new PhysicalTableDataSet(info, columnNames);
         return instance;
     }
 
