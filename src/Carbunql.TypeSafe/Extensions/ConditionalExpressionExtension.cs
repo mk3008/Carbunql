@@ -6,12 +6,11 @@ namespace Carbunql.TypeSafe.Extensions;
 internal static class ConditionalExpressionExtension
 {
     internal static string ToValue(this ConditionalExpression cnd
-        , Func<Expression, Func<string, object?, string>, string> mainConverter
         , Func<string, object?, string> addParameter)
     {
-        var test = mainConverter(cnd.Test, addParameter);
-        var ifTrue = mainConverter(cnd.IfTrue, addParameter);
-        var ifFalse = mainConverter(cnd.IfFalse, addParameter);
+        var test = cnd.Test.ToValue(addParameter);
+        var ifTrue = cnd.IfTrue.ToValue(addParameter);
+        var ifFalse = cnd.IfFalse.ToValue(addParameter);
 
         if (string.IsNullOrEmpty(ifFalse))
         {

@@ -36,9 +36,14 @@ public class PropertySelector
     /// <returns>An enumerable of PropertyInfo representing the selected properties.</returns>
     public static IEnumerable<PropertyInfo> SelectLiteralProperties<T>()
     {
+        return SelectLiteralProperties(typeof(T));
+    }
+
+    public static IEnumerable<PropertyInfo> SelectLiteralProperties(Type type)
+    {
         // Exclude properties with invalid attributes.
         // Exclude properties with non-literal types.
-        var props = SelectProperties<T>()
+        var props = SelectProperties(type)
             .Where(prop => LiteralTypes.Contains(prop.PropertyType));
 
         return props;
@@ -70,8 +75,13 @@ public class PropertySelector
     /// <returns>An enumerable of PropertyInfo representing the selected properties.</returns>
     private static IEnumerable<PropertyInfo> SelectProperties<T>()
     {
+        return SelectProperties(typeof(T));
+    }
+
+    private static IEnumerable<PropertyInfo> SelectProperties(Type type)
+    {
         // Exclude properties with invalid attributes.
-        var props = typeof(T).GetProperties()
+        var props = type.GetProperties()
             .Where(prop => !Attribute.IsDefined(prop, typeof(IgnoreMappingAttribute)));
 
         return props;

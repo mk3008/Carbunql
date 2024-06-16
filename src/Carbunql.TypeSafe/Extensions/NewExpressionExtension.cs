@@ -5,7 +5,6 @@ namespace Carbunql.TypeSafe.Extensions;
 internal static class NewExpressionExtension
 {
     internal static string ToValue(this NewExpression ne
-        , Func<Expression, Func<string, object?, string>, string> mainConverter
         , Func<string, object?, string> addParameter)
     {
         var obj = ne.CompileAndInvoke();

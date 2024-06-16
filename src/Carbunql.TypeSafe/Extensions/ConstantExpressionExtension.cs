@@ -5,7 +5,6 @@ namespace Carbunql.TypeSafe.Extensions;
 internal static class ConstantExpressionExtension
 {
     internal static string ToValue(this ConstantExpression ce
-        , Func<Expression, Func<string, object?, string>, string> mainConverter
         , Func<string, object?, string> addParameter)
     {
         var obj = ce.Value;

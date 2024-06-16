@@ -5,21 +5,19 @@ namespace Carbunql.TypeSafe.Extensions;
 internal static class UnaryExpressionExtension
 {
     internal static string ToValue(this UnaryExpression ue
-        , Func<Expression, Func<string, object?, string>, string> mainConverter
         , Func<string, object?, string> addParameter)
     {
         if (ue.NodeType == ExpressionType.Convert)
         {
-            return ToConvertValue(ue, mainConverter, addParameter);
+            return ToConvertValue(ue, addParameter);
         }
         throw new InvalidProgramException($"NodeType:{ue.NodeType}");
     }
 
     private static string ToConvertValue(UnaryExpression ue
-        , Func<Expression, Func<string, object?, string>, string> mainConverter
         , Func<string, object?, string> addParameter)
     {
-        var value = mainConverter(ue.Operand, addParameter);
+        var value = ue.Operand.ToValue(addParameter);
         return FluentSelectQuery.CreateCastStatement(value, ue.Type);
     }
 }
