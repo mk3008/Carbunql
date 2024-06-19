@@ -295,7 +295,7 @@ public class FluentSelectQuery : SelectQuery
         return this;
     }
 
-    public FluentSelectQuery With(Expression<Func<FluentSelectQuery>> expression)
+    public FluentSelectQuery With(Expression<Func<FluentSelectQuery>> expression, bool force = false)
     {
 #if DEBUG
         var analyzed = ExpressionReader.Analyze(expression);
@@ -303,16 +303,40 @@ public class FluentSelectQuery : SelectQuery
 
         var prmManager = new ParameterManager(GetParameters(), AddParameter);
 
-        var me = (MemberExpression)expression.Body;
+        if (expression.Body is not MemberExpression me)
+        {
+            throw new InvalidOperationException("The expression body must be a MemberExpression.");
+        }
 
         var alias = me.Member.Name;
 
-        var ce = (ConstantExpression)me.Expression!;
+        if (me.Expression is not ConstantExpression ce)
+        {
+            throw new InvalidOperationException("The expression must be a member access expression.");
+        }
 
         var fsql = expression.Compile().Invoke();
 
-        this.With(fsql).As(alias);
-
+        WithClause ??= new();
+        var cte = WithClause.FirstOrDefault(x => x.Alias == alias);
+        if (cte != null)
+        {
+            if (force)
+            {
+                // Overwrite CTE
+                var index = WithClause.IndexOf(cte);
+                WithClause[index] = fsql.ToCommonTable(alias);
+            }
+            else
+            {
+                throw new InvalidOperationException($"The alias '{alias}' already exists in the WITH clause.");
+            }
+        }
+        else
+        {
+            // Add the new entry to the beginning of the WithClause list to be referenced with the highest priority.
+            WithClause.Insert(0, fsql.ToCommonTable(alias));
+        }
         return this;
     }
 
