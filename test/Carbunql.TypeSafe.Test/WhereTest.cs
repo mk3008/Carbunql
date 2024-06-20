@@ -190,16 +190,16 @@ WHERE
         Output.WriteLine(query.ToText());
 
         var expect = @"/*
-  :p0 = 'a'
+  :const_0 = 'a'
 */
 SELECT
     *
 FROM
     sale AS a
 WHERE
-    a.product_name LIKE :p0 || '%'
-    AND a.product_name LIKE '%' || :p0 || '%'
-    AND a.product_name LIKE :p0 || '%'";
+    a.product_name LIKE :const_0 || '%'
+    AND a.product_name LIKE '%' || :const_0 || '%'
+    AND a.product_name LIKE :const_0 || '%'";
 
         Assert.Equal(expect, actual, true, true, true);
     }

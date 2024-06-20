@@ -14,14 +14,25 @@ namespace Carbunql.TypeSafe;
 
 public class FluentSelectQuery : SelectQuery
 {
+    internal readonly ISqlDialect SqlDialect;
+
+    public FluentSelectQuery(ISqlDialect sqlDialect)
+    {
+        SqlDialect = sqlDialect;
+    }
+
+    public FluentSelectQuery() : this(new PostgresDialect())
+    {
+    }
+
     public FluentSelectQuery Select<T>(Expression<Func<T>> expression) where T : class
     {
 #if DEBUG
         var analyzed = ExpressionReader.Analyze(expression);
 #endif
-        var mergedParameter = QueryParameterMerger.Merge(GetParameters());
-
-        var prmManager = new ParameterManager(mergedParameter, AddParameter);
+        var parameters = QueryParameterMerger.Merge(GetParameters());
+        var prmManager = new ParameterManager(parameters, AddParameter);
+        var engine = new BuilderEngine(SqlDialect, prmManager);
 
         if (expression.Body is MemberExpression mem)
         {
@@ -75,7 +86,7 @@ public class FluentSelectQuery : SelectQuery
                     }
 
                     //add
-                    var value = ne.Arguments[i].ToValue(prmManager.AddParameter);
+                    var value = ne.Arguments[i].ToValue(engine);
                     this.Select(RemoveRootBracketOrDefault(value)).As(alias);
                 }
             }
@@ -101,7 +112,7 @@ public class FluentSelectQuery : SelectQuery
                     }
 
                     // Add
-                    var value = ma.Expression.ToValue(prmManager.AddParameter);
+                    var value = ma.Expression.ToValue(engine);
                     this.Select(RemoveRootBracketOrDefault(value)).As(alias);
                 }
             }
@@ -122,9 +133,9 @@ public class FluentSelectQuery : SelectQuery
 #if DEBUG
         var analyzed = ExpressionReader.Analyze(expression);
 #endif
-        var mergedParameter = QueryParameterMerger.Merge(GetParameters());
-
-        var prmManager = new ParameterManager(mergedParameter, AddParameter);
+        var parameters = QueryParameterMerger.Merge(GetParameters());
+        var prmManager = new ParameterManager(parameters, AddParameter);
+        var engine = new BuilderEngine(SqlDialect, prmManager);
 
         if (expression.Body is NewExpression ne)
         {
@@ -133,7 +144,7 @@ public class FluentSelectQuery : SelectQuery
                 var cnt = ne.Members.Count();
                 for (var i = 0; i < cnt; i++)
                 {
-                    var value = ne.Arguments[i].ToValue(prmManager.AddParameter);
+                    var value = ne.Arguments[i].ToValue(engine);
                     var s = ValueParser.Parse(RemoveRootBracketOrDefault(value));
                     this.Group(s);
                 }
@@ -156,8 +167,11 @@ public class FluentSelectQuery : SelectQuery
         var compiledExpression = tableExpression.Compile();
         var table = compiledExpression();
 
-        var prmManager = new ParameterManager(GetParameters(), AddParameter);
-        var condition = conditionExpression.Body.ToValue(prmManager.AddParameter);
+        var parameters = QueryParameterMerger.Merge(GetParameters());
+        var prmManager = new ParameterManager(parameters, AddParameter);
+        var engine = new BuilderEngine(SqlDialect, prmManager);
+
+        var condition = conditionExpression.Body.ToValue(engine);
 
         table.DataSet.BuildJoinClause(this, "inner join", tableAlias, condition);
 
@@ -176,9 +190,11 @@ public class FluentSelectQuery : SelectQuery
         var compiledExpression = tableExpression.Compile();
         var table = compiledExpression();
 
-        var prmManager = new ParameterManager(GetParameters(), AddParameter);
+        var parameters = QueryParameterMerger.Merge(GetParameters());
+        var prmManager = new ParameterManager(parameters, AddParameter);
+        var engine = new BuilderEngine(SqlDialect, prmManager);
 
-        var condition = conditionExpression.Body.ToValue(prmManager.AddParameter);
+        var condition = conditionExpression.Body.ToValue(engine);
 
         table.DataSet.BuildJoinClause(this, "left join", tableAlias, condition);
 
@@ -197,9 +213,11 @@ public class FluentSelectQuery : SelectQuery
         var compiledExpression = tableExpression.Compile();
         var table = compiledExpression();
 
-        var prmManager = new ParameterManager(GetParameters(), AddParameter);
+        var parameters = QueryParameterMerger.Merge(GetParameters());
+        var prmManager = new ParameterManager(parameters, AddParameter);
+        var engine = new BuilderEngine(SqlDialect, prmManager);
 
-        var condition = conditionExpression.Body.ToValue(prmManager.AddParameter);
+        var condition = conditionExpression.Body.ToValue(engine);
 
         table.DataSet.BuildJoinClause(this, "right join", tableAlias, condition);
 
@@ -226,9 +244,11 @@ public class FluentSelectQuery : SelectQuery
         var analyzed = ExpressionReader.Analyze(expression);
 #endif
 
-        var prmManager = new ParameterManager(GetParameters(), AddParameter);
+        var parameters = QueryParameterMerger.Merge(GetParameters());
+        var prmManager = new ParameterManager(parameters, AddParameter);
+        var engine = new BuilderEngine(SqlDialect, prmManager);
 
-        var value = expression.Body.ToValue(prmManager.AddParameter);
+        var value = expression.Body.ToValue(engine);
 
         this.Where(value);
 
@@ -240,9 +260,11 @@ public class FluentSelectQuery : SelectQuery
 #if DEBUG
         var analyzed = ExpressionReader.Analyze(expression);
 #endif
-        var prmManager = new ParameterManager(GetParameters(), AddParameter);
+        var parameters = QueryParameterMerger.Merge(GetParameters());
+        var prmManager = new ParameterManager(parameters, AddParameter);
+        var engine = new BuilderEngine(SqlDialect, prmManager);
 
-        var value = expression.Body.ToValue(prmManager.AddParameter);
+        var value = expression.Body.ToValue(engine);
 
         var clause = TableDefinitionClauseFactory.Create<T>();
 
@@ -260,9 +282,11 @@ public class FluentSelectQuery : SelectQuery
 #if DEBUG
         var analyzed = ExpressionReader.Analyze(expression);
 #endif
-        var prmManager = new ParameterManager(GetParameters(), AddParameter);
+        var parameters = QueryParameterMerger.Merge(GetParameters());
+        var prmManager = new ParameterManager(parameters, AddParameter);
+        var engine = new BuilderEngine(SqlDialect, prmManager);
 
-        var value = expression.Body.ToValue(prmManager.AddParameter);
+        var value = expression.Body.ToValue(engine);
 
         var clause = TableDefinitionClauseFactory.Create<T>();
 
@@ -282,9 +306,11 @@ public class FluentSelectQuery : SelectQuery
 #if DEBUG
         var analyzed = ExpressionReader.Analyze(expression);
 #endif
-        var prmManager = new ParameterManager(GetParameters(), AddParameter);
+        var parameters = QueryParameterMerger.Merge(GetParameters());
+        var prmManager = new ParameterManager(parameters, AddParameter);
+        var engine = new BuilderEngine(SqlDialect, prmManager);
 
-        var value = expression.Body.ToValue(prmManager.AddParameter);
+        var value = expression.Body.ToValue(engine);
 
         var fsql = new SelectQuery();
         fsql.From(dataset).As(expression.Parameters[0].Name!);
@@ -338,12 +364,6 @@ public class FluentSelectQuery : SelectQuery
             WithClause.Insert(0, fsql.ToCommonTable(alias));
         }
         return this;
-    }
-
-    internal static string CreateCastStatement(string value, Type type)
-    {
-        var dbtype = DbmsConfiguration.ToDbType(type);
-        return $"cast({value} as {dbtype})";
     }
 
     private string RemoveRootBracketOrDefault(string value)
@@ -477,7 +497,11 @@ public class FluentSelectQuery : SelectQuery
 
 public class FluentSelectQuery<T> : FluentSelectQuery where T : IDataRow, new()
 {
-    public FluentSelectQuery()
+    public FluentSelectQuery(ISqlDialect sqlDialect) : base(sqlDialect)
+    {
+    }
+
+    public FluentSelectQuery() : base()
     {
     }
 

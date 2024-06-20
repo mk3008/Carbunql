@@ -56,14 +56,14 @@ FROM
         Output.WriteLine(actual);
 
         var expect = @"/*
-  :p0 = 'test'
+  :const_0 = 'test'
 */
 SELECT
     o.order_id,
     o.store_id,
     o.order_date,
     o.customer_name,
-    :p0 AS memo
+    :const_0 AS memo
 FROM
     order AS o";
 

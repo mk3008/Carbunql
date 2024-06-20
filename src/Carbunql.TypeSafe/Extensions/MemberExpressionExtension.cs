@@ -4,15 +4,14 @@ namespace Carbunql.TypeSafe.Extensions;
 
 internal static class MemberExpressionExtension
 {
-    internal static string ToValue(this MemberExpression mem
-        , Func<string, object?, string> addParameter)
+    internal static string ToValue(this MemberExpression mem, BuilderEngine engine)
     {
         var tp = mem.Member.DeclaringType;
 
         if (tp == typeof(Sql))
         {
             // ex. Sql.Now, Sql.CurrentTimestamp
-            return CreateSqlCommand(mem);
+            return mem.CreateSqlCommand(engine);
         }
         if (mem.Expression is MemberExpression && typeof(IDataRow).IsAssignableFrom(tp))
         {
@@ -26,11 +25,11 @@ internal static class MemberExpressionExtension
         if (mem.Expression is ConstantExpression ce)
         {
             //variable
-            return addParameter(mem.Member.Name, mem.CompileAndInvoke());
+            return engine.AddParameter(mem.Member.Name, mem.CompileAndInvoke());
         }
         if (mem.Expression is MemberExpression me)
         {
-            return me.ToValue(addParameter);
+            return me.ToValue(engine);
         }
         if (mem.Expression is ParameterExpression pe)
         {
@@ -39,12 +38,12 @@ internal static class MemberExpressionExtension
         throw new NotSupportedException($"Member.Name:{mem.Member.Name}, Member.DeclaringType:{mem.Member.DeclaringType}");
     }
 
-    private static string CreateSqlCommand(MemberExpression mem)
+    private static string CreateSqlCommand(this MemberExpression mem, BuilderEngine engine)
     {
         return mem.Member.Name switch
         {
-            nameof(Sql.Now) => FluentSelectQuery.CreateCastStatement(DbmsConfiguration.GetNowCommandLogic(), typeof(DateTime)),
-            nameof(Sql.CurrentTimestamp) => DbmsConfiguration.GetCurrentTimestampCommandLogic(),
+            nameof(Sql.Now) => engine.SqlDialect.GetNowCommand(),
+            nameof(Sql.CurrentTimestamp) => engine.SqlDialect.GetCurrentTimestampCommand(),
             _ => throw new NotSupportedException($"The member '{mem.Member.Name}' is not supported.")
         };
     }

@@ -4,90 +4,86 @@ using Carbunql.Building;
 using Carbunql.Extensions;
 using Carbunql.TypeSafe.Extensions;
 using Carbunql.Values;
-using System.Collections;
 using System.Linq.Expressions;
 
 namespace Carbunql.TypeSafe.Extensions;
 
 internal static class MethodCallExpressionExtension
 {
-    internal static string ToValue(this MethodCallExpression mce
-        , Func<string, object?, string> addParameter)
+    internal static string ToValue(this MethodCallExpression mce, BuilderEngine engine)
     {
         // DeclaringType
         if (mce.Method.DeclaringType == typeof(Math))
         {
-            return CreateMathCommand(mce, addParameter);
+            return CreateMathCommand(mce, engine);
         }
         if (mce.Method.DeclaringType == typeof(Sql))
         {
-            return CreateSqlCommand(mce, addParameter);
+            return CreateSqlCommand(mce, engine);
         }
         if (mce.Method.DeclaringType == typeof(DateTimeExtension))
         {
-            return CreateDateTimeExtensionCommand(mce, addParameter);
+            return CreateDateTimeExtensionCommand(mce, engine);
         }
 
         // Return Type
         if (mce.Type == typeof(string))
         {
-            return ToStringValue(mce, addParameter);
+            return ToStringValue(mce, engine);
         }
         if (mce.Type == typeof(bool))
         {
-            return ToBoolValue(mce, addParameter);
+            return ToBoolValue(mce, engine);
         }
         if (mce.Type == typeof(DateTime))
         {
-            return ToDateTimeValue(mce, addParameter);
+            return ToDateTimeValue(mce, engine);
         }
 
         throw new NotSupportedException($"Type:{mce.Type}, Method.DeclaringType:{mce.Method.DeclaringType}");
     }
 
-    private static string CreateMathCommand(this MethodCallExpression mce
-        , Func<string, object?, string> addParameter)
+    private static string CreateMathCommand(this MethodCallExpression mce, BuilderEngine engine)
     {
-        var args = mce.Arguments.Select(x => RemoveRootBracketOrDefault(x.ToValue(addParameter)));
+        var args = mce.Arguments.Select(x => RemoveRootBracketOrDefault(x.ToValue(engine)));
 
         return mce.Method.Name switch
         {
-            nameof(Math.Truncate) => DbmsConfiguration.GetTruncateCommandLogic(args),
-            nameof(Math.Floor) => DbmsConfiguration.GetFloorCommandLogic(args),
-            nameof(Math.Ceiling) => DbmsConfiguration.GetCeilingCommandLogic(args),
-            nameof(Math.Round) => DbmsConfiguration.GetRoundCommandLogic(args),
+            nameof(Math.Truncate) => engine.SqlDialect.GetTruncateCommand(args),
+            nameof(Math.Floor) => engine.SqlDialect.GetFloorCommand(args),
+            nameof(Math.Ceiling) => engine.SqlDialect.GetCeilingCommand(args),
+            nameof(Math.Round) => engine.SqlDialect.GetRoundCommand(args),
             _ => throw new NotSupportedException($"The method '{mce.Method.Name}' is not supported.")
         };
     }
 
-    private static string CreateDateTimeExtensionCommand(MethodCallExpression mce
-        , Func<string, object?, string> addParameter)
+    private static string CreateDateTimeExtensionCommand(MethodCallExpression mce, BuilderEngine engine)
     {
         switch (mce.Method.Name)
         {
             case nameof(DateTimeExtension.TruncateToYear):
-                return $"date_trunc('year', {mce.Arguments[0].ToValue(addParameter)})";
+                return $"date_trunc('year', {mce.Arguments[0].ToValue(engine)})";
 
             case nameof(DateTimeExtension.TruncateToQuarter):
-                return $"date_trunc('quarter', {mce.Arguments[0].ToValue(addParameter)})";
+                return $"date_trunc('quarter', {mce.Arguments[0].ToValue(engine)})";
 
             case nameof(DateTimeExtension.TruncateToMonth):
-                return $"date_trunc('month', {mce.Arguments[0].ToValue(addParameter)})";
+                return $"date_trunc('month', {mce.Arguments[0].ToValue(engine)})";
 
             case nameof(DateTimeExtension.TruncateToDay):
-                return $"date_trunc('day', {mce.Arguments[0].ToValue(addParameter)})";
+                return $"date_trunc('day', {mce.Arguments[0].ToValue(engine)})";
 
             case nameof(DateTimeExtension.TruncateToHour):
-                return $"date_trunc('hour',{mce.Arguments[0].ToValue(addParameter)})";
+                return $"date_trunc('hour',{mce.Arguments[0].ToValue(engine)})";
 
             case nameof(DateTimeExtension.TruncateToMinute):
-                return $"date_trunc('minute', {mce.Arguments[0].ToValue(addParameter)})";
+                return $"date_trunc('minute', {mce.Arguments[0].ToValue(engine)})";
 
             case nameof(DateTimeExtension.TruncateToSecond):
-                return $"date_trunc('second', {mce.Arguments[0].ToValue(addParameter)})";
+                return $"date_trunc('second', {mce.Arguments[0].ToValue(engine)})";
 
             case nameof(DateTimeExtension.ToMonthEndDate):
-                return $"date_trunc('month', {mce.Arguments[0].ToValue(addParameter)}) + interval '1 month - 1 day'";
+                return $"date_trunc('month', {mce.Arguments[0].ToValue(engine)}) + interval '1 month - 1 day'";
 
             default:
                 throw new ArgumentException($"Unsupported method call: {mce.Method.Name}");
@@ -96,31 +92,30 @@ internal static class MethodCallExpressionExtension
         throw new ArgumentException("Invalid argument type for SQL command processing.");
     }
 
-    private static string CreateSqlCommand(this MethodCallExpression mce
-        , Func<string, object?, string> addParameter)
+    private static string CreateSqlCommand(this MethodCallExpression mce, BuilderEngine engine)
     {
         switch (mce.Method.Name)
         {
             case nameof(Sql.DateTruncateToYear):
-                return $"date_trunc('year', {mce.Arguments[0].ToValue(addParameter)})";
+                return $"date_trunc('year', {mce.Arguments[0].ToValue(engine)})";
 
             case nameof(Sql.DateTruncateToQuarter):
-                return $"date_trunc('quarter', {mce.Arguments[0].ToValue(addParameter)})";
+                return $"date_trunc('quarter', {mce.Arguments[0].ToValue(engine)})";
 
             case nameof(Sql.DateTruncToMonth):
-                return $"date_trunc('month', {mce.Arguments[0].ToValue(addParameter)})";
+                return $"date_trunc('month', {mce.Arguments[0].ToValue(engine)})";
 
             case nameof(Sql.DateTruncateToDay):
-                return $"date_trunc('day', {mce.Arguments[0].ToValue(addParameter)})";
+                return $"date_trunc('day', {mce.Arguments[0].ToValue(engine)})";
 
             case nameof(Sql.DateTruncateToHour):
-                return $"date_trunc('hour', {mce.Arguments[0].ToValue(addParameter)})";
+                return $"date_trunc('hour', {mce.Arguments[0].ToValue(engine)})";
 
             case nameof(Sql.DateTruncateToMinute):
-                return $"date_trunc('minute', {mce.Arguments[0].ToValue(addParameter)})";
+                return $"date_trunc('minute', {mce.Arguments[0].ToValue(engine)})";
 
             case nameof(Sql.DateTruncateToSecond):
-                return $"date_trunc('second', {mce.Arguments[0].ToValue(addParameter)})";
+                return $"date_trunc('second', {mce.Arguments[0].ToValue(engine)})";
 
             case nameof(Sql.Raw):
                 if (mce.Arguments.First() is ConstantExpression argRaw)
@@ -130,25 +125,25 @@ internal static class MethodCallExpressionExtension
                 break;
 
             case nameof(Sql.RowNumber):
-                return Aggregate(mce, addParameter, "row_number");
+                return Aggregate(mce, engine, "row_number");
 
 
             case nameof(Sql.Exists):
             case nameof(Sql.NotExists):
-                return ToExistsClause(mce);
+                return ToExistsClause(mce, engine);
 
             case nameof(Sql.Sum):
-                return Aggregate(mce, addParameter, "sum");
+                return Aggregate(mce, engine, "sum");
 
             case nameof(Sql.Count):
-                return Aggregate(mce, addParameter, "count");
+                return Aggregate(mce, engine, "count");
 
             case nameof(Sql.Min):
-                return Aggregate(mce, addParameter, "min");
+                return Aggregate(mce, engine, "min");
             case nameof(Sql.Max):
-                return Aggregate(mce, addParameter, "max");
+                return Aggregate(mce, engine, "max");
             case nameof(Sql.Average):
-                return Aggregate(mce, addParameter, "avg");
+                return Aggregate(mce, engine, "avg");
 
             default:
                 throw new ArgumentException($"Unsupported method call: {mce.Method.Name}");
@@ -157,9 +152,7 @@ internal static class MethodCallExpressionExtension
         throw new ArgumentException("Invalid argument type for SQL command processing.");
     }
 
-    private static string Aggregate(MethodCallExpression mce
-        , Func<string, object?, string> addParameter
-        , string aggregateFunction)
+    private static string Aggregate(MethodCallExpression mce, BuilderEngine engine, string aggregateFunction)
     {
 #if DEBUG
         // Analyze the expression tree for debugging purposes
@@ -178,7 +171,7 @@ internal static class MethodCallExpressionExtension
         }
         else
         {
-            value = ExtractFunction(mce, addParameter, aggregateFunction, mce.Arguments[0]);
+            value = ExtractFunction(mce, engine, aggregateFunction, mce.Arguments[0]);
         }
 
         // Determine the argument indices for partition and order
@@ -190,8 +183,8 @@ internal static class MethodCallExpressionExtension
         // - Main function argument, partition, order
         // - Partition, order
         // There are no functions that only have a partition or only have an order.
-        string partitionby = mce.Arguments.Count <= partitionArgumentIndex ? string.Empty : ExtractPartition(mce, addParameter, mce.Arguments[partitionArgumentIndex]);
-        string orderby = mce.Arguments.Count <= orderArgumentIndex ? string.Empty : ExtractOrder(mce, addParameter, mce.Arguments[orderArgumentIndex]);
+        string partitionby = mce.Arguments.Count <= partitionArgumentIndex ? string.Empty : ExtractPartition(mce, engine, mce.Arguments[partitionArgumentIndex]);
+        string orderby = mce.Arguments.Count <= orderArgumentIndex ? string.Empty : ExtractOrder(mce, engine, mce.Arguments[orderArgumentIndex]);
 
         // Construct the final SQL function string with the over clause
         if (!string.IsNullOrEmpty(partitionby) && !string.IsNullOrEmpty(orderby))
@@ -211,7 +204,7 @@ internal static class MethodCallExpressionExtension
     }
 
     private static string ExtractFunction(MethodCallExpression mce
-        , Func<string, object?, string> addParameter
+        , BuilderEngine engine
         , string functionName
         , Expression? argument)
     {
@@ -222,21 +215,19 @@ internal static class MethodCallExpressionExtension
 
         if (expression.Body is BinaryExpression be)
         {
-            var value = be.ToValue(addParameter);
+            var value = be.ToValue(engine);
             return $"{functionName}({value})";
         }
         if (expression.Body is MemberExpression me)
         {
-            var value = me.ToValue(addParameter);
+            var value = me.ToValue(engine);
             return $"{functionName}({value})";
         }
 
         throw new NotSupportedException();
     }
 
-    private static string ExtractPartition(MethodCallExpression mce
-        , Func<string, object?, string> addParameter
-        , Expression argument)
+    private static string ExtractPartition(MethodCallExpression mce, BuilderEngine engine, Expression argument)
     {
 #if DEBUG
         // Analyze the expression tree for debugging purposes
@@ -252,16 +243,14 @@ internal static class MethodCallExpressionExtension
 
         if (expression.Body is NewExpression ne && ne.Members != null)
         {
-            var value = string.Join(",", ne.Arguments.Select(x => x.ToValue(addParameter)));
+            var value = string.Join(",", ne.Arguments.Select(x => x.ToValue(engine)));
             return $"{functionName} {value}";
         }
 
         throw new NotSupportedException();
     }
 
-    private static string ExtractOrder(MethodCallExpression mce
-        , Func<string, object?, string> addParameter
-        , Expression argument)
+    private static string ExtractOrder(MethodCallExpression mce, BuilderEngine engine, Expression argument)
     {
         var functionName = "order by";
 
@@ -279,7 +268,7 @@ internal static class MethodCallExpressionExtension
             for (var i = 0; i < cnt; i++)
             {
                 var alias = ne.Members[i].Name;
-                var val = ne.Arguments[i].ToValue(addParameter);
+                var val = ne.Arguments[i].ToValue(engine);
                 if (ValueParser.Parse(val).GetDefaultName() == alias)
                 {
                     args.Add(val);
@@ -296,7 +285,7 @@ internal static class MethodCallExpressionExtension
         throw new NotSupportedException();
     }
 
-    private static string ToExistsClause(MethodCallExpression mce)
+    private static string ToExistsClause(MethodCallExpression mce, BuilderEngine engine)
     {
         var ue = (UnaryExpression)mce.Arguments[1];
         var expression = (LambdaExpression)ue.Operand;
@@ -306,8 +295,11 @@ internal static class MethodCallExpressionExtension
 
         var fsql = new FluentSelectQuery();
         var (f, x) = fsql.From(clause).As(expression.Parameters[0].Name!);
+
         var prmManager = new ParameterManager(fsql.GetParameters(), fsql.AddParameter);
-        var value = expression.Body.ToValue(prmManager.AddParameter);
+        var eng = new BuilderEngine(engine.SqlDialect, prmManager);
+
+        var value = expression.Body.ToValue(eng);
         fsql.Where(value);
 
         if (mce.Method.Name == nameof(Sql.Exists))
@@ -320,12 +312,11 @@ internal static class MethodCallExpressionExtension
         }
     }
 
-    private static string ToStringValue(this MethodCallExpression mce
-        , Func<string, object?, string> addParameter)
+    private static string ToStringValue(this MethodCallExpression mce, BuilderEngine engine)
     {
         if (mce.Object != null)
         {
-            var value = mce.Object.ToValue(addParameter);
+            var value = mce.Object.ToValue(engine);
             if (mce.Arguments.Count == 0)
             {
                 if (mce.Method.Name == nameof(String.TrimStart))
@@ -342,7 +333,7 @@ internal static class MethodCallExpressionExtension
                 }
                 if (mce.Method.Name == nameof(String.ToString))
                 {
-                    return FluentSelectQuery.CreateCastStatement(value, typeof(string));
+                    return engine.SqlDialect.GetCastStatement(value, typeof(string));
                 }
             }
 
@@ -350,16 +341,14 @@ internal static class MethodCallExpressionExtension
             {
                 if (mce.Method.Name == nameof(String.ToString))
                 {
-                    Func<string, object?, string> typeCaster = (key, value) =>
-                    {
-                        var v = ConverToDbDateFormat(value!.ToString()!);
-                        return addParameter(key, v);
-                    };
-                    var typedArg = mce.Arguments[0].ToValue(typeCaster);
-                    return $"to_char({value}, {typedArg})";
+                    var mng = new StringFormatParameterManager(engine.Manager);
+                    var eng = new BuilderEngine(engine.SqlDialect, mng);
+
+                    var format = mce.Arguments[0].ToValue(eng);
+                    return $"to_char({value}, {format})";
                 }
 
-                var arg = mce.Arguments[0].ToValue(addParameter);
+                var arg = mce.Arguments[0].ToValue(engine);
                 if (mce.Method.Name == nameof(String.StartsWith))
                 {
                     return $"{value} like {arg} || '%'";
@@ -380,8 +369,7 @@ internal static class MethodCallExpressionExtension
         throw new NotSupportedException($"Object:NULL, Method:{mce.Method.Name}, Arguments:{mce.Arguments.Count}, Type:{mce.Type}");
     }
 
-    private static string ToBoolValue(this MethodCallExpression mce
-        , Func<string, object?, string> addParameter)
+    private static string ToBoolValue(this MethodCallExpression mce, BuilderEngine engine)
     {
         if (mce.Object != null)
         {
@@ -389,9 +377,9 @@ internal static class MethodCallExpressionExtension
             {
                 if (mce.Method.DeclaringType == typeof(string))
                 {
-                    var value = mce.Object.ToValue(addParameter);
+                    var value = mce.Object.ToValue(engine);
 
-                    var arg = mce.Arguments[0].ToValue(addParameter);
+                    var arg = mce.Arguments[0].ToValue(engine);
                     if (mce.Method.Name == nameof(String.StartsWith))
                     {
                         return $"{value} like {arg} || '%'";
@@ -409,25 +397,16 @@ internal static class MethodCallExpressionExtension
                 {
                     //The IN clause itself is not suitable for parameter queries, so the collection will be forcibly expanded.
                     //If you want to parameterize it, use the ANY function, etc.
-                    var args = new List<string>();
-                    Func<string, object?, string> argumentsDecoder = (_, collection) =>
-                    {
-                        if (collection != null && IsGenericList(collection.GetType()))
-                        {
-                            foreach (var item in (IEnumerable)collection)
-                            {
-                                args.Add(AddParameter(item, addParameter));
-                            }
-                        }
-                        return string.Empty;
-                    };
 
-                    _ = mce.Object.ToValue(argumentsDecoder);
+                    var prmManger = new CollectionParameterManager(engine.Manager);
+                    var eng = new BuilderEngine(engine.SqlDialect, prmManger);
 
-                    var left = mce.Arguments[0].ToValue(addParameter);
+                    _ = mce.Object.ToValue(eng);
+
+                    var left = mce.Arguments[0].ToValue(engine);
                     if (mce.Method.Name == nameof(String.Contains))
                     {
-                        return $"{left} in({string.Join(",", args)})";
+                        return $"{left} in ({prmManger.GetCollectionValue})";
                     }
                 }
             }
@@ -442,7 +421,7 @@ internal static class MethodCallExpressionExtension
                 {
                     if (mce.Method.Name == nameof(Enumerable.Any))
                     {
-                        return ToAnyClauseValue(mce, addParameter);
+                        return ToAnyClauseValue(mce, engine);
                     }
                 }
             }
@@ -450,8 +429,7 @@ internal static class MethodCallExpressionExtension
         }
     }
 
-    private static string ToAnyClauseValue(this MethodCallExpression mce
-        , Func<string, object?, string> addParameter)
+    private static string ToAnyClauseValue(this MethodCallExpression mce, BuilderEngine engine)
     {
         // Format:
         // Array.Any(x => (table.column == x))
@@ -459,51 +437,46 @@ internal static class MethodCallExpressionExtension
         // Array.Any(x => (x == table.column))
 
         var lambda = (LambdaExpression)mce.Arguments[1];
+
         var variableName = lambda.Parameters[0].Name!;
 
-        var arrayParameterName = mce.Arguments[0].ToValue(addParameter);
+        var arrayParameterName = mce.Arguments[0].ToValue(engine);
+
 
         // Hook the parameter name and return in the format any(PARAMETER)
-        var hasAnyCommand = false;
-        Func<string, object?, string> interceptor = (_, x) =>
-        {
-            if (variableName.Equals(x))
-            {
-                hasAnyCommand = true;
-                return $"any({arrayParameterName})";
-            }
-            throw new InvalidProgramException();
-        };
+        var prmManager = new ArrayParameterManager(engine, variableName, arrayParameterName);
+        var interceptor = new BuilderEngine(engine.SqlDialect, prmManager);
 
         var body = (BinaryExpression)lambda.Body;
         if (body.NodeType != ExpressionType.Equal) throw new InvalidProgramException();
 
         // Adjust to make the ANY function appear on the right side
         var left = body.Left.ToValue(interceptor);
-        if (hasAnyCommand)
+        if (prmManager.IsCommandCreated)
         {
+            //right = any(left)
             return $"{body.Right.ToValue(interceptor)} = {left}";
         }
 
         var right = body.Right.ToValue(interceptor);
-        if (hasAnyCommand)
+        if (prmManager.IsCommandCreated)
         {
+            //left = any(right)
             return $"{left} = {right}";
         }
 
         throw new InvalidProgramException();
     }
 
-    private static string ToDateTimeValue(this MethodCallExpression mce
-        , Func<string, object?, string> addParameter)
+    private static string ToDateTimeValue(this MethodCallExpression mce, BuilderEngine engine)
     {
         if (mce!.Object != null)
         {
-            var value = mce!.Object!.ToValue(addParameter);
+            var value = mce!.Object!.ToValue(engine);
 
             if (mce.Arguments.Count == 1)
             {
-                var arg = mce.Arguments[0].ToValue(addParameter);
+                var arg = mce.Arguments[0].ToValue(engine);
 
                 if (mce.Method.Name == nameof(DateTime.AddYears))
                 {
@@ -541,7 +514,7 @@ internal static class MethodCallExpressionExtension
         {
             if (mce.Arguments.Count == 1)
             {
-                Func<string, object?, string> echo = (_, x) => x!.ToString()!;
+                var echo = new BuilderEngine(engine.SqlDialect, new EchoParameterManager());
                 return mce.ToValue(echo);
             }
 
@@ -562,29 +535,6 @@ internal static class MethodCallExpressionExtension
         return value;
     }
 
-    private static string ConverToDbDateFormat(string csharpFormat)
-    {
-        var replacements = new Dictionary<string, string>
-        {
-            {"yyyy", "YYYY"},
-            {"MM", "MM"},
-            {"dd", "DD"},
-            {"HH", "HH24"},
-            {"mm", "MI"},
-            {"ss", "SS"},
-            {"ffffff", "US"},
-            {"fff", "MS"}
-        };
-
-        string dbformat = csharpFormat;
-
-        foreach (var pair in replacements)
-        {
-            dbformat = dbformat.Replace(pair.Key, pair.Value);
-        }
-
-        return dbformat;
-    }
 
     private static bool IsGenericList(Type? type)
     {

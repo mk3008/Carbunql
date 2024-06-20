@@ -4,39 +4,39 @@ namespace Carbunql.TypeSafe.Extensions;
 
 public static class ExpresionExtension
 {
-    public static string ToValue(this Expression exp, Func<string, object?, string> addParameter)
+    internal static string ToValue(this Expression exp, BuilderEngine engine)
     {
         if (exp is MemberExpression mem)
         {
-            return mem.ToValue(addParameter);
+            return mem.ToValue(engine);
         }
         else if (exp is ConstantExpression ce)
         {
-            return ce.ToValue(addParameter);
+            return ce.ToValue(engine);
         }
         else if (exp is NewExpression ne)
         {
-            return ne.ToValue(addParameter);
+            return ne.ToValue(engine);
         }
         else if (exp is BinaryExpression be)
         {
-            return be.ToValue(addParameter);
+            return be.ToValue(engine);
         }
         else if (exp is UnaryExpression ue)
         {
-            return ue.ToValue(addParameter);
+            return ue.ToValue(engine);
         }
         else if (exp is MethodCallExpression mce)
         {
-            return mce.ToValue(addParameter);
+            return mce.ToValue(engine);
         }
         else if (exp is ConditionalExpression cnd)
         {
-            return cnd.ToValue(addParameter);
+            return cnd.ToValue(engine);
         }
         else if (exp is ParameterExpression prm)
         {
-            return prm.ToValue(addParameter);
+            return prm.ToValue(engine);
         }
 
         throw new InvalidProgramException(exp.ToString());
