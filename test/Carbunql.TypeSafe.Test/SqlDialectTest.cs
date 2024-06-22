@@ -64,7 +64,7 @@ SELECT
         var id = 1;
         var value = 10.5;
 
-        var query = new FluentSelectQueryBuilder(new SQLiteDialect()).From()
+        var query = new FluentSelectQueryBuilder(new SQLiteTranspiler()).From()
             .Select(() => new
             {
                 parameter_symbol = id,
@@ -163,7 +163,7 @@ public class DependencySetupFixture : IDisposable
     public DependencySetupFixture()
     {
         var serviceCollection = new ServiceCollection()
-            .AddSingleton<ISqlDialect, SQLiteDialect>()
+            .AddSingleton<ISqlTranspiler, SQLiteTranspiler>()
             .AddTransient<FluentSelectQueryBuilder>();
 
         ServiceProvider = serviceCollection.BuildServiceProvider();

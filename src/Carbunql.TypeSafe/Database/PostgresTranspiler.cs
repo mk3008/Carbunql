@@ -2,7 +2,7 @@
 
 namespace Carbunql.TypeSafe.Dialect;
 
-public class PostgresDialect : ISqlDialect
+public class PostgresTranspiler : ISqlTranspiler
 {
     public string BooleanDbType { get; } = "boolean";
     public string CharDbType { get; } = "character";

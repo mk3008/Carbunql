@@ -16,14 +16,14 @@ namespace Carbunql.TypeSafe;
 
 public class FluentSelectQuery : SelectQuery
 {
-    internal readonly ISqlDialect SqlDialect;
+    internal readonly ISqlTranspiler SqlDialect;
 
-    public FluentSelectQuery(ISqlDialect sqlDialect)
+    public FluentSelectQuery(ISqlTranspiler sqlDialect)
     {
         SqlDialect = sqlDialect;
     }
 
-    public FluentSelectQuery() : this(new PostgresDialect())
+    public FluentSelectQuery() : this(new PostgresTranspiler())
     {
     }
 
@@ -499,7 +499,7 @@ public class FluentSelectQuery : SelectQuery
 
 public class FluentSelectQuery<T> : FluentSelectQuery where T : IDataRow, new()
 {
-    public FluentSelectQuery(ISqlDialect sqlDialect) : base(sqlDialect)
+    public FluentSelectQuery(ISqlTranspiler sqlDialect) : base(sqlDialect)
     {
     }
 

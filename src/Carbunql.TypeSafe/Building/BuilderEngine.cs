@@ -5,9 +5,9 @@ using System.Data;
 
 namespace Carbunql.TypeSafe.Building;
 
-internal class BuilderEngine(ISqlDialect sqlDialect, IConstantRegistry registory)
+internal class BuilderEngine(ISqlTranspiler sqlDialect, IConstantRegistry registory)
 {
-    internal readonly ISqlDialect SqlDialect = sqlDialect;
+    internal readonly ISqlTranspiler SqlDialect = sqlDialect;
     public readonly IConstantRegistry Registory = registory;
 
     public string AddParameter(string name, object? value)

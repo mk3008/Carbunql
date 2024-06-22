@@ -2,7 +2,7 @@
 
 namespace Carbunql.TypeSafe.Dialect;
 
-public class SQLiteDialect : ISqlDialect
+public class SQLiteTranspiler : ISqlTranspiler
 {
     public string BooleanDbType { get; } = "integer"; // SQLite does not have a boolean type, so it is mapped to integer
     public string CharDbType { get; } = "text";
