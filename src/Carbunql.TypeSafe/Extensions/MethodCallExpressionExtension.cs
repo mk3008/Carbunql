@@ -2,6 +2,7 @@
 using Carbunql.Annotations;
 using Carbunql.Building;
 using Carbunql.Extensions;
+using Carbunql.TypeSafe.Building;
 using Carbunql.TypeSafe.Extensions;
 using Carbunql.Values;
 using System.Linq.Expressions;
@@ -296,7 +297,7 @@ internal static class MethodCallExpressionExtension
         var fsql = new FluentSelectQuery();
         var (f, x) = fsql.From(clause).As(expression.Parameters[0].Name!);
 
-        var prmManager = new ParameterManager(fsql.GetParameters(), fsql.AddParameter);
+        var prmManager = new ParameterRegistory(fsql.GetParameters(), fsql.AddParameter);
         var eng = new BuilderEngine(engine.SqlDialect, prmManager);
 
         var value = expression.Body.ToValue(eng);
@@ -341,7 +342,7 @@ internal static class MethodCallExpressionExtension
             {
                 if (mce.Method.Name == nameof(String.ToString))
                 {
-                    var mng = new StringFormatParameterManager(engine.Manager);
+                    var mng = new StringFormatRegistory(engine.Registory);
                     var eng = new BuilderEngine(engine.SqlDialect, mng);
 
                     var format = mce.Arguments[0].ToValue(eng);
@@ -398,7 +399,7 @@ internal static class MethodCallExpressionExtension
                     //The IN clause itself is not suitable for parameter queries, so the collection will be forcibly expanded.
                     //If you want to parameterize it, use the ANY function, etc.
 
-                    var prmManger = new CollectionParameterManager(engine.Manager);
+                    var prmManger = new CollectionRegistory(engine.Registory);
                     var eng = new BuilderEngine(engine.SqlDialect, prmManger);
 
                     _ = mce.Object.ToValue(eng);
@@ -444,7 +445,7 @@ internal static class MethodCallExpressionExtension
 
 
         // Hook the parameter name and return in the format any(PARAMETER)
-        var prmManager = new ArrayParameterManager(engine, variableName, arrayParameterName);
+        var prmManager = new ArrayRegistry(engine, variableName, arrayParameterName);
         var interceptor = new BuilderEngine(engine.SqlDialect, prmManager);
 
         var body = (BinaryExpression)lambda.Body;
@@ -514,7 +515,7 @@ internal static class MethodCallExpressionExtension
         {
             if (mce.Arguments.Count == 1)
             {
-                var echo = new BuilderEngine(engine.SqlDialect, new EchoParameterManager());
+                var echo = new BuilderEngine(engine.SqlDialect, new PassThroughRegistory());
                 return mce.ToValue(echo);
             }
 

@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using Carbunql.TypeSafe.Building;
 
 namespace Carbunql.TypeSafe.Extensions;
 
