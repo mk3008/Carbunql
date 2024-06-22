@@ -94,14 +94,44 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     public WindowClause? WindowClause { get; set; }
 
     /// <summary>
-    /// Gets or sets the comment clause of the select query.
+    /// Gets or sets the comment clause of the select clause.
     /// </summary>
+    /// <remarks>
+    /// A comment that is output before the selection clause. It is suitable for indicating the nature of the selection query.
+    /// Since it is output after the With clause, it is less visible than the HeaderCommentClause.
+    /// </remarks>
     [IgnoreMember]
     public CommentClause? CommentClause { get; set; }
+
+    /// <summary>
+    /// Gets or sets the comment clause for the select query.
+    /// This is printed before the With clause, which can be useful for debugging.
+    /// </summary>
+    /// <remarks>
+    /// This is printed before the With clause and is useful for debugging.
+    /// However, it is not printed if it is not the root query.
+    /// </remarks>
+    [IgnoreMember]
+    public CommentClause? HeaderCommentClause { get; set; }
+
+    public void AddHeaderComment(string comment)
+    {
+        HeaderCommentClause ??= new CommentClause();
+        HeaderCommentClause.Add(comment);
+    }
 
     /// <inheritdoc/>
     public override IEnumerable<Token> GetCurrentTokens(Token? parent)
     {
+        // If this is a root query, a header comment is printed on the first line.
+        if (parent == null && HeaderCommentClause != null)
+        {
+            foreach (var item in HeaderCommentClause.GetTokens(parent))
+            {
+                yield return item;
+            }
+        }
+
         if (parent == null && WithClause != null)
         {
             var commonTables = GetCommonTables();

@@ -34,6 +34,7 @@ internal class Program
         // Debug
         var query = SelectSaleReportQuery();
         var sale = SelectSaleTestDataQuery();
+        query.AddHeaderComment("unit test query");
         query.With(() => sale);
 
         Console.WriteLine(query.ToText());
