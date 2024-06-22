@@ -406,6 +406,7 @@ public class FluentSelectQuery : SelectQuery
         q.LimitClause = LimitClause;
         q.Parameters = Parameters;
         q.CommentClause = CommentClause;
+        q.HeaderCommentClause = HeaderCommentClause;
 
         var clause = TableDefinitionClauseFactory.Create<T>();
 
