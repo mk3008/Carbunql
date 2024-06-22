@@ -1,23 +1,22 @@
 ﻿using System.Linq.Expressions;
+using Carbunql.TypeSafe.Building;
 
 namespace Carbunql.TypeSafe.Extensions;
 
 internal static class UnaryExpressionExtension
 {
-    internal static string ToValue(this UnaryExpression ue
-        , Func<string, object?, string> addParameter)
+    internal static string ToValue(this UnaryExpression ue, BuilderEngine engine)
     {
         if (ue.NodeType == ExpressionType.Convert)
         {
-            return ToConvertValue(ue, addParameter);
+            return ToConvertValue(ue, engine);
         }
         throw new InvalidProgramException($"NodeType:{ue.NodeType}");
     }
 
-    private static string ToConvertValue(UnaryExpression ue
-        , Func<string, object?, string> addParameter)
+    private static string ToConvertValue(UnaryExpression ue, BuilderEngine engine)
     {
-        var value = ue.Operand.ToValue(addParameter);
-        return FluentSelectQuery.CreateCastStatement(value, ue.Type);
+        var value = ue.Operand.ToValue(engine);
+        return engine.SqlDialect.GetCastStatement(value, ue.Type);
     }
 }

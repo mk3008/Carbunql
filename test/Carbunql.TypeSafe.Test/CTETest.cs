@@ -62,7 +62,7 @@ public class CTETest
         FROM
             order AS o
         WHERE
-            o.order_date = CAST(NOW() AS timestamp)
+            o.order_date = NOW()
     )
 SELECT
     o.store_id
@@ -97,7 +97,7 @@ FROM
         FROM
             order AS o
         WHERE
-            o.order_date = CAST(NOW() AS timestamp)
+            o.order_date = NOW()
     )
 SELECT
     o.store_id
@@ -132,7 +132,7 @@ FROM
         FROM
             order AS o
         WHERE
-            o.order_date = CAST(NOW() AS timestamp)
+            o.order_date = NOW()
     )
 SELECT
     o.store_id

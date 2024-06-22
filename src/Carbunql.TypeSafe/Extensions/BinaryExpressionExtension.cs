@@ -1,20 +1,20 @@
 ﻿using Carbunql.Analysis.Parser;
 using Carbunql.Extensions;
+using Carbunql.TypeSafe.Building;
 using System.Linq.Expressions;
 
 namespace Carbunql.TypeSafe.Extensions;
 
 internal static class BinaryExpressionExtension
 {
-    internal static string ToValue(this BinaryExpression be
-       , Func<string, object?, string> addParameter)
+    internal static string ToValue(this BinaryExpression be, BuilderEngine engine)
     {
-        var left = be.Left.ToValue(addParameter);
-        var right = be.Right.ToValue(addParameter);
-        return ToValue(be.NodeType, left, right);
+        var left = be.Left.ToValue(engine);
+        var right = be.Right.ToValue(engine);
+        return ToValue(be.NodeType, left, right, engine);
     }
 
-    private static string ToValue(ExpressionType nodeType, string left, string right)
+    private static string ToValue(ExpressionType nodeType, string left, string right, BuilderEngine engine)
     {
         var opPrecedence = GetPrecedenceFromExpressionType(nodeType);
 
@@ -49,12 +49,12 @@ internal static class BinaryExpressionExtension
         // Return the formatted expression based on the operation type
         return nodeType switch
         {
-            ExpressionType.Coalesce => $"{DbmsConfiguration.CoalesceFunctionName}({left}, {right})",
+            ExpressionType.Coalesce => engine.SqlDialect.GetCoalesceCommand(left, right),
             ExpressionType.Add => $"{left} + {right}",
             ExpressionType.Subtract => $"{left} - {right}",
             ExpressionType.Multiply => $"{left} * {right}",
             ExpressionType.Divide => $"{left} / {right}",
-            ExpressionType.Modulo => $"{DbmsConfiguration.GetModuloCommandLogic(left, right)}",
+            ExpressionType.Modulo => engine.SqlDialect.GetModuloCommand(left, right),
             ExpressionType.Equal => $"{left} = {right}",
             ExpressionType.NotEqual => $"{left} <> {right}",
             ExpressionType.GreaterThan => $"{left} > {right}",

@@ -1,10 +1,10 @@
 ﻿using Carbunql.Building;
 
-namespace Carbunql.TypeSafe;
+namespace Carbunql.TypeSafe.Building;
 
-internal class ParameterManager
+internal class ParameterRegistory : IConstantRegistry
 {
-    public ParameterManager(IEnumerable<QueryParameter> parameters, Func<string, object?, string> addParameterLogic)
+    public ParameterRegistory(IEnumerable<QueryParameter> parameters, Func<string, object?, string> addParameterLogic)
     {
         Parameters = parameters.ToDictionary(x => x.ParameterName, x => x.Value);
         AddParameterLogic = addParameterLogic;
@@ -14,6 +14,8 @@ internal class ParameterManager
 
     public Func<string, object?, string> AddParameterLogic { get; set; }
 
+    IEnumerable<KeyValuePair<string, object>> IConstantRegistry.Parameters => Parameters!;
+
     /// <summary>
     /// Generates an available parameter name.
     /// The returned parameter name may not necessarily be unused.
@@ -22,10 +24,10 @@ internal class ParameterManager
     /// <param name="variableName">Variable name</param>
     /// <param name="value">Variable value</param>
     /// <returns>Returns an available parameter name. It also indicates whether the parameter name is being reused.</returns>
-    private Result GenerateParameterName(string variableName, object? value)
+    private Result GenerateParameterName(string key, object? value)
     {
         // If there is no variable name, and there is exactly one match with the same value, reuse it
-        if (string.IsNullOrEmpty(variableName))
+        if (string.IsNullOrEmpty(key))
         {
             var q = Parameters.Where(x => x.Value != null && x.Value.Equals(value));
             if (q.Count() == 1)
@@ -35,21 +37,18 @@ internal class ParameterManager
             }
         }
 
-        // Temporarily set the parameter name based on the variable name
-        var requestKey = !string.IsNullOrEmpty(variableName) ? $"{DbmsConfiguration.PlaceholderIdentifier}{variableName.ToLowerSnakeCase()}" : $"{DbmsConfiguration.PlaceholderIdentifier}p{Parameters.Count}";
-
         // If the temporary parameter is unused, the desired parameter can be used as is
-        if (!Parameters.ContainsKey(requestKey))
+        if (!Parameters.ContainsKey(key))
         {
-            return new Result(requestKey, false);
+            return new Result(key, false);
         }
 
-        var existingValue = Parameters[requestKey];
+        var existingValue = Parameters[key];
 
         // Even if used, if the existing parameter and key match the value, it can be reused
         if (existingValue != null && existingValue.Equals(value))
         {
-            return new Result(requestKey, true);
+            return new Result(key, true);
         }
 
         // Otherwise, automatically assign a name.
@@ -57,13 +56,13 @@ internal class ParameterManager
         string tmpkey;
         do
         {
-            tmpkey = $"{requestKey}_{index++}";
+            tmpkey = $"{key}_{index++}";
         } while (Parameters.ContainsKey(tmpkey));
 
         return new Result(tmpkey, false);
     }
 
-    public string AddParameter(string key, object? value)
+    public string Add(string key, object? value)
     {
         var nameInfo = GenerateParameterName(key, value);
 
@@ -73,6 +72,11 @@ internal class ParameterManager
         Parameters.Add(nameInfo.ParameterName, value);
 
         return nameInfo.ParameterName;
+    }
+
+    public int Count()
+    {
+        return Parameters.Count();
     }
 
     internal struct Result
@@ -87,3 +91,4 @@ internal class ParameterManager
         }
     }
 }
+

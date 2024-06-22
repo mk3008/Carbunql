@@ -1,11 +1,11 @@
 ﻿using System.Linq.Expressions;
+using Carbunql.TypeSafe.Building;
 
 namespace Carbunql.TypeSafe.Extensions;
 
 internal static class ConstantExpressionExtension
 {
-    internal static string ToValue(this ConstantExpression ce
-        , Func<string, object?, string> addParameter)
+    internal static string ToValue(this ConstantExpression ce, BuilderEngine engine)
     {
         var obj = ce.Value;
         var tp = ce.Type;
@@ -22,12 +22,12 @@ internal static class ConstantExpressionExtension
             }
             else
             {
-                return addParameter(string.Empty, obj);
+                return engine.AddParameter(obj);
             }
         }
         else if (tp == typeof(DateTime))
         {
-            return addParameter(string.Empty, obj);
+            return engine.AddParameter(obj);
         }
         else
         {

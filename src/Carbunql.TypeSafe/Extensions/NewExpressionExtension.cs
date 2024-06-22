@@ -1,11 +1,11 @@
 ﻿using System.Linq.Expressions;
+using Carbunql.TypeSafe.Building;
 
 namespace Carbunql.TypeSafe.Extensions;
 
 internal static class NewExpressionExtension
 {
-    internal static string ToValue(this NewExpression ne
-        , Func<string, object?, string> addParameter)
+    internal static string ToValue(this NewExpression ne, BuilderEngine engine)
     {
         var obj = ne.CompileAndInvoke();
         var tp = ne.Type;
@@ -22,12 +22,12 @@ internal static class NewExpressionExtension
             }
             else
             {
-                return addParameter(string.Empty, obj);
+                return engine.AddParameter(obj);
             }
         }
         else if (tp == typeof(DateTime))
         {
-            return addParameter(string.Empty, obj);
+            return engine.AddParameter(obj);
         }
         else
         {

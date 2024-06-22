@@ -98,16 +98,16 @@ FROM
         Output.WriteLine(actual);
 
         var expect = @"/*
-  :p0 = 'test'
-  :p1 = 2000/01/01 10:10:00
+  :const_0 = 'test'
+  :const_1 = 2000/01/01 10:10:00
 */
 SELECT
     1 AS id,
     10 AS value,
     0.1 AS rate,
     True AS tf_value,
-    :p0 AS remarks,
-    :p1 AS created_at
+    :const_0 AS remarks,
+    :const_1 AS created_at
 FROM
     sale AS a";
 
@@ -279,7 +279,7 @@ SELECT
     DATE_TRUNC('hour', :d) AS v_trunc_hour,
     DATE_TRUNC('minute', :d) AS v_trunc_minute,
     DATE_TRUNC('second', :d) AS v_trunc_second,
-    DATE_TRUNC('month', CAST(NOW() AS timestamp)) + 1 * INTERVAL '1 month' + -1 * INTERVAL '1 day' AS last_date_of_month
+    DATE_TRUNC('month', NOW()) + 1 * INTERVAL '1 month' + -1 * INTERVAL '1 day' AS last_date_of_month
 FROM
     sale AS a";
 
@@ -321,8 +321,8 @@ SELECT
     DATE_TRUNC('hour', :d) AS v_trunc_hour,
     DATE_TRUNC('minute', :d) AS v_trunc_minute,
     DATE_TRUNC('second', :d) AS v_trunc_second,
-    DATE_TRUNC('month', CAST(NOW() AS timestamp)) + 1 * INTERVAL '1 month' + -1 * INTERVAL '1 day' AS last_date_of_month,
-    DATE_TRUNC('month', CAST(NOW() AS timestamp)) + INTERVAL '1 month - 1 day' AS last_date_of_month2
+    DATE_TRUNC('month', NOW()) + 1 * INTERVAL '1 month' + -1 * INTERVAL '1 day' AS last_date_of_month,
+    DATE_TRUNC('month', NOW()) + INTERVAL '1 month - 1 day' AS last_date_of_month2
 FROM
     sale AS a";
 
@@ -401,7 +401,7 @@ FROM
         Output.WriteLine(actual);
 
         var expect = @"SELECT
-    CAST(NOW() AS timestamp) AS now_command,
+    NOW() AS now_command,
     current_timestamp AS timestamp_commend
 FROM
     sale AS a";
@@ -581,14 +581,14 @@ FROM
         Output.WriteLine(actual);
 
         var expect = @"/*
-  :p0 = 'YYYY/MM/DD HH24:MI:SS.US'
-  :p1 = 'YYYY/MM/DD HH24:MI:SS.MS'
+  :const_0 = 'YYYY/MM/DD HH24:MI:SS.US'
+  :const_1 = 'YYYY/MM/DD HH24:MI:SS.MS'
 */
 SELECT
     CAST(a.product_name AS text) AS product_name,
     CAST(a.sale_id AS text) AS sale_id,
-    TO_CHAR(a.created_at, :p0) AS created_at,
-    TO_CHAR(a.created_at, :p1) AS created_at2
+    TO_CHAR(a.created_at, :const_0) AS created_at,
+    TO_CHAR(a.created_at, :const_1) AS created_at2
 FROM
     sale AS a";
 

@@ -139,6 +139,17 @@ public static class Sql
         return sq;
     }
 
+
+    /// <summary>
+    /// Select query without a From clause
+    /// </summary>
+    /// <returns></returns>
+    public static FluentSelectQuery From()
+    {
+        var sq = new FluentSelectQuery();
+        return sq;
+    }
+
     public static bool Exists<T>(Func<T> getDataSet, Expression<Func<T, bool>> expression) where T : IDataRow, new()
     {
         return true;
@@ -157,6 +168,7 @@ public static class Sql
 
     public static string CurrentTimestamp => string.Empty;
 
+    [Obsolete("user DateTime.Now")]
     public static DateTime Now => new DateTime();
 
     public static DateTime DateTruncateToYear(DateTime d) => new DateTime();

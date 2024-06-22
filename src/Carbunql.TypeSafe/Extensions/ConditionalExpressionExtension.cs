@@ -1,16 +1,16 @@
 ﻿using Carbunql.Analysis.Parser;
+using Carbunql.TypeSafe.Building;
 using System.Linq.Expressions;
 
 namespace Carbunql.TypeSafe.Extensions;
 
 internal static class ConditionalExpressionExtension
 {
-    internal static string ToValue(this ConditionalExpression cnd
-        , Func<string, object?, string> addParameter)
+    internal static string ToValue(this ConditionalExpression cnd, BuilderEngine engine)
     {
-        var test = cnd.Test.ToValue(addParameter);
-        var ifTrue = cnd.IfTrue.ToValue(addParameter);
-        var ifFalse = cnd.IfFalse.ToValue(addParameter);
+        var test = cnd.Test.ToValue(engine);
+        var ifTrue = cnd.IfTrue.ToValue(engine);
+        var ifFalse = cnd.IfFalse.ToValue(engine);
 
         if (string.IsNullOrEmpty(ifFalse))
         {
