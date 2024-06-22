@@ -119,8 +119,6 @@ public static class ISqlDialectExtension
 
 public class PostgresDialect : ISqlDialect
 {
-    public string PlaceholderIdentifier { get; } = ":";
-    public string CoalesceFunctionName { get; } = "coalesce";
     public string BooleanDbType { get; } = "boolean";
     public string CharDbType { get; } = "character";
     public string SByteDbType { get; } = "smallint";
@@ -172,22 +170,22 @@ public class PostgresDialect : ISqlDialect
 
     public string GetTruncateCommand(IEnumerable<string> args)
     {
-        return $"trunc({string.Join(",", args)})";
+        return $"trunc({string.Join(",", args)})";//引数は1
     }
 
     public string GetFloorCommand(IEnumerable<string> args)
     {
-        return $"floor({string.Join(",", args)})";
+        return $"floor({string.Join(",", args)})";//引数は1
     }
 
     public string GetCeilingCommand(IEnumerable<string> args)
     {
-        return $"ceil({string.Join(",", args)})";
+        return $"ceil({string.Join(",", args)})";//引数は1
     }
 
     public string GetRoundCommand(IEnumerable<string> args)
     {
-        return $"round({string.Join(",", args)})";
+        return $"round({string.Join(",", args)})";//引数は1、または2
     }
 
     public string GetCastStatement(string value, Type type)
@@ -198,8 +196,6 @@ public class PostgresDialect : ISqlDialect
 
 public class SQLiteDialect : ISqlDialect
 {
-    public string PlaceholderIdentifier { get; } = "@";
-    public string CoalesceFunctionName { get; } = "coalesce";
     public string BooleanDbType { get; } = "integer"; // SQLite does not have a boolean type, so it is mapped to integer
     public string CharDbType { get; } = "text";
     public string SByteDbType { get; } = "integer";

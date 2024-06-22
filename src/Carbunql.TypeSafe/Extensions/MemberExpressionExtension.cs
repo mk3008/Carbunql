@@ -13,6 +13,17 @@ internal static class MemberExpressionExtension
             // ex. Sql.Now, Sql.CurrentTimestamp
             return mem.CreateSqlCommand(engine);
         }
+        if (mem.Expression is null)
+        {
+            if (mem.Member.DeclaringType == typeof(DateTime))
+            {
+                if (mem.Member.Name == "Now")
+                {
+                    return engine.SqlDialect.GetNowCommand();
+                }
+            }
+            throw new NotSupportedException();
+        }
         if (mem.Expression is MemberExpression && typeof(IDataRow).IsAssignableFrom(tp))
         {
             //column
