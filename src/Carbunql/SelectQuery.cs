@@ -102,18 +102,19 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     /// <inheritdoc/>
     public override IEnumerable<Token> GetCurrentTokens(Token? parent)
     {
-        if (CommentClause != null)
+        if (parent == null && WithClause != null)
         {
-            foreach (var item in CommentClause.GetTokens(parent))
+            var commonTables = GetCommonTables();
+            foreach (var item in WithClause.GetTokens(parent, commonTables))
             {
                 yield return item;
             }
         }
 
-        if (parent == null && WithClause != null)
+        // Comments will be unified to be displayed just before the selected section.
+        if (CommentClause != null)
         {
-            var commonTables = GetCommonTables();
-            foreach (var item in WithClause.GetTokens(parent, commonTables))
+            foreach (var item in CommentClause.GetTokens(parent))
             {
                 yield return item;
             }
