@@ -22,7 +22,7 @@ internal class Program
         Console.WriteLine(SelectStoreSaleReportByStaffId(staffId).ToText());
         Console.WriteLine(";");
 
-        //アスペクト指向フィルタリング
+        //拡張メソッドによるフィルタリング
         Console.WriteLine(SelectAreaSaleReport().FilterByStaffId(staffId).ToText());
         Console.WriteLine(";");
 
@@ -93,7 +93,7 @@ internal class Program
     }
 }
 
-public static class AspectOrientedFiltering
+public static class Filtering
 {
     /// <summary>
     /// 選択クエリをスタッフIDでフィルタリングします。

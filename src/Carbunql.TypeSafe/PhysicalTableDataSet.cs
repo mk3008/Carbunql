@@ -10,8 +10,6 @@ public class PhysicalTableDataSet(ITable tb, IEnumerable<string> columns) : IDat
 {
     public SelectableTable Table { get; set; } = new PhysicalTable(tb).ToSelectable();
 
-    public List<string> Columns { get; init; } = columns.ToList();
-
     public SelectQuery BuildFromClause(SelectQuery query, string alias)
     {
         query.From(Table).As(alias);

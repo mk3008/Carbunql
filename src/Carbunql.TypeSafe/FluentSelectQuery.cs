@@ -40,16 +40,17 @@ public class FluentSelectQuery : SelectQuery
         {
             // DataSet.*
             var table = mem.Member.Name;
-            var c = mem.CompileAndInvoke();
 
             if (!GetSelectableTables().Where(x => x.Alias == table).Any())
             {
                 throw new InvalidProgramException($"A dataset that is not defined in the FROM clause has been referenced. Name:{table}");
             }
 
-            if (c is IDataRow dr)
+            var c = mem.CompileAndInvoke();
+
+            if (c != null)
             {
-                foreach (var item in dr.DataSet.Columns)
+                foreach (var item in PropertySelector.SelectLiteralProperties(c.GetType()).Select(x => x.Name))
                 {
                     //Do not add duplicate columns
                     if (SelectClause != null && SelectClause.Where(x => x.Alias.IsEqualNoCase(item)).FirstOrDefault() != null)

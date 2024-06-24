@@ -7,8 +7,6 @@ public class QueryDataSet(SelectQuery query) : IDataSet
 {
     public SelectQuery Query { get; init; } = query;
 
-    public List<string> Columns { get; init; } = query.GetColumnNames().ToList();
-
     public SelectQuery BuildFromClause(SelectQuery query, string alias)
     {
         query.From(Query).As(alias);

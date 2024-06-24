@@ -176,14 +176,14 @@ FROM
   :localtion = 'japan'
 */
 SELECT
+    r.order_date,
+    r.customer_name,
+    r.store_id,
     r.order_detail_id,
     r.order_id,
     r.product_id,
     r.quantity,
     r.price,
-    r.order_date,
-    r.customer_name,
-    r.store_id,
     s.name AS store_name
 FROM
     (
