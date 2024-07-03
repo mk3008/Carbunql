@@ -4,6 +4,7 @@ using Carbunql.Tables;
 using Carbunql.Values;
 using MessagePack;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Clauses;
 
@@ -104,6 +105,17 @@ public abstract class TableBase : IQueryCommandable
     /// <returns>The select query associated with this table.</returns>
     public virtual SelectQuery GetSelectQuery() => throw new NotSupportedException();
 
+    public bool TryGetSelectQuery([MaybeNullWhen(false)] out SelectQuery query)
+    {
+        if (IsSelectQuery)
+        {
+            query = GetSelectQuery();
+            return true;
+        }
+        query = null;
+        return false;
+    }
+
     /// <summary>
     /// Gets the internal queries associated with this table.
     /// </summary>
@@ -121,4 +133,9 @@ public abstract class TableBase : IQueryCommandable
     /// </summary>
     /// <returns>The common tables associated with this table.</returns>
     public abstract IEnumerable<CommonTable> GetCommonTables();
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        yield break;
+    }
 }

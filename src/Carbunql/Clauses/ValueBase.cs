@@ -253,4 +253,22 @@ public abstract class ValueBase : IQueryCommandable
     {
         return GetTokens(null).ToText();
     }
+
+    internal abstract IEnumerable<ColumnValue> GetColumnsCore();
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        foreach (var item in GetColumnsCore())
+        {
+            yield return item;
+        }
+
+        if (OperatableValue != null)
+        {
+            foreach (var item in OperatableValue.Value.GetColumns())
+            {
+                yield return item;
+            }
+        }
+    }
 }

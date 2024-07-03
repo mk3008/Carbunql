@@ -1,6 +1,7 @@
 ﻿using Carbunql.Analysis.Parser;
 using Carbunql.Clauses;
 using Carbunql.Tables;
+using Carbunql.Values;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Definitions;
@@ -243,5 +244,10 @@ public class ColumnDefinition : ITableDefinition
 
         constraint = new CheckConstraint(this) { Value = CheckDefinition };
         return true;
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        yield break;
     }
 }

@@ -6,7 +6,7 @@ using Carbunql.Tables;
 
 namespace Carbunql.TypeSafe;
 
-public class PhysicalTableDataSet(ITable tb, IEnumerable<string> columns) : IDataSet
+public class PhysicalTableDataSet(ITable tb, IEnumerable<string> columns) : ITypeSafeDataSet
 {
     public SelectableTable Table { get; set; } = new PhysicalTable(tb).ToSelectable();
 

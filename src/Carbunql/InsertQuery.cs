@@ -1,6 +1,7 @@
 ﻿using Carbunql.Building;
 using Carbunql.Clauses;
 using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 using System.Diagnostics.CodeAnalysis;
 
@@ -146,5 +147,10 @@ public class InsertQuery : IQueryCommandable, IReturning, ICommentable
             }
         }
         return false;
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        yield break;
     }
 }

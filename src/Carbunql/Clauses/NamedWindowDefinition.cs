@@ -1,4 +1,5 @@
 ﻿using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 
 namespace Carbunql.Clauses;
@@ -81,6 +82,14 @@ public class NamedWindowDefinition : IQueryCommandable
         yield return Token.Reserved(this, parent, "as");
 
         foreach (var item in WindowDefinition.GetTokens(parent)) yield return item;
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        foreach (var item in WindowDefinition.GetColumns())
+        {
+            yield return item;
+        }
     }
 }
 

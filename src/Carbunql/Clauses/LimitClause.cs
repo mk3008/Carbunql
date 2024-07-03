@@ -135,4 +135,19 @@ public class LimitClause : IQueryCommandable
             foreach (var item in Offset.GetTokens(clause)) yield return item;
         }
     }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        foreach (var item in Condition.GetColumns())
+        {
+            yield return item;
+        }
+        if (Offset != null)
+        {
+            foreach (var item in Offset.GetColumns())
+            {
+                yield return item;
+            }
+        }
+    }
 }

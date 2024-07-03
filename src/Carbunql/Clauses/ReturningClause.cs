@@ -64,4 +64,15 @@ public class ReturningClause : QueryCommandCollection<ValueBase>, IQueryCommanda
     {
         yield break;
     }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        foreach (var item in Items)
+        {
+            foreach (var column in item.GetColumns())
+            {
+                yield return column;
+            }
+        }
+    }
 }

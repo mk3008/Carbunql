@@ -1,4 +1,5 @@
 ﻿using Carbunql.Tables;
+using Carbunql.Values;
 using System.Collections;
 
 namespace Carbunql.Clauses;
@@ -146,4 +147,15 @@ public class WhenClause : IList<MergeCondition>, IQueryCommandable
         return ((IEnumerable)Conditions).GetEnumerator();
     }
     #endregion
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        foreach (var condition in Conditions)
+        {
+            foreach (var item in condition.GetColumns())
+            {
+                yield return item;
+            }
+        }
+    }
 }

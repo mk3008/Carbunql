@@ -2,6 +2,7 @@
 using Carbunql.Clauses;
 using Carbunql.Definitions;
 using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 
 namespace Carbunql;
@@ -110,5 +111,10 @@ public class AlterTableQuery : IQueryCommandable, ICommentable, ITable
         if (AlterTableClause.Count != 1) throw new InvalidOperationException();
         var cmd = AlterTableClause[0];
         return cmd.TrySet(clause);
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        yield break;
     }
 }

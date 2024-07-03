@@ -144,4 +144,22 @@ public class MergeInsertQuery : IQueryCommandable
         foreach (var item in Datasource.GetTokens(bracket)) yield return item;
         yield return Token.ReservedBracketEnd(this, parent);
     }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        if (Destination != null)
+        {
+            foreach (var item in Destination.GetColumns())
+            {
+                yield return item;
+            }
+        }
+        if (Datasource != null)
+        {
+            foreach (var item in Datasource.GetColumns())
+            {
+                yield return item;
+            }
+        }
+    }
 }

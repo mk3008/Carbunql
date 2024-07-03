@@ -1,4 +1,5 @@
 ﻿using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 
 namespace Carbunql.Clauses;
@@ -105,6 +106,18 @@ public class AtTimeZoneClause : ValueBase
             yield return item;
         }
         foreach (var item in TimeZone.GetCommonTables())
+        {
+            yield return item;
+        }
+    }
+
+    internal override IEnumerable<ColumnValue> GetColumnsCore()
+    {
+        foreach (var item in Value.GetColumns())
+        {
+            yield return item;
+        }
+        foreach (var item in TimeZone.GetColumns())
         {
             yield return item;
         }

@@ -102,7 +102,7 @@ FROM
         public decimal price { get; set; }
 
         // interface property
-        IDataSet IDataRow.DataSet { get; set; } = null!;
+        ITypeSafeDataSet IDataRow.DataSet { get; set; } = null!;
     }
 
     public record store : IDataRow
@@ -112,7 +112,7 @@ FROM
         public string location { get; set; } = string.Empty;
 
         // interface property
-        IDataSet IDataRow.DataSet { get; set; } = null!;
+        ITypeSafeDataSet IDataRow.DataSet { get; set; } = null!;
     }
 
     [Fact]
@@ -149,7 +149,7 @@ FROM
         public IList<order_detail> order_details { get; init; } = new List<order_detail>();
 
         // interface property
-        IDataSet IDataRow.DataSet { get; set; } = null!;
+        ITypeSafeDataSet IDataRow.DataSet { get; set; } = null!;
     }
 
     public record order_detail : IDataRow
@@ -161,7 +161,7 @@ FROM
         public decimal price { get; set; }
 
         // interface property
-        IDataSet IDataRow.DataSet { get; set; } = null!;
+        ITypeSafeDataSet IDataRow.DataSet { get; set; } = null!;
     }
 
     public record order_detail_product : order_detail

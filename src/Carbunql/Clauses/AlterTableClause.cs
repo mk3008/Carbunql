@@ -1,5 +1,6 @@
 ﻿using Carbunql.Definitions;
 using Carbunql.Tables;
+using Carbunql.Values;
 
 namespace Carbunql.Clauses;
 
@@ -115,6 +116,11 @@ public class AlterTableClause : QueryCommandCollection<IAlterCommand>, IQueryCom
     /// Gets the common tables associated with this clause.
     /// </summary>
     public IEnumerable<CommonTable> GetCommonTables()
+    {
+        yield break;
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
     {
         yield break;
     }

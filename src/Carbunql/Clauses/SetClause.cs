@@ -1,4 +1,5 @@
 ﻿using Carbunql.Tables;
+using Carbunql.Values;
 
 namespace Carbunql.Clauses;
 
@@ -7,6 +8,17 @@ namespace Carbunql.Clauses;
 /// </summary>
 public class SetClause : QueryCommandCollection<ValueBase>, IQueryCommandable
 {
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        foreach (var x in Items)
+        {
+            foreach (var item in x.GetColumns())
+            {
+                yield return item;
+            }
+        }
+    }
+
     /// <inheritdoc/>
     public IEnumerable<CommonTable> GetCommonTables()
     {

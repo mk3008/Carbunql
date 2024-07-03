@@ -58,7 +58,7 @@ GROUP BY
         public decimal price { get; set; }
 
         // interface property
-        IDataSet IDataRow.DataSet { get; set; } = null!;
+        ITypeSafeDataSet IDataRow.DataSet { get; set; } = null!;
     }
 
     public record store : IDataRow
@@ -68,7 +68,7 @@ GROUP BY
         public string location { get; set; } = string.Empty;
 
         // interface property
-        IDataSet IDataRow.DataSet { get; set; } = null!;
+        ITypeSafeDataSet IDataRow.DataSet { get; set; } = null!;
     }
 
     public record order : IDataRow
@@ -80,7 +80,7 @@ GROUP BY
         public IList<order_detail> order_details { get; init; } = new List<order_detail>();
 
         // interface property
-        IDataSet IDataRow.DataSet { get; set; } = null!;
+        ITypeSafeDataSet IDataRow.DataSet { get; set; } = null!;
     }
 
     public record order_detail : IDataRow
@@ -92,7 +92,7 @@ GROUP BY
         public decimal price { get; set; }
 
         // interface property
-        IDataSet IDataRow.DataSet { get; set; } = null!;
+        ITypeSafeDataSet IDataRow.DataSet { get; set; } = null!;
     }
 
     public record order_detail_report : order_detail

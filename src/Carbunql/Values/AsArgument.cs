@@ -99,4 +99,16 @@ public class AsArgument : ValueBase
             yield return item;
         }
     }
+
+    internal override IEnumerable<ColumnValue> GetColumnsCore()
+    {
+        foreach (var item in Value.GetColumns())
+        {
+            yield return item;
+        }
+        foreach (var item in Type.GetColumns())
+        {
+            yield return item;
+        }
+    }
 }

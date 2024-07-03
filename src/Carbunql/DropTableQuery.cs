@@ -2,6 +2,7 @@
 using Carbunql.Clauses;
 using Carbunql.Definitions;
 using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 
 namespace Carbunql;
@@ -92,6 +93,11 @@ public class DropTableQuery : IQueryCommandable, ICommentable, ITable
     /// </summary>
     /// <returns>Common tables.</returns>
     public IEnumerable<CommonTable> GetCommonTables()
+    {
+        yield break;
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
     {
         yield break;
     }

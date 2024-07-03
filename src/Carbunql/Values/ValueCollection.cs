@@ -162,6 +162,17 @@ public class ValueCollection : ValueBase, IList<ValueBase>, IQueryCommandable
         }
     }
 
+    internal override IEnumerable<ColumnValue> GetColumnsCore()
+    {
+        foreach (var item in this)
+        {
+            foreach (var value in item.GetColumns())
+            {
+                yield return value;
+            }
+        }
+    }
+
     /// <summary>
     /// Adds a string value to the collection.
     /// </summary>

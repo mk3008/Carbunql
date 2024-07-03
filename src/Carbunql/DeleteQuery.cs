@@ -1,6 +1,7 @@
 ﻿using Carbunql.Building;
 using Carbunql.Clauses;
 using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 
 namespace Carbunql;
@@ -177,6 +178,38 @@ public class DeleteQuery : IQueryCommandable, IReturning, ICommentable
         if (ReturningClause != null)
         {
             foreach (var item in ReturningClause.GetCommonTables())
+            {
+                yield return item;
+            }
+        }
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        if (DeleteClause != null)
+        {
+            foreach (var item in DeleteClause.GetColumns())
+            {
+                yield return item;
+            }
+        }
+        if (WithClause != null)
+        {
+            foreach (var item in WithClause.GetColumns())
+            {
+                yield return item;
+            }
+        }
+        if (WhereClause != null)
+        {
+            foreach (var item in WhereClause.GetColumns())
+            {
+                yield return item;
+            }
+        }
+        if (ReturningClause != null)
+        {
+            foreach (var item in ReturningClause.GetColumns())
             {
                 yield return item;
             }

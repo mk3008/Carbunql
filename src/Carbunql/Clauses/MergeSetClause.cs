@@ -1,4 +1,5 @@
 ﻿using Carbunql.Tables;
+using Carbunql.Values;
 
 namespace Carbunql.Clauses;
 
@@ -7,6 +8,17 @@ namespace Carbunql.Clauses;
 /// </summary>
 public class MergeSetClause : QueryCommandCollection<ValueBase>, IQueryCommandable
 {
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        foreach (var value in Items)
+        {
+            foreach (var item in value.GetColumns())
+            {
+                yield return item;
+            }
+        }
+    }
+
     /// <inheritdoc/>
     public IEnumerable<CommonTable> GetCommonTables()
     {

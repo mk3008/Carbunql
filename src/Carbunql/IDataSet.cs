@@ -3,20 +3,42 @@
 public interface IDataSet
 {
     /// <summary>
-    /// Build the FROM clause
+    /// Branch number.
+    /// For union queries.
     /// </summary>
-    /// <param name="query"></param>
-    /// <param name="alias"></param>
-    /// <returns></returns>
-    SelectQuery BuildFromClause(SelectQuery query, string alias);
+    int Branch { get; }
 
     /// <summary>
-    /// Build the JOIN clause
+    /// Nested level.
     /// </summary>
-    /// <param name="query"></param>
-    /// <param name="join"></param>
-    /// <param name="alias"></param>
-    /// <param name="condition"></param>
-    /// <returns></returns>
-    SelectQuery BuildJoinClause(SelectQuery query, string join, string alias, string condition = "");
+    int Level { get; }
+
+    /// <summary>
+    /// Reference order.
+    /// </summary>
+    int Sequence { get; }
+
+    string DataSetName { get; }
+
+    IEnumerable<string> ColumnNames { get; }
+
+    SelectQuery Query { get; }
+
+    //IEnumerable<IDataSet> SubDataSets();
+}
+
+public class DataSet(int branch, int level, int sequence, string dataSetName, IEnumerable<string> columnNames, SelectQuery query) : IDataSet
+{
+    public int Branch { get; } = branch;
+
+    public string DataSetName => dataSetName;
+
+    public IEnumerable<string> ColumnNames => columnNames;
+
+    public SelectQuery Query => query;
+
+    public int Level { get; } = level;
+
+    public int Sequence { get; } = sequence;
+    //public IEnumerable<IDataSet> SubDataSets() => subDataSets;
 }

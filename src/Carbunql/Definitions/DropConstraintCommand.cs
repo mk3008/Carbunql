@@ -1,5 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
+using Carbunql.Values;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Definitions;
@@ -35,6 +36,11 @@ public class DropConstraintCommand : IAlterCommand
     /// Gets or sets the name of the table from which the constraint will be dropped.
     /// </summary>
     public string Table { get; init; } = string.Empty;
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        yield break;
+    }
 
     /// <summary>
     /// Gets the common tables associated with the drop constraint command (currently empty).

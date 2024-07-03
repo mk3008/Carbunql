@@ -127,4 +127,22 @@ public class CaseExpression : ValueBase
             }
         }
     }
+
+    internal override IEnumerable<ColumnValue> GetColumnsCore()
+    {
+        if (CaseCondition != null)
+        {
+            foreach (var item in CaseCondition.GetColumns())
+            {
+                yield return item;
+            }
+        }
+        foreach (var exp in WhenExpressions)
+        {
+            foreach (var item in exp.GetColumns())
+            {
+                yield return item;
+            }
+        }
+    }
 }

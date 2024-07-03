@@ -1,4 +1,5 @@
 ﻿using Carbunql.Tables;
+using Carbunql.Values;
 
 namespace Carbunql.Clauses;
 
@@ -119,5 +120,20 @@ public class UsingClause : IQueryCommandable
     {
         yield return Token.Reserved(this, parent, "on");
         foreach (var token in Condition.GetTokens(parent)) yield return token;
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        foreach (var item in Root.GetColumns())
+        {
+            yield return item;
+        }
+        if (Condition != null)
+        {
+            foreach (var item in Condition.GetColumns())
+            {
+                yield return item;
+            }
+        }
     }
 }

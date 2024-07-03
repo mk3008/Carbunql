@@ -1,4 +1,5 @@
 ﻿using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 
 namespace Carbunql.Clauses;
@@ -90,5 +91,13 @@ public class SelectableItem : IQueryCommandable, ISelectable
     public IEnumerable<QueryParameter> GetParameters()
     {
         return Value.GetParameters();
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        foreach(var item in Value.GetColumns())
+        {
+            yield return item;
+        }
     }
 }

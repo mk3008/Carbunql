@@ -1,4 +1,5 @@
 ﻿using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 
 namespace Carbunql.Clauses;
@@ -80,5 +81,13 @@ public class OverClause : IQueryCommandable
         yield return overToken;
 
         foreach (var item in WindowDefinition.GetTokens(overToken)) yield return item;
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        foreach (var item in WindowDefinition.GetColumns())
+        {
+            yield return item;
+        }
     }
 }

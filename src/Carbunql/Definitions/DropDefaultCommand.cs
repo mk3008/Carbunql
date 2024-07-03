@@ -1,5 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
+using Carbunql.Values;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Definitions;
@@ -35,6 +36,11 @@ public class DropDefaultCommand : IAlterCommand
     /// Gets or sets the name of the table containing the column.
     /// </summary>
     public string Table { get; init; } = string.Empty;
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        yield break;
+    }
 
     /// <summary>
     /// Gets the common tables associated with the drop default command (currently empty).

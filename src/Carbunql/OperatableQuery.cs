@@ -1,5 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 
 namespace Carbunql;
@@ -80,5 +81,10 @@ public class OperatableQuery : IQueryCommandable
         {
             yield return item;
         }
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        yield break;
     }
 }

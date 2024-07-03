@@ -1,6 +1,7 @@
 ﻿using Carbunql.Building;
 using Carbunql.Clauses;
 using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 
 namespace Carbunql;
@@ -282,5 +283,44 @@ public class UpdateQuery : IQueryCommandable, IReturning, ICommentable
 
         if (ReturningClause == null) yield break;
         foreach (var item in ReturningClause.GetTokens(parent)) yield return item;
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        if (WithClause != null)
+        {
+            foreach (var item in WithClause.GetColumns())
+            {
+                yield return item;
+            }
+        }
+        if (SetClause != null)
+        {
+            foreach (var item in SetClause.GetColumns())
+            {
+                yield return item;
+            }
+        }
+        if (FromClause != null)
+        {
+            foreach (var item in FromClause.GetColumns())
+            {
+                yield return item;
+            }
+        }
+        if (WhereClause != null)
+        {
+            foreach (var item in WhereClause.GetColumns())
+            {
+                yield return item;
+            }
+        }
+        if (ReturningClause != null)
+        {
+            foreach (var item in ReturningClause.GetColumns())
+            {
+                yield return item;
+            }
+        }
     }
 }

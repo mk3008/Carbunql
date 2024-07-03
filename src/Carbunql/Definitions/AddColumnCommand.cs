@@ -1,5 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
+using Carbunql.Values;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Definitions;
@@ -32,6 +33,11 @@ public class AddColumnCommand : IAlterCommand
     /// Gets the table of the column to be added.
     /// </summary>
     public string Table => Definition.Table;
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        yield break;
+    }
 
     /// <summary>
     /// Gets the common tables affected by this command.

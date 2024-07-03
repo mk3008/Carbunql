@@ -3,7 +3,7 @@ using Carbunql.Building;
 
 namespace Carbunql.TypeSafe;
 
-public class QueryDataSet(SelectQuery query) : IDataSet
+public class QueryDataSet(SelectQuery query) : ITypeSafeDataSet
 {
     public SelectQuery Query { get; init; } = query;
 

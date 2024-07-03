@@ -5,6 +5,8 @@ using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
 using MessagePack;
+using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql;
@@ -118,6 +120,161 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     {
         HeaderCommentClause ??= new CommentClause();
         HeaderCommentClause.Add(comment);
+    }
+
+    public IEnumerable<IDataSet> GetDataSets()
+    {
+        var commonTables = GetCommonTables().ToList();
+        return GetDataSets(1, 1, 1, commonTables);
+    }
+
+
+    private IEnumerable<IDataSet> ProcessQuery(SelectQuery query, int sequence, int branch, int level, string alias, IList<CommonTable> commonTables)
+    {
+        // cache
+        var currentBranch = branch;
+        var currentSequence = sequence;
+        var currentLevel = level;
+        sequence++;
+
+        var allColumns = new Dictionary<string, IEnumerable<string>>();
+
+        foreach (var nestedDataSet in query.GetDataSets(1, branch, level + 1, commonTables))
+        {
+            if (level + 1 == nestedDataSet.Level)
+            {
+                allColumns[nestedDataSet.DataSetName] = nestedDataSet.ColumnNames;
+            }
+            yield return nestedDataSet;
+            sequence++;
+            branch++;
+        }
+
+        var cname = query.GetColumnNames();
+
+        if (cname.Contains("*"))
+        {
+            var wilds = query.SelectClause!.Where(x => x.Alias == "*");
+            foreach (var wild in wilds.Select(x => x.Value).OfType<ColumnValue>())
+            {
+                if (string.IsNullOrEmpty(wild.TableAlias))
+                {
+                    yield return new DataSet(currentBranch, currentLevel, currentSequence, alias, allColumns.SelectMany(x => x.Value), this);
+                }
+                else
+                {
+                    var cols = cname.ToList();
+                    cols.Remove("*");
+                    cols.AddRange(allColumns[wild.TableAlias]);
+
+                    yield return new DataSet(currentBranch, currentLevel, currentSequence, alias, cols.Distinct(), this);
+                }
+            }
+        }
+        else
+        {
+            yield return new DataSet(currentBranch, currentLevel, currentSequence, alias, cname, this);
+        }
+    }
+
+    public IEnumerable<IDataSet> GetDataSets(int sequence, int branch, int level, IList<CommonTable> commonTables)
+    {
+        if (FromClause == null) yield break;
+
+        var hasRelation = (FromClause.Relations?.Any() ?? false);
+        var columns = GetColumns().ToList();
+
+        if (hasRelation && columns.Any(x => string.IsNullOrEmpty(x.TableAlias)))
+        {
+            var cols = string.Join(", ", columns.Where(x => string.IsNullOrEmpty(x.TableAlias)).Select(x => x.Column));
+            throw new InvalidProgramException($"There are columns whose table alias names cannot be parsed: {cols}.");
+        }
+
+        foreach (var item in FromClause.GetSelectableTables())
+        {
+            var alias = item.Alias;
+
+            if (item.Table.TryGetSelectQuery(out var query))
+            {
+                // subquery
+                foreach (var dataSet in ProcessQuery(query, sequence, branch, level, alias, commonTables))
+                {
+                    yield return dataSet;
+                }
+            }
+            else if (item.Table is PhysicalTable table && commonTables.Any(x => x.Alias == table.GetTableFullName()))
+            {
+                var ct = commonTables.First(x => x.Alias == table.GetTableFullName());
+
+                if (ct.IsSelectQuery)
+                {
+                    var commonQuery = commonTables.First(x => x.Alias == table.GetTableFullName()).GetSelectQuery();
+
+                    foreach (var dataSet in ProcessQuery(commonQuery, sequence, branch, level, alias, commonTables))
+                    {
+                        yield return dataSet;
+                    }
+                }
+                else if (ct.Table is VirtualTable vt && vt.Query is ValuesQuery && ct.ColumnAliases != null)
+                {
+                    var names = ct.ColumnAliases.OfType<ColumnValue>().Select(x => x.Column);
+
+                    //var cname = columns
+                    //    .Where(x => !hasRelation || x.TableAlias == alias)
+                    //    .Select(x => x.Column)
+                    //    .Distinct();
+
+                    //if (cname.Contains("*"))
+                    //{
+                    //    var wilds = query.SelectClause!.Where(x => x.Alias == "*");
+                    //    foreach (var wild in wilds.Select(x => x.Value).OfType<ColumnValue>())
+                    //    {
+                    //        if (string.IsNullOrEmpty(wild.TableAlias))
+                    //        {
+                    //            yield return new DataSet(branch, level, sequence, alias, allColumns.SelectMany(x => x.Value), this);
+                    //        }
+                    //        else
+                    //        {
+
+                    //            yield return new DataSet(branch, level, sequence, alias, allColumns[wild.TableAlias], this);
+                    //        }
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    yield return new DataSet(branch, level, sequence, alias, cname, this);
+                    //}
+                    yield return new DataSet(branch, level, sequence, alias, names, this);
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            }
+            else
+            {
+                var cname = columns
+                    .Where(x => !hasRelation || x.TableAlias == alias)
+                    .Select(x => x.Column)
+                    .Distinct();
+
+                var dataSet = new DataSet(branch, level, sequence, alias, cname, this);
+                yield return dataSet;
+            }
+            sequence++;
+            branch++;
+        }
+
+        foreach (var item in OperatableQueries.Select(x => x.Query).OfType<SelectQuery>())
+        {
+            foreach (var branchDataSet in item.GetDataSets(sequence, branch, level, commonTables))
+            {
+                sequence = branchDataSet.Sequence;
+                yield return branchDataSet;
+            }
+            sequence++;
+            branch++;
+        }
     }
 
     /// <inheritdoc/>
@@ -527,6 +684,66 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         if (LimitClause != null)
         {
             foreach (var item in LimitClause.GetCommonTables())
+            {
+                yield return item;
+            }
+        }
+    }
+
+    public override IEnumerable<ColumnValue> GetColumns()
+    {
+        if (SelectClause != null)
+        {
+            foreach (var item in SelectClause.GetColumns())
+            {
+                yield return item;
+            }
+        }
+        if (FromClause != null)
+        {
+            foreach (var item in FromClause.GetColumns())
+            {
+                yield return item;
+            }
+        }
+        if (WhereClause != null)
+        {
+            foreach (var item in WhereClause.GetColumns())
+            {
+                yield return item;
+            }
+        }
+        if (GroupClause != null)
+        {
+            foreach (var item in GroupClause.GetColumns())
+            {
+                yield return item;
+            }
+        }
+        if (HavingClause != null)
+        {
+            foreach (var item in HavingClause.GetColumns())
+            {
+                yield return item;
+            }
+        }
+        if (WindowClause != null)
+        {
+            foreach (var item in WindowClause.GetColumns())
+            {
+                yield return item;
+            }
+        }
+        if (OrderClause != null)
+        {
+            foreach (var item in OrderClause.GetColumns())
+            {
+                yield return item;
+            }
+        }
+        if (LimitClause != null)
+        {
+            foreach (var item in LimitClause.GetColumns())
             {
                 yield return item;
             }

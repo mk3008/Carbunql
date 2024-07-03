@@ -268,4 +268,30 @@ public class MergeQuery : IQueryCommandable
 
         return new UsingClause(datasource.ToSelectableTable(sourceName), v, keys);
     }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        if (WithClause != null)
+        {
+            foreach (var item in WithClause.GetColumns())
+            {
+                yield return item;
+            }
+        }
+        foreach (var item in MergeClause.GetColumns())
+        {
+            yield return item;
+        }
+        foreach (var item in UsingClause.GetColumns())
+        {
+            yield return item;
+        }
+        if (WhenClause != null)
+        {
+            foreach (var item in WhenClause.GetColumns())
+            {
+                yield return item;
+            }
+        }
+    }
 }

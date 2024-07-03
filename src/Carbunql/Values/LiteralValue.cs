@@ -88,4 +88,9 @@ public class LiteralValue : ValueBase
     {
         yield break;
     }
+
+    internal override IEnumerable<ColumnValue> GetColumnsCore()
+    {
+        yield break;
+    }
 }

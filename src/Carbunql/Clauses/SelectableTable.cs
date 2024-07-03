@@ -38,7 +38,7 @@ public class SelectableTable : IQueryCommandable, ISelectable
     /// <summary>
     /// Gets the table to be selected.
     /// </summary>
-    public TableBase Table { get; init; }
+    public TableBase Table { get; internal set; }
 
     /// <summary>
     /// Gets the alias for the selected table.
@@ -139,5 +139,10 @@ public class SelectableTable : IQueryCommandable, ISelectable
         {
             yield return item;
         }
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        yield break;
     }
 }

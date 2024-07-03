@@ -1,4 +1,5 @@
 ﻿using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 
 namespace Carbunql.Clauses;
@@ -200,5 +201,26 @@ public class WindowDefinition : IQueryCommandable
         }
 
         yield return Token.ReservedBracketEnd(this, parent);
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        if (!string.IsNullOrEmpty(Name)) yield break;
+        if (PartitionBy == null && OrderBy == null) yield break;
+
+        if (PartitionBy != null)
+        {
+            foreach (var item in PartitionBy.GetColumns())
+            {
+                yield return item;
+            }
+        }
+        if (OrderBy != null)
+        {
+            foreach (var item in OrderBy.GetColumns())
+            {
+                yield return item;
+            }
+        }
     }
 }

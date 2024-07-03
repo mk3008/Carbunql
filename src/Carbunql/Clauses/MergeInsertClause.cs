@@ -65,4 +65,12 @@ public class MergeInsertClause : IQueryCommandable
             yield return item;
         }
     }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        foreach (var item in ColumnAliases.GetColumns())
+        {
+            yield return item;
+        }
+    }
 }

@@ -1,4 +1,5 @@
 ﻿using Carbunql.Tables;
+using Carbunql.Values;
 
 namespace Carbunql.Clauses;
 
@@ -60,5 +61,10 @@ public class MergeClause : IQueryCommandable
         var t = Token.Reserved(this, parent, "merge into");
         yield return t;
         foreach (var item in Table.GetTokens(t)) yield return item;
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        yield break;
     }
 }

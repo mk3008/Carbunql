@@ -15,6 +15,17 @@ public class Filter : IQueryCommandable
     /// </summary>
     public WhereClause? WhereClause { get; set; }
 
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        if (WhereClause != null)
+        {
+            foreach (var item in WhereClause.GetColumns())
+            {
+                yield return item;
+            }
+        }
+    }
+
     /// <inheritdoc/>
     public IEnumerable<CommonTable> GetCommonTables()
     {
