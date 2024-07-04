@@ -1,0 +1,148 @@
+@page "/query_source/ensure_any"
+
+@using Carbunql.Analysis;
+@using Carbunql.Building;
+@using Carbunql;
+
+<PageTitle>QuerySource EnsureAny</PageTitle>
+
+<div class="container-fluid">
+@*    <div class="row" Style="margin: 0px 0px 16px 0px;">
+        <RadzenMenu class="rz-shadow-3">
+            <RadzenMenuItem Text="Clear SQL" Icon="clear" Click=@OnClear>
+            </RadzenMenuItem>
+        </RadzenMenu>
+    </div>*@
+    <div class="row">
+        <div class="col-md-12 p-3">
+            <RadzenText TextStyle="TextStyle.H4">EnsureAny</RadzenText>
+
+            <RadzenText>Checks if the filter was successful. If there are zero results, an error occurs.</RadzenText>
+            
+             <RadzenCard>
+                <RadzenText TextStyle="TextStyle.Subtitle2">Source code</RadzenText>
+                <RadzenTextArea @bind-Value=@sourcecode TValue="string" Style="width: 100%; min-height: 250px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" />
+            </RadzenCard>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 p-3">
+            <RadzenText TextStyle="TextStyle.H5">Demo</RadzenText>
+        </div>
+
+        <div class="col-md-6 p-3">
+            <RadzenCard>
+                <RadzenText TextStyle="TextStyle.Subtitle2">Column name</RadzenText>
+                <RadzenTextBox Change=@OnChange @bind-Value=@columnName />
+
+                <RadzenText TextStyle="TextStyle.Subtitle2">Parameter symbol</RadzenText>
+                <RadzenTextBox Change=@OnChange @bind-Value=@symbol />
+
+                <RadzenText TextStyle="TextStyle.Subtitle2">Value</RadzenText>
+                <RadzenTextBox Change=@OnChange @bind-Value=@val />
+            </RadzenCard>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 p-3">
+            <RadzenCard>
+                <RadzenText TextStyle="TextStyle.Subtitle2">Input</RadzenText>
+                <RadzenTextArea @bind-Value=@sql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" Placeholder="Enter select query(ex. select id, value from table)" />
+            </RadzenCard>
+        </div>
+        <div class="col-md-6 p-3">
+            <RadzenCard>
+                <RadzenText TextStyle="TextStyle.Subtitle2">Result</RadzenText>
+                <RadzenTextArea @bind-Value=@fsql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" />
+            </RadzenCard>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    string columnName = "e___mployee_id";
+    string symbol = ":";
+    string val = "1";
+    string fsql = string.Empty;
+
+    string sourcecode = @"using Carbunql;
+using Carbunql.Building;
+
+var q = new SelectQuery(sql);
+q.GetQuerySources()
+    .Where(x => x.ColumnNames.Contains(columnName))
+    .GetRootsByBranch()
+    .GetRootsByQuery()
+    .EnsureAny()
+    .ForEach(x =>
+    {
+        x.Query.Where(x.Alias, columnName).Equal(x.Query.AddParameter(symbol + columnName, val));
+    });
+Console.WriteLine(q.ToText());";
+
+    protected override void OnInitialized()
+    {
+        OnChange(sql);
+    }
+
+    void OnClear()
+    {
+        sql = string.Empty;
+        OnChange(sql);
+    }
+
+    void OnChange(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            fsql = string.Empty;
+            return;
+        }
+        try
+        {
+            var q = new SelectQuery(sql);
+            var sources = q.GetQuerySources().ToList();
+
+            q.GetQuerySources()
+                .Where(x => x.ColumnNames.Contains(columnName))
+                .GetRootsByBranch()
+                .GetRootsByQuery()
+                .EnsureAny()
+                .ForEach(x =>
+                {
+                    x.AddSourceComment("inject filter");
+                    x.Query.Where(x.Alias, columnName).Equal(x.Query.AddParameter(symbol + columnName, val));
+                });
+
+            fsql = q.ToText();
+        }
+		catch (Exception ex)
+		{
+			fsql = ex.ToString();
+		}
+	}
+
+    string sql = @"WITH project_counts AS (
+    SELECT
+        employee_id,
+        COUNT(project_id) AS project_count
+    FROM
+        projects
+    GROUP BY
+        employee_id
+)
+SELECT
+    e.employee_id,
+    e.employee_name,
+    COALESCE(pc.project_count, 0) AS project_count
+FROM
+    employees e
+LEFT JOIN
+    project_counts pc
+ON
+    e.employee_id = pc.employee_id
+ORDER BY
+    e.employee_id;
+";
+}

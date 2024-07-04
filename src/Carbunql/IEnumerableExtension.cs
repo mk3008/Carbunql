@@ -32,4 +32,20 @@ public static class IEnumerableExtension
     {
         return source.GroupBy(ds => ds.Query).Select(ds => ds.OrderByDescending(s => s.Level).ThenBy(s => s.Sequence).First());
     }
+
+    /// <summary>
+    /// Ensures that the enumerable source contains at least one element.
+    /// Throws an <see cref="InvalidOperationException"/> if no elements are found.
+    /// </summary>
+    /// <typeparam name="T">The type of elements in the enumerable, must implement <see cref="IQuerySource"/>.</typeparam>
+    /// <param name="source">The enumerable source to check.</param>
+    /// <returns>The same enumerable source if it contains any elements.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when no elements are found in the enumerable source.</exception>
+    public static IEnumerable<T> EnsureAny<T>(this IEnumerable<T> source) where T : IQuerySource
+    {
+        if (source.Any())
+            return source;
+
+        throw new InvalidOperationException("No matching QuerySource was found.");
+    }
 }

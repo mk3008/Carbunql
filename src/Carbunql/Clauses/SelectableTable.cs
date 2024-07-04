@@ -1,4 +1,5 @@
-﻿using Carbunql.Tables;
+﻿using Carbunql.Building;
+using Carbunql.Tables;
 using Carbunql.Values;
 using MessagePack;
 
@@ -9,7 +10,7 @@ namespace Carbunql.Clauses;
 /// It allows for specifying an alias to reference the table or subquery within the query.
 /// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
-public class SelectableTable : IQueryCommandable, ISelectable
+public class SelectableTable : IQueryCommandable, ISelectable, ICommentable
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="SelectableTable"/> class with the specified table and alias.
@@ -55,6 +56,9 @@ public class SelectableTable : IQueryCommandable, ISelectable
     /// </summary>
     public ValueCollection? ColumnAliases { get; init; }
 
+    [IgnoreMember]
+    public CommentClause? CommentClause { get; set; }
+
     public IEnumerable<Token> GetAliasTokens(Token? parent)
     {
         if (!string.IsNullOrEmpty(Alias) && Alias != Table.GetDefaultName())
@@ -74,6 +78,14 @@ public class SelectableTable : IQueryCommandable, ISelectable
     /// <inheritdoc/>
     public virtual IEnumerable<Token> GetTokens(Token? parent)
     {
+        if (CommentClause != null)
+        {
+            foreach (var item in CommentClause.GetTokens(parent))
+            {
+                yield return item;
+            }
+        }
+
         foreach (var item in Table.GetTokens(parent)) yield return item;
 
         if (!string.IsNullOrEmpty(Alias) && Alias != Table.GetDefaultName())

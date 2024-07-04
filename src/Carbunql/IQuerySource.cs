@@ -1,4 +1,7 @@
-﻿namespace Carbunql;
+﻿using Carbunql.Clauses;
+using Carbunql.Tables;
+
+namespace Carbunql;
 
 /// <summary>
 /// Represents a query source, which can be a physical table, subquery, or common table expression (CTE).
@@ -40,4 +43,33 @@ public interface IQuerySource
     /// Gets the select query to which the query source belongs.
     /// </summary>
     SelectQuery Query { get; }
+
+    SelectableTable Source { get; }
 }
+
+public static class IQuerySourceExtension
+{
+    public static string GetTableFullName(this IQuerySource querySource)
+    {
+        if (querySource.Source.Table is PhysicalTable pt)
+        {
+            return pt.GetTableFullName();
+        }
+        return string.Empty;
+    }
+
+    public static IQuerySource AddSourceComment(this IQuerySource querySource, string comment)
+    {
+        querySource.Source.CommentClause ??= new CommentClause();
+        querySource.Source.CommentClause.Add(comment);
+        return querySource;
+    }
+
+    public static IQuerySource AddQueryComment(this IQuerySource querySource, string comment)
+    {
+        querySource.Query.CommentClause ??= new CommentClause();
+        querySource.Query.CommentClause.Add(comment);
+        return querySource;
+    }
+}
+

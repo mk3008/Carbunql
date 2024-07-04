@@ -1,4 +1,6 @@
-﻿namespace Carbunql;
+﻿using Carbunql.Clauses;
+
+namespace Carbunql;
 
 /// <summary>
 /// Query source
@@ -9,7 +11,7 @@
 /// <param name="alias">The alias name of the query source.</param>
 /// <param name="columnNames">The column names belonging to the query source. Duplicates are removed, but order is not guaranteed.</param>
 /// <param name="query">The select query to which the query source belongs.</param>
-public class QuerySource(int branch, int level, int sequence, string alias, IEnumerable<string> columnNames, SelectQuery query) : IQuerySource
+public class QuerySource(int branch, int level, int sequence, string alias, IEnumerable<string> columnNames, SelectQuery query, SelectableTable source) : IQuerySource
 {
     /// <summary>
     /// The branch number of the referenced query source.
@@ -22,7 +24,7 @@ public class QuerySource(int branch, int level, int sequence, string alias, IEnu
     /// <summary>
     /// The alias name of the query source.
     /// </summary>
-    public string Alias => alias;
+    public string Alias => source.Alias;
 
     /// <summary>
     /// The column names belonging to the query source. Duplicates are removed, but order is not guaranteed.
@@ -43,4 +45,6 @@ public class QuerySource(int branch, int level, int sequence, string alias, IEnu
     /// The sequence number within the select query. Numbering starts from 1.
     /// </summary>
     public int Sequence { get; } = sequence;
+
+    public SelectableTable Source => source;
 }

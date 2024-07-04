@@ -2,11 +2,11 @@
 
 namespace Carbunql.Building.Test;
 
-public class DataSetTest
+public class QuerySourceTest
 {
     private readonly QueryCommandMonitor Monitor;
 
-    public DataSetTest(ITestOutputHelper output)
+    public QuerySourceTest(ITestOutputHelper output)
     {
         Monitor = new QueryCommandMonitor(output);
     }
@@ -25,12 +25,12 @@ from
     sale as s";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetQuerySources().ToList();
-        Monitor.Log(datasets);
+        var sources = query.GetQuerySources().ToList();
+        Monitor.Log(sources);
 
-        Assert.Single(datasets);
+        Assert.Single(sources);
 
-        var ds = datasets[0];
+        var ds = sources[0];
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(1, ds.Level);
@@ -55,12 +55,12 @@ where
     s.store_id = 1";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetQuerySources().ToList();
-        Monitor.Log(datasets);
+        var sources = query.GetQuerySources().ToList();
+        Monitor.Log(sources);
 
-        Assert.Single(datasets);
+        Assert.Single(sources);
 
-        var ds = datasets[0];
+        var ds = sources[0];
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(1, ds.Level);
@@ -83,12 +83,12 @@ order by
     s.store_id = 1";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetQuerySources().ToList();
-        Monitor.Log(datasets);
+        var sources = query.GetQuerySources().ToList();
+        Monitor.Log(sources);
 
-        Assert.Single(datasets);
+        Assert.Single(sources);
 
-        var ds = datasets[0];
+        var ds = sources[0];
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(1, ds.Level);
@@ -112,12 +112,12 @@ group by
     s.store_id";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetQuerySources().ToList();
-        Monitor.Log(datasets);
+        var sources = query.GetQuerySources().ToList();
+        Monitor.Log(sources);
 
-        Assert.Single(datasets);
+        Assert.Single(sources);
 
-        var ds = datasets[0];
+        var ds = sources[0];
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(1, ds.Level);
@@ -142,12 +142,12 @@ having
     sum(s.price) = 0";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetQuerySources().ToList();
-        Monitor.Log(datasets);
+        var sources = query.GetQuerySources().ToList();
+        Monitor.Log(sources);
 
-        Assert.Single(datasets);
+        Assert.Single(sources);
 
-        var ds = datasets[0];
+        var ds = sources[0];
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(1, ds.Level);
@@ -175,12 +175,12 @@ where
     store_id = 1";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetQuerySources().ToList();
-        Monitor.Log(datasets);
+        var sources = query.GetQuerySources().ToList();
+        Monitor.Log(sources);
 
-        Assert.Single(datasets);
+        Assert.Single(sources);
 
-        var ds = datasets[0];
+        var ds = sources[0];
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(1, ds.Level);
@@ -210,8 +210,8 @@ where
 
         var exception = Assert.Throws<InvalidProgramException>(() =>
         {
-            var datasets = query.GetQuerySources().ToList();
-            Monitor.Log(datasets);
+            var sources = query.GetQuerySources().ToList();
+            Monitor.Log(sources);
         });
 
         Assert.Contains("There are columns whose table alias names cannot be parsed: sale_id.", exception.Message);
@@ -238,13 +238,13 @@ from
     ) as d";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetQuerySources().ToList();
-        Monitor.Log(datasets);
+        var sources = query.GetQuerySources().ToList();
+        Monitor.Log(sources);
 
-        Assert.Equal(2, datasets.Count);
+        Assert.Equal(2, sources.Count);
 
         //index:0
-        var ds = datasets[0];
+        var ds = sources[0];
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(2, ds.Level);
@@ -258,7 +258,7 @@ from
         Assert.Equal("amount", columns[3]);
 
         //index:1
-        ds = datasets[1];
+        ds = sources[1];
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(1, ds.Level);
@@ -294,13 +294,13 @@ from
     cte as d";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetQuerySources().ToList();
-        Monitor.Log(datasets);
+        var sources = query.GetQuerySources().ToList();
+        Monitor.Log(sources);
 
-        Assert.Equal(2, datasets.Count);
+        Assert.Equal(2, sources.Count);
 
         //index:0
-        var ds = datasets[0];
+        var ds = sources[0];
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(2, ds.Level);
@@ -314,7 +314,7 @@ from
         Assert.Equal("amount", columns[3]);
 
         //index:1
-        ds = datasets[1];
+        ds = sources[1];
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(1, ds.Level);
@@ -365,13 +365,13 @@ where
     s.sale_id = 3";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetQuerySources().ToList();
-        Monitor.Log(datasets);
+        var sources = query.GetQuerySources().ToList();
+        Monitor.Log(sources);
 
-        Assert.Equal(3, datasets.Count);
+        Assert.Equal(3, sources.Count);
 
         //index:0
-        var ds = datasets[0];
+        var ds = sources[0];
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(1, ds.Level);
@@ -384,7 +384,7 @@ where
         Assert.Equal("price", columns[2]);
 
         //index:1
-        ds = datasets[1];
+        ds = sources[1];
         Assert.Equal(2, ds.Sequence);
         Assert.Equal(2, ds.Branch);
         Assert.Equal(1, ds.Level);
@@ -397,7 +397,7 @@ where
         Assert.Equal("price", columns[2]);
 
         //index:2
-        ds = datasets[2];
+        ds = sources[2];
         Assert.Equal(3, ds.Sequence);
         Assert.Equal(3, ds.Branch);
         Assert.Equal(1, ds.Level);
@@ -436,13 +436,13 @@ from
     ) as q";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetQuerySources().ToList();
-        Monitor.Log(datasets);
+        var sources = query.GetQuerySources().ToList();
+        Monitor.Log(sources);
 
-        Assert.Equal(3, datasets.Count);
+        Assert.Equal(3, sources.Count);
 
         //index:0
-        var ds = datasets[0];
+        var ds = sources[0];
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(3, ds.Level);
@@ -456,7 +456,7 @@ from
         Assert.Equal("amount", columns[3]);
 
         //index:1
-        ds = datasets[1];
+        ds = sources[1];
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(2, ds.Level);
@@ -469,7 +469,7 @@ from
         Assert.Equal("price", columns[2]);
 
         //index:2
-        ds = datasets[2];
+        ds = sources[2];
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(1, ds.Level);
@@ -513,13 +513,13 @@ where
 ";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetQuerySources().ToList();
-        Monitor.Log(datasets);
+        var sources = query.GetQuerySources().ToList();
+        Monitor.Log(sources);
 
-        Assert.Equal(4, datasets.Count);
+        Assert.Equal(4, sources.Count);
 
         //index:0
-        var ds = datasets[0];
+        var ds = sources[0];
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(3, ds.Level);
@@ -533,7 +533,7 @@ where
         Assert.Equal("amount", columns[3]);
 
         //index:1
-        ds = datasets[1];
+        ds = sources[1];
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(2, ds.Level);
@@ -546,7 +546,7 @@ where
         Assert.Equal("price", columns[2]);
 
         //index:2
-        ds = datasets[2];
+        ds = sources[2];
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(1, ds.Level);
@@ -559,7 +559,7 @@ where
         Assert.Equal("price", columns[2]);
 
         //index:3
-        ds = datasets[3];
+        ds = sources[3];
         Assert.Equal(2, ds.Sequence);
         Assert.Equal(2, ds.Branch);
         Assert.Equal(1, ds.Level);
@@ -609,13 +609,13 @@ ORDER BY
     r.sale_month";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetQuerySources().ToList();
-        Monitor.Log(datasets);
+        var sources = query.GetQuerySources().ToList();
+        Monitor.Log(sources);
 
-        Assert.Equal(4, datasets.Count);
+        Assert.Equal(4, sources.Count);
 
         //index:0
-        var ds = datasets[0];
+        var ds = sources[0];
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(2, ds.Level);
@@ -627,7 +627,7 @@ ORDER BY
         Assert.Equal("customer_name", columns[1]);
 
         //index:1
-        ds = datasets[1];
+        ds = sources[1];
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(2, ds.Branch);
         Assert.Equal(3, ds.Level);
@@ -640,7 +640,7 @@ ORDER BY
         Assert.Equal("sale_amount", columns[2]);
 
         //index:2
-        ds = datasets[2];
+        ds = sources[2];
         Assert.Equal(2, ds.Sequence);
         Assert.Equal(2, ds.Branch);
         Assert.Equal(2, ds.Level);
@@ -653,7 +653,7 @@ ORDER BY
         Assert.Equal("total_sales", columns[2]);
 
         //index:3
-        ds = datasets[3];
+        ds = sources[3];
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(1, ds.Level);
@@ -770,9 +770,76 @@ ORDER BY
     line_id";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetQuerySources().ToList();
-        Monitor.Log(datasets);
+        var sources = query.GetQuerySources().ToList();
+        Monitor.Log(sources);
 
-        Assert.Equal(10, datasets.Count);
+        query.GetQuerySources().ForEach(x =>
+        {
+            x.AddSourceComment($"Seq:{x.Sequence}, Branch:{x.Branch}, Lv:{x.Level}");
+        })
+        .GetRootsByBranch().ForEach(x =>
+        {
+            x.AddQueryComment($"Root of Branch:{x.Branch}");
+        });
+
+        Monitor.Log(query);
+
+        Assert.Equal(10, sources.Count);
+    }
+
+    [Fact]
+    public void TypeCastTest()
+    {
+        var sql = @"
+WITH monthly_sales AS (
+    SELECT
+        product_id,
+        DATE_TRUNC('month', sales_date) AS month,
+        SUM(sales_amount) AS total_sales
+    FROM
+        sales
+    GROUP BY
+        product_id,
+        DATE_TRUNC('month', sales_date)
+),
+total_monthly_sales AS (
+    SELECT
+        month,
+        SUM(total_sales) AS total_sales
+    FROM
+        monthly_sales
+    GROUP BY
+        month
+)
+SELECT
+    ms.product_id,
+    ms.month,
+    ms.total_sales,
+    tms.total_sales AS total_monthly_sales,
+    (ms.total_sales::FLOAT / tms.total_sales) * 100 AS sales_percentage
+FROM
+    monthly_sales ms
+INNER JOIN
+    total_monthly_sales tms ON ms.month = tms.month
+ORDER BY
+    ms.month,
+    ms.product_id";
+
+        var query = new SelectQuery(sql);
+        var sources = query.GetQuerySources().ToList();
+        Monitor.Log(sources);
+
+        query.GetQuerySources().ForEach(x =>
+        {
+            x.AddSourceComment($"Seq:{x.Sequence}, Branch:{x.Branch}, Lv:{x.Level}");
+        })
+        .GetRootsByBranch().ForEach(x =>
+        {
+            x.AddQueryComment($"Root of Branch:{x.Branch}");
+        });
+
+        Monitor.Log(query);
+
+        Assert.Equal(5, sources.Count);
     }
 }
