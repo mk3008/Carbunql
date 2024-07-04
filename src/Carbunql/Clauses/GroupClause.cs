@@ -1,4 +1,5 @@
 ﻿using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 using System.Collections;
 
@@ -165,4 +166,15 @@ public class GroupClause : IList<ValueBase>, IQueryCommandable
         return ((IEnumerable)Items).GetEnumerator();
     }
     #endregion
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        foreach (var value in Items)
+        {
+            foreach (var item in value.GetColumns())
+            {
+                yield return item;
+            }
+        }
+    }
 }

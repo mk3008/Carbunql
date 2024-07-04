@@ -316,4 +316,26 @@ public class FunctionValue : ValueBase
             }
         }
     }
+
+    internal override IEnumerable<ColumnValue> GetColumnsCore()
+    {
+        foreach (var item in Arguments.GetColumns())
+        {
+            yield return item;
+        }
+        if (Filter != null)
+        {
+            foreach (var item in Filter.GetColumns())
+            {
+                yield return item;
+            }
+        }
+        if (Over != null)
+        {
+            foreach (var item in Over.GetColumns())
+            {
+                yield return item;
+            }
+        }
+    }
 }

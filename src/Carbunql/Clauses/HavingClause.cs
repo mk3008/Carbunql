@@ -1,4 +1,5 @@
 ﻿using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 
 namespace Carbunql.Clauses;
@@ -73,5 +74,10 @@ public class HavingClause : IQueryCommandable
         yield return clause;
 
         foreach (var item in Condition.GetTokens(clause)) yield return item;
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        return ((IColumnContainer)Condition).GetColumns();
     }
 }

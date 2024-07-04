@@ -3,6 +3,7 @@ using MessagePack;
 
 namespace Carbunql.Clauses;
 
+using Carbunql.Values;
 using System.Collections.Generic;
 
 /// <summary>
@@ -24,6 +25,11 @@ public class TopClause : IQueryCommandable
     /// Gets the value representing the number of rows.
     /// </summary>
     public ValueBase Value { get; init; }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        return Value.GetColumns();
+    }
 
     /// <summary>
     /// Gets the common tables used in the clause.

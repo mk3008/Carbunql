@@ -1,4 +1,5 @@
 ﻿using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 
 namespace Carbunql.Clauses;
@@ -151,6 +152,20 @@ public class FromClause : IQueryCommandable
         foreach (var item in Relations)
         {
             foreach (var token in item.GetTokens(clause)) yield return token;
+        }
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        if (Relations != null)
+        {
+            foreach (var relation in Relations)
+            {
+                foreach (var item in relation.GetColumns())
+                {
+                    yield return item;
+                }
+            }
         }
     }
 }

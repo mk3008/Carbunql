@@ -71,4 +71,12 @@ public class NegativeValue : ValueBase
             yield return item;
         }
     }
+
+    internal override IEnumerable<ColumnValue> GetColumnsCore()
+    {
+        foreach (var item in Inner.GetColumns())
+        {
+            yield return item;
+        }
+    }
 }

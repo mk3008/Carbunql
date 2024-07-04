@@ -1,4 +1,5 @@
 ﻿using Carbunql.Tables;
+using Carbunql.Values;
 using System.Collections;
 
 namespace Carbunql.Clauses;
@@ -150,6 +151,11 @@ public class CommentClause : IList<string>, IQueryCommandable
     public void RemoveAt(int index)
     {
         ((IList<string>)Collection).RemoveAt(index);
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        yield break;
     }
 }
 

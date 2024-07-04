@@ -1,4 +1,5 @@
 ﻿using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 
 namespace Carbunql.Clauses;
@@ -144,5 +145,21 @@ public class BetweenClause : ValueBase
         foreach (var item in Start.GetTokens(parent)) yield return item;
         yield return Token.Reserved(this, parent, "and");
         foreach (var item in End.GetTokens(parent)) yield return item;
+    }
+
+    internal override IEnumerable<ColumnValue> GetColumnsCore()
+    {
+        foreach (var item in Value.GetColumns())
+        {
+            yield return item;
+        }
+        foreach (var item in Start.GetColumns())
+        {
+            yield return item;
+        }
+        foreach (var item in End.GetColumns())
+        {
+            yield return item;
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
+using Carbunql.Values;
 
 namespace Carbunql;
 
@@ -85,5 +86,16 @@ public class MergeUpdateQuery : IQueryCommandable
         var t = Token.Reserved(this, parent, "update set");
         yield return t;
         foreach (var item in SetClause.GetTokens(t)) yield return item;
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        if (SetClause != null)
+        {
+            foreach (var item in SetClause.GetColumns())
+            {
+                yield return item;
+            }
+        }
     }
 }

@@ -56,7 +56,7 @@ namespace Carbunql;
 [Union(43, typeof(MergeWhenInsert))]
 [Union(44, typeof(MergeWhenNothing))]
 [Union(45, typeof(MergeWhenUpdate))]
-public interface IQueryCommandable
+public interface IQueryCommandable : IColumnContainer
 {
     /// <summary>
     /// Retrieves tokens for the query command.

@@ -1,5 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 
 namespace Carbunql;
@@ -166,5 +167,33 @@ public abstract class ReadQuery : IReadQuery
     {
         Parameters.Add(new QueryParameter(name, Value));
         return name;
+    }
+
+    public virtual IEnumerable<ColumnValue> GetColumns()
+    {
+        var q = GetSelectClause()?.GetColumns();
+        if (q != null)
+        {
+            foreach (var item in q)
+            {
+                yield return item;
+            }
+        }
+        q = OrderClause?.GetColumns();
+        if (q != null)
+        {
+            foreach (var item in q)
+            {
+                yield return item;
+            }
+        }
+        q = LimitClause?.GetColumns();
+        if (q != null)
+        {
+            foreach (var item in q)
+            {
+                yield return item;
+            }
+        }
     }
 }

@@ -77,4 +77,12 @@ public class ArrayValue : ValueBase
             yield return item;
         }
     }
+
+    internal override IEnumerable<ColumnValue> GetColumnsCore()
+    {
+        foreach (var item in Argument.GetColumns())
+        {
+            yield return item;
+        }
+    }
 }

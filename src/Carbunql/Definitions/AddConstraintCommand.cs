@@ -1,5 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
+using Carbunql.Values;
 
 namespace Carbunql.Definitions;
 
@@ -31,6 +32,11 @@ public class AddConstraintCommand : IAlterCommand
     /// Gets the name of the table to which the constraint will be added.
     /// </summary>
     public string Table => Constraint.Table;
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        yield break;
+    }
 
     /// <summary>
     /// Gets the common tables associated with the constraint (currently empty).

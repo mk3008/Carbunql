@@ -1,4 +1,5 @@
 ﻿using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 
 namespace Carbunql.Clauses;
@@ -136,6 +137,17 @@ public class Relation : IQueryCommandable
         {
             yield return Token.Reserved(this, parent, "on");
             foreach (var item in Condition.GetTokens(parent)) yield return item;
+        }
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        if (Condition != null)
+        {
+            foreach (var item in Condition.GetColumns())
+            {
+                yield return item;
+            }
         }
     }
 }

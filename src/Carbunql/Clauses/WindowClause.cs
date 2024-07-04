@@ -1,4 +1,5 @@
 ﻿using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 using System.Collections;
 
@@ -181,4 +182,15 @@ public class WindowClause : IList<NamedWindowDefinition>, IQueryCommandable
         return ((IEnumerable)NamedWindowDefinitions).GetEnumerator();
     }
     #endregion
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        foreach (var definition in NamedWindowDefinitions)
+        {
+            foreach (var item in definition.GetColumns())
+            {
+                yield return item;
+            }
+        }
+    }
 }

@@ -83,4 +83,9 @@ public class ParameterValue : ValueBase
     {
         yield break;
     }
+
+    internal override IEnumerable<ColumnValue> GetColumnsCore()
+    {
+        yield break;
+    }
 }

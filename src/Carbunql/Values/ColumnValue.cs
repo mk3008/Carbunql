@@ -111,4 +111,9 @@ public class ColumnValue : ValueBase
     {
         yield break;
     }
+
+    internal override IEnumerable<ColumnValue> GetColumnsCore()
+    {
+        yield return this;
+    }
 }

@@ -1,4 +1,5 @@
 ﻿using Carbunql.Tables;
+using Carbunql.Values;
 
 namespace Carbunql.Clauses;
 
@@ -72,4 +73,15 @@ public abstract class MergeCondition : IQueryCommandable
     /// <param name="parent">The parent token.</param>
     /// <returns>The tokens representing the merge condition.</returns>
     public abstract IEnumerable<Token> GetTokens(Token? parent);
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        if (Condition != null)
+        {
+            foreach (var item in Condition.GetColumns())
+            {
+                yield return item;
+            }
+        }
+    }
 }

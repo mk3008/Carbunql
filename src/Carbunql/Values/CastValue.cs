@@ -136,4 +136,16 @@ public class CastValue : ValueBase
             yield return item;
         }
     }
+
+    internal override IEnumerable<ColumnValue> GetColumnsCore()
+    {
+        foreach (var item in Inner.GetColumns())
+        {
+            yield return item;
+        }
+        foreach (var item in Type.GetColumns())
+        {
+            yield return item;
+        }
+    }
 }

@@ -1,5 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 
 namespace Carbunql;
@@ -138,5 +139,16 @@ public class CreateIndexQuery : IAlterIndexQuery
     public IEnumerable<CommonTable> GetCommonTables()
     {
         yield break;
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        if (WhereClause != null)
+        {
+            foreach (var item in WhereClause.GetColumns())
+            {
+                yield return item;
+            }
+        }
     }
 }

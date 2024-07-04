@@ -1,4 +1,5 @@
 ﻿using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 
 namespace Carbunql.Clauses;
@@ -83,6 +84,14 @@ public class WithoutTimeZoneClause : ValueBase
     protected override IEnumerable<CommonTable> GetCommonTablesCore()
     {
         foreach (var item in Value.GetCommonTables())
+        {
+            yield return item;
+        }
+    }
+
+    internal override IEnumerable<ColumnValue> GetColumnsCore()
+    {
+        foreach (var item in Value.GetColumns())
         {
             yield return item;
         }

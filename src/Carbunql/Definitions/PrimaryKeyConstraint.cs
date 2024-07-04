@@ -1,5 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
+using Carbunql.Values;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Definitions;
@@ -148,29 +149,9 @@ public class PrimaryKeyConstraint : IConstraint
         constraint = this;
         return true;
     }
-}
 
-/// <summary>
-/// Represents a mapping between a column name and a property name.
-/// </summary>
-public readonly struct PrimaryKeyMap
-{
-    /// <summary>
-    /// Initializes a new instance of the <see cref="PrimaryKeyMap"/> struct with the specified column name and property name.
-    /// </summary>
-    public PrimaryKeyMap(string ColumnName, string PropertyName)
+    public IEnumerable<ColumnValue> GetColumns()
     {
-        this.ColumnName = ColumnName;
-        this.PropertyName = PropertyName;
+        yield break;
     }
-
-    /// <summary>
-    /// Gets the name of the column.
-    /// </summary>
-    public string ColumnName { get; }
-
-    /// <summary>
-    /// Gets the name of the property.
-    /// </summary>
-    public string PropertyName { get; }
 }

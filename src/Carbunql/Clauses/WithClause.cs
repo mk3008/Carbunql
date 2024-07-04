@@ -1,4 +1,5 @@
 ﻿using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 using System.Collections;
 
@@ -152,6 +153,11 @@ public class WithClause : IList<CommonTable>, IQueryCommandable
                 yield return item;
             }
         }
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        yield break;
     }
 
     #region implements IList<CommonTable>

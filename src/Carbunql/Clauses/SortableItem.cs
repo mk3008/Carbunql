@@ -1,5 +1,6 @@
 ﻿using Carbunql.Extensions;
 using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 
 namespace Carbunql.Clauses;
@@ -77,5 +78,10 @@ public class SortableItem : IQueryCommandable
         foreach (var item in Value.GetTokens(parent)) yield return item;
         if (!IsAscending) yield return Token.Reserved(this, parent, "desc");
         if (NullSort != NullSort.Undefined) yield return Token.Reserved(this, parent, NullSort.ToCommandText());
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        return ((IColumnContainer)Value).GetColumns();
     }
 }

@@ -73,4 +73,12 @@ public class QueryContainer : ValueBase
             yield return item;
         }
     }
+
+    internal override IEnumerable<ColumnValue> GetColumnsCore()
+    {
+        foreach (var item in Query.GetColumns())
+        {
+            yield return item;
+        }
+    }
 }

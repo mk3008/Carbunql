@@ -2,6 +2,7 @@
 using Carbunql.Clauses;
 using Carbunql.Definitions;
 using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 using System.Data;
 
@@ -294,5 +295,10 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
         }
 
         return queryset;
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        yield break;
     }
 }

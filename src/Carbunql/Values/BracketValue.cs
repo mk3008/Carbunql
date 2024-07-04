@@ -75,4 +75,12 @@ public class BracketValue : ValueBase
         foreach (var item in Inner.GetTokens(bracket)) yield return item;
         yield return Token.ExpressionBracketEnd(this, parent);
     }
+
+    internal override IEnumerable<ColumnValue> GetColumnsCore()
+    {
+        foreach (var item in Inner.GetColumns())
+        {
+            yield return item;
+        }
+    }
 }

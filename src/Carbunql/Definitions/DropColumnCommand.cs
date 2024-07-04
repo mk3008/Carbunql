@@ -1,5 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
+using Carbunql.Values;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.Definitions;
@@ -40,6 +41,11 @@ public class DropColumnCommand : IAlterCommand
     /// Gets the names of the columns (currently empty).
     /// </summary>
     public IEnumerable<string> GetColumnNames()
+    {
+        yield break;
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
     {
         yield break;
     }

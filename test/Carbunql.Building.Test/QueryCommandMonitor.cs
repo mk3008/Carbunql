@@ -1,10 +1,11 @@
-﻿using Xunit.Abstractions;
+﻿using System.Data;
+using Xunit.Abstractions;
 
 namespace Carbunql.Building.Test;
 
 public class QueryCommandMonitor
 {
-    private readonly ITestOutputHelper Output;
+    public readonly ITestOutputHelper Output;
 
     public QueryCommandMonitor(ITestOutputHelper output)
     {
@@ -18,6 +19,7 @@ public class QueryCommandMonitor
         //bld.Logger = (x) => Output.WriteLine(x);
 
         //var sql = bld.Execute(arg.GetTokens(null));
+        Output.WriteLine("--------------------");
         Output.WriteLine(arg.ToText());
         Output.WriteLine("--------------------");
         var len = 20;
@@ -30,6 +32,20 @@ public class QueryCommandMonitor
             var l = item.Parents().Count();
             var r = item.IsReserved ? "reserved" : string.Empty;
             Output.WriteLine($"{index.ToString().PadLeft(3)} {(indent + item.Text).PadRight(len)} lv.{l} sender:{s.PadRight(15)}, parent:{p.PadRight(6)}, {r}");
+            index++;
+        }
+    }
+
+    public void Log(IEnumerable<IQuerySource> datasets)
+    {
+        var index = 0;
+        foreach (var ds in datasets)
+        {
+            Output.WriteLine("--------------------");
+            Output.WriteLine($"Index:{index}, Seq:{ds.Sequence}, Branch:{ds.Branch}, Lv:{ds.Level}");
+            Output.WriteLine($"DataSet:{ds.Alias}");
+            Output.WriteLine($"Query:{ds.Query.ToOneLineText()}");
+            Output.WriteLine($"Columns:{string.Join(", ", ds.ColumnNames)}");
             index++;
         }
     }

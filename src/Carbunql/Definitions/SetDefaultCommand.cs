@@ -52,6 +52,11 @@ public class SetDefaultCommand : IAlterCommand
     /// </summary>
     public string Table { get; init; } = string.Empty;
 
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        yield break;
+    }
+
     /// <summary>
     /// Gets the common tables associated with the command.
     /// </summary>

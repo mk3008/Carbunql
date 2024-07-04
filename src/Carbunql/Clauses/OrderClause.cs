@@ -1,4 +1,5 @@
 ﻿using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 
 namespace Carbunql.Clauses;
@@ -69,5 +70,16 @@ public class OrderClause : QueryCommandCollection<IQueryCommandable>, IQueryComm
         yield return clause;
 
         foreach (var item in base.GetTokens(clause)) yield return item;
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        foreach (var value in Items)
+        {
+            foreach (var item in value.GetColumns())
+            {
+                yield return item;
+            }
+        }
     }
 }

@@ -27,6 +27,11 @@ public class InsertClause : IQueryCommandable
     /// </summary>
     public ValueCollection? ColumnAliases { get; init; }
 
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        yield break;
+    }
+
     /// <summary>
     /// Gets the common tables associated with this INSERT INTO clause.
     /// </summary>

@@ -3,6 +3,7 @@ using MessagePack;
 
 namespace Carbunql.Clauses;
 
+using Carbunql.Values;
 using System.Collections.Generic;
 
 /// <summary>
@@ -77,6 +78,14 @@ public class WhereClause : IQueryCommandable
     public IEnumerable<CommonTable> GetCommonTables()
     {
         foreach (var item in Condition.GetCommonTables())
+        {
+            yield return item;
+        }
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        foreach (var item in Condition.GetColumns())
         {
             yield return item;
         }

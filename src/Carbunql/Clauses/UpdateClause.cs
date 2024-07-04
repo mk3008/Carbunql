@@ -1,4 +1,5 @@
 ﻿using Carbunql.Tables;
+using Carbunql.Values;
 
 namespace Carbunql.Clauses;
 
@@ -70,6 +71,11 @@ public class UpdateClause : IQueryCommandable
     /// <remarks>This method is not implemented and throws a <see cref="NotImplementedException"/>.</remarks>
     public IEnumerable<QueryParameter> GetParameters()
     {
-        throw new NotImplementedException();
+        yield break;
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        yield break;
     }
 }

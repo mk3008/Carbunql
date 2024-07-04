@@ -1,4 +1,5 @@
 ﻿using Carbunql.Tables;
+using Carbunql.Values;
 using MessagePack;
 
 namespace Carbunql.Clauses;
@@ -188,6 +189,33 @@ public class SelectClause : QueryCommandCollection<SelectableItem>, IQueryComman
         foreach (var item in toRemove)
         {
             Remove(item);
+        }
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        if (Distinct != null)
+        {
+            foreach (var item in Distinct.GetColumns())
+            {
+                yield return item;
+            }
+        }
+
+        if (Top != null)
+        {
+            foreach (var item in Top.GetColumns())
+            {
+                yield return item;
+            }
+        }
+
+        foreach (var value in Items)
+        {
+            foreach (var item in value.GetColumns())
+            {
+                yield return item;
+            }
         }
     }
 }

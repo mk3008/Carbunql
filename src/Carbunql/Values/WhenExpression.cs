@@ -8,7 +8,7 @@ namespace Carbunql.Values;
 /// Represents a WHEN expression.
 /// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
-public class WhenExpression : IQueryCommandable
+public class WhenExpression : IQueryCommandable, IColumnContainer
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="WhenExpression"/> class with a condition and a value.
@@ -125,6 +125,21 @@ public class WhenExpression : IQueryCommandable
             }
         }
         foreach (var item in Value.GetCommonTables())
+        {
+            yield return item;
+        }
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        if (Condition != null)
+        {
+            foreach (var item in Condition.GetColumns())
+            {
+                yield return item;
+            }
+        }
+        foreach (var item in Value.GetColumns())
         {
             yield return item;
         }

@@ -8,7 +8,7 @@ namespace Carbunql.Values;
 /// Represents an operatable value in a query.
 /// </summary>
 [MessagePackObject(keyAsPropertyName: true)]
-public class OperatableValue : IQueryCommandable
+public class OperatableValue : IQueryCommandable, IColumnContainer
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="OperatableValue"/> class with the specified operator and value.
@@ -72,5 +72,13 @@ public class OperatableValue : IQueryCommandable
             yield return Token.Reserved(this, parent, Operator);
         }
         foreach (var item in Value.GetTokens(parent)) yield return item;
+    }
+
+    public IEnumerable<ColumnValue> GetColumns()
+    {
+        foreach (var item in Value.GetColumns())
+        {
+            yield return item;
+        }
     }
 }
