@@ -25,7 +25,7 @@ from
     sale as s";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetDataSets().ToList();
+        var datasets = query.GetQuerySources().ToList();
         Monitor.Log(datasets);
 
         Assert.Single(datasets);
@@ -34,7 +34,7 @@ from
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(1, ds.Level);
-        Assert.Equal("s", ds.DataSetName);
+        Assert.Equal("s", ds.Alias);
 
         var columns = ds.ColumnNames.ToList();
         Assert.Equal(3, columns.Count());
@@ -55,7 +55,7 @@ where
     s.store_id = 1";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetDataSets().ToList();
+        var datasets = query.GetQuerySources().ToList();
         Monitor.Log(datasets);
 
         Assert.Single(datasets);
@@ -64,7 +64,7 @@ where
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(1, ds.Level);
-        Assert.Equal("s", ds.DataSetName);
+        Assert.Equal("s", ds.Alias);
 
         var columns = ds.ColumnNames.ToList();
         Assert.Single(columns);
@@ -83,7 +83,7 @@ order by
     s.store_id = 1";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetDataSets().ToList();
+        var datasets = query.GetQuerySources().ToList();
         Monitor.Log(datasets);
 
         Assert.Single(datasets);
@@ -92,7 +92,7 @@ order by
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(1, ds.Level);
-        Assert.Equal("s", ds.DataSetName);
+        Assert.Equal("s", ds.Alias);
 
         var columns = ds.ColumnNames.ToList();
         Assert.Single(columns);
@@ -112,7 +112,7 @@ group by
     s.store_id";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetDataSets().ToList();
+        var datasets = query.GetQuerySources().ToList();
         Monitor.Log(datasets);
 
         Assert.Single(datasets);
@@ -121,7 +121,7 @@ group by
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(1, ds.Level);
-        Assert.Equal("s", ds.DataSetName);
+        Assert.Equal("s", ds.Alias);
 
         var columns = ds.ColumnNames.ToList();
         Assert.Single(columns);
@@ -142,7 +142,7 @@ having
     sum(s.price) = 0";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetDataSets().ToList();
+        var datasets = query.GetQuerySources().ToList();
         Monitor.Log(datasets);
 
         Assert.Single(datasets);
@@ -151,7 +151,7 @@ having
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(1, ds.Level);
-        Assert.Equal("s", ds.DataSetName);
+        Assert.Equal("s", ds.Alias);
 
         var columns = ds.ColumnNames.ToList();
         Assert.Equal(2, columns.Count());
@@ -175,7 +175,7 @@ where
     store_id = 1";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetDataSets().ToList();
+        var datasets = query.GetQuerySources().ToList();
         Monitor.Log(datasets);
 
         Assert.Single(datasets);
@@ -184,7 +184,7 @@ where
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(1, ds.Level);
-        Assert.Equal("s", ds.DataSetName);
+        Assert.Equal("s", ds.Alias);
 
         var columns = ds.ColumnNames.ToList();
         Assert.Single(columns);
@@ -210,7 +210,7 @@ where
 
         var exception = Assert.Throws<InvalidProgramException>(() =>
         {
-            var datasets = query.GetDataSets().ToList();
+            var datasets = query.GetQuerySources().ToList();
             Monitor.Log(datasets);
         });
 
@@ -238,7 +238,7 @@ from
     ) as d";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetDataSets().ToList();
+        var datasets = query.GetQuerySources().ToList();
         Monitor.Log(datasets);
 
         Assert.Equal(2, datasets.Count);
@@ -248,7 +248,7 @@ from
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(2, ds.Level);
-        Assert.Equal("s", ds.DataSetName);
+        Assert.Equal("s", ds.Alias);
 
         var columns = ds.ColumnNames.ToList();
         Assert.Equal(4, columns.Count());
@@ -262,7 +262,7 @@ from
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(1, ds.Level);
-        Assert.Equal("d", ds.DataSetName);
+        Assert.Equal("d", ds.Alias);
 
         columns = ds.ColumnNames.ToList();
         Assert.Equal(3, columns.Count());
@@ -294,7 +294,7 @@ from
     cte as d";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetDataSets().ToList();
+        var datasets = query.GetQuerySources().ToList();
         Monitor.Log(datasets);
 
         Assert.Equal(2, datasets.Count);
@@ -304,7 +304,7 @@ from
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(2, ds.Level);
-        Assert.Equal("s", ds.DataSetName);
+        Assert.Equal("s", ds.Alias);
 
         var columns = ds.ColumnNames.ToList();
         Assert.Equal(4, columns.Count());
@@ -318,7 +318,7 @@ from
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(1, ds.Level);
-        Assert.Equal("d", ds.DataSetName);
+        Assert.Equal("d", ds.Alias);
 
         columns = ds.ColumnNames.ToList();
         Assert.Equal(3, columns.Count());
@@ -365,7 +365,7 @@ where
     s.sale_id = 3";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetDataSets().ToList();
+        var datasets = query.GetQuerySources().ToList();
         Monitor.Log(datasets);
 
         Assert.Equal(3, datasets.Count);
@@ -375,7 +375,7 @@ where
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(1, ds.Level);
-        Assert.Equal("s", ds.DataSetName);
+        Assert.Equal("s", ds.Alias);
 
         var columns = ds.ColumnNames.ToList();
         Assert.Equal(3, columns.Count());
@@ -388,7 +388,7 @@ where
         Assert.Equal(2, ds.Sequence);
         Assert.Equal(2, ds.Branch);
         Assert.Equal(1, ds.Level);
-        Assert.Equal("s", ds.DataSetName);
+        Assert.Equal("s", ds.Alias);
 
         columns = ds.ColumnNames.ToList();
         Assert.Equal(3, columns.Count());
@@ -401,7 +401,7 @@ where
         Assert.Equal(3, ds.Sequence);
         Assert.Equal(3, ds.Branch);
         Assert.Equal(1, ds.Level);
-        Assert.Equal("s", ds.DataSetName);
+        Assert.Equal("s", ds.Alias);
 
         columns = ds.ColumnNames.ToList();
         Assert.Equal(3, columns.Count());
@@ -436,7 +436,7 @@ from
     ) as q";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetDataSets().ToList();
+        var datasets = query.GetQuerySources().ToList();
         Monitor.Log(datasets);
 
         Assert.Equal(3, datasets.Count);
@@ -446,7 +446,7 @@ from
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(3, ds.Level);
-        Assert.Equal("s", ds.DataSetName);
+        Assert.Equal("s", ds.Alias);
 
         var columns = ds.ColumnNames.ToList();
         Assert.Equal(4, columns.Count());
@@ -460,7 +460,7 @@ from
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(2, ds.Level);
-        Assert.Equal("d", ds.DataSetName);
+        Assert.Equal("d", ds.Alias);
 
         columns = ds.ColumnNames.ToList();
         Assert.Equal(3, columns.Count());
@@ -473,7 +473,7 @@ from
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(1, ds.Level);
-        Assert.Equal("q", ds.DataSetName);
+        Assert.Equal("q", ds.Alias);
 
         columns = ds.ColumnNames.ToList();
         Assert.Equal(3, columns.Count());
@@ -513,7 +513,7 @@ where
 ";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetDataSets().ToList();
+        var datasets = query.GetQuerySources().ToList();
         Monitor.Log(datasets);
 
         Assert.Equal(4, datasets.Count);
@@ -523,7 +523,7 @@ where
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(3, ds.Level);
-        Assert.Equal("s", ds.DataSetName);
+        Assert.Equal("s", ds.Alias);
 
         var columns = ds.ColumnNames.ToList();
         Assert.Equal(4, columns.Count());
@@ -537,7 +537,7 @@ where
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(2, ds.Level);
-        Assert.Equal("d", ds.DataSetName);
+        Assert.Equal("d", ds.Alias);
 
         columns = ds.ColumnNames.ToList();
         Assert.Equal(3, columns.Count());
@@ -550,7 +550,7 @@ where
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(1, ds.Level);
-        Assert.Equal("q", ds.DataSetName);
+        Assert.Equal("q", ds.Alias);
 
         columns = ds.ColumnNames.ToList();
         Assert.Equal(3, columns.Count());
@@ -563,7 +563,7 @@ where
         Assert.Equal(2, ds.Sequence);
         Assert.Equal(2, ds.Branch);
         Assert.Equal(1, ds.Level);
-        Assert.Equal("st", ds.DataSetName);
+        Assert.Equal("st", ds.Alias);
 
         columns = ds.ColumnNames.ToList();
         Assert.Single(columns);
@@ -609,7 +609,7 @@ ORDER BY
     r.sale_month";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetDataSets().ToList();
+        var datasets = query.GetQuerySources().ToList();
         Monitor.Log(datasets);
 
         Assert.Equal(4, datasets.Count);
@@ -619,7 +619,7 @@ ORDER BY
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(2, ds.Level);
-        Assert.Equal("c", ds.DataSetName);
+        Assert.Equal("c", ds.Alias);
 
         var columns = ds.ColumnNames.ToList();
         Assert.Equal(2, columns.Count());
@@ -631,7 +631,7 @@ ORDER BY
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(2, ds.Branch);
         Assert.Equal(3, ds.Level);
-        Assert.Equal("sales", ds.DataSetName);
+        Assert.Equal("sales", ds.Alias);
 
         columns = ds.ColumnNames.ToList();
         Assert.Equal(3, columns.Count());
@@ -644,7 +644,7 @@ ORDER BY
         Assert.Equal(2, ds.Sequence);
         Assert.Equal(2, ds.Branch);
         Assert.Equal(2, ds.Level);
-        Assert.Equal("ms", ds.DataSetName);
+        Assert.Equal("ms", ds.Alias);
 
         columns = ds.ColumnNames.ToList();
         Assert.Equal(3, columns.Count());
@@ -657,7 +657,7 @@ ORDER BY
         Assert.Equal(1, ds.Sequence);
         Assert.Equal(1, ds.Branch);
         Assert.Equal(1, ds.Level);
-        Assert.Equal("r", ds.DataSetName);
+        Assert.Equal("r", ds.Alias);
 
         columns = ds.ColumnNames.ToList();
         Assert.Equal(4, columns.Count());
@@ -770,7 +770,7 @@ ORDER BY
     line_id";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetDataSets().ToList();
+        var datasets = query.GetQuerySources().ToList();
         Monitor.Log(datasets);
 
         Assert.Equal(10, datasets.Count);

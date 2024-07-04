@@ -12,23 +12,23 @@ public static class IEnumerableExtension
     }
 
     /// <summary>
-    /// Retrieves one dataset per branch. The retrieval order is descending by Level and ascending by Sequence.
+    /// Retrieves one QuerySource per branch. The retrieval order is descending by Level and ascending by Sequence.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <param name="source">The source collection of datasets.</param>
-    /// <returns>A collection of datasets, one per branch, ordered by descending Level and ascending Sequence.</returns>
-    public static IEnumerable<T> GetRootDataSetsByBranch<T>(this IEnumerable<T> source) where T : IDataSet
+    /// <param name="source">The source collection of QuerySources.</param>
+    /// <returns>A collection of QuerySources, one per branch, ordered by descending Level and ascending Sequence.</returns>
+    public static IEnumerable<T> GetRootsByBranch<T>(this IEnumerable<T> source) where T : IQuerySource
     {
         return source.GroupBy(ds => ds.Branch).Select(ds => ds.OrderByDescending(s => s.Level).ThenBy(s => s.Sequence).First());
     }
 
     /// <summary>
-    /// Retrieves one dataset per query. The retrieval order is descending by Level and ascending by Sequence.
+    /// Retrieves one QuerySource per query. The retrieval order is descending by Level and ascending by Sequence.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <param name="source">The source collection of datasets.</param>
-    /// <returns>A collection of datasets, one per query, ordered by descending Level and ascending Sequence.</returns>
-    public static IEnumerable<T> GetRootDataSetsByQuery<T>(this IEnumerable<T> source) where T : IDataSet
+    /// <param name="source">The source collection of QuerySources.</param>
+    /// <returns>A collection of QuerySources, one per query, ordered by descending Level and ascending Sequence.</returns>
+    public static IEnumerable<T> GetRootsByQuery<T>(this IEnumerable<T> source) where T : IQuerySource
     {
         return source.GroupBy(ds => ds.Query).Select(ds => ds.OrderByDescending(s => s.Level).ThenBy(s => s.Sequence).First());
     }

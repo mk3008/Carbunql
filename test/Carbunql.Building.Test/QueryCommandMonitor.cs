@@ -36,14 +36,14 @@ public class QueryCommandMonitor
         }
     }
 
-    public void Log(IEnumerable<IDataSet> datasets)
+    public void Log(IEnumerable<IQuerySource> datasets)
     {
         var index = 0;
         foreach (var ds in datasets)
         {
             Output.WriteLine("--------------------");
             Output.WriteLine($"Index:{index}, Seq:{ds.Sequence}, Branch:{ds.Branch}, Lv:{ds.Level}");
-            Output.WriteLine($"DataSet:{ds.DataSetName}");
+            Output.WriteLine($"DataSet:{ds.Alias}");
             Output.WriteLine($"Query:{ds.Query.ToOneLineText()}");
             Output.WriteLine($"Columns:{string.Join(", ", ds.ColumnNames)}");
             index++;

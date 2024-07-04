@@ -25,7 +25,7 @@ from
         var query = new SelectQuery(sql);
         Monitor.Log(query);
 
-        var datasets = query.GetDataSets().ToList();
+        var datasets = query.GetQuerySources().ToList();
         Monitor.Log(datasets);
 
         Assert.Single(datasets);
@@ -47,10 +47,10 @@ from
         var column = "sale_id";
         var value = 1;
 
-        query.GetDataSets()
+        query.GetQuerySources()
             .Where(ds => ds.ColumnNames.Contains(column))
-            .GetRootDataSetsByBranch()
-            .ForEach(ds => ds.Query.Where(ds.DataSetName, column).Equal(value));
+            .GetRootsByBranch()
+            .ForEach(ds => ds.Query.Where(ds.Alias, column).Equal(value));
 
         Monitor.Log(query);
 
@@ -86,17 +86,17 @@ from
     ) as s2";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetDataSets().ToList();
+        var datasets = query.GetQuerySources().ToList();
         Monitor.Log(datasets);
 
 
         var column = "sale_id";
         var value = 1;
 
-        query.GetDataSets()
+        query.GetQuerySources()
             .Where(ds => ds.ColumnNames.Contains(column))
-            .GetRootDataSetsByBranch()
-            .ForEach(ds => ds.Query.Where(ds.DataSetName, column).Equal(value));
+            .GetRootsByBranch()
+            .ForEach(ds => ds.Query.Where(ds.Alias, column).Equal(value));
 
         Monitor.Log(query);
 
@@ -136,10 +136,10 @@ from
         var column = "store_id";
         var value = 1;
 
-        query.GetDataSets()
+        query.GetQuerySources()
             .Where(ds => ds.ColumnNames.Contains(column))
-            .GetRootDataSetsByBranch()
-            .ForEach(ds => ds.Query.Where(ds.DataSetName, column).Equal(value));
+            .GetRootsByBranch()
+            .ForEach(ds => ds.Query.Where(ds.Alias, column).Equal(value));
 
         Monitor.Log(query);
 
@@ -171,17 +171,17 @@ from
     inner join store as st on s.store_id = st.store_id";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetDataSets().ToList();
+        var datasets = query.GetQuerySources().ToList();
         Monitor.Log(datasets);
 
         var column = "store_id";
         var value = 1;
 
-        query.GetDataSets()
+        query.GetQuerySources()
             .Where(ds => ds.ColumnNames.Contains(column))
-            .GetRootDataSetsByBranch()
-            .GetRootDataSetsByQuery()
-            .ForEach(ds => ds.Query.Where(ds.DataSetName, column).Equal(value));
+            .GetRootsByBranch()
+            .GetRootsByQuery()
+            .ForEach(ds => ds.Query.Where(ds.Alias, column).Equal(value));
 
         Monitor.Log(query);
 
@@ -224,10 +224,10 @@ from
         var column = "store_id";
         var value = 1;
 
-        query.GetDataSets()
+        query.GetQuerySources()
             .Where(ds => ds.ColumnNames.Contains(column))
-            .GetRootDataSetsByBranch()
-            .ForEach(ds => ds.Query.Where(ds.DataSetName, column).Equal(value));
+            .GetRootsByBranch()
+            .ForEach(ds => ds.Query.Where(ds.Alias, column).Equal(value));
 
         Monitor.Log(query);
 
@@ -284,16 +284,16 @@ ORDER BY
     ms.sale_month";
 
         var query = new SelectQuery(sql);
-        var datasets = query.GetDataSets().ToList();
+        var datasets = query.GetQuerySources().ToList();
         Monitor.Log(datasets);
 
         var column = "customer_id";
         var value = 1;
 
-        query.GetDataSets()
+        query.GetQuerySources()
             .Where(ds => ds.ColumnNames.Contains(column))
-            .GetRootDataSetsByBranch()
-            .ForEach(ds => ds.Query.Where(ds.DataSetName, column).Equal(value));
+            .GetRootsByBranch()
+            .ForEach(ds => ds.Query.Where(ds.Alias, column).Equal(value));
 
         Monitor.Log(query);
 

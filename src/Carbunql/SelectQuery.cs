@@ -122,14 +122,14 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         HeaderCommentClause.Add(comment);
     }
 
-    public IEnumerable<IDataSet> GetDataSets()
+    public IEnumerable<IQuerySource> GetQuerySources()
     {
         var commonTables = GetCommonTables().ToList();
-        return GetDataSets(1, 1, 1, commonTables);
+        return GetQuerySources(1, 1, 1, commonTables);
     }
 
 
-    private IEnumerable<IDataSet> ProcessQuery(SelectQuery query, int sequence, int branch, int level, string alias, IList<CommonTable> commonTables)
+    private IEnumerable<IQuerySource> ProcessQuery(SelectQuery query, int sequence, int branch, int level, string alias, IList<CommonTable> commonTables)
     {
         // cache
         var currentBranch = branch;
@@ -139,11 +139,11 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
 
         var allColumns = new Dictionary<string, IEnumerable<string>>();
 
-        foreach (var nestedDataSet in query.GetDataSets(1, branch, level + 1, commonTables))
+        foreach (var nestedDataSet in query.GetQuerySources(1, branch, level + 1, commonTables))
         {
             if (level + 1 == nestedDataSet.Level)
             {
-                allColumns[nestedDataSet.DataSetName] = nestedDataSet.ColumnNames;
+                allColumns[nestedDataSet.Alias] = nestedDataSet.ColumnNames;
             }
             yield return nestedDataSet;
             sequence++;
@@ -159,7 +159,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             {
                 if (string.IsNullOrEmpty(wild.TableAlias))
                 {
-                    yield return new DataSet(currentBranch, currentLevel, currentSequence, alias, allColumns.SelectMany(x => x.Value), this);
+                    yield return new QuerySource(currentBranch, currentLevel, currentSequence, alias, allColumns.SelectMany(x => x.Value), this);
                 }
                 else
                 {
@@ -167,17 +167,17 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
                     cols.Remove("*");
                     cols.AddRange(allColumns[wild.TableAlias]);
 
-                    yield return new DataSet(currentBranch, currentLevel, currentSequence, alias, cols.Distinct(), this);
+                    yield return new QuerySource(currentBranch, currentLevel, currentSequence, alias, cols.Distinct(), this);
                 }
             }
         }
         else
         {
-            yield return new DataSet(currentBranch, currentLevel, currentSequence, alias, cname, this);
+            yield return new QuerySource(currentBranch, currentLevel, currentSequence, alias, cname, this);
         }
     }
 
-    public IEnumerable<IDataSet> GetDataSets(int sequence, int branch, int level, IList<CommonTable> commonTables)
+    public IEnumerable<IQuerySource> GetQuerySources(int sequence, int branch, int level, IList<CommonTable> commonTables)
     {
         if (FromClause == null) yield break;
 
@@ -218,33 +218,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
                 else if (ct.Table is VirtualTable vt && vt.Query is ValuesQuery && ct.ColumnAliases != null)
                 {
                     var names = ct.ColumnAliases.OfType<ColumnValue>().Select(x => x.Column);
-
-                    //var cname = columns
-                    //    .Where(x => !hasRelation || x.TableAlias == alias)
-                    //    .Select(x => x.Column)
-                    //    .Distinct();
-
-                    //if (cname.Contains("*"))
-                    //{
-                    //    var wilds = query.SelectClause!.Where(x => x.Alias == "*");
-                    //    foreach (var wild in wilds.Select(x => x.Value).OfType<ColumnValue>())
-                    //    {
-                    //        if (string.IsNullOrEmpty(wild.TableAlias))
-                    //        {
-                    //            yield return new DataSet(branch, level, sequence, alias, allColumns.SelectMany(x => x.Value), this);
-                    //        }
-                    //        else
-                    //        {
-
-                    //            yield return new DataSet(branch, level, sequence, alias, allColumns[wild.TableAlias], this);
-                    //        }
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    yield return new DataSet(branch, level, sequence, alias, cname, this);
-                    //}
-                    yield return new DataSet(branch, level, sequence, alias, names, this);
+                    yield return new QuerySource(branch, level, sequence, alias, names, this);
                 }
                 else
                 {
@@ -258,7 +232,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
                     .Select(x => x.Column)
                     .Distinct();
 
-                var dataSet = new DataSet(branch, level, sequence, alias, cname, this);
+                var dataSet = new QuerySource(branch, level, sequence, alias, cname, this);
                 yield return dataSet;
             }
             sequence++;
@@ -267,7 +241,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
 
         foreach (var item in OperatableQueries.Select(x => x.Query).OfType<SelectQuery>())
         {
-            foreach (var branchDataSet in item.GetDataSets(sequence, branch, level, commonTables))
+            foreach (var branchDataSet in item.GetQuerySources(sequence, branch, level, commonTables))
             {
                 sequence = branchDataSet.Sequence;
                 yield return branchDataSet;
