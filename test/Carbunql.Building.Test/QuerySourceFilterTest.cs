@@ -2,11 +2,11 @@
 
 namespace Carbunql.Building.Test;
 
-public class DataSetFilterTest
+public class QuerySourceFilterTest
 {
     private readonly QueryCommandMonitor Monitor;
 
-    public DataSetFilterTest(ITestOutputHelper output)
+    public QuerySourceFilterTest(ITestOutputHelper output)
     {
         Monitor = new QueryCommandMonitor(output);
     }

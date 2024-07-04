@@ -143,9 +143,5 @@ public class CastValue : ValueBase
         {
             yield return item;
         }
-        foreach (var item in Type.GetColumns())
-        {
-            yield return item;
-        }
     }
 }

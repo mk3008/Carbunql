@@ -129,7 +129,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     }
 
 
-    private IEnumerable<IQuerySource> ProcessQuery(SelectQuery query, int sequence, int branch, int level, string alias, IList<CommonTable> commonTables)
+    private IEnumerable<IQuerySource> ProcessQuery(SelectableTable source, SelectQuery query, int sequence, int branch, int level, string alias, IList<CommonTable> commonTables)
     {
         // cache
         var currentBranch = branch;
@@ -159,7 +159,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             {
                 if (string.IsNullOrEmpty(wild.TableAlias))
                 {
-                    yield return new QuerySource(currentBranch, currentLevel, currentSequence, alias, allColumns.SelectMany(x => x.Value), this);
+                    yield return new QuerySource(currentBranch, currentLevel, currentSequence, alias, allColumns.SelectMany(x => x.Value), this, source);
                 }
                 else
                 {
@@ -167,13 +167,13 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
                     cols.Remove("*");
                     cols.AddRange(allColumns[wild.TableAlias]);
 
-                    yield return new QuerySource(currentBranch, currentLevel, currentSequence, alias, cols.Distinct(), this);
+                    yield return new QuerySource(currentBranch, currentLevel, currentSequence, alias, cols.Distinct(), this, source);
                 }
             }
         }
         else
         {
-            yield return new QuerySource(currentBranch, currentLevel, currentSequence, alias, cname, this);
+            yield return new QuerySource(currentBranch, currentLevel, currentSequence, alias, cname, this, source);
         }
     }
 
@@ -190,19 +190,19 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             throw new InvalidProgramException($"There are columns whose table alias names cannot be parsed: {cols}.");
         }
 
-        foreach (var item in FromClause.GetSelectableTables())
+        foreach (var source in FromClause.GetSelectableTables())
         {
-            var alias = item.Alias;
+            var alias = source.Alias;
 
-            if (item.Table.TryGetSelectQuery(out var query))
+            if (source.Table.TryGetSelectQuery(out var query))
             {
                 // subquery
-                foreach (var dataSet in ProcessQuery(query, sequence, branch, level, alias, commonTables))
+                foreach (var dataSet in ProcessQuery(source, query, sequence, branch, level, alias, commonTables))
                 {
                     yield return dataSet;
                 }
             }
-            else if (item.Table is PhysicalTable table && commonTables.Any(x => x.Alias == table.GetTableFullName()))
+            else if (source.Table is PhysicalTable table && commonTables.Any(x => x.Alias == table.GetTableFullName()))
             {
                 var ct = commonTables.First(x => x.Alias == table.GetTableFullName());
 
@@ -210,7 +210,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
                 {
                     var commonQuery = commonTables.First(x => x.Alias == table.GetTableFullName()).GetSelectQuery();
 
-                    foreach (var dataSet in ProcessQuery(commonQuery, sequence, branch, level, alias, commonTables))
+                    foreach (var dataSet in ProcessQuery(source, commonQuery, sequence, branch, level, alias, commonTables))
                     {
                         yield return dataSet;
                     }
@@ -218,7 +218,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
                 else if (ct.Table is VirtualTable vt && vt.Query is ValuesQuery && ct.ColumnAliases != null)
                 {
                     var names = ct.ColumnAliases.OfType<ColumnValue>().Select(x => x.Column);
-                    yield return new QuerySource(branch, level, sequence, alias, names, this);
+                    yield return new QuerySource(branch, level, sequence, alias, names, this, source);
                 }
                 else
                 {
@@ -232,7 +232,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
                     .Select(x => x.Column)
                     .Distinct();
 
-                var dataSet = new QuerySource(branch, level, sequence, alias, cname, this);
+                var dataSet = new QuerySource(branch, level, sequence, alias, cname, this, source);
                 yield return dataSet;
             }
             sequence++;

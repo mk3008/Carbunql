@@ -1,0 +1,145 @@
+@page "/query_source/labels"
+
+@using Carbunql.Analysis;
+@using Carbunql;
+
+<PageTitle>QuerySource Labels</PageTitle>
+
+<div class="container-fluid">
+@*    <div class="row" Style="margin: 0px 0px 16px 0px;">
+        <RadzenMenu class="rz-shadow-3">
+            <RadzenMenuItem Text="Clear SQL" Icon="clear" Click=@OnClear>
+            </RadzenMenuItem>
+        </RadzenMenu>
+    </div>*@
+    <div class="row">
+        <div class="col-md-12 p-3">
+            <RadzenText TextStyle="TextStyle.H4">Labels</RadzenText>
+
+            <RadzenText>Gets and labels the SQL query source.</RadzenText>
+            
+             <RadzenCard>
+                <RadzenText TextStyle="TextStyle.Subtitle2">Source code</RadzenText>
+                <RadzenTextArea @bind-Value=@sourcecode TValue="string" Style="width: 100%; min-height: 250px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" />
+            </RadzenCard>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 p-3">
+            <RadzenText TextStyle="TextStyle.H5">Demo</RadzenText>
+        </div>
+        <div class="col-md-6 p-3">
+            <RadzenCard>
+                <RadzenText TextStyle="TextStyle.Subtitle2">Input</RadzenText>
+                <RadzenTextArea @bind-Value=@sql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" Placeholder="Enter select query(ex. select * from table)" />
+            </RadzenCard>
+        </div>
+        <div class="col-md-6 p-3">
+            <RadzenCard>
+                <RadzenText TextStyle="TextStyle.Subtitle2">Result</RadzenText>
+                <RadzenTextArea @bind-Value=@fsql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" />
+            </RadzenCard>
+        </div>
+
+    </div>
+</div>
+
+@code {
+
+    string fsql = string.Empty;
+
+    string sourcecode = @"using Carbunql;
+
+var q = new SelectQuery(sql);
+var sources = q.GetQuerySources().ToList();
+
+q.GetQuerySources().ForEach(x =>
+{
+    x.AddSourceComment($""Seq:{x.Sequence}, Branch:{x.Branch}, Lv:{x.Level}"");
+})
+.GetRootsByBranch().ForEach(x =>
+{
+    x.AddQueryComment($""Root of Branch:{x.Branch}"");
+});
+Console.WriteLine(q.ToText());";
+
+    protected override void OnInitialized()
+    {
+        OnChange(sql);
+    }
+
+    void OnClear()
+    {
+        sql = string.Empty;
+        OnChange(sql);
+    }
+
+    void OnChange(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            fsql = string.Empty;
+            return;
+        }
+        try
+        {
+            var q = new SelectQuery(sql);
+            var sources = q.GetQuerySources().ToList();
+
+            q.GetQuerySources().ForEach(x =>
+            {
+                x.AddSourceComment($"Seq:{x.Sequence}, Branch:{x.Branch}, Lv:{x.Level}");
+            })
+            .GetRootsByBranch().ForEach(x =>
+            {
+                x.AddQueryComment($"Root of Branch:{x.Branch}");
+            });
+
+            fsql = q.ToText();
+        }
+		catch (Exception ex)
+		{
+			fsql = ex.ToString();
+		}
+	}
+
+    string sql = @"WITH
+monthly_sales AS (
+    SELECT
+        store_id,
+        product_id,
+        DATE_TRUNC('month', sales_date) AS month,
+        SUM(sales_amount) AS total_sales
+    FROM
+        sales
+    GROUP BY
+        store_id,
+        product_id,
+        DATE_TRUNC('month', sales_date)
+),
+total_monthly_sales AS (
+    SELECT
+        store_id,
+        month,
+        SUM(total_sales) AS total_sales
+    FROM
+        monthly_sales
+    GROUP BY
+        store_id,
+        month
+)
+SELECT
+    ms.store_id,
+    ms.product_id,
+    ms.month,
+    ms.total_sales,
+    tms.total_sales AS total_monthly_sales,
+    (ms.total_sales::FLOAT / tms.total_sales) * 100 AS sales_percentage
+FROM
+    monthly_sales ms
+INNER JOIN
+    total_monthly_sales tms ON ms.store_id = tms.store_id AND ms.month = tms.month
+ORDER BY
+    ms.month,
+    ms.product_id";
+}
