@@ -11,5 +11,5 @@ public interface IDataRow
     /// The dataset it belongs to (table, subquery, CTE)
     /// </summary>
     [IgnoreMapping]
-    ITypeSafeDataSet DataSet { get; set; }
+    IDataSet DataSet { get; set; }
 }

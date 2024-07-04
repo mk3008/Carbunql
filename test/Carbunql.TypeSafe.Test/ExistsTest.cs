@@ -159,7 +159,7 @@ WHERE
         public decimal price { get; set; }
 
         // interface property
-        ITypeSafeDataSet IDataRow.DataSet { get; set; } = null!;
+        IDataSet IDataRow.DataSet { get; set; } = null!;
     }
 
     public record store : IDataRow
@@ -169,7 +169,7 @@ WHERE
         public string location { get; set; } = string.Empty;
 
         // interface property
-        ITypeSafeDataSet IDataRow.DataSet { get; set; } = null!;
+        IDataSet IDataRow.DataSet { get; set; } = null!;
     }
 
     public record order : IDataRow
@@ -181,7 +181,7 @@ WHERE
         public IList<order_detail> order_details { get; init; } = new List<order_detail>();
 
         // interface property
-        ITypeSafeDataSet IDataRow.DataSet { get; set; } = null!;
+        IDataSet IDataRow.DataSet { get; set; } = null!;
     }
 
     public record order_detail : IDataRow
@@ -193,7 +193,7 @@ WHERE
         public decimal price { get; set; }
 
         // interface property
-        ITypeSafeDataSet IDataRow.DataSet { get; set; } = null!;
+        IDataSet IDataRow.DataSet { get; set; } = null!;
     }
 
     public record order_detail_report : order_detail

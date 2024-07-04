@@ -213,7 +213,7 @@ internal class Program
         public int total_tax { get; set; }
         public int line_tax_trancated_summary { get; set; }
         public int tax_difference { get; set; }
-        public ITypeSafeDataSet DataSet { get; set; } = null!;
+        public IDataSet DataSet { get; set; } = null!;
     }
 
     private record SaleReport : SaleWithTax
@@ -232,5 +232,5 @@ public record Sale : IDataRow
     public int quantity { get; set; }
     public double tax_rate { get; set; }
 
-    public ITypeSafeDataSet DataSet { get; set; } = null!;
+    public IDataSet DataSet { get; set; } = null!;
 }

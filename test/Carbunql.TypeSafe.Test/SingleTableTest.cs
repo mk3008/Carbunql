@@ -678,6 +678,6 @@ FROM
         public sale() : this(0, "", 0, 0, DateTime.Now) { }
 
         // interface property
-        ITypeSafeDataSet IDataRow.DataSet { get; set; } = null!;
+        IDataSet IDataRow.DataSet { get; set; } = null!;
     }
 }

@@ -291,6 +291,6 @@ WHERE
         public sale() : this(0, "", 0, 0) { }
 
         // interface property
-        ITypeSafeDataSet IDataRow.DataSet { get; set; } = null!;
+        IDataSet IDataRow.DataSet { get; set; } = null!;
     }
 }

@@ -3,7 +3,7 @@ using Carbunql.Building;
 
 namespace Carbunql.TypeSafe;
 
-public class CTEDataSet(string name, SelectQuery query) : ITypeSafeDataSet
+public class CTEDataSet(string name, SelectQuery query) : IDataSet
 {
     public string Name { get; set; } = name;
 

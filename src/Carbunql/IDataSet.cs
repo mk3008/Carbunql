@@ -1,6 +1,6 @@
 ﻿namespace Carbunql;
 
-public interface ITypeSafeDataSet
+public interface IDataSet
 {
     /// <summary>
     /// Build the FROM clause

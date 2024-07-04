@@ -168,7 +168,7 @@ public record Area : IDataRow
 
     public long sales_staff_id { get; set; }
 
-    public ITypeSafeDataSet DataSet { get; set; } = null!;
+    public IDataSet DataSet { get; set; } = null!;
 }
 
 public record Area_detail : IDataRow
@@ -177,7 +177,7 @@ public record Area_detail : IDataRow
 
     public long store_id { get; set; }
 
-    public ITypeSafeDataSet DataSet { get; set; } = null!;
+    public IDataSet DataSet { get; set; } = null!;
 }
 
 public record Area_detail_with_staff : IDataRow
@@ -188,7 +188,7 @@ public record Area_detail_with_staff : IDataRow
 
     public long sales_staff_id { get; set; }
 
-    public ITypeSafeDataSet DataSet { get; set; } = null!;
+    public IDataSet DataSet { get; set; } = null!;
 }
 
 public record Area_sale_report : IDataRow
@@ -197,7 +197,7 @@ public record Area_sale_report : IDataRow
     public long sales_staff_id { get; set; }
     public decimal sale_price { get; set; }
 
-    public ITypeSafeDataSet DataSet { get; set; } = null!;
+    public IDataSet DataSet { get; set; } = null!;
 }
 
 public record Store_sale_report : IDataRow
@@ -205,5 +205,5 @@ public record Store_sale_report : IDataRow
     public long store_id { get; set; }
     public decimal sale_price { get; set; }
 
-    public ITypeSafeDataSet DataSet { get; set; } = null!;
+    public IDataSet DataSet { get; set; } = null!;
 }

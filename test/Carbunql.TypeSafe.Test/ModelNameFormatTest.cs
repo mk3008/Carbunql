@@ -98,7 +98,7 @@ FROM
         public int StoreDataId { get; set; }
         public string StoreName { get; set; } = string.Empty;
         // interface property
-        ITypeSafeDataSet IDataRow.DataSet { get; set; } = null!;
+        IDataSet IDataRow.DataSet { get; set; } = null!;
     }
 
     [Table([nameof(store_id)], Schema = "public", Table = "stores")]
@@ -107,6 +107,6 @@ FROM
         public int store_id { get; set; }
         public string store_name { get; set; } = string.Empty;
         // interface property
-        ITypeSafeDataSet IDataRow.DataSet { get; set; } = null!;
+        IDataSet IDataRow.DataSet { get; set; } = null!;
     }
 }

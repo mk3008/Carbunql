@@ -61,7 +61,7 @@ public class PropertySelector
         var props = SelectProperties<T>()
             .Where(prop => !LiteralTypes.Contains(prop.PropertyType))
             .Where(prop => !Attribute.IsDefined(prop, typeof(IgnoreMappingAttribute)))
-            .Where(prop => !typeof(ITypeSafeDataSet).IsAssignableFrom(prop.PropertyType))
+            .Where(prop => !typeof(IDataSet).IsAssignableFrom(prop.PropertyType))
             .Where(prop => Attribute.IsDefined(prop, typeof(ParentRelationColumnAttribute))
                             || prop.PropertyType.GetInterface(nameof(IEnumerable)) == null);
 
