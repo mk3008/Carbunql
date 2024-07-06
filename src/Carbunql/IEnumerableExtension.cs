@@ -12,14 +12,22 @@ public static class IEnumerableExtension
     }
 
     /// <summary>
-    /// Retrieves one QuerySource per branch. The retrieval order is descending by Level and ascending by Sequence.
+    /// Get the root QuerySource.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <param name="source">The source collection of QuerySources.</param>
-    /// <returns>A collection of QuerySources, one per branch, ordered by descending Level and ascending Sequence.</returns>
-    public static IEnumerable<T> GetRootsByBranch<T>(this IEnumerable<T> source) where T : IQuerySource
+    /// <param name="source">The source collection of QuerySource. </param>
+    /// <returns>A collection of QuerySource. </returns>
+    public static IEnumerable<T> GetRootsBySource<T>(this IEnumerable<T> source) where T : IQuerySource
     {
-        return source.GroupBy(ds => ds.Branch).Select(ds => ds.OrderByDescending(s => s.Level).ThenBy(s => s.Sequence).First());
+        var sources = new List<T>();
+        foreach (var item in (from x in source orderby x.Level descending, x.ParentIndex descending, x.SourceIndex select x))
+        {
+            if (!sources.Where(x => x.ReferencedIndexes.Contains(item.SourceIndex)).Any())
+            {
+                sources.Add(item);
+            }
+        }
+        return sources;
     }
 
     /// <summary>

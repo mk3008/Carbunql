@@ -55,7 +55,7 @@ var sources = q.GetQuerySources().ToList();
 
 q.GetQuerySources().ForEach(x =>
 {
-    x.AddSourceComment($""Seq:{x.Sequence}, Branch:{x.Branch}, Lv:{x.Level}"");
+x.AddSourceComment($""Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join(""-"", x.ReferencedIndexes)}, Columns:[{string.Join("", "", x.ColumnNames)}]"");
 })
 .GetRootsByBranch().ForEach(x =>
 {
@@ -88,11 +88,11 @@ Console.WriteLine(q.ToText());";
 
             q.GetQuerySources().ForEach(x =>
             {
-                x.AddSourceComment($"Seq:{x.Sequence}, Branch:{x.Branch}, Lv:{x.Level}");
+                x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Index:{x.SourceIndex}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
             })
-            .GetRootsByBranch().ForEach(x =>
+            .GetRootsBySource().OrderBy(x => x.SourceIndex).ForEach(x =>
             {
-                x.AddQueryComment($"Root of Branch:{x.Branch}");
+                x.AddQueryComment($"Root:{string.Join("-", x.ReferencedIndexes)}");
             });
 
             fsql = q.ToText();

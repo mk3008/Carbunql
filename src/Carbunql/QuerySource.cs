@@ -3,36 +3,39 @@
 namespace Carbunql;
 
 /// <summary>
-/// Query source
+/// Represents a query source, which can be a physical table, subquery, or common table expression (CTE).
+/// This class implements the IQuerySource interface and provides concrete implementations for its properties.
 /// </summary>
-/// <param name="branch">The branch number of the referenced query source. Numbering starts from 1.</param>
-/// <param name="level">The depth level of the query source. Numbering starts from 1 and increments with each nesting level.</param>
-/// <param name="sequence">The sequence number within the select query. Numbering starts from 1.</param>
-/// <param name="alias">The alias name of the query source.</param>
-/// <param name="columnNames">The column names belonging to the query source. Duplicates are removed, but order is not guaranteed.</param>
-/// <param name="query">The select query to which the query source belongs.</param>
-public class QuerySource(int branch, int level, int sequence, string alias, IEnumerable<string> columnNames, SelectQuery query, SelectableTable source) : IQuerySource
+public class QuerySource(int parentBranch, HashSet<int> indexes, int level, int sequence, HashSet<string> columnNames, SelectQuery query, SelectableTable source) : IQuerySource
 {
     /// <summary>
-    /// The branch number of the referenced query source.
-    /// Numbering starts from 1.
-    /// The query source in the FROM clause inherits the upstream branch number,
-    /// while the query source in table joins is assigned a new branch number.
+    /// The ID of the parent query source. If it doesn't exist, it's 0.
     /// </summary>
-    public int Branch { get; } = branch;
+    public int ParentIndex { get; } = parentBranch;
 
     /// <summary>
-    /// The alias name of the query source.
+    /// The index of the query source. It is a unique value within a query, starting from 1.
+    /// </summary>
+    public int SourceIndex { get; } = indexes.Last();
+
+    /// <summary>
+    /// Indicates the order in which the query source is referenced.
+    /// </summary>
+    public HashSet<int> ReferencedIndexes { get; } = indexes;
+
+    /// <summary>
+    /// Gets the alias name of the query source.
     /// </summary>
     public string Alias => source.Alias;
 
     /// <summary>
-    /// The column names belonging to the query source. Duplicates are removed, but order is not guaranteed.
+    /// Gets the column names belonging to the query source.
+    /// Duplicates are removed, but order is not guaranteed.
     /// </summary>
-    public IEnumerable<string> ColumnNames => columnNames;
+    public HashSet<string> ColumnNames => columnNames;
 
     /// <summary>
-    /// The select query to which the query source belongs.
+    /// Gets the select query to which the query source belongs.
     /// </summary>
     public SelectQuery Query => query;
 
@@ -42,9 +45,13 @@ public class QuerySource(int branch, int level, int sequence, string alias, IEnu
     public int Level { get; } = level;
 
     /// <summary>
-    /// The sequence number within the select query. Numbering starts from 1.
+    /// Gets the sequence number within the select query.
+    /// Numbering starts from 1.
     /// </summary>
     public int Sequence { get; } = sequence;
 
+    /// <summary>
+    /// The selectable object that contains the query source.
+    /// </summary>
     public SelectableTable Source => source;
 }

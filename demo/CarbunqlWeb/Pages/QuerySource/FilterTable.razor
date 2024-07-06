@@ -76,8 +76,7 @@ using Carbunql.Building;
 var q = new SelectQuery(sql);
 q.GetQuerySources()
     .Where(x => x.GetTableFullName() == tableName && x.ColumnNames.Contains(columnName))
-    .GetRootsByBranch()
-    .GetRootsByQuery()
+    .GetRootsBySource()
     .ForEach(x =>
     {
         x.Query.Where(x.Alias, columnName).Equal(x.Query.AddParameter(symbol + columnName, val));
@@ -109,8 +108,7 @@ Console.WriteLine(q.ToText());";
 
             q.GetQuerySources()
                 .Where(x => x.GetTableFullName() == tableName && x.ColumnNames.Contains(columnName))
-                .GetRootsByBranch()
-                .GetRootsByQuery()
+                .GetRootsBySource()
                 .ForEach(x =>
                 {
                     x.AddSourceComment("inject filter");

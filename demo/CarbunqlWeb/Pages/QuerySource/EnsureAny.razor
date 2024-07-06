@@ -72,7 +72,7 @@ using Carbunql.Building;
 var q = new SelectQuery(sql);
 q.GetQuerySources()
     .Where(x => x.ColumnNames.Contains(columnName))
-    .GetRootsByBranch()
+    .GetRootsBySource()
     .GetRootsByQuery()
     .EnsureAny()
     .ForEach(x =>
@@ -106,8 +106,7 @@ Console.WriteLine(q.ToText());";
 
             q.GetQuerySources()
                 .Where(x => x.ColumnNames.Contains(columnName))
-                .GetRootsByBranch()
-                .GetRootsByQuery()
+                .GetRootsBySource()
                 .EnsureAny()
                 .ForEach(x =>
                 {
