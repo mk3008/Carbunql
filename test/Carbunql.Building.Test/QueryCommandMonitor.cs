@@ -12,7 +12,7 @@ public class QueryCommandMonitor
         Output = output;
     }
 
-    public void Log(IQueryCommandable arg)
+    public void Log(IQueryCommandable arg, bool exportTokens = true)
     {
         //var frm = new TokenFormatLogic();
         //var bld = new CommandTextBuilder(frm);
@@ -21,6 +21,9 @@ public class QueryCommandMonitor
         //var sql = bld.Execute(arg.GetTokens(null));
         Output.WriteLine("--------------------");
         Output.WriteLine(arg.ToText());
+
+        if (!exportTokens) return;
+
         Output.WriteLine("--------------------");
         var len = 20;
         var indent = string.Empty;
@@ -42,7 +45,7 @@ public class QueryCommandMonitor
         foreach (var ds in srouces)
         {
             Output.WriteLine("--------------------");
-            Output.WriteLine($"Index:{index}, Seq:{ds.Sequence}, Branch:{ds.Branch}, Lv:{ds.Level}");
+            Output.WriteLine($"Index:{index}, Seq:{ds.Sequence}, Branch:{ds.SourceIndex}, Lv:{ds.Level}");
             Output.WriteLine($"Query:{ds.Query.ToOneLineText()}");
             Output.WriteLine($"Source:{ds.Source.Table.ToOneLineText()}");
             Output.WriteLine($"Table:{ds.GetTableFullName()}");

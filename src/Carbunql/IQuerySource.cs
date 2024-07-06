@@ -9,12 +9,19 @@ namespace Carbunql;
 public interface IQuerySource
 {
     /// <summary>
-    /// Gets the branch number of the referenced query source.
-    /// Numbering starts from 1.
-    /// The query source in the FROM clause inherits the upstream branch number,
-    /// while the query source in table joins is assigned a new branch number.
+    /// The ID of the parent query source. If it doesn't exist, it's 0.
     /// </summary>
-    int Branch { get; }
+    int ParentIndex { get; }
+
+    /// <summary>
+    /// The index of the query source. It is a unique value within a query, starting from 1.
+    /// </summary>
+    int SourceIndex { get; }
+
+    /// <summary>
+    /// Indicates the order in which the query source is referenced.
+    /// </summary>
+    HashSet<int> ReferencedIndexes { get; }
 
     /// <summary>
     /// Gets the depth level of the query source.
@@ -37,13 +44,16 @@ public interface IQuerySource
     /// Gets the column names belonging to the query source.
     /// Duplicates are removed, but order is not guaranteed.
     /// </summary>
-    IEnumerable<string> ColumnNames { get; }
+    HashSet<string> ColumnNames { get; }
 
     /// <summary>
     /// Gets the select query to which the query source belongs.
     /// </summary>
     SelectQuery Query { get; }
 
+    /// <summary>
+    /// The selectable object that contains the query source.
+    /// </summary>
     SelectableTable Source { get; }
 }
 

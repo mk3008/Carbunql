@@ -25,14 +25,19 @@ from
     sale as s";
 
         var query = new SelectQuery(sql);
+        query.GetQuerySources().ForEach(x =>
+        {
+            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+        });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
+        Monitor.Log(query);
 
         Assert.Single(sources);
 
         var ds = sources[0];
         Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.Branch);
+        Assert.Equal(1, ds.SourceIndex);
         Assert.Equal(1, ds.Level);
         Assert.Equal("s", ds.Alias);
 
@@ -55,14 +60,19 @@ where
     s.store_id = 1";
 
         var query = new SelectQuery(sql);
+        query.GetQuerySources().ForEach(x =>
+        {
+            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+        });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
+        Monitor.Log(query);
 
         Assert.Single(sources);
 
         var ds = sources[0];
         Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.Branch);
+        Assert.Equal(1, ds.SourceIndex);
         Assert.Equal(1, ds.Level);
         Assert.Equal("s", ds.Alias);
 
@@ -83,14 +93,19 @@ order by
     s.store_id = 1";
 
         var query = new SelectQuery(sql);
+        query.GetQuerySources().ForEach(x =>
+        {
+            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+        });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
+        Monitor.Log(query);
 
         Assert.Single(sources);
 
         var ds = sources[0];
         Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.Branch);
+        Assert.Equal(1, ds.SourceIndex);
         Assert.Equal(1, ds.Level);
         Assert.Equal("s", ds.Alias);
 
@@ -112,14 +127,19 @@ group by
     s.store_id";
 
         var query = new SelectQuery(sql);
+        query.GetQuerySources().ForEach(x =>
+        {
+            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+        });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
+        Monitor.Log(query);
 
         Assert.Single(sources);
 
         var ds = sources[0];
         Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.Branch);
+        Assert.Equal(1, ds.SourceIndex);
         Assert.Equal(1, ds.Level);
         Assert.Equal("s", ds.Alias);
 
@@ -142,14 +162,19 @@ having
     sum(s.price) = 0";
 
         var query = new SelectQuery(sql);
+        query.GetQuerySources().ForEach(x =>
+        {
+            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+        });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
+        Monitor.Log(query);
 
         Assert.Single(sources);
 
         var ds = sources[0];
         Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.Branch);
+        Assert.Equal(1, ds.SourceIndex);
         Assert.Equal(1, ds.Level);
         Assert.Equal("s", ds.Alias);
 
@@ -175,14 +200,19 @@ where
     store_id = 1";
 
         var query = new SelectQuery(sql);
+        query.GetQuerySources().ForEach(x =>
+        {
+            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+        });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
+        Monitor.Log(query);
 
         Assert.Single(sources);
 
         var ds = sources[0];
         Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.Branch);
+        Assert.Equal(1, ds.SourceIndex);
         Assert.Equal(1, ds.Level);
         Assert.Equal("s", ds.Alias);
 
@@ -223,30 +253,35 @@ where
         //If you are using a subquery,
         //you get the participating columns from the query's select clause.
         var sql = @"
-select
+SELECT
     d.sale_id
-from
-    --Seq:1, Branch:1, Lv:1
+FROM
+    /* Lv:1, Seq:1, Refs:0-1, Columns:[sale_id, store_id, price] */
     (
-        select 
-            s.sale_id
-            , s.store_id
-            , s.quantity * q.amount as price
-        from
-            --Seq:1, Branch:1, Lv:2
-            sale as s
-    ) as d";
+        SELECT
+            s.sale_id,
+            s.store_id,
+            s.quantity * q.amount AS price
+        FROM
+            /* Lv:2, Seq:1, Refs:0-1-2, Columns:[sale_id, store_id, quantity, amount] */
+            sale AS s
+    ) AS d";
 
         var query = new SelectQuery(sql);
+        query.GetQuerySources().ForEach(x =>
+        {
+            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+        });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
+        Monitor.Log(query);
 
         Assert.Equal(2, sources.Count);
 
         //index:0
         var ds = sources[0];
         Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.Branch);
+        Assert.Equal(2, ds.SourceIndex);
         Assert.Equal(2, ds.Level);
         Assert.Equal("s", ds.Alias);
 
@@ -260,7 +295,7 @@ from
         //index:1
         ds = sources[1];
         Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.Branch);
+        Assert.Equal(1, ds.SourceIndex);
         Assert.Equal(1, ds.Level);
         Assert.Equal("d", ds.Alias);
 
@@ -277,32 +312,37 @@ from
         //If you are using a CTE,
         //you get the participating columns from the query's select clause.
         var sql = @"
-with
-cte as (
-    select 
-        s.sale_id
-        , s.store_id
-        , s.quantity * q.amount as price
-    from
-        --Seq:1, Branch:1, Lv:2
-        sale as s
-)
-select
+WITH
+    cte AS (
+        SELECT
+            s.sale_id,
+            s.store_id,
+            s.quantity * q.amount AS price
+        FROM
+            /* Lv:2, Seq:1, Refs:0-1-2, Columns:[sale_id, store_id, quantity, amount] */
+            sale AS s
+    )
+SELECT
     d.sale_id
-from
-    --Seq:1, Branch:1, Lv:1
-    cte as d";
+FROM
+    /* Lv:1, Seq:1, Refs:0-1, Columns:[sale_id, store_id, price] */
+    cte AS d";
 
         var query = new SelectQuery(sql);
+        query.GetQuerySources().ForEach(x =>
+        {
+            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+        });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
+        Monitor.Log(query);
 
         Assert.Equal(2, sources.Count);
 
         //index:0
         var ds = sources[0];
         Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.Branch);
+        Assert.Equal(2, ds.SourceIndex);
         Assert.Equal(2, ds.Level);
         Assert.Equal("s", ds.Alias);
 
@@ -316,7 +356,7 @@ from
         //index:1
         ds = sources[1];
         Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.Branch);
+        Assert.Equal(1, ds.SourceIndex);
         Assert.Equal(1, ds.Level);
         Assert.Equal("d", ds.Alias);
 
@@ -334,46 +374,51 @@ from
         //If you are using a CTE,
         //you get the participating columns from the query's select clause.
         var sql = @"
-select 
-    s.sale_id
-    , s.store_id
-    , s.price
-from
-    --Seq:1, Branch:1, Lv:1
-    sale as s
-where
+SELECT
+    s.sale_id,
+    s.store_id,
+    s.price
+FROM
+    /* Lv:1, Seq:1, Refs:0-1, Columns:[sale_id, store_id, price] */
+    sale AS s
+WHERE
     s.sale_id = 1
-union all
-select 
-    s.sale_id
-    , s.store_id
-    , s.price
-from
-    --Seq:2, Branch:2, Lv:1
-    sale as s
-where
+UNION ALL
+SELECT
+    s.sale_id,
+    s.store_id,
+    s.price
+FROM
+    /* Lv:1, Seq:2, Refs:0-2, Columns:[sale_id, store_id, price] */
+    sale AS s
+WHERE
     s.sale_id = 2
-union all
-select 
-    s.sale_id
-    , s.store_id
-    , s.price
-from
-    --Seq:3, Branch:3, Lv:1
-    sale as s
-where
+UNION ALL
+SELECT
+    s.sale_id,
+    s.store_id,
+    s.price
+FROM
+    /* Lv:1, Seq:3, Refs:0-3, Columns:[sale_id, store_id, price] */
+    sale AS s
+WHERE
     s.sale_id = 3";
 
         var query = new SelectQuery(sql);
+        query.GetQuerySources().ForEach(x =>
+        {
+            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+        });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
+        Monitor.Log(query);
 
         Assert.Equal(3, sources.Count);
 
         //index:0
         var ds = sources[0];
         Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.Branch);
+        Assert.Equal(1, ds.SourceIndex);
         Assert.Equal(1, ds.Level);
         Assert.Equal("s", ds.Alias);
 
@@ -386,7 +431,7 @@ where
         //index:1
         ds = sources[1];
         Assert.Equal(2, ds.Sequence);
-        Assert.Equal(2, ds.Branch);
+        Assert.Equal(2, ds.SourceIndex);
         Assert.Equal(1, ds.Level);
         Assert.Equal("s", ds.Alias);
 
@@ -399,7 +444,7 @@ where
         //index:2
         ds = sources[2];
         Assert.Equal(3, ds.Sequence);
-        Assert.Equal(3, ds.Branch);
+        Assert.Equal(3, ds.SourceIndex);
         Assert.Equal(1, ds.Level);
         Assert.Equal("s", ds.Alias);
 
@@ -415,36 +460,41 @@ where
     {
 
         var sql = @"
-select
+SELECT
     *
-from
-    --Seq:1, Branch:1, Lv:1
+FROM
+    /* Lv:1, Seq:1, Refs:0-1, Columns:[sale_id, store_id, price] */
     (
-        select
+        SELECT
             *
-        from
-            --Seq:1, Branch:1, Lv:2
+        FROM
+            /* Lv:2, Seq:1, Refs:0-1-2, Columns:[sale_id, store_id, price] */
             (
-                select 
-                    s.sale_id
-                    , s.store_id
-                    , s.quantity * q.amount as price
-                from
-                    --Seq:1, Branch:1, Lv:3
-                    sale as s
-            ) as d
-    ) as q";
+                SELECT
+                    s.sale_id,
+                    s.store_id,
+                    s.quantity * q.amount AS price
+                FROM
+                    /* Lv:3, Seq:1, Refs:0-1-2-3, Columns:[sale_id, store_id, quantity, amount] */
+                    sale AS s
+            ) AS d
+    ) AS q";
 
         var query = new SelectQuery(sql);
+        query.GetQuerySources().ForEach(x =>
+        {
+            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+        });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
+        Monitor.Log(query);
 
         Assert.Equal(3, sources.Count);
 
         //index:0
         var ds = sources[0];
         Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.Branch);
+        Assert.Equal(3, ds.SourceIndex);
         Assert.Equal(3, ds.Level);
         Assert.Equal("s", ds.Alias);
 
@@ -458,7 +508,7 @@ from
         //index:1
         ds = sources[1];
         Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.Branch);
+        Assert.Equal(2, ds.SourceIndex);
         Assert.Equal(2, ds.Level);
         Assert.Equal("d", ds.Alias);
 
@@ -471,7 +521,7 @@ from
         //index:2
         ds = sources[2];
         Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.Branch);
+        Assert.Equal(1, ds.SourceIndex);
         Assert.Equal(1, ds.Level);
         Assert.Equal("q", ds.Alias);
 
@@ -487,41 +537,47 @@ from
     {
 
         var sql = @"
-select
+SELECT
     q.*
-from
-    --Index:2, Seq:1, Branch:1, Lv:1
+FROM
+    /* Lv:1, Seq:1, Refs:0-1, Columns:[sale_id, store_id, price] */
     (
-        select
+        SELECT
             d.*
-        from
-            --Index:1, Seq:1, Branch:1, Lv:2
+        FROM
+            /* Lv:2, Seq:1, Refs:0-1-2, Columns:[sale_id, store_id, price] */
             (
-                select 
-                    s.sale_id
-                    , s.store_id
-                    , s.quantity * q.amount as price
-                from
-                    --Index:0, Seq:1, Branch:1, Lv:3
-                    sale as s
-            ) as d
-    ) as q
-    --Index:3, Seq:2, Branch:2, Lv:1
-    cross join store as st
-where
+                SELECT
+                    s.sale_id,
+                    s.store_id,
+                    s.quantity * q.amount AS price
+                FROM
+                    /* Lv:3, Seq:1, Refs:0-1-2-3, Columns:[sale_id, store_id, quantity, amount] */
+                    sale AS s
+            ) AS d
+    ) AS q
+    CROSS JOIN
+    /* Lv:1, Seq:2, Refs:0-4, Columns:[store_id] */
+    store AS st
+WHERE
     st.store_id = 1
 ";
 
         var query = new SelectQuery(sql);
+        query.GetQuerySources().ForEach(x =>
+        {
+            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+        });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
+        Monitor.Log(query);
 
         Assert.Equal(4, sources.Count);
 
         //index:0
         var ds = sources[0];
         Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.Branch);
+        Assert.Equal(3, ds.SourceIndex);
         Assert.Equal(3, ds.Level);
         Assert.Equal("s", ds.Alias);
 
@@ -535,7 +591,7 @@ where
         //index:1
         ds = sources[1];
         Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.Branch);
+        Assert.Equal(2, ds.SourceIndex);
         Assert.Equal(2, ds.Level);
         Assert.Equal("d", ds.Alias);
 
@@ -548,7 +604,7 @@ where
         //index:2
         ds = sources[2];
         Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.Branch);
+        Assert.Equal(1, ds.SourceIndex);
         Assert.Equal(1, ds.Level);
         Assert.Equal("q", ds.Alias);
 
@@ -561,7 +617,7 @@ where
         //index:3
         ds = sources[3];
         Assert.Equal(2, ds.Sequence);
-        Assert.Equal(2, ds.Branch);
+        Assert.Equal(4, ds.SourceIndex);
         Assert.Equal(1, ds.Level);
         Assert.Equal("st", ds.Alias);
 
@@ -581,7 +637,7 @@ WITH
             DATE_TRUNC('month', sale_date) AS sale_month,
             SUM(sale_amount) AS total_sales
         FROM
-            --Index:1, Seq:1, Branch:2, Lv:3 
+            /* Lv:3, Seq:1, Refs:0-1-3-4, Columns:[customer_id, sale_date, sale_amount] */
             sales
         GROUP BY
             customer_id,
@@ -594,30 +650,36 @@ WITH
             ms.sale_month,
             COALESCE(ms.total_sales, 0) AS total_sales
         FROM
-            --Index:0, Seq:1, Branch:1, Lv:2
+            /* Lv:2, Seq:1, Refs:0-1-2, Columns:[customer_id, customer_name] */
             customers AS c
-            --Index:2, Seq:1, Branch:2, Lv:2
-            LEFT JOIN monthly_sales AS ms ON c.customer_id = ms.customer_id
+            LEFT JOIN
+            /* Lv:2, Seq:2, Refs:0-1-3, Columns:[customer_id, sale_month, total_sales] */
+            monthly_sales AS ms ON c.customer_id = ms.customer_id
     )
 SELECT
     *
 FROM
-    --Index:3,  Seq:1, Branch:1, Lv:1
+    /* Lv:1, Seq:1, Refs:0-1, Columns:[customer_id, customer_name, sale_month, total_sales] */
     report AS r
 ORDER BY
     r.customer_id,
     r.sale_month";
 
         var query = new SelectQuery(sql);
+        query.GetQuerySources().ForEach(x =>
+        {
+            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+        });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
+        Monitor.Log(query);
 
         Assert.Equal(4, sources.Count);
 
         //index:0
         var ds = sources[0];
         Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.Branch);
+        Assert.Equal(2, ds.SourceIndex);
         Assert.Equal(2, ds.Level);
         Assert.Equal("c", ds.Alias);
 
@@ -629,7 +691,7 @@ ORDER BY
         //index:1
         ds = sources[1];
         Assert.Equal(1, ds.Sequence);
-        Assert.Equal(2, ds.Branch);
+        Assert.Equal(4, ds.SourceIndex);
         Assert.Equal(3, ds.Level);
         Assert.Equal("sales", ds.Alias);
 
@@ -642,7 +704,7 @@ ORDER BY
         //index:2
         ds = sources[2];
         Assert.Equal(2, ds.Sequence);
-        Assert.Equal(2, ds.Branch);
+        Assert.Equal(3, ds.SourceIndex);
         Assert.Equal(2, ds.Level);
         Assert.Equal("ms", ds.Alias);
 
@@ -655,7 +717,7 @@ ORDER BY
         //index:3
         ds = sources[3];
         Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.Branch);
+        Assert.Equal(1, ds.SourceIndex);
         Assert.Equal(1, ds.Level);
         Assert.Equal("r", ds.Alias);
 
@@ -672,7 +734,6 @@ ORDER BY
     {
         var sql = @"
 WITH
-    --not dataset
     dat (
         line_id, name, unit_price, quantity, tax_rate
     ) AS (
@@ -683,31 +744,31 @@ WITH
             (4, 'tea', 309, 7, 0.08),
             (5, 'coffee', 555, 9, 0.08),
             (6, 'cola', 456, 2, 0.08)
-    ),    
+    ),
     detail AS (
         SELECT
             q.*,
             TRUNC(q.price * (1 + q.tax_rate)) - q.price AS tax,
             q.price * (1 + q.tax_rate) - q.price AS raw_tax
         FROM
-            --Seq:1, Branch:1, Lv:5
-            --Seq:1, Branch:2, Lv:6
+            /* Lv:5, Seq:1, Refs:0-1-2-3-4-5, Columns:[price, line_id, name, unit_price, quantity, tax_rate] */
+            /* Lv:6, Seq:1, Refs:0-1-2-3-6-7-8, Columns:[price, line_id, name, unit_price, quantity, tax_rate] */
             (
                 SELECT
                     dat.*,
                     (dat.unit_price * dat.quantity) AS price
                 FROM
-                    --Seq:1, Branch:1, Lv:6
-                    --Seq:1, Branch:2, Lv:7
+                    /* Lv:6, Seq:1, Refs:0-1-2-3-4-5, Columns:[line_id, name, unit_price, quantity, tax_rate] */
+                    /* Lv:7, Seq:1, Refs:0-1-2-3-6-7-8, Columns:[line_id, name, unit_price, quantity, tax_rate] */
                     dat
             ) AS q
     ),
     tax_summary AS (
-        --Seq:1, Branch:2, Lv:5
         SELECT
             d.tax_rate,
             TRUNC(SUM(raw_tax)) AS total_tax
         FROM
+            /* Lv:5, Seq:1, Refs:0-1-2-3-6-7, Columns:[tax, raw_tax, price, line_id, name, unit_price, quantity, tax_rate] */
             detail AS d
         GROUP BY
             d.tax_rate
@@ -722,7 +783,7 @@ SELECT
     price + tax AS tax_included_price,
     tax
 FROM
-    --Seq1, Branch:1, Lv:1
+    /* Lv:1, Seq:1, Refs:0-1, Columns:[line_id, name, unit_price, quantity, tax_rate, price, tax] */
     (
         SELECT
             line_id,
@@ -733,7 +794,7 @@ FROM
             price,
             tax + adjust_tax AS tax
         FROM
-            --Seq:1, Branch:1, Lv:2
+            /* Lv:2, Seq:1, Refs:0-1-2, Columns:[adjust_tax, total_tax, cumulative, priority, tax, raw_tax, price, line_id, name, unit_price, quantity, tax_rate] */
             (
                 SELECT
                     q.*,
@@ -742,7 +803,7 @@ FROM
                         ELSE 0
                     END AS adjust_tax
                 FROM
-                    --Seq:1, Branch:1, Lv:3
+                    /* Lv:3, Seq:1, Refs:0-1-2-3, Columns:[total_tax, cumulative, priority, tax, raw_tax, price, line_id, name, unit_price, quantity, tax_rate] */
                     (
                         SELECT
                             d.*,
@@ -759,10 +820,11 @@ FROM
                                     d.line_id
                             ) AS priority
                         FROM
-                            --Seq:1, Branch:1, Lv:4
+                            /* Lv:4, Seq:1, Refs:0-1-2-3-4, Columns:[tax, raw_tax, price, line_id, name, unit_price, quantity, tax_rate] */
                             detail AS d
-                            --Seq:2, Branch:2, Lv:4
-                            INNER JOIN tax_summary AS s ON d.tax_rate = s.tax_rate
+                            INNER JOIN
+                            /* Lv:4, Seq:2, Refs:0-1-2-3-6, Columns:[tax_rate, total_tax] */
+                            tax_summary AS s ON d.tax_rate = s.tax_rate
                     ) AS q
             ) AS q
     ) AS q
@@ -770,16 +832,18 @@ ORDER BY
     line_id";
 
         var query = new SelectQuery(sql);
-        var sources = query.GetQuerySources().ToList();
-        Monitor.Log(sources);
-
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Seq:{x.Sequence}, Branch:{x.Branch}, Lv:{x.Level}");
-        })
-        .GetRootsByBranch().ForEach(x =>
+            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+        });
+        var sources = query.GetQuerySources().ToList();
+        Monitor.Log(sources);
+        Monitor.Log(query);
+
+        query.GetQuerySources()
+        .GetRootsBySource().ForEach(x =>
         {
-            x.AddQueryComment($"Root of Branch:{x.Branch}");
+            x.AddQueryComment($"Root of Branch:{x.SourceIndex}");
         });
 
         Monitor.Log(query);
@@ -791,26 +855,30 @@ ORDER BY
     public void TypeCastTest()
     {
         var sql = @"
-WITH monthly_sales AS (
-    SELECT
-        product_id,
-        DATE_TRUNC('month', sales_date) AS month,
-        SUM(sales_amount) AS total_sales
-    FROM
-        sales
-    GROUP BY
-        product_id,
-        DATE_TRUNC('month', sales_date)
-),
-total_monthly_sales AS (
-    SELECT
-        month,
-        SUM(total_sales) AS total_sales
-    FROM
-        monthly_sales
-    GROUP BY
-        month
-)
+WITH
+    monthly_sales AS (
+        SELECT
+            product_id,
+            DATE_TRUNC('month', sales_date) AS month,
+            SUM(sales_amount) AS total_sales
+        FROM
+            /* Lv:2, Seq:1, Tree:0-1-2, Columns:[product_id, sales_date, sales_amount] */
+            /* Lv:3, Seq:1, Tree:0-3-4-5, Columns:[product_id, sales_date, sales_amount] */
+            sales
+        GROUP BY
+            product_id,
+            DATE_TRUNC('month', sales_date)
+    ),
+    total_monthly_sales AS (
+        SELECT
+            month,
+            SUM(total_sales) AS total_sales
+        FROM
+            /* Lv:2, Seq:1, Tree:0-3-4, Columns:[product_id, month, total_sales] */
+            monthly_sales
+        GROUP BY
+            month
+    )
 SELECT
     ms.product_id,
     ms.month,
@@ -818,24 +886,31 @@ SELECT
     tms.total_sales AS total_monthly_sales,
     (ms.total_sales::FLOAT / tms.total_sales) * 100 AS sales_percentage
 FROM
-    monthly_sales ms
-INNER JOIN
-    total_monthly_sales tms ON ms.month = tms.month
+    /* Lv:1, Seq:1, Tree:0-1, Columns:[product_id, month, total_sales] */
+    monthly_sales AS ms
+    INNER JOIN
+    /* Lv:1, Seq:2, Tree:0-3, Columns:[month, total_sales] */
+    total_monthly_sales AS tms ON ms.month = tms.month
 ORDER BY
     ms.month,
     ms.product_id";
 
         var query = new SelectQuery(sql);
+        query.GetQuerySources().ForEach(x =>
+        {
+            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Tree:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+        });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
+        Monitor.Log(query);
 
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Seq:{x.Sequence}, Branch:{x.Branch}, Lv:{x.Level}");
+            x.AddSourceComment($"Seq:{x.Sequence}, Branch:{x.SourceIndex}, Lv:{x.Level}");
         })
-        .GetRootsByBranch().ForEach(x =>
+        .GetRootsBySource().ForEach(x =>
         {
-            x.AddQueryComment($"Root of Branch:{x.Branch}");
+            x.AddQueryComment($"Root of Branch:{x.SourceIndex}");
         });
 
         Monitor.Log(query);
