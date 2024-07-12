@@ -45,7 +45,7 @@ public class QueryCommandMonitor
         foreach (var ds in srouces)
         {
             Output.WriteLine("--------------------");
-            Output.WriteLine($"Index:{index}, Seq:{ds.Sequence}, Branch:{ds.SourceIndex}, Lv:{ds.Level}");
+            Output.WriteLine($"Index:{index}, Lv:{ds.MaxLevel}");
             Output.WriteLine($"Query:{ds.Query.ToOneLineText()}");
             Output.WriteLine($"Source:{ds.Source.Table.ToOneLineText()}");
             Output.WriteLine($"Table:{ds.GetTableFullName()}");

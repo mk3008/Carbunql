@@ -88,11 +88,7 @@ Console.WriteLine(q.ToText());";
 
             q.GetQuerySources().ForEach(x =>
             {
-                x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Index:{x.SourceIndex}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
-            })
-            .GetRootsBySource().OrderBy(x => x.SourceIndex).ForEach(x =>
-            {
-                x.AddQueryComment($"Root:{string.Join("-", x.ReferencedIndexes)}");
+                x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
             });
 
             fsql = q.ToText();

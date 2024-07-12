@@ -6,22 +6,12 @@ namespace Carbunql;
 /// Represents a query source, which can be a physical table, subquery, or common table expression (CTE).
 /// This class implements the IQuerySource interface and provides concrete implementations for its properties.
 /// </summary>
-public class QuerySource(int parentBranch, HashSet<int> indexes, int level, int sequence, HashSet<string> columnNames, SelectQuery query, SelectableTable source) : IQuerySource
+public class QuerySource(int index, HashSet<string> columnNames, SelectQuery query, SelectableTable source) : IQuerySource
 {
-    /// <summary>
-    /// The ID of the parent query source. If it doesn't exist, it's 0.
-    /// </summary>
-    public int ParentIndex { get; } = parentBranch;
-
     /// <summary>
     /// The index of the query source. It is a unique value within a query, starting from 1.
     /// </summary>
-    public int SourceIndex { get; } = indexes.Last();
-
-    /// <summary>
-    /// Indicates the order in which the query source is referenced.
-    /// </summary>
-    public HashSet<int> ReferencedIndexes { get; } = indexes;
+    public int Index { get; } = index;
 
     /// <summary>
     /// Gets the alias name of the query source.
@@ -42,16 +32,13 @@ public class QuerySource(int parentBranch, HashSet<int> indexes, int level, int 
     /// <summary>
     /// The depth level of the query source. Numbering starts from 1 and increments with each nesting level.
     /// </summary>
-    public int Level { get; } = level;
-
-    /// <summary>
-    /// Gets the sequence number within the select query.
-    /// Numbering starts from 1.
-    /// </summary>
-    public int Sequence { get; } = sequence;
+    public int MaxLevel => !References.Any() ? 0 : References.Max(x => x.MaxLevel) + 1;
 
     /// <summary>
     /// The selectable object that contains the query source.
     /// </summary>
     public SelectableTable Source => source;
+
+    public IList<IQuerySource> References { get; } = new List<IQuerySource>();
 }
+
