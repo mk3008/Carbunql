@@ -20,12 +20,9 @@ public static class IEnumerableExtension
     public static IEnumerable<T> GetRootsBySource<T>(this IEnumerable<T> source) where T : IQuerySource
     {
         var sources = new List<T>();
-        foreach (var item in (from x in source orderby x.Level descending, x.ParentIndex descending, x.SourceIndex select x))
+        foreach (var item in (from x in source orderby x.MaxLevel descending, x.Index select x))
         {
-            if (!sources.Where(x => x.ReferencedIndexes.Contains(item.SourceIndex)).Any())
-            {
-                sources.Add(item);
-            }
+            sources.Add(item);
         }
         return sources;
     }
@@ -38,7 +35,7 @@ public static class IEnumerableExtension
     /// <returns>A collection of QuerySources, one per query, ordered by descending Level and ascending Sequence.</returns>
     public static IEnumerable<T> GetRootsByQuery<T>(this IEnumerable<T> source) where T : IQuerySource
     {
-        return source.GroupBy(ds => ds.Query).Select(ds => ds.OrderByDescending(s => s.Level).ThenBy(s => s.Sequence).First());
+        return source.GroupBy(ds => ds.Query).Select(ds => ds.OrderByDescending(s => s.MaxLevel).ThenBy(s => s.Index).First());
     }
 
     /// <summary>

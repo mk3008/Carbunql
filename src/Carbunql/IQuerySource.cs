@@ -1,5 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
+using System.Text;
 
 namespace Carbunql;
 
@@ -9,31 +10,15 @@ namespace Carbunql;
 public interface IQuerySource
 {
     /// <summary>
-    /// The ID of the parent query source. If it doesn't exist, it's 0.
-    /// </summary>
-    int ParentIndex { get; }
-
-    /// <summary>
     /// The index of the query source. It is a unique value within a query, starting from 1.
     /// </summary>
-    int SourceIndex { get; }
-
-    /// <summary>
-    /// Indicates the order in which the query source is referenced.
-    /// </summary>
-    HashSet<int> ReferencedIndexes { get; }
+    int Index { get; }
 
     /// <summary>
     /// Gets the depth level of the query source.
     /// Numbering starts from 1 and increments with each nesting level.
     /// </summary>
-    int Level { get; }
-
-    /// <summary>
-    /// Gets the sequence number within the select query.
-    /// Numbering starts from 1.
-    /// </summary>
-    int Sequence { get; }
+    int MaxLevel { get; }
 
     /// <summary>
     /// Gets the alias name of the query source.
@@ -55,6 +40,8 @@ public interface IQuerySource
     /// The selectable object that contains the query source.
     /// </summary>
     SelectableTable Source { get; }
+
+    IList<IQuerySource> References { get; }
 }
 
 public static class IQuerySourceExtension
@@ -80,6 +67,30 @@ public static class IQuerySourceExtension
         querySource.Query.CommentClause ??= new CommentClause();
         querySource.Query.CommentClause.Add(comment);
         return querySource;
+    }
+
+    public static List<List<int>> ToTreePaths(this IQuerySource source)
+    {
+        var result = new List<List<int>>();
+        BuildTreePaths(source, new List<int>(), result);
+        return result;
+    }
+
+    private static void BuildTreePaths(IQuerySource source, List<int> currentPath, List<List<int>> result)
+    {
+        currentPath.Add(source.Index);
+
+        if (source.References.Count == 0)
+        {
+            result.Add(new List<int>(currentPath));
+        }
+        else
+        {
+            foreach (var reference in source.References)
+            {
+                BuildTreePaths(reference, new List<int>(currentPath), result);
+            }
+        }
     }
 }
 

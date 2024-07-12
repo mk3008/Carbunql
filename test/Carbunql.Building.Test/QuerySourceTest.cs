@@ -27,7 +27,7 @@ from
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
@@ -36,9 +36,8 @@ from
         Assert.Single(sources);
 
         var ds = sources[0];
-        Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.SourceIndex);
-        Assert.Equal(1, ds.Level);
+        Assert.Equal(1, ds.Index);
+        Assert.Equal(1, ds.MaxLevel);
         Assert.Equal("s", ds.Alias);
 
         var columns = ds.ColumnNames.ToList();
@@ -62,7 +61,7 @@ where
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
@@ -71,9 +70,8 @@ where
         Assert.Single(sources);
 
         var ds = sources[0];
-        Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.SourceIndex);
-        Assert.Equal(1, ds.Level);
+        Assert.Equal(1, ds.Index);
+        Assert.Equal(1, ds.MaxLevel);
         Assert.Equal("s", ds.Alias);
 
         var columns = ds.ColumnNames.ToList();
@@ -95,7 +93,7 @@ order by
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
@@ -104,9 +102,8 @@ order by
         Assert.Single(sources);
 
         var ds = sources[0];
-        Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.SourceIndex);
-        Assert.Equal(1, ds.Level);
+        Assert.Equal(1, ds.Index);
+        Assert.Equal(1, ds.MaxLevel);
         Assert.Equal("s", ds.Alias);
 
         var columns = ds.ColumnNames.ToList();
@@ -129,7 +126,7 @@ group by
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
@@ -138,9 +135,8 @@ group by
         Assert.Single(sources);
 
         var ds = sources[0];
-        Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.SourceIndex);
-        Assert.Equal(1, ds.Level);
+        Assert.Equal(1, ds.Index);
+        Assert.Equal(1, ds.MaxLevel);
         Assert.Equal("s", ds.Alias);
 
         var columns = ds.ColumnNames.ToList();
@@ -164,7 +160,7 @@ having
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
@@ -173,9 +169,8 @@ having
         Assert.Single(sources);
 
         var ds = sources[0];
-        Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.SourceIndex);
-        Assert.Equal(1, ds.Level);
+        Assert.Equal(1, ds.Index);
+        Assert.Equal(1, ds.MaxLevel);
         Assert.Equal("s", ds.Alias);
 
         var columns = ds.ColumnNames.ToList();
@@ -202,7 +197,7 @@ where
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
@@ -211,9 +206,8 @@ where
         Assert.Single(sources);
 
         var ds = sources[0];
-        Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.SourceIndex);
-        Assert.Equal(1, ds.Level);
+        Assert.Equal(1, ds.Index);
+        Assert.Equal(1, ds.MaxLevel);
         Assert.Equal("s", ds.Alias);
 
         var columns = ds.ColumnNames.ToList();
@@ -270,7 +264,7 @@ FROM
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
@@ -280,9 +274,8 @@ FROM
 
         //index:0
         var ds = sources[0];
-        Assert.Equal(1, ds.Sequence);
-        Assert.Equal(2, ds.SourceIndex);
-        Assert.Equal(2, ds.Level);
+        Assert.Equal(2, ds.Index);
+        Assert.Equal(2, ds.MaxLevel);
         Assert.Equal("s", ds.Alias);
 
         var columns = ds.ColumnNames.ToList();
@@ -294,9 +287,8 @@ FROM
 
         //index:1
         ds = sources[1];
-        Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.SourceIndex);
-        Assert.Equal(1, ds.Level);
+        Assert.Equal(1, ds.Index);
+        Assert.Equal(1, ds.MaxLevel);
         Assert.Equal("d", ds.Alias);
 
         columns = ds.ColumnNames.ToList();
@@ -331,7 +323,7 @@ FROM
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Index:{x.Index}, Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
@@ -341,9 +333,8 @@ FROM
 
         //index:0
         var ds = sources[0];
-        Assert.Equal(1, ds.Sequence);
-        Assert.Equal(2, ds.SourceIndex);
-        Assert.Equal(2, ds.Level);
+        Assert.Equal(2, ds.Index);
+        Assert.Equal(2, ds.MaxLevel);
         Assert.Equal("s", ds.Alias);
 
         var columns = ds.ColumnNames.ToList();
@@ -355,9 +346,8 @@ FROM
 
         //index:1
         ds = sources[1];
-        Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.SourceIndex);
-        Assert.Equal(1, ds.Level);
+        Assert.Equal(1, ds.Index);
+        Assert.Equal(1, ds.MaxLevel);
         Assert.Equal("d", ds.Alias);
 
         columns = ds.ColumnNames.ToList();
@@ -407,7 +397,7 @@ WHERE
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
@@ -417,9 +407,8 @@ WHERE
 
         //index:0
         var ds = sources[0];
-        Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.SourceIndex);
-        Assert.Equal(1, ds.Level);
+        Assert.Equal(1, ds.Index);
+        Assert.Equal(1, ds.MaxLevel);
         Assert.Equal("s", ds.Alias);
 
         var columns = ds.ColumnNames.ToList();
@@ -430,9 +419,8 @@ WHERE
 
         //index:1
         ds = sources[1];
-        Assert.Equal(2, ds.Sequence);
-        Assert.Equal(2, ds.SourceIndex);
-        Assert.Equal(1, ds.Level);
+        Assert.Equal(2, ds.Index);
+        Assert.Equal(1, ds.MaxLevel);
         Assert.Equal("s", ds.Alias);
 
         columns = ds.ColumnNames.ToList();
@@ -443,9 +431,8 @@ WHERE
 
         //index:2
         ds = sources[2];
-        Assert.Equal(3, ds.Sequence);
-        Assert.Equal(3, ds.SourceIndex);
-        Assert.Equal(1, ds.Level);
+        Assert.Equal(3, ds.Index);
+        Assert.Equal(1, ds.MaxLevel);
         Assert.Equal("s", ds.Alias);
 
         columns = ds.ColumnNames.ToList();
@@ -483,7 +470,7 @@ FROM
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
@@ -493,9 +480,8 @@ FROM
 
         //index:0
         var ds = sources[0];
-        Assert.Equal(1, ds.Sequence);
-        Assert.Equal(3, ds.SourceIndex);
-        Assert.Equal(3, ds.Level);
+        Assert.Equal(3, ds.Index);
+        Assert.Equal(3, ds.MaxLevel);
         Assert.Equal("s", ds.Alias);
 
         var columns = ds.ColumnNames.ToList();
@@ -507,9 +493,8 @@ FROM
 
         //index:1
         ds = sources[1];
-        Assert.Equal(1, ds.Sequence);
-        Assert.Equal(2, ds.SourceIndex);
-        Assert.Equal(2, ds.Level);
+        Assert.Equal(2, ds.Index);
+        Assert.Equal(2, ds.MaxLevel);
         Assert.Equal("d", ds.Alias);
 
         columns = ds.ColumnNames.ToList();
@@ -520,9 +505,8 @@ FROM
 
         //index:2
         ds = sources[2];
-        Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.SourceIndex);
-        Assert.Equal(1, ds.Level);
+        Assert.Equal(1, ds.Index);
+        Assert.Equal(1, ds.MaxLevel);
         Assert.Equal("q", ds.Alias);
 
         columns = ds.ColumnNames.ToList();
@@ -566,7 +550,7 @@ WHERE
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
@@ -576,9 +560,8 @@ WHERE
 
         //index:0
         var ds = sources[0];
-        Assert.Equal(1, ds.Sequence);
-        Assert.Equal(3, ds.SourceIndex);
-        Assert.Equal(3, ds.Level);
+        Assert.Equal(3, ds.Index);
+        Assert.Equal(3, ds.MaxLevel);
         Assert.Equal("s", ds.Alias);
 
         var columns = ds.ColumnNames.ToList();
@@ -590,9 +573,8 @@ WHERE
 
         //index:1
         ds = sources[1];
-        Assert.Equal(1, ds.Sequence);
-        Assert.Equal(2, ds.SourceIndex);
-        Assert.Equal(2, ds.Level);
+        Assert.Equal(2, ds.Index);
+        Assert.Equal(2, ds.MaxLevel);
         Assert.Equal("d", ds.Alias);
 
         columns = ds.ColumnNames.ToList();
@@ -603,9 +585,8 @@ WHERE
 
         //index:2
         ds = sources[2];
-        Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.SourceIndex);
-        Assert.Equal(1, ds.Level);
+        Assert.Equal(1, ds.Index);
+        Assert.Equal(1, ds.MaxLevel);
         Assert.Equal("q", ds.Alias);
 
         columns = ds.ColumnNames.ToList();
@@ -616,9 +597,8 @@ WHERE
 
         //index:3
         ds = sources[3];
-        Assert.Equal(2, ds.Sequence);
-        Assert.Equal(4, ds.SourceIndex);
-        Assert.Equal(1, ds.Level);
+        Assert.Equal(4, ds.Index);
+        Assert.Equal(1, ds.MaxLevel);
         Assert.Equal("st", ds.Alias);
 
         columns = ds.ColumnNames.ToList();
@@ -668,7 +648,8 @@ ORDER BY
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
@@ -678,9 +659,8 @@ ORDER BY
 
         //index:0
         var ds = sources[0];
-        Assert.Equal(1, ds.Sequence);
-        Assert.Equal(2, ds.SourceIndex);
-        Assert.Equal(2, ds.Level);
+        Assert.Equal(2, ds.Index);
+        Assert.Equal(2, ds.MaxLevel);
         Assert.Equal("c", ds.Alias);
 
         var columns = ds.ColumnNames.ToList();
@@ -690,9 +670,8 @@ ORDER BY
 
         //index:1
         ds = sources[1];
-        Assert.Equal(1, ds.Sequence);
-        Assert.Equal(4, ds.SourceIndex);
-        Assert.Equal(3, ds.Level);
+        Assert.Equal(4, ds.Index);
+        Assert.Equal(3, ds.MaxLevel);
         Assert.Equal("sales", ds.Alias);
 
         columns = ds.ColumnNames.ToList();
@@ -703,9 +682,8 @@ ORDER BY
 
         //index:2
         ds = sources[2];
-        Assert.Equal(2, ds.Sequence);
-        Assert.Equal(3, ds.SourceIndex);
-        Assert.Equal(2, ds.Level);
+        Assert.Equal(3, ds.Index);
+        Assert.Equal(2, ds.MaxLevel);
         Assert.Equal("ms", ds.Alias);
 
         columns = ds.ColumnNames.ToList();
@@ -716,9 +694,8 @@ ORDER BY
 
         //index:3
         ds = sources[3];
-        Assert.Equal(1, ds.Sequence);
-        Assert.Equal(1, ds.SourceIndex);
-        Assert.Equal(1, ds.Level);
+        Assert.Equal(1, ds.Index);
+        Assert.Equal(1, ds.MaxLevel);
         Assert.Equal("r", ds.Alias);
 
         columns = ds.ColumnNames.ToList();
@@ -834,7 +811,8 @@ ORDER BY
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
@@ -843,12 +821,12 @@ ORDER BY
         query.GetQuerySources()
         .GetRootsBySource().ForEach(x =>
         {
-            x.AddQueryComment($"Root of Branch:{x.SourceIndex}");
+            x.AddQueryComment($"Root of Branch:{x.Index}");
         });
 
         Monitor.Log(query);
 
-        Assert.Equal(10, sources.Count);
+        Assert.Equal(8, sources.Count);
     }
 
     [Fact]
@@ -898,7 +876,7 @@ ORDER BY
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Tree:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
@@ -906,11 +884,11 @@ ORDER BY
 
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Seq:{x.Sequence}, Branch:{x.SourceIndex}, Lv:{x.Level}");
+            x.AddSourceComment($"Index:{x.Index}, Lv:{x.MaxLevel}");
         })
         .GetRootsBySource().ForEach(x =>
         {
-            x.AddQueryComment($"Root of Branch:{x.SourceIndex}");
+            x.AddQueryComment($"Root of Index:{x.Index}");
         });
 
         Monitor.Log(query);

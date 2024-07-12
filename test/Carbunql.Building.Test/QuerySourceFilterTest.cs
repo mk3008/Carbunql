@@ -26,7 +26,7 @@ from
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
         });
         Monitor.Log(query, exportTokens: false);
 
@@ -51,7 +51,7 @@ FROM
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
         });
         Monitor.Log(query, exportTokens: false);
 
@@ -70,7 +70,7 @@ FROM
     s.store_id,
     s.price
 FROM
-    /* Lv:1, Seq:1, Refs:0-1, Columns:[sale_id, store_id, price] */
+    /* Lv:1, Columns:[sale_id, store_id, price] */
     sale AS s
 WHERE
     s.sale_id = 1";
@@ -102,7 +102,7 @@ FROM
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
         });
         Monitor.Log(query, exportTokens: false);
 
@@ -121,18 +121,20 @@ FROM
     s2.store_id,
     s2.price
 FROM
-    /* Lv:1, Seq:1, Refs:0-1, Columns:[sale_id, store_id, price] */
+    /* Lv:1, Columns:[sale_id, store_id, price] */
     (
         SELECT
             s1.sale_id,
             s1.store_id,
             s1.price
         FROM
-            /* Lv:2, Seq:1, Refs:0-1-2, Columns:[sale_id, store_id, price] */
+            /* Lv:2, Columns:[sale_id, store_id, price] */
             sale AS s1
         WHERE
             s1.sale_id = 1
-    ) AS s2";
+    ) AS s2
+WHERE
+    s2.sale_id = 1";
 
         Assert.Equal(expect, query.ToText(), true, true, true);
     }
@@ -155,7 +157,7 @@ FROM
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
         });
         Monitor.Log(query, exportTokens: false);
 
@@ -175,10 +177,10 @@ FROM
     s.store_id,
     s.price
 FROM
-    /* Lv:1, Seq:1, Refs:0-1, Columns:[sale_id, store_id, price] */
+    /* Lv:1, Columns:[sale_id, store_id, price] */
     sale AS s
     INNER JOIN
-    /* Lv:1, Seq:2, Refs:0-2, Columns:[store_id] */
+    /* Lv:1, Columns:[store_id] */
     store AS st ON s.store_id = st.store_id
 WHERE
     s.store_id = 1
@@ -206,7 +208,7 @@ FROM
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
         });
         Monitor.Log(query, exportTokens: false);
 
@@ -232,10 +234,10 @@ FROM
     st.store_name,
     s.price
 FROM
-    /* Lv:1, Seq:1, Refs:0-1, Columns:[sale_id, store_id, price] */
+    /* Lv:1, Columns:[sale_id, store_id, price] */
     sale AS s
     INNER JOIN
-    /* Lv:1, Seq:2, Refs:0-2, Columns:[store_name, store_id] */
+    /* Lv:1, Columns:[store_name, store_id] */
     store AS st ON s.store_id = st.store_id
 WHERE
     s.store_id = 1";
@@ -268,7 +270,7 @@ FROM
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
         });
         Monitor.Log(query, exportTokens: false);
 
@@ -289,7 +291,7 @@ FROM
             s1.store_id,
             s1.price
         FROM
-            /* Lv:2, Seq:1, Refs:0-1-2, Columns:[sale_id, store_id, price] */
+            /* Lv:2, Columns:[sale_id, store_id, price] */
             sale AS s1
         WHERE
             s1.store_id = 1
@@ -299,8 +301,10 @@ SELECT
     s2.store_id,
     s2.price
 FROM
-    /* Lv:1, Seq:1, Refs:0-1, Columns:[sale_id, store_id, price] */
-    sx AS s2";
+    /* Lv:1, Columns:[sale_id, store_id, price] */
+    sx AS s2
+WHERE
+    s2.store_id = 1";
 
         Assert.Equal(expect, query.ToText(), true, true, true);
     }
@@ -310,7 +314,7 @@ FROM
     {
         var sql = @"
 WITH
-    monthly_sales AS (
+    monthly_sales AS(
         SELECT
             customer_id,
             DATE_TRUNC('month', sale_date) AS sale_month,
@@ -340,7 +344,7 @@ ORDER BY
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.Level}, Seq:{x.Sequence}, Refs:{string.Join("-", x.ReferencedIndexes)}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
         });
         Monitor.Log(query, exportTokens: false);
 
@@ -361,7 +365,7 @@ ORDER BY
             DATE_TRUNC('month', sale_date) AS sale_month,
             SUM(sale_amount) AS total_sales
         FROM
-            /* Lv:2, Seq:1, Refs:0-2-3, Columns:[customer_id, sale_date, sale_amount] */
+            /* Lv:2, Columns:[customer_id, sale_date, sale_amount] */
             sales
         WHERE
             sales.customer_id = 1
@@ -375,13 +379,14 @@ SELECT
     ms.sale_month,
     COALESCE(ms.total_sales, 0) AS total_sales
 FROM
-    /* Lv:1, Seq:1, Refs:0-1, Columns:[customer_id, customer_name] */
+    /* Lv:1, Columns:[customer_id, customer_name] */
     customers AS c
     LEFT JOIN
-    /* Lv:1, Seq:2, Refs:0-2, Columns:[customer_id, sale_month, total_sales] */
+    /* Lv:1, Columns:[customer_id, sale_month, total_sales] */
     monthly_sales AS ms ON c.customer_id = ms.customer_id
 WHERE
     c.customer_id = 1
+    AND ms.customer_id = 1
 ORDER BY
     c.customer_id,
     ms.sale_month";

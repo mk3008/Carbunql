@@ -5,8 +5,6 @@ using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
 using MessagePack;
-using System.Collections;
-using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 
@@ -126,15 +124,21 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     public IList<IQuerySource> GetQuerySources()
     {
         var commonTables = GetCommonTables().ToList();
-        var rootIndex = 0;
-        return GetQuerySources(new Numbering(0), [rootIndex], 1, 1, commonTables).ToList();
+        var sources = new List<IQuerySource>();
+        var lst = CreateQuerySources(ref sources, commonTables, new Numbering(0));
+
+        var root = new QuerySource(0, GetColumnNames().ToHashSet(), this, this.ToSelectableTable(""));
+        lst.ForEach(x => x.References.Add(root));
+
+        return sources;
     }
 
-    private IEnumerable<IQuerySource> GetQuerySources(Numbering numbering, HashSet<int> indexRefenreces, int level, int sequence, IList<CommonTable> commonTables)
+    private IList<IQuerySource> CreateQuerySources(ref List<IQuerySource> sources, IList<CommonTable> commonTables, Numbering numbering)
     {
-        if (FromClause == null) yield break;
+        if (FromClause == null) return new List<IQuerySource>();
 
-        var parentIndex = indexRefenreces.Last();
+        var currentSources = new List<IQuerySource>();
+
         var hasRelation = (FromClause.Relations?.Any() ?? false);
         var columns = GetColumns().ToList();
 
@@ -148,11 +152,8 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         {
             if (source.Table.TryGetSelectQuery(out var query))
             {
-                // disassemble subquery
-                foreach (var qs in DisassembleQuerySources(numbering, indexRefenreces, level, sequence, source, query, commonTables))
-                {
-                    yield return qs;
-                }
+                var qs = DisassembleQuerySources(ref sources, source, query, commonTables, numbering);
+                currentSources.Add(qs);
             }
             else if (source.Table is PhysicalTable table && commonTables.Any(x => x.Alias == table.GetTableFullName()))
             {
@@ -163,16 +164,17 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
                 {
                     // select query
                     var commonQuery = commonTables.First(x => x.Alias == table.GetTableFullName()).GetSelectQuery();
-                    foreach (var qs in DisassembleQuerySources(numbering, indexRefenreces, level, sequence, source, commonQuery, commonTables))
-                    {
-                        yield return qs;
-                    }
+                    var qs = DisassembleQuerySources(ref sources, source, commonQuery, commonTables, numbering);
+                    currentSources.Add(qs);
                 }
                 else if (ct.Table is VirtualTable vt && vt.Query is ValuesQuery && ct.ColumnAliases != null)
                 {
                     // values query
                     var names = ct.ColumnAliases.OfType<ColumnValue>().Select(x => x.Column).ToHashSet();
-                    yield return new QuerySource(parentIndex, indexRefenreces, level, sequence, names, this, source);
+
+                    var qs = new QuerySource(numbering.GetNext(), names, this, source);
+                    sources.Add(qs);
+                    currentSources.Add(qs);
                 }
                 else
                 {
@@ -181,56 +183,52 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             }
             else
             {
-                var currentRefs = new HashSet<int>(indexRefenreces) { numbering.GetNextSourceIndex() };
-
                 var cname = columns
                     .Where(x => !hasRelation || x.TableAlias == source.Alias)
                     .Select(x => x.Column)
                     .ToHashSet();
 
-                var qs = new QuerySource(parentIndex, currentRefs, level, sequence, cname, this, source);
-                yield return qs;
+                var qs = new QuerySource(numbering.GetNext(), cname, this, source);
+                sources.Add(qs);
+                currentSources.Add(qs);
             }
-            sequence++;
         }
 
         // ex. union query
         foreach (var item in OperatableQueries.Select(x => x.Query).OfType<SelectQuery>())
         {
-            foreach (var extendSource in item.GetQuerySources(numbering, indexRefenreces, level, sequence, commonTables))
+            foreach (var qs in item.CreateQuerySources(ref sources, commonTables, numbering))
             {
-                if (level == extendSource.Level)
-                {
-                    sequence = extendSource.Sequence;
-                }
-                yield return extendSource;
+                currentSources.Add(qs);
             }
-            sequence++;
         }
+
+        return currentSources;
     }
 
-    private IEnumerable<IQuerySource> DisassembleQuerySources(Numbering numbering, HashSet<int> indexRefenreces, int level, int sequence, SelectableTable source, SelectQuery query, IList<CommonTable> commonTables)
+    private IQuerySource DisassembleQuerySources(ref List<IQuerySource> sources, SelectableTable source, SelectQuery query, IList<CommonTable> commonTables, Numbering numbering)
     {
-        var parentIndex = indexRefenreces.Last();
-        var currentRefs = new HashSet<int>(indexRefenreces) { numbering.GetNextSourceIndex() };
 
-        //for wildcard decode
-        var allColumns = new Dictionary<string, IEnumerable<string>>();
-
-        foreach (var nestedDataSet in query.GetQuerySources(numbering, currentRefs, level + 1, 1, commonTables))
+        if (sources.Where(x => x.Source == source).Any())
         {
-            if (level + 1 == nestedDataSet.Level)
-            {
-                allColumns[nestedDataSet.Alias] = nestedDataSet.ColumnNames;
-            }
-            yield return nestedDataSet;
+            return sources.Where(x => x.Source == source).First();
         }
+
+        var index = numbering.GetNext();
+
+        var parents = query.CreateQuerySources(ref sources, commonTables, numbering);
 
         var cname = query.GetColumnNames().ToList();
 
         // decode wild card
         if (cname.Contains("*"))
         {
+            var allColumns = new Dictionary<string, IEnumerable<string>>();
+            foreach (var nestedSource in parents)
+            {
+                allColumns[nestedSource.Alias] = nestedSource.ColumnNames;
+            }
+
             cname.Remove("*");
 
             var wilds = query.SelectClause!.Where(x => x.Alias == "*");
@@ -250,7 +248,15 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             }
         }
 
-        yield return new QuerySource(parentIndex, currentRefs, level, sequence, cname.ToHashSet(), this, source);
+        var qs = new QuerySource(index, cname.ToHashSet(), this, source);
+
+        foreach (var item in parents)
+        {
+            item.References.Add(qs);
+        }
+        sources.Add(qs);
+
+        return qs;
     }
 
     /// <inheritdoc/>
@@ -771,11 +777,11 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
 
     private class Numbering(int startIndex)
     {
-        public int CurrentSourceIndex { get; private set; } = startIndex;
-        public int GetNextSourceIndex()
+        public int Current { get; private set; } = startIndex;
+        public int GetNext()
         {
-            CurrentSourceIndex++;
-            return CurrentSourceIndex;
+            Current++;
+            return Current;
         }
     }
 }
