@@ -127,9 +127,6 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         var sources = new List<IQuerySource>();
         var lst = CreateQuerySources(ref sources, commonTables, new Numbering(0));
 
-        var root = new QuerySource(0, GetColumnNames().ToHashSet(), this, this.ToSelectableTable(""));
-        lst.ForEach(x => x.References.Add(root));
-
         return sources;
     }
 
@@ -150,7 +147,12 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
 
         foreach (var source in FromClause.GetSelectableTables())
         {
-            if (source.Table.TryGetSelectQuery(out var query))
+            if (sources.Where(x => x.Source == source).Any())
+            {
+                var qs = sources.Where(x => x.Source == source).First();
+                currentSources.Add(qs);
+            }
+            else if (source.Table.TryGetSelectQuery(out var query))
             {
                 var qs = DisassembleQuerySources(ref sources, source, query, commonTables, numbering);
                 currentSources.Add(qs);
@@ -208,12 +210,6 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
 
     private IQuerySource DisassembleQuerySources(ref List<IQuerySource> sources, SelectableTable source, SelectQuery query, IList<CommonTable> commonTables, Numbering numbering)
     {
-
-        if (sources.Where(x => x.Source == source).Any())
-        {
-            return sources.Where(x => x.Source == source).First();
-        }
-
         var index = numbering.GetNext();
 
         var parents = query.CreateQuerySources(ref sources, commonTables, numbering);

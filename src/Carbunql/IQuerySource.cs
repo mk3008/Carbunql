@@ -1,6 +1,5 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
-using System.Text;
 
 namespace Carbunql;
 
@@ -41,6 +40,9 @@ public interface IQuerySource
     /// </summary>
     SelectableTable Source { get; }
 
+    /// <summary>
+    /// Gets the query sources that reference this query source.
+    /// </summary>
     IList<IQuerySource> References { get; }
 }
 
@@ -73,6 +75,10 @@ public static class IQuerySourceExtension
     {
         var result = new List<List<int>>();
         BuildTreePaths(source, new List<int>(), result);
+
+        //set root querysource(index:0)
+        result.ForEach(x => x.Add(0));
+
         return result;
     }
 

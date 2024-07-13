@@ -27,7 +27,8 @@ from
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
@@ -61,7 +62,8 @@ where
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
@@ -93,7 +95,8 @@ order by
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
@@ -126,7 +129,8 @@ group by
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
@@ -160,7 +164,8 @@ having
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
@@ -197,7 +202,8 @@ where
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
@@ -264,7 +270,8 @@ FROM
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
@@ -305,57 +312,107 @@ FROM
         //you get the participating columns from the query's select clause.
         var sql = @"
 WITH
-    cte AS (
+monthly_sales AS (
+    SELECT
+        store_id,
+        product_id,
+        DATE_TRUNC('month', sales_date) AS month,
+        SUM(sales_amount) AS total_sales
+    FROM
+        sales
+    GROUP BY
+        store_id,
+        product_id,
+        DATE_TRUNC('month', sales_date)
+),
+total_monthly_sales AS (
+    SELECT
+        store_id,
+        month,
+        SUM(total_sales) AS total_sales
+    FROM
+        monthly_sales
+    GROUP BY
+        store_id,
+        month
+)
+SELECT
+    ms.store_id,
+    ms.product_id,
+    ms.month,
+    ms.total_sales,
+    tms.total_sales AS total_monthly_sales,
+    (ms.total_sales::FLOAT / tms.total_sales) * 100 AS sales_percentage
+FROM
+    monthly_sales ms
+INNER JOIN
+    total_monthly_sales tms ON ms.store_id = tms.store_id AND ms.month = tms.month
+ORDER BY
+    ms.month,
+    ms.product_id";
+
+        var expect = @"WITH
+    monthly_sales AS (
         SELECT
-            s.sale_id,
-            s.store_id,
-            s.quantity * q.amount AS price
+            store_id,
+            product_id,
+            DATE_TRUNC('month', sales_date) AS month,
+            SUM(sales_amount) AS total_sales
         FROM
-            /* Lv:2, Seq:1, Refs:0-1-2, Columns:[sale_id, store_id, quantity, amount] */
-            sale AS s
+            /* Index:2, MaxLv:3, Columns:[store_id, product_id, sales_date, sales_amount] */
+            /* Path:2-1-0 */
+            /* Path:2-4-3-0 */
+            sales
+        GROUP BY
+            store_id,
+            product_id,
+            DATE_TRUNC('month', sales_date)
+    ),
+    total_monthly_sales AS (
+        SELECT
+            store_id,
+            month,
+            SUM(total_sales) AS total_sales
+        FROM
+            /* Index:4, MaxLv:2, Columns:[store_id, product_id, month, total_sales] */
+            /* Path:4-3-0 */
+            monthly_sales
+        GROUP BY
+            store_id,
+            month
     )
 SELECT
-    d.sale_id
+    ms.store_id,
+    ms.product_id,
+    ms.month,
+    ms.total_sales,
+    tms.total_sales AS total_monthly_sales,
+    (ms.total_sales::FLOAT / tms.total_sales) * 100 AS sales_percentage
 FROM
-    /* Lv:1, Seq:1, Refs:0-1, Columns:[sale_id, store_id, price] */
-    cte AS d";
+    /* Index:1, MaxLv:1, Columns:[store_id, product_id, month, total_sales] */
+    /* Path:1-0 */
+    monthly_sales AS ms
+    INNER JOIN
+    /* Index:3, MaxLv:1, Columns:[store_id, month, total_sales] */
+    /* Path:3-0 */
+    total_monthly_sales AS tms ON ms.store_id = tms.store_id AND ms.month = tms.month
+ORDER BY
+    ms.month,
+    ms.product_id";
 
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Index:{x.Index}, Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
         Monitor.Log(query);
 
-        Assert.Equal(2, sources.Count);
+        Assert.Equal(expect, query.ToText());
 
-        //index:0
-        var ds = sources[0];
-        Assert.Equal(2, ds.Index);
-        Assert.Equal(2, ds.MaxLevel);
-        Assert.Equal("s", ds.Alias);
-
-        var columns = ds.ColumnNames.ToList();
-        Assert.Equal(4, columns.Count());
-        Assert.Equal("sale_id", columns[0]);
-        Assert.Equal("store_id", columns[1]);
-        Assert.Equal("quantity", columns[2]);
-        Assert.Equal("amount", columns[3]);
-
-        //index:1
-        ds = sources[1];
-        Assert.Equal(1, ds.Index);
-        Assert.Equal(1, ds.MaxLevel);
-        Assert.Equal("d", ds.Alias);
-
-        columns = ds.ColumnNames.ToList();
-        Assert.Equal(3, columns.Count());
-        Assert.Equal("sale_id", columns[0]);
-        Assert.Equal("store_id", columns[1]);
-        Assert.Equal("price", columns[2]); // The column "price" is recognizable.
-
+        Assert.Equal(4, sources.Count);
     }
 
     [Fact]
@@ -397,7 +454,8 @@ WHERE
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
@@ -470,7 +528,8 @@ FROM
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
@@ -550,7 +609,8 @@ WHERE
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
@@ -873,26 +933,61 @@ ORDER BY
     ms.month,
     ms.product_id";
 
+        var expect = @"WITH
+    monthly_sales AS (
+        SELECT
+            product_id,
+            DATE_TRUNC('month', sales_date) AS month,
+            SUM(sales_amount) AS total_sales
+        FROM
+            /* Index:2, MaxLv:3, Columns:[product_id, sales_date, sales_amount] */
+            /* Path:2-1-0 */
+            /* Path:2-4-3-0 */
+            sales
+        GROUP BY
+            product_id,
+            DATE_TRUNC('month', sales_date)
+    ),
+    total_monthly_sales AS (
+        SELECT
+            month,
+            SUM(total_sales) AS total_sales
+        FROM
+            /* Index:4, MaxLv:2, Columns:[product_id, month, total_sales] */
+            /* Path:4-3-0 */
+            monthly_sales
+        GROUP BY
+            month
+    )
+SELECT
+    ms.product_id,
+    ms.month,
+    ms.total_sales,
+    tms.total_sales AS total_monthly_sales,
+    (ms.total_sales::FLOAT / tms.total_sales) * 100 AS sales_percentage
+FROM
+    /* Index:1, MaxLv:1, Columns:[product_id, month, total_sales] */
+    /* Path:1-0 */
+    monthly_sales AS ms
+    INNER JOIN
+    /* Index:3, MaxLv:1, Columns:[month, total_sales] */
+    /* Path:3-0 */
+    total_monthly_sales AS tms ON ms.month = tms.month
+ORDER BY
+    ms.month,
+    ms.product_id";
+
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
         Monitor.Log(query);
 
-        query.GetQuerySources().ForEach(x =>
-        {
-            x.AddSourceComment($"Index:{x.Index}, Lv:{x.MaxLevel}");
-        })
-        .GetRootsBySource().ForEach(x =>
-        {
-            x.AddQueryComment($"Root of Index:{x.Index}");
-        });
-
-        Monitor.Log(query);
-
-        Assert.Equal(5, sources.Count);
+        Assert.Equal(expect, query.ToText());
+        Assert.Equal(4, sources.Count);
     }
 }

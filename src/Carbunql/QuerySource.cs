@@ -32,7 +32,7 @@ public class QuerySource(int index, HashSet<string> columnNames, SelectQuery que
     /// <summary>
     /// The depth level of the query source. Numbering starts from 1 and increments with each nesting level.
     /// </summary>
-    public int MaxLevel => !References.Any() ? 0 : References.Max(x => x.MaxLevel) + 1;
+    public int MaxLevel => !References.Any() ? 1 : References.Max(x => x.MaxLevel) + 1;
 
     /// <summary>
     /// The selectable object that contains the query source.
