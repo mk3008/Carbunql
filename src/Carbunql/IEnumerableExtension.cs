@@ -1,4 +1,6 @@
-﻿namespace Carbunql;
+﻿using Carbunql.Building;
+
+namespace Carbunql;
 
 public static class IEnumerableExtension
 {
@@ -12,19 +14,41 @@ public static class IEnumerableExtension
     }
 
     /// <summary>
-    /// Get the root QuerySource.
+    /// Gets the root query sources which are not referenced by any other query sources.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="source">The source collection of QuerySource. </param>
-    /// <returns>A collection of QuerySource. </returns>
-    public static IEnumerable<T> GetRootsBySource<T>(this IEnumerable<T> source) where T : IQuerySource
+    public static IEnumerable<IQuerySource> GetRootsBySource(this IEnumerable<IQuerySource> querySources)
     {
-        var sources = new List<T>();
-        foreach (var item in (from x in source orderby x.MaxLevel descending, x.Index select x))
+        var querySourceList = querySources.OrderByDescending(x => x.MaxLevel).ToList();
+
+        var rootQuerySources = new List<IQuerySource>();
+        var roots = new List<List<int>>();
+
+        foreach (var qs in querySourceList)
         {
-            sources.Add(item);
+            var paths = qs.ToTreePaths();
+            var isRoot = true;
+
+            foreach (var root in roots)
+            {
+                foreach (var path in paths)
+                {
+                    if (root.Contains(path.First()))
+                    {
+                        isRoot = false;
+                    }
+                }
+            }
+            if (isRoot)
+            {
+                rootQuerySources.Add(qs);
+                foreach (var path in paths)
+                {
+                    roots.Add(path);
+                }
+            }
         }
-        return sources;
+
+        return rootQuerySources;
     }
 
     /// <summary>

@@ -132,9 +132,7 @@ FROM
             sale AS s1
         WHERE
             s1.sale_id = 1
-    ) AS s2
-WHERE
-    s2.sale_id = 1";
+    ) AS s2";
 
         Assert.Equal(expect, query.ToText(), true, true, true);
     }
@@ -302,9 +300,7 @@ SELECT
     s2.price
 FROM
     /* Lv:1, Columns:[sale_id, store_id, price] */
-    sx AS s2
-WHERE
-    s2.store_id = 1";
+    sx AS s2";
 
         Assert.Equal(expect, query.ToText(), true, true, true);
     }
@@ -312,15 +308,15 @@ WHERE
     [Fact]
     public void PracticalTest()
     {
-        var sql = @"
-WITH
-    monthly_sales AS(
+        var sql = @"WITH
+    monthly_sales AS (
         SELECT
             customer_id,
             DATE_TRUNC('month', sale_date) AS sale_month,
             SUM(sale_amount) AS total_sales
         FROM
-            /* Lv:2, Seq:1, Refs:0-2-3, Columns:[customer_id, sale_date, sale_amount] */
+            /* Index:3, MaxLv:2, Columns:[customer_id, sale_date, sale_amount] */
+            /* Path:3-2-0 */
             sales
         GROUP BY
             customer_id,
@@ -332,10 +328,12 @@ SELECT
     ms.sale_month,
     COALESCE(ms.total_sales, 0) AS total_sales
 FROM
-    /* Lv:1, Seq:1, Refs:0-1, Columns:[customer_id, customer_name] */
+    /* Index:1, MaxLv:1, Columns:[customer_id, customer_name] */
+    /* Path:1-0 */
     customers AS c
     LEFT JOIN
-    /* Lv:1, Seq:2, Refs:0-2, Columns:[customer_id, sale_month, total_sales] */
+    /* Index:2, MaxLv:1, Columns:[customer_id, sale_month, total_sales] */
+    /* Path:2-0 */
     monthly_sales AS ms ON c.customer_id = ms.customer_id
 ORDER BY
     c.customer_id,
@@ -344,7 +342,8 @@ ORDER BY
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
         });
         Monitor.Log(query, exportTokens: false);
 
@@ -354,7 +353,11 @@ ORDER BY
         query.GetQuerySources()
             .Where(ds => ds.ColumnNames.Contains(column))
             .GetRootsBySource()
-            .ForEach(ds => ds.Query.Where(ds.Alias, column).Equal(value));
+            .ForEach(ds =>
+            {
+                ds.AddSourceComment("inject filter");
+                ds.Query.Where(ds.Alias, column).Equal(value);
+            });
 
         Monitor.Log(query, exportTokens: false);
 
@@ -365,7 +368,9 @@ ORDER BY
             DATE_TRUNC('month', sale_date) AS sale_month,
             SUM(sale_amount) AS total_sales
         FROM
-            /* Lv:2, Columns:[customer_id, sale_date, sale_amount] */
+            /* Index:3, MaxLv:2, Columns:[customer_id, sale_date, sale_amount] */
+            /* Path:3-2-0 */
+            /* inject filter */
             sales
         WHERE
             sales.customer_id = 1
@@ -379,14 +384,16 @@ SELECT
     ms.sale_month,
     COALESCE(ms.total_sales, 0) AS total_sales
 FROM
-    /* Lv:1, Columns:[customer_id, customer_name] */
+    /* Index:1, MaxLv:1, Columns:[customer_id, customer_name] */
+    /* Path:1-0 */
+    /* inject filter */
     customers AS c
     LEFT JOIN
-    /* Lv:1, Columns:[customer_id, sale_month, total_sales] */
+    /* Index:2, MaxLv:1, Columns:[customer_id, sale_month, total_sales] */
+    /* Path:2-0 */
     monthly_sales AS ms ON c.customer_id = ms.customer_id
 WHERE
     c.customer_id = 1
-    AND ms.customer_id = 1
 ORDER BY
     c.customer_id,
     ms.sale_month";
