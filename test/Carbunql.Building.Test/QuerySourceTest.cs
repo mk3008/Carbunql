@@ -871,22 +871,121 @@ ORDER BY
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
         {
-            x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Index:{x.Index}, Alias:{x.Alias}, MaxLv:{x.MaxLevel}, SourceType:{x.SourceType}, Columns:[{string.Join(", ", x.ColumnNames)}]");
             x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
         });
         var sources = query.GetQuerySources().ToList();
         Monitor.Log(sources);
         Monitor.Log(query);
 
-        query.GetQuerySources()
-        .GetRootsBySource().ForEach(x =>
-        {
-            x.AddQueryComment($"Root of Branch:{x.Index}");
-        });
-
-        Monitor.Log(query);
+        var expect = @"WITH
+    dat (
+        line_id, name, unit_price, quantity, tax_rate
+    ) AS (
+        VALUES
+            (1, 'apple', 105, 5, 0.07),
+            (2, 'orange', 203, 3, 0.07),
+            (3, 'banana', 233, 9, 0.07),
+            (4, 'tea', 309, 7, 0.08),
+            (5, 'coffee', 555, 9, 0.08),
+            (6, 'cola', 456, 2, 0.08)
+    ),
+    detail AS (
+        SELECT
+            q.*,
+            TRUNC(q.price * (1 + q.tax_rate)) - q.price AS tax,
+            q.price * (1 + q.tax_rate) - q.price AS raw_tax
+        FROM
+            /* Index:5, Alias:q, MaxLv:6, SourceType:SubQuery, Columns:[price, line_id, name, unit_price, quantity, tax_rate] */
+            /* Path:5-4-3-2-1-0 */
+            /* Path:5-8-7-3-2-1-0 */
+            (
+                SELECT
+                    dat.*,
+                    (dat.unit_price * dat.quantity) AS price
+                FROM
+                    /* Index:6, Alias:dat, MaxLv:7, SourceType:ValuesQuery, Columns:[line_id, name, unit_price, quantity, tax_rate] */
+                    /* Path:6-5-4-3-2-1-0 */
+                    /* Path:6-5-8-7-3-2-1-0 */
+                    dat
+            ) AS q
+    ),
+    tax_summary AS (
+        SELECT
+            d.tax_rate,
+            TRUNC(SUM(raw_tax)) AS total_tax
+        FROM
+            /* Index:8, Alias:d, MaxLv:5, SourceType:CommonTableExtension, Columns:[tax, raw_tax, price, line_id, name, unit_price, quantity, tax_rate] */
+            /* Path:8-7-3-2-1-0 */
+            detail AS d
+        GROUP BY
+            d.tax_rate
+    )
+SELECT
+    line_id,
+    name,
+    unit_price,
+    quantity,
+    tax_rate,
+    price,
+    price + tax AS tax_included_price,
+    tax
+FROM
+    /* Index:1, Alias:q, MaxLv:1, SourceType:SubQuery, Columns:[line_id, name, unit_price, quantity, tax_rate, price, tax] */
+    /* Path:1-0 */
+    (
+        SELECT
+            line_id,
+            name,
+            unit_price,
+            quantity,
+            tax_rate,
+            price,
+            tax + adjust_tax AS tax
+        FROM
+            /* Index:2, Alias:q, MaxLv:2, SourceType:SubQuery, Columns:[adjust_tax, total_tax, cumulative, priority, tax, raw_tax, price, line_id, name, unit_price, quantity, tax_rate] */
+            /* Path:2-1-0 */
+            (
+                SELECT
+                    q.*,
+                    CASE
+                        WHEN q.total_tax - q.cumulative >= q.priority THEN 1
+                        ELSE 0
+                    END AS adjust_tax
+                FROM
+                    /* Index:3, Alias:q, MaxLv:3, SourceType:SubQuery, Columns:[total_tax, cumulative, priority, tax, raw_tax, price, line_id, name, unit_price, quantity, tax_rate] */
+                    /* Path:3-2-1-0 */
+                    (
+                        SELECT
+                            d.*,
+                            s.total_tax,
+                            SUM(d.tax) OVER(
+                                PARTITION BY
+                                    d.tax_rate
+                            ) AS cumulative,
+                            ROW_NUMBER() OVER(
+                                PARTITION BY
+                                    d.tax_rate
+                                ORDER BY
+                                    d.raw_tax % 1 DESC,
+                                    d.line_id
+                            ) AS priority
+                        FROM
+                            /* Index:4, Alias:d, MaxLv:4, SourceType:CommonTableExtension, Columns:[tax, raw_tax, price, line_id, name, unit_price, quantity, tax_rate] */
+                            /* Path:4-3-2-1-0 */
+                            detail AS d
+                            INNER JOIN
+                            /* Index:7, Alias:s, MaxLv:4, SourceType:CommonTableExtension, Columns:[tax_rate, total_tax] */
+                            /* Path:7-3-2-1-0 */
+                            tax_summary AS s ON d.tax_rate = s.tax_rate
+                    ) AS q
+            ) AS q
+    ) AS q
+ORDER BY
+    line_id";
 
         Assert.Equal(8, sources.Count);
+        Assert.Equal(expect, query.ToText());
     }
 
     [Fact]

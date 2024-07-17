@@ -6,7 +6,7 @@ namespace Carbunql;
 /// Represents a query source, which can be a physical table, subquery, or common table expression (CTE).
 /// This class implements the IQuerySource interface and provides concrete implementations for its properties.
 /// </summary>
-public class QuerySource(int index, HashSet<string> columnNames, SelectQuery query, SelectableTable source) : IQuerySource
+public class QuerySource(int index, HashSet<string> columnNames, SelectQuery query, SelectableTable source, SourceType type) : IQuerySource
 {
     /// <summary>
     /// The index of the query source. It is a unique value within a query, starting from 1.
@@ -40,5 +40,6 @@ public class QuerySource(int index, HashSet<string> columnNames, SelectQuery que
     public SelectableTable Source => source;
 
     public IList<IQuerySource> References { get; } = new List<IQuerySource>();
-}
 
+    public SourceType SourceType => type;
+}

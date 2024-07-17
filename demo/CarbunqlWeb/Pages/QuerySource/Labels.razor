@@ -55,7 +55,7 @@ var sources = q.GetQuerySources().ToList();
 
 q.GetQuerySources().ForEach(x =>
 {
-    x.AddSourceComment($""Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join("", "", x.ColumnNames)}]"");
+    x.AddSourceComment($""Index:{x.Index}, Alias:{x.Alias}, MaxLv:{x.MaxLevel}, SourceType:{x.SourceType}, Columns:[{string.Join("", "", x.ColumnNames)}]"");
     x.ToTreePaths().ForEach(path => x.AddSourceComment($""Path:{string.Join(""-"", path)}""));
 });
 Console.WriteLine(q.ToText());";
@@ -85,7 +85,7 @@ Console.WriteLine(q.ToText());";
 
             q.GetQuerySources().ForEach(x =>
             {
-                x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.AddSourceComment($"Index:{x.Index}, Alias:{x.Alias}, MaxLv:{x.MaxLevel}, SourceType:{x.SourceType}, Columns:[{string.Join(", ", x.ColumnNames)}]");
                 x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
             });
 

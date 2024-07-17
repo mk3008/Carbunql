@@ -44,6 +44,16 @@ public interface IQuerySource
     /// Gets the query sources that reference this query source.
     /// </summary>
     IList<IQuerySource> References { get; }
+
+    SourceType SourceType { get; }
+}
+
+public enum SourceType
+{
+    PhysicalTable,
+    SubQuery,
+    CommonTableExtension,
+    ValuesQuery
 }
 
 public static class IQuerySourceExtension
