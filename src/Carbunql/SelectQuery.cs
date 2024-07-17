@@ -154,7 +154,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             }
             else if (source.Table.TryGetSelectQuery(out var query))
             {
-                var qs = DisassembleQuerySources(ref sources, source, query, commonTables, numbering);
+                var qs = DisassembleQuerySources(ref sources, source, query, commonTables, numbering, SourceType.SubQuery);
                 currentSources.Add(qs);
             }
             else if (source.Table is PhysicalTable table && commonTables.Any(x => x.Alias == table.GetTableFullName()))
@@ -166,7 +166,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
                 {
                     // select query
                     var commonQuery = commonTables.First(x => x.Alias == table.GetTableFullName()).GetSelectQuery();
-                    var qs = DisassembleQuerySources(ref sources, source, commonQuery, commonTables, numbering);
+                    var qs = DisassembleQuerySources(ref sources, source, commonQuery, commonTables, numbering, SourceType.CommonTableExtension);
                     currentSources.Add(qs);
                 }
                 else if (ct.Table is VirtualTable vt && vt.Query is ValuesQuery && ct.ColumnAliases != null)
@@ -174,7 +174,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
                     // values query
                     var names = ct.ColumnAliases.OfType<ColumnValue>().Select(x => x.Column).ToHashSet();
 
-                    var qs = new QuerySource(numbering.GetNext(), names, this, source);
+                    var qs = new QuerySource(numbering.GetNext(), names, this, source, SourceType.ValuesQuery);
                     sources.Add(qs);
                     currentSources.Add(qs);
                 }
@@ -190,7 +190,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
                     .Select(x => x.Column)
                     .ToHashSet();
 
-                var qs = new QuerySource(numbering.GetNext(), cname, this, source);
+                var qs = new QuerySource(numbering.GetNext(), cname, this, source, SourceType.PhysicalTable);
                 sources.Add(qs);
                 currentSources.Add(qs);
             }
@@ -208,7 +208,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         return currentSources;
     }
 
-    private IQuerySource DisassembleQuerySources(ref List<IQuerySource> sources, SelectableTable source, SelectQuery query, IList<CommonTable> commonTables, Numbering numbering)
+    private IQuerySource DisassembleQuerySources(ref List<IQuerySource> sources, SelectableTable source, SelectQuery query, IList<CommonTable> commonTables, Numbering numbering, SourceType type)
     {
         var index = numbering.GetNext();
 
@@ -244,7 +244,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             }
         }
 
-        var qs = new QuerySource(index, cname.ToHashSet(), this, source);
+        var qs = new QuerySource(index, cname.ToHashSet(), this, source, type);
 
         foreach (var item in parents)
         {
@@ -779,5 +779,36 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             Current++;
             return Current;
         }
+    }
+
+    public SelectQuery ToCteQuery(string name, string alias)
+    {
+        if (GetCommonTables().Where(x => x.Alias == name).Any())
+        {
+            throw new InvalidProgramException();
+        }
+
+        var (q, t) = this.ToCTE(name);
+
+        q.From(t).As(alias);
+        GetColumnNames().ForEach(column => q.Select($"{alias}.{column}").As(column));
+
+        return q;
+    }
+
+    public SelectQuery ToSubQuery(string alias)
+    {
+        var q = new SelectQuery();
+        var (f, t) = q.From(this).As(alias);
+
+        GetColumnNames().ForEach(column => q.Select($"{alias}.{column}").As(column));
+
+        return q;
+    }
+
+    public SelectQuery AddColumn(string column, string alias)
+    {
+        this.Select(column).As(alias);
+        return this;
     }
 }

@@ -24,7 +24,7 @@ public class SelectableItem : IQueryCommandable, ISelectable
     /// <summary>
     /// Gets or sets the value or column to be selected. This can include expressions, inline queries, or simple column names.
     /// </summary>
-    public ValueBase Value { get; private set; }
+    public ValueBase Value { get; set; }
 
     /// <summary>
     /// Gets or sets the alias name for the selected value, which appears after the "AS" keyword in the query.
@@ -95,7 +95,7 @@ public class SelectableItem : IQueryCommandable, ISelectable
 
     public IEnumerable<ColumnValue> GetColumns()
     {
-        foreach(var item in Value.GetColumns())
+        foreach (var item in Value.GetColumns())
         {
             yield return item;
         }
