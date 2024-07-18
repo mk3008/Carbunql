@@ -6,53 +6,41 @@
 
 <PageTitle>Format</PageTitle>
 
-<div class="container-fluid">
-@*    <div class="row" Style="margin: 0px 0px 16px 0px;">
-        <RadzenMenu class="rz-shadow-3">
-            <RadzenMenuItem Text="Clear SQL" Icon="clear" Click=@OnClear>
-            </RadzenMenuItem>
-        </RadzenMenu>
-    </div>*@
-    <div class="row">
-        <div class="col-md-12 p-3">
-            <RadzenText TextStyle="TextStyle.H4">Format</RadzenText>
+<RadzenText TextStyle="TextStyle.H4">Format</RadzenText>
 
-            <RadzenText>SQL can be formatted.(select, values, insert, create table, create index, alter table)</RadzenText>
-            
-             <RadzenCard>
-                <RadzenText TextStyle="TextStyle.Subtitle2">Source code</RadzenText>
-                <RadzenTextArea @bind-Value=@sourcecode TValue="string" Style="width: 100%; min-height: 150px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" />
-            </RadzenCard>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12 p-3">
-            <RadzenText TextStyle="TextStyle.H5">Demo</RadzenText>
-        </div>
-        <div class="col-md-6 p-3">
-            <RadzenCard>
-                <RadzenText TextStyle="TextStyle.Subtitle2">Input</RadzenText>
-                <RadzenTextArea @bind-Value=@sql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" Placeholder="Enter select query(ex. select * from table)" />
-            </RadzenCard>
-        </div>
-        <div class="col-md-6 p-3">
-            <RadzenCard>
-                <RadzenText TextStyle="TextStyle.Subtitle2">Result</RadzenText>
-                <RadzenTextArea @bind-Value=@fsql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" />
-            </RadzenCard>
-        </div>
+<RadzenText>SQL can be formatted.(select, values, insert, create table, create index, alter table)</RadzenText>
 
-    </div>
-</div>
+<RadzenTabs TabPosition=TabPosition.Top RenderMode="TabRenderMode.Client" >
+    <Tabs>
+        <RadzenTabsItem Text="Example">
+			<div class="row">
+				<div class="col-md-6 p-3">
+					<RadzenCard>
+						<RadzenText TextStyle="TextStyle.Subtitle2">Input</RadzenText>
+						<RadzenTextArea @bind-Value=@sql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" Placeholder="Enter select query(ex. select id, value from table)" />
+					</RadzenCard>
+				</div>
+				<div class="col-md-6 p-3">
+					<RadzenCard>
+						<RadzenText TextStyle="TextStyle.Subtitle2">Result</RadzenText>
+						<RadzenTextArea @bind-Value=@fsql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" />
+					</RadzenCard>
+				</div>
+			</div>
+
+        </RadzenTabsItem>
+        <RadzenTabsItem Text="Source">
+	        <RadzenText Style="font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" >using Carbunql;
+
+var sql = QueryCommandableParser.Parse("select id, val from table_a as a")
+	.ToText();</RadzenText>
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
 
 @code {
 
     string fsql = string.Empty;
-
-    string sourcecode = @"using Carbunql;
-
-var q = QueryCommandableParser.Parse(sql_text);
-Console.WriteLine(q.ToText());";
 
     protected override void OnInitialized()
 	{
