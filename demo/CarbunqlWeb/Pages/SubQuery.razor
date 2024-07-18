@@ -1,87 +1,91 @@
 @page "/subquery"
 @using Carbunql;
-@using Carbunql.Building;
 
 <PageTitle>To SubQuery</PageTitle>
 
-<div class="container-fluid">
-@*	<div class="row" Style="margin: 0px 0px 16px 0px;">
-		<RadzenMenu class="rz-shadow-3">
-			<RadzenMenuItem Text="Clear SQL" Icon="clear" Click=@OnClear>
-			</RadzenMenuItem>
-		</RadzenMenu>
-	</div>*@
-	<div class="row">
-		<div class="col-md-12 p-3">
-			<RadzenText TextStyle="TextStyle.H4">To SubQuery</RadzenText>
+<RadzenText TextStyle="TextStyle.H4">To SubQuery</RadzenText>
 
-			<RadzenText>A select query can be converted to a sub query.</RadzenText>
+<RadzenText>A select query can be converted to a sub query.</RadzenText>
 
-			<RadzenCard>
-				<RadzenText TextStyle="TextStyle.Subtitle2">Source code</RadzenText>
-				<RadzenTextArea @bind-Value=@sourcecode TValue="string" Style="width: 100%; min-height: 500px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" />
-			</RadzenCard>
-		</div>
-	</div>
-	<div class="row">
-		<div class="col-md-12 p-3">
-            <RadzenText TextStyle="TextStyle.H5">Demo</RadzenText>
-        </div>
+<RadzenTabs TabPosition=TabPosition.Top RenderMode="TabRenderMode.Client" >
+    <Tabs>
+        <RadzenTabsItem Text="Example">
+			<div class="row">
+				<div class="col-md-6 p-3">
+					<RadzenCard>
+						<RadzenText TextStyle="TextStyle.Subtitle2">Alias</RadzenText>
+						<RadzenTextBox Change=@OnChange @bind-Value=@alias />
+					</RadzenCard>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-6 p-3">
+					<RadzenCard>
+						<RadzenText TextStyle="TextStyle.Subtitle2">Input</RadzenText>
+						<RadzenTextArea @bind-Value=@sql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" Placeholder="Enter select query(ex. select id, value from table)" />
+					</RadzenCard>
+				</div>
+				<div class="col-md-6 p-3">
+					<RadzenCard>
+						<RadzenText TextStyle="TextStyle.Subtitle2">Result</RadzenText>
+						<RadzenTextArea @bind-Value=@fsql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" />
+					</RadzenCard>
+				</div>
+			</div>
 
-		<div class="col-md-6 p-3">
-			<RadzenCard>
-				<RadzenText TextStyle="TextStyle.Subtitle2">Alias</RadzenText>
-				<RadzenTextBox Change=@OnChange @bind-Value=@alias />
-			</RadzenCard>
-		</div>
-	</div>
-	<div class="row">
-		<div class="col-md-6 p-3">
-			<RadzenCard>
-				<RadzenText TextStyle="TextStyle.Subtitle2">Input</RadzenText>
-				<RadzenTextArea @bind-Value=@sql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" Placeholder="Enter select query(ex. select id, value from table)" />
-			</RadzenCard>
-		</div>
-		<div class="col-md-6 p-3">
-			<RadzenCard>
-				<RadzenText TextStyle="TextStyle.Subtitle2">Result</RadzenText>
-				<RadzenTextArea @bind-Value=@fsql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" />
-			</RadzenCard>
-		</div>
-	</div>
-</div>
+        </RadzenTabsItem>
+        <RadzenTabsItem Text="Source">
+	        <RadzenText Style="font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" >using Carbunql;
+
+var sql = new SelectQuery("select id, val from table_a as a")
+	.ToSubQuery(alias)
+	.ToText();</RadzenText>
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
 
 @code {
 	string sql = @"WITH
-    x AS (
-        SELECT
-            t.id,
-            t.col1 AS value
-        FROM
-            table AS t
-    )
+monthly_sales AS (
+    SELECT
+        store_id,
+        product_id,
+        DATE_TRUNC('month', sales_date) AS month,
+        SUM(sales_amount) AS total_sales
+    FROM
+        sales
+    GROUP BY
+        store_id,
+        product_id,
+        DATE_TRUNC('month', sales_date)
+),
+total_monthly_sales AS (
+    SELECT
+        store_id,
+        month,
+        SUM(total_sales) AS total_sales
+    FROM
+        monthly_sales
+    GROUP BY
+        store_id,
+        month
+)
 SELECT
-    x.id,
-    x.value as val
+    ms.store_id,
+    ms.product_id,
+    ms.month,
+    ms.total_sales,
+    tms.total_sales AS total_monthly_sales,
+    (ms.total_sales::FLOAT / tms.total_sales) * 100 AS sales_percentage
 FROM
-    x";
+    monthly_sales ms
+INNER JOIN
+    total_monthly_sales tms ON ms.store_id = tms.store_id AND ms.month = tms.month
+ORDER BY
+    ms.month,
+    ms.product_id";
 
 	string fsql = string.Empty;
-
-	string sourcecode = @"using Carbunql;
-using Carbunql.Building;
-
-var subsq = new SelectQuery(""select id, val from table_a"");
-
-var sq = new SelectQuery();
-//Convert select query to Common table
-//Return value is FromClause class and SelectableTable class
-var (_, t) = sq.From(subsq).As(""alias"");
-
-//Select all columns of the sub query
-sq.Select(t);
-
-Console.WriteLine(q.ToCommand().CommandText);";
 
 	string alias = "q";
 
@@ -105,13 +109,9 @@ Console.WriteLine(q.ToCommand().CommandText);";
 		}
 		try
 		{
-			var sq = new SelectQuery();
-			var (f, q) = sq.From(new SelectQuery(sql)).As("q");
-
-			sq.Select(q);
-
-
-			fsql = sq.ToCommand().CommandText;
+			fsql = new SelectQuery(sql)
+				.ToSubQuery(alias)
+				.ToText();
 		}
 		catch (Exception ex)
 		{
