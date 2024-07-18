@@ -1,0 +1,128 @@
+@page "/cte"
+@using Carbunql;
+
+<PageTitle>To CTE Query</PageTitle>
+
+<RadzenText TextStyle="TextStyle.H4">To CTE Query</RadzenText>
+
+<RadzenText>A select query can be converted to a CTE.</RadzenText>
+
+<RadzenTabs TabPosition=TabPosition.Top RenderMode="TabRenderMode.Client" >
+    <Tabs>
+        <RadzenTabsItem Text="Example">
+			<div class="row">
+				<div class="col-md-6 p-3">
+					<RadzenCard>
+						<RadzenText TextStyle="TextStyle.Subtitle2">Name</RadzenText>
+						<RadzenTextBox Change=@OnChange @bind-Value=@name />
+
+						<RadzenText TextStyle="TextStyle.Subtitle2">Alias</RadzenText>
+						<RadzenTextBox Change=@OnChange @bind-Value=@alias />
+					</RadzenCard>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-6 p-3">
+					<RadzenCard>
+						<RadzenText TextStyle="TextStyle.Subtitle2">Input</RadzenText>
+						<RadzenTextArea @bind-Value=@sql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" Placeholder="Enter select query(ex. select id, value from table)" />
+					</RadzenCard>
+				</div>
+				<div class="col-md-6 p-3">
+					<RadzenCard>
+						<RadzenText TextStyle="TextStyle.Subtitle2">Result</RadzenText>
+						<RadzenTextArea @bind-Value=@fsql TValue="string" Change=@OnChange Style="width: 100%; min-height: 600px; font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" />
+					</RadzenCard>
+				</div>
+			</div>
+
+        </RadzenTabsItem>
+        <RadzenTabsItem Text="Source">
+	        <RadzenText Style="font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" >using Carbunql;
+
+var sql = new SelectQuery("select id, val from table_a as a")
+	.ToCteQuery(name, alias)
+	.ToText();</RadzenText>
+        </RadzenTabsItem>
+    </Tabs>
+</RadzenTabs>
+
+@code {
+	TabPosition tabPosition = TabPosition.Top;
+
+	string sql = @"WITH
+monthly_sales AS (
+    SELECT
+        store_id,
+        product_id,
+        DATE_TRUNC('month', sales_date) AS month,
+        SUM(sales_amount) AS total_sales
+    FROM
+        sales
+    GROUP BY
+        store_id,
+        product_id,
+        DATE_TRUNC('month', sales_date)
+),
+total_monthly_sales AS (
+    SELECT
+        store_id,
+        month,
+        SUM(total_sales) AS total_sales
+    FROM
+        monthly_sales
+    GROUP BY
+        store_id,
+        month
+)
+SELECT
+    ms.store_id,
+    ms.product_id,
+    ms.month,
+    ms.total_sales,
+    tms.total_sales AS total_monthly_sales,
+    (ms.total_sales::FLOAT / tms.total_sales) * 100 AS sales_percentage
+FROM
+    monthly_sales ms
+INNER JOIN
+    total_monthly_sales tms ON ms.store_id = tms.store_id AND ms.month = tms.month
+ORDER BY
+    ms.month,
+    ms.product_id";
+
+	string fsql = string.Empty;
+
+	string name = "final";
+
+	string alias = "";
+
+	protected override void OnInitialized()
+	{
+		OnChange(sql);
+	}
+
+	void OnClear()
+	{
+		sql = string.Empty;
+		OnChange(sql);
+	}
+
+	void OnChange(string value)
+	{
+		if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(sql))
+		{
+			fsql = string.Empty;
+			return;
+		}
+		try
+		{
+			fsql = new SelectQuery(sql)
+				.ToCTEQuery(name.Trim(), alias.Trim())
+				.ToText();
+		}
+		catch (Exception ex)
+		{
+			fsql = ex.ToString();
+		}
+	}
+}
