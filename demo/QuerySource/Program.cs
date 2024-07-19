@@ -22,24 +22,18 @@ var query = new SelectQuery(sql);
 Console.WriteLine(query.ToText());
 Console.WriteLine(";");
 
-
-Console.WriteLine("--sub----------");
-query = new SelectQuery(sql).ToSubQuery("q");
-Console.WriteLine(query.ToText());
-Console.WriteLine(";");
-
 try
 {
     Console.WriteLine("--snapshot----------");
     var crateTablequery = new SelectQuery(sql)
         .ToCTEQuery("datasource", "ds")
-        .OverrideColumn(dateColumn, (source, item) =>
+        .OverrideSelect(dateColumn, (source, value) =>
         {
             source.Query.AddComment($"Inject a lower limit for {dateColumn}");
-            return $"greatest({item.Value.ToOneLineText()}, '{lowerLimit}'::date)";
+            return $"greatest({value}, {source.Query.AddParameter(":lower_limit", lowerLimit)})";
         })
         .InjectNotJournaledFilter(keyTable, keyColumn)
-        .AddColumn("nextval('sale_journal_id_seq')", "sale_journal_id")
+        .AddSelect("nextval('sale_journal_id_seq')", "sale_journal_id")
         .ToCTEQuery("final", "f")
         .ToCreateTableQuery("tmp", isTemporary: true);
     Console.WriteLine(crateTablequery.ToText());
@@ -47,11 +41,19 @@ try
 
     Console.WriteLine("--validate----------");
     var insertQuery = new SelectQuery(sql)
-         .ToDiffQuery(journalTable, keyColumn, valueColumn, ignoreColumn)
-         .InjectUnderLimitProcessing(dateColumn, lowerLimit)
-         .InjectFilter(keyColumn, 1)
-         .ToCTEQuery("final", "f")
-         .ToInsertQuery("sale_journals");
+        .ToDiffQuery(journalTable, keyColumn, valueColumn, ignoreColumn)
+        .OverrideSelect(dateColumn, (source, value) =>
+        {
+            source.Query.AddComment($"Inject a lower limit for {dateColumn}");
+            return $"greatest({value}, {source.Query.AddParameter(":lower_limit", lowerLimit)})";
+        })
+        .AddWhere(keyColumn, source =>
+        {
+            source.Query.AddComment($"Inject filter. {keyColumn}");
+            return $"{source.Alias}.{keyColumn} = {source.Query.AddParameter(":sale_id", 1)}";
+        })
+        .ToCTEQuery("final", "f")
+        .ToInsertQuery("sale_journals");
     Console.WriteLine(insertQuery.ToText());
     Console.WriteLine(";");
 }
@@ -63,26 +65,6 @@ catch (Exception ex)
 
 public static class SelectQueryExtension
 {
-    public static SelectQuery InjectUnderLimitProcessing(this SelectQuery query, string dateColumnName, DateTime lowerLimitDate)
-    {
-        var lowerLimit = lowerLimitDate.ToString("yyyy-MM-dd");
-
-        query.GetQuerySources()
-            .Where(x => x.Query.GetSelectableItems().Where(x => x.Alias == dateColumnName).Any())
-            .GetRootsBySource()
-            .EnsureAny()
-            .ForEach(x =>
-            {
-                x.Query.AddComment($"Inject a lower limit for {dateColumnName}");
-                var si = x.Query.GetSelectableItems().Where(x => x.Alias == dateColumnName).First();
-
-                //override
-                si.Value = ValueParser.Parse($"greatest({si.Value.ToOneLineText()}, '{lowerLimit}'::date)");
-            });
-
-        return query;
-    }
-
     public static SelectQuery InjectNotJournaledFilter(this SelectQuery query, string keyTable, string keyColumn)
     {
         query.GetQuerySources()
@@ -177,21 +159,5 @@ public static class SelectQueryExtension
         diffquer.AddOperatableValue("union all", selectRevisedQuery());
 
         return diffquer;
-    }
-
-    public static SelectQuery InjectFilter(this SelectQuery query, string keyColumn, int keyValue)
-    {
-        query.GetQuerySources()
-            .Where(x => x.ColumnNames.Contains(keyColumn))
-            .GetRootsBySource()
-            .EnsureAny()
-            .ForEach(x =>
-            {
-                //filter 
-                x.Query.AddComment($"Inject a filter {keyColumn}");
-                x.Query.Where(ValueParser.Parse($"{x.Alias}.{keyColumn} = {keyValue}"));
-            });
-
-        return query;
     }
 }

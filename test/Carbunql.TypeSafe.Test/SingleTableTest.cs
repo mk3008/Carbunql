@@ -99,7 +99,7 @@ FROM
 
         var expect = @"/*
   :const_0 = 'test'
-  :const_1 = 2000/01/01 10:10:00
+  :const_1 = '2000/01/01 10:10:00'
 */
 SELECT
     1 AS id,
@@ -170,7 +170,7 @@ FROM
   :rate = 0.1
   :tf_value = True
   :remarks = 'test'
-  :created_at = 2000/01/01 10:10:00
+  :created_at = '2000/01/01 10:10:00'
 */
 SELECT
     :id AS id,
@@ -269,7 +269,7 @@ FROM
         Output.WriteLine(actual);
 
         var expect = @"/*
-  :d = 2000/10/20 0:00:00
+  :d = '2000/10/20 0:00:00'
 */
 SELECT
     DATE_TRUNC('year', :d) AS v_trunc_year,
@@ -311,7 +311,7 @@ FROM
         Output.WriteLine(actual);
 
         var expect = @"/*
-  :d = 2000/10/20 0:00:00
+  :d = '2000/10/20 0:00:00'
 */
 SELECT
     DATE_TRUNC('year', :d) AS v_trunc_year,
