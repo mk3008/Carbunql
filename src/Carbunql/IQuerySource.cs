@@ -1,4 +1,5 @@
-﻿using Carbunql.Clauses;
+﻿using Carbunql.Building;
+using Carbunql.Clauses;
 using Carbunql.Tables;
 
 namespace Carbunql;
@@ -58,6 +59,11 @@ public enum SourceType
 
 public static class IQuerySourceExtension
 {
+    public static void AddComment(this IQuerySource querySource, string comment)
+    {
+        querySource.Source.AddComment(comment);
+    }
+
     public static string GetTableFullName(this IQuerySource querySource)
     {
         if (querySource.Source.Table is PhysicalTable pt)

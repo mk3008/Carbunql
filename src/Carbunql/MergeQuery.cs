@@ -25,7 +25,12 @@ public class MergeQuery : IQueryCommandable
         Datasource = datasource;
         DatasourceAlias = datasourceAlias;
 
-        WithClause = datasource.GetWithClause();
+        if (datasource.GetCommonTables().Any())
+        {
+            WithClause = new WithClause();
+            datasource.GetCommonTables().ForEach(WithClause.Add);     
+        }
+
         UsingClause = CreateUsingClause(datasource, keys, destination.Alias, datasourceAlias);
         MergeClause = new MergeClause(destination);
         Parameters = datasource.GetParameters();
@@ -43,7 +48,12 @@ public class MergeQuery : IQueryCommandable
         Datasource = datasource;
         DatasourceAlias = datasourceAlias;
 
-        WithClause = datasource.GetWithClause();
+        if (datasource.GetCommonTables().Any())
+        {
+            WithClause = new WithClause();
+            datasource.GetCommonTables().ForEach(WithClause.Add);
+        }
+
         UsingClause = CreateUsingClause(datasource, keys, destination.Alias, datasourceAlias);
         MergeClause = new MergeClause(destination);
         Parameters = datasource.GetParameters();

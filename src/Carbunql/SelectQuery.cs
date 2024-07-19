@@ -782,6 +782,17 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         }
     }
 
+    /// <summary>
+    /// Returns a select query that references itself as a CTE (Common Table Expression).
+    /// </summary>
+    /// <param name="name">The name of the CTE.</param>
+    /// <param name="alias">
+    /// The alias to use. If omitted, the select clause will use a wildcard.
+    /// </param>
+    /// <returns>The modified select query with the CTE reference.</returns>
+    /// <exception cref="InvalidProgramException">
+    /// Thrown if a CTE with the same name already exists.
+    /// </exception>
     public SelectQuery ToCTEQuery(string name, string alias = "")
     {
         if (GetCommonTables().Where(x => x.Alias.IsEqualNoCase(name)).Any())
@@ -805,6 +816,11 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         return q;
     }
 
+    /// <summary>
+    /// Returns a select query that references itself as a subquery.
+    /// </summary>
+    /// <param name="alias">The alias to use for the subquery.</param>
+    /// <returns>The modified select query with the subquery reference.</returns>
     public SelectQuery ToSubQuery(string alias)
     {
         var q = new SelectQuery();
@@ -815,12 +831,24 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         return q;
     }
 
+    /// <summary>
+    /// Adds a column to the select clause.
+    /// </summary>
+    /// <param name="column">The column information.</param>
+    /// <param name="alias">The alias name for the column.</param>
+    /// <returns>The modified select query.</returns>
     public SelectQuery AddSelect(string column, string alias)
     {
         this.Select(column).As(alias);
         return this;
     }
 
+    /// <summary>
+    /// Searches for the specified column and overrides it.
+    /// </summary>
+    /// <param name="columnName">The name of the column to search for.</param>
+    /// <param name="overrider">The function to modify the column value.</param>
+    /// <returns>The modified select query.</returns>
     public SelectQuery OverrideSelect(string columnName, Func<IQuerySource, string, string> overrider)
     {
         GetQuerySources()
@@ -837,6 +865,13 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         return this;
     }
 
+    /// <summary>
+    /// Searches for the specified column in the specified table and overrides it.
+    /// </summary>
+    /// <param name="tableName">The name of the table to search in.</param>
+    /// <param name="columnName">The name of the column to search for.</param>
+    /// <param name="overrider">The function to modify the column value.</param>
+    /// <returns>The modified select query.</returns>
     public SelectQuery OverrideColumn(string tableName, string columnName, Func<IQuerySource, SelectableItem, string> overrider)
     {
         GetQuerySources()
@@ -854,6 +889,12 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         return this;
     }
 
+    /// <summary>
+    /// Adds a search condition.
+    /// </summary>
+    /// <param name="columnName">The name of the column to search in.</param>
+    /// <param name="adder">The function to create the search condition.</param>
+    /// <returns>The modified select query.</returns>
     public SelectQuery AddWhere(string columnName, Func<IQuerySource, string> adder)
     {
         GetQuerySources()
@@ -868,6 +909,13 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         return this;
     }
 
+    /// <summary>
+    /// Adds a search condition.
+    /// </summary>
+    /// <param name="tableName">The name of the table to search in.</param>
+    /// <param name="columnName">The name of the column to search in.</param>
+    /// <param name="adder">The function to create the search condition.</param>
+    /// <returns>The modified select query.</returns>
     public SelectQuery AddWhere(string tableName, string columnName, Func<IQuerySource, string> adder)
     {
         GetQuerySources()
@@ -878,6 +926,118 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             .ForEach(x =>
             {
                 x.Query.Where(adder(x));
+            });
+
+        return this;
+    }
+
+    /// <summary>
+    /// Adds an EXISTS clause.
+    /// </summary>
+    /// <param name="keyColumnNames">The columns to use for the search condition.</param>
+    /// <param name="validationTableName">The table to use for comparison within the EXISTS clause.</param>
+    /// <param name="action">An optional function to process the query source, primarily used for adding comments.</param>
+    /// <returns>The modified select query.</returns>
+    public SelectQuery AddExists(IEnumerable<string> keyColumnNames, string validationTableName, Action<IQuerySource>? action = null)
+    {
+        GetQuerySources()
+            .Where(x => keyColumnNames.All(keyColumn => x.ColumnNames.Contains(keyColumn)))
+            .GetRootsBySource()
+            .EnsureAny()
+            .ForEach(qs =>
+            {
+                qs.Query.Where(() =>
+                {
+                    var sq = new SelectQuery($"select * from {validationTableName} as x");
+                    keyColumnNames.ForEach(keyColumn => sq.Where($"x.{keyColumn} = {qs.Alias}.{keyColumn}"));
+                    return sq.ToExists();
+                });
+                action?.Invoke(qs);
+            });
+
+        return this;
+    }
+
+    /// <summary>
+    /// Adds an EXISTS clause.
+    /// </summary>
+    /// <param name="sourceTableName">The name of the table to search in.</param>
+    /// <param name="keyColumnNames">The columns to use for the search condition.</param>
+    /// <param name="validationTableName">The table to use for comparison within the EXISTS clause.</param>
+    /// <param name="action">An optional function to process the query source, primarily used for adding comments.</param>
+    /// <returns>The modified select query.</returns>
+    public SelectQuery AddExists(string sourceTableName, IEnumerable<string> keyColumnNames, string validationTableName, Action<IQuerySource>? action = null)
+    {
+        GetQuerySources()
+            .Where(x => x.GetTableFullName().IsEqualNoCase(sourceTableName))
+            .Where(x => keyColumnNames.All(keyColumn => x.ColumnNames.Contains(keyColumn)))
+            .GetRootsBySource()
+            .EnsureAny()
+            .ForEach(qs =>
+            {
+                qs.Query.Where(() =>
+                {
+                    var sq = new SelectQuery($"select * from {validationTableName} as x");
+                    keyColumnNames.ForEach(keyColumn => sq.Where($"x.{keyColumn} = {qs.Alias}.{keyColumn}"));
+                    return sq.ToExists();
+                });
+                action?.Invoke(qs);
+            });
+
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a NOT EXISTS clause.
+    /// </summary>
+    /// <param name="keyColumnNames">The columns to use for the search condition.</param>
+    /// <param name="validationTableName">The table to use for comparison within the NOT EXISTS clause.</param>
+    /// <param name="action">An optional function to process the query source, primarily used for adding comments.</param>
+    /// <returns>The modified select query.</returns>
+    public SelectQuery AddNotExists(IEnumerable<string> keyColumnNames, string validationTableName, Action<IQuerySource>? action = null)
+    {
+        GetQuerySources()
+            .Where(x => keyColumnNames.All(keyColumn => x.ColumnNames.Contains(keyColumn)))
+            .GetRootsBySource()
+            .EnsureAny()
+            .ForEach(qs =>
+            {
+                qs.Query.Where(() =>
+                {
+                    var sq = new SelectQuery($"select * from {validationTableName} as x");
+                    keyColumnNames.ForEach(keyColumn => sq.Where($"x.{keyColumn} = {qs.Alias}.{keyColumn}"));
+                    return sq.ToNotExists();
+                });
+                action?.Invoke(qs);
+            });
+
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a NOT EXISTS clause.
+    /// </summary>
+    /// <param name="sourceTableName">The name of the table to search in.</param>
+    /// <param name="keyColumnNames">The columns to use for the search condition.</param>
+    /// <param name="validationTableName">The table to use for comparison within the NOT EXISTS clause.</param>
+    /// <param name="action">An optional function to process the query source, primarily used for adding comments.</param>
+    /// <returns>The modified select query.</returns>
+    public SelectQuery AddNotExists(string sourceTableName, IEnumerable<string> keyColumnNames, string validationTableName, Action<IQuerySource>? action = null)
+    {
+        GetQuerySources()
+            .Where(x => x.GetTableFullName().IsEqualNoCase(sourceTableName))
+            .Where(x => keyColumnNames.All(keyColumn => x.ColumnNames.Contains(keyColumn)))
+            .GetRootsBySource()
+            .EnsureAny()
+            .ForEach(qs =>
+            {
+                qs.Query.Where(() =>
+                {
+                    var sq = new SelectQuery($"select * from {validationTableName} as x");
+                    keyColumnNames.ForEach(keyColumn => sq.Where($"x.{keyColumn} = {qs.Alias}.{keyColumn}"));
+                    return sq.ToNotExists();
+                });
+                action?.Invoke(qs);
             });
 
         return this;
