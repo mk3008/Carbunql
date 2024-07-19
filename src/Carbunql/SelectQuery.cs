@@ -815,13 +815,13 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         return q;
     }
 
-    public SelectQuery AddColumn(string column, string alias)
+    public SelectQuery AddSelect(string column, string alias)
     {
         this.Select(column).As(alias);
         return this;
     }
 
-    public SelectQuery OverrideColumn(string columnName, Func<IQuerySource, SelectableItem, string> overrider)
+    public SelectQuery OverrideSelect(string columnName, Func<IQuerySource, string, string> overrider)
     {
         GetQuerySources()
             .Where(x => x.Query.GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnName)).Any())
@@ -831,7 +831,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             {
                 var si = x.Query.GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnName)).First();
                 //override
-                si.Value = ValueParser.Parse(overrider(x, si));
+                si.Value = ValueParser.Parse(overrider(x, si.Value.ToOneLineText()));
             });
 
         return this;
@@ -849,6 +849,35 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
                 var si = x.Query.GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnName)).First();
                 //override
                 si.Value = ValueParser.Parse(overrider(x, si));
+            });
+
+        return this;
+    }
+
+    public SelectQuery AddWhere(string columnName, Func<IQuerySource, string> adder)
+    {
+        GetQuerySources()
+            .Where(x => x.Query.GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnName)).Any())
+            .GetRootsBySource()
+            .EnsureAny()
+            .ForEach(x =>
+            {
+                x.Query.Where(adder(x));
+            });
+
+        return this;
+    }
+
+    public SelectQuery AddWhere(string tableName, string columnName, Func<IQuerySource, string> adder)
+    {
+        GetQuerySources()
+            .Where(x => x.GetTableFullName().IsEqualNoCase(tableName))
+            .Where(x => x.Query.GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnName)).Any())
+            .GetRootsBySource()
+            .EnsureAny()
+            .ForEach(x =>
+            {
+                x.Query.Where(adder(x));
             });
 
         return this;

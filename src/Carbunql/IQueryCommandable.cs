@@ -190,7 +190,7 @@ public static class IQueryCommandableExtension
             {
                 sb.AppendLine($"  {item.Key} is NULL");
             }
-            else if (item.Value.GetType() == typeof(string))
+            else if (item.Value.GetType() == typeof(string) || item.Value.GetType() == typeof(DateTime))
             {
                 sb.AppendLine($"  {item.Key} = '{item.Value}'");
             }
