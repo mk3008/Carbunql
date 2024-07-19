@@ -1,7 +1,6 @@
 ﻿using Carbunql;
 using Carbunql.Analysis.Parser;
 using Carbunql.Building;
-using Carbunql.Clauses;
 using Carbunql.Extensions;
 
 var sql = @"select s.sale_id, s.store_id, s.sale_date as journal_date, s.sale_price from sales as s";
@@ -25,18 +24,33 @@ Console.WriteLine(";");
 try
 {
     Console.WriteLine("--snapshot----------");
-    var crateTablequery = new SelectQuery(sql)
+    var crateTableQuery = new SelectQuery(sql)
         .ToCTEQuery("datasource", "ds")
         .OverrideSelect(dateColumn, (source, value) =>
         {
-            source.Query.AddComment($"Inject a lower limit for {dateColumn}");
+            source.AddComment($"Inject a lower limit for {source.Alias}.{dateColumn}");
             return $"greatest({value}, {source.Query.AddParameter(":lower_limit", lowerLimit)})";
         })
-        .InjectNotJournaledFilter(keyTable, keyColumn)
+        .AddNotExists([keyColumn], keyTable, source => source.AddComment($"Inject a NOT EXISTS condition for {source.Alias}"))
         .AddSelect("nextval('sale_journal_id_seq')", "sale_journal_id")
         .ToCTEQuery("final", "f")
         .ToCreateTableQuery("tmp", isTemporary: true);
-    Console.WriteLine(crateTablequery.ToText());
+    Console.WriteLine(crateTableQuery.ToText());
+    Console.WriteLine(";");
+
+    Console.WriteLine("--replace----------");
+    var mergeQuery = new SelectQuery(sql)
+        .ToCTEQuery("datasource", "ds")
+        .OverrideSelect(dateColumn, (source, value) =>
+        {
+            source.AddComment($"Inject a lower limit for {source.Alias}.{dateColumn}");
+            return $"greatest({value}, {source.Query.AddParameter(":lower_limit", lowerLimit)})";
+        })
+        .ToCTEQuery("final", "f")
+        .ToMergeQuery("sale_journals", [keyColumn])
+        .AddMatchedUpdate()
+        .AddNotMatchedInsert();
+    Console.WriteLine(mergeQuery.ToText());
     Console.WriteLine(";");
 
     Console.WriteLine("--validate----------");
@@ -44,12 +58,12 @@ try
         .ToDiffQuery(journalTable, keyColumn, valueColumn, ignoreColumn)
         .OverrideSelect(dateColumn, (source, value) =>
         {
-            source.Query.AddComment($"Inject a lower limit for {dateColumn}");
+            source.AddComment($"Inject a lower limit for {source.Alias}.{dateColumn}");
             return $"greatest({value}, {source.Query.AddParameter(":lower_limit", lowerLimit)})";
         })
         .AddWhere(keyColumn, source =>
         {
-            source.Query.AddComment($"Inject filter. {keyColumn}");
+            source.AddComment($"Inject a condition for {source.Alias}.{keyColumn}");
             return $"{source.Alias}.{keyColumn} = {source.Query.AddParameter(":sale_id", 1)}";
         })
         .ToCTEQuery("final", "f")
@@ -65,27 +79,6 @@ catch (Exception ex)
 
 public static class SelectQueryExtension
 {
-    public static SelectQuery InjectNotJournaledFilter(this SelectQuery query, string keyTable, string keyColumn)
-    {
-        query.GetQuerySources()
-            .Where(x => x.ColumnNames.Contains(keyColumn))
-            .GetRootsBySource()
-            .EnsureAny()
-            .ForEach(qs =>
-            {
-                //filter 
-                qs.Query.AddComment($"Inject a not archived filter. {keyTable}");
-                qs.Query.Where(() =>
-                {
-                    var sq = new SelectQuery($"select * from {keyTable} as x");
-                    sq.Where($"x.{keyColumn} = {qs.Alias}.{keyColumn}");
-                    return sq.ToNotExists();
-                });
-            });
-
-        return query;
-    }
-
     public static SelectQuery ToDiffQuery(this SelectQuery actualQuery, string journalTable, string keyColumn, string valueColumn, string ignoreColumn)
     {
         var expectQuery = new SelectQuery($"select arch.sale_id, arch.store_id, arch.journal_date, arch.sale_price from {journalTable} as arch");
