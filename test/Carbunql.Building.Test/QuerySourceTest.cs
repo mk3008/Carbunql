@@ -1089,4 +1089,44 @@ ORDER BY
         Assert.Equal(expect, query.ToText());
         Assert.Equal(4, sources.Count);
     }
+
+    [Fact]
+    public void NameConflict()
+    {
+        var sql = @"
+with
+sales as (
+    select * from sales
+)
+select
+    *
+from
+    sales";
+
+        var query = new SelectQuery(sql);
+        query.GetQuerySources().ForEach(x =>
+        {
+            x.AddSourceComment($"Index:{x.Index}, Alias:{x.Alias}, MaxLv:{x.MaxLevel}, SourceType:{x.SourceType}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
+        });
+        Monitor.Log(query);
+
+        var expect = @"WITH
+    sales AS (
+        SELECT
+            *
+        FROM
+            /* Index:2, Alias:sales, MaxLv:2, SourceType:PhysicalTable, Columns:[*] */
+            /* Path:2-1-0 */
+            sales
+    )
+SELECT
+    *
+FROM
+    /* Index:1, Alias:sales, MaxLv:1, SourceType:CommonTableExtension, Columns:[*] */
+    /* Path:1-0 */
+    sales";
+
+        Assert.Equal(expect, query.ToText());
+    }
 }
