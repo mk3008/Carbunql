@@ -166,8 +166,13 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
                 if (ct.IsSelectQuery)
                 {
                     // select query
+
+                    // Only those declared before this will be recognized as CTEs
+                    var id = commonTables.IndexOf(ct);
+                    var ctes = commonTables.Where((item, index) => index < id).ToList();
+
                     var commonQuery = commonTables.First(x => x.Alias == table.GetTableFullName()).GetSelectQuery();
-                    var qs = DisassembleQuerySources(ref sources, source, commonQuery, commonTables, numbering, SourceType.CommonTableExtension);
+                    var qs = DisassembleQuerySources(ref sources, source, commonQuery, ctes, numbering, SourceType.CommonTableExtension);
                     currentSources.Add(qs);
                 }
                 else if (ct.Table is VirtualTable vt && vt.Query is ValuesQuery && ct.ColumnAliases != null)
@@ -872,7 +877,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     /// <param name="columnName">The name of the column to search for.</param>
     /// <param name="overrider">The function to modify the column value.</param>
     /// <returns>The modified select query.</returns>
-    public SelectQuery OverrideColumn(string tableName, string columnName, Func<IQuerySource, SelectableItem, string> overrider)
+    public SelectQuery OverrideSelect(string tableName, string columnName, Func<IQuerySource, SelectableItem, string> overrider)
     {
         GetQuerySources()
             .Where(x => x.GetTableFullName().IsEqualNoCase(tableName))
