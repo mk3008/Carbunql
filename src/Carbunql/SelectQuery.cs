@@ -140,7 +140,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         var hasRelation = (FromClause.Relations?.Any() ?? false);
         var columns = GetColumns().ToList();
 
-        if (hasRelation && columns.Any(x => string.IsNullOrEmpty(x.TableAlias)))
+        if (hasRelation && columns.Any(x => string.IsNullOrEmpty(x.TableAlias) && x.Column != "*"))
         {
             var cols = string.Join(", ", columns.Where(x => string.IsNullOrEmpty(x.TableAlias)).Select(x => x.Column));
             throw new InvalidProgramException($"There are columns whose table alias names cannot be parsed: {cols}.");
@@ -192,7 +192,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             else
             {
                 var cname = columns
-                    .Where(x => !hasRelation || x.TableAlias == source.Alias)
+                    .Where(x => x.TableAlias == source.Alias || (!hasRelation && string.IsNullOrEmpty(x.TableAlias) && x.Column != "*"))
                     .Select(x => x.Column)
                     .ToHashSet();
 

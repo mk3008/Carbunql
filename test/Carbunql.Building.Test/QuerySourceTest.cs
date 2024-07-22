@@ -261,7 +261,7 @@ FROM
         SELECT
             s.sale_id,
             s.store_id,
-            s.quantity * q.amount AS price
+            s.quantity * s.amount AS price
         FROM
             /* Lv:2, Seq:1, Refs:0-1-2, Columns:[sale_id, store_id, quantity, amount] */
             sale AS s
@@ -518,7 +518,7 @@ FROM
                 SELECT
                     s.sale_id,
                     s.store_id,
-                    s.quantity * q.amount AS price
+                    s.quantity * s.amount AS price
                 FROM
                     /* Lv:3, Seq:1, Refs:0-1-2-3, Columns:[sale_id, store_id, quantity, amount] */
                     sale AS s
@@ -593,7 +593,7 @@ FROM
                 SELECT
                     s.sale_id,
                     s.store_id,
-                    s.quantity * q.amount AS price
+                    s.quantity * s.amount AS price
                 FROM
                     /* Lv:3, Seq:1, Refs:0-1-2-3, Columns:[sale_id, store_id, quantity, amount] */
                     sale AS s
@@ -1116,17 +1116,144 @@ from
         SELECT
             *
         FROM
-            /* Index:2, Alias:sales, MaxLv:2, SourceType:PhysicalTable, Columns:[*] */
+            /* Index:2, Alias:sales, MaxLv:2, SourceType:PhysicalTable, Columns:[] */
             /* Path:2-1-0 */
             sales
     )
 SELECT
     *
 FROM
-    /* Index:1, Alias:sales, MaxLv:1, SourceType:CommonTableExtension, Columns:[*] */
+    /* Index:1, Alias:sales, MaxLv:1, SourceType:CommonTableExtension, Columns:[] */
     /* Path:1-0 */
     sales";
 
         Assert.Equal(expect, query.ToText());
     }
+
+    /// <summary>
+    /// ISSUE-482
+    /// </summary>
+    [Fact]
+    public void UseRelationshipUseWildcardExists()
+    {
+        var sql = @"
+select
+1
+from
+sales s
+inner join target t on s.sale_id = t.sale_id --use relation ship
+where
+exists (select * from dat where x.sale_id = s.sale_id) --use wildcard";
+
+        var query = new SelectQuery(sql);
+        query.GetQuerySources().ForEach(x =>
+        {
+            x.AddSourceComment($"Index:{x.Index}, Alias:{x.Alias}, MaxLv:{x.MaxLevel}, SourceType:{x.SourceType}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
+        });
+        Monitor.Log(query);
+
+        var expect = @"SELECT
+    1
+FROM
+    /* Index:1, Alias:s, MaxLv:1, SourceType:PhysicalTable, Columns:[sale_id] */
+    /* Path:1-0 */
+    sales AS s
+    INNER JOIN
+    /* Index:2, Alias:t, MaxLv:1, SourceType:PhysicalTable, Columns:[sale_id] */
+    /* Path:2-0 */
+    target AS t ON s.sale_id = t.sale_id
+WHERE
+    EXISTS (
+        SELECT
+            *
+        FROM
+            dat
+        WHERE
+            x.sale_id = s.sale_id
+    )";
+
+        Assert.Equal(expect, query.ToText());
+    }
+
+    /// <summary>
+    /// ISSUE-482
+    /// </summary>
+    [Fact]
+    public void SelectableColumnTest()
+    {
+        var sql = @"
+select
+1
+from
+sales s --has not relationship
+where
+not exists (select dat.v1 from dat where x.sale_id = s.sale_id) --use wildcard";
+
+        var query = new SelectQuery(sql);
+        query.GetQuerySources().ForEach(x =>
+        {
+            x.AddSourceComment($"Index:{x.Index}, Alias:{x.Alias}, MaxLv:{x.MaxLevel}, SourceType:{x.SourceType}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
+        });
+        Monitor.Log(query);
+
+        var expect = @"SELECT
+    1
+FROM
+    /* Index:1, Alias:s, MaxLv:1, SourceType:PhysicalTable, Columns:[sale_id] */
+    /* Path:1-0 */
+    sales AS s
+WHERE
+    NOT EXISTS (
+        SELECT
+            dat.v1
+        FROM
+            dat
+        WHERE
+            x.sale_id = s.sale_id
+    )";
+
+        Assert.Equal(expect, query.ToText());
+    }
+
+    [Fact]
+    public void NoAlias()
+    {
+        var sql = @"
+SELECT
+    customer_id,
+    DATE_TRUNC('month', sale_date) AS sale_month,
+    SUM(sale_amount) AS total_sales
+FROM
+    sales
+GROUP BY
+    customer_id,
+    DATE_TRUNC('month', sale_date)";
+
+        var query = new SelectQuery(sql);
+        query.GetQuerySources().ForEach(x =>
+        {
+            x.AddSourceComment($"Index:{x.Index}, Alias:{x.Alias}, MaxLv:{x.MaxLevel}, SourceType:{x.SourceType}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
+        });
+        Monitor.Log(query);
+
+        var expect = @"SELECT
+    customer_id,
+    DATE_TRUNC('month', sale_date) AS sale_month,
+    SUM(sale_amount) AS total_sales
+FROM
+    /* Index:1, Alias:sales, MaxLv:1, SourceType:PhysicalTable, Columns:[customer_id, sale_date, sale_amount] */
+    /* Path:1-0 */
+    sales
+GROUP BY
+    customer_id,
+    DATE_TRUNC('month', sale_date)";
+
+        Assert.Equal(expect, query.ToText());
+    }
+
+
+
 }
