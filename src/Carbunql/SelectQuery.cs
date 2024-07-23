@@ -8,6 +8,7 @@ using Carbunql.Values;
 using MessagePack;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace Carbunql;
 
@@ -146,7 +147,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             throw new InvalidProgramException($"There are columns whose table alias names cannot be parsed: {cols}.");
         }
 
-        foreach (var source in FromClause.GetSelectableTables())
+        foreach (var source in GetQuerySourceSelectableTables())
         {
             if (sources.Where(x => x.Source == source).Any())
             {
@@ -250,6 +251,18 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             }
         }
 
+        // If not available, infer the column names from your query
+        if (!cname.Any() && FromClause != null)
+        {
+            var hasRelation = (FromClause.Relations?.Any() ?? false);
+            var columns = GetColumns().ToList();
+
+            cname = columns
+                .Where(x => x.TableAlias == source.Alias || (!hasRelation && string.IsNullOrEmpty(x.TableAlias) && x.Column != "*"))
+                .Select(x => x.Column)
+                .ToList();
+        }
+
         var qs = new QuerySource(index, cname.ToHashSet(), this, source, type);
 
         foreach (var item in parents)
@@ -259,6 +272,24 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         sources.Add(qs);
 
         return qs;
+    }
+
+    private IEnumerable<SelectableTable> GetQuerySourceSelectableTables()
+    {
+        if (FromClause != null)
+        {
+            foreach (var item in FromClause.GetSelectableTables())
+            {
+                yield return item;
+            }
+        }
+        if (WhereClause != null)
+        {
+            foreach (var item in WhereClause.GetSelectableTables())
+            {
+                yield return item;
+            }
+        }
     }
 
     /// <inheritdoc/>
