@@ -1211,6 +1211,8 @@ WHERE
         SELECT
             dat.v1
         FROM
+            /* Index:2, Alias:dat, MaxLv:1, SourceType:PhysicalTable, Columns:[v1] */
+            /* Path:2-0 */
             dat
         WHERE
             x.sale_id = s.sale_id
@@ -1305,6 +1307,87 @@ WHERE
         WHERE
             x.sale_id = s.sale_id
     )";
+
+        Assert.Equal(expect, query.ToText());
+    }
+
+    [Fact]
+    public void CTEExistsTest()
+    {
+        var sql = @"
+WITH
+    final AS (
+        SELECT
+            s.sale_id,
+            s.store_id,
+            GREATEST(s.sale_date, :lower_limit) AS journal_date,
+            s.price AS journal_price,
+            s.request_timestamp
+        FROM
+            sales AS s
+        WHERE
+            NOT EXISTS (
+                SELECT
+                    *
+                FROM
+                    sale_journals AS x
+                WHERE
+                    x.sale_id = s.sale_id
+            )
+            AND s.request_timestamp >= :lower_limit
+    )
+SELECT
+    f.sale_id,
+    f.store_id,
+    f.journal_date,
+    f.journal_price,
+    f.request_timestamp
+FROM
+    final AS f";
+
+        var query = new SelectQuery(sql);
+        query.GetQuerySources().ForEach(x =>
+        {
+            x.AddSourceComment($"Index:{x.Index}, Alias:{x.Alias}, MaxLv:{x.MaxLevel}, SourceType:{x.SourceType}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
+        });
+        Monitor.Log(query);
+
+        var expect = @"WITH
+    final AS (
+        SELECT
+            s.sale_id,
+            s.store_id,
+            GREATEST(s.sale_date, :lower_limit) AS journal_date,
+            s.price AS journal_price,
+            s.request_timestamp
+        FROM
+            /* Index:2, Alias:s, MaxLv:2, SourceType:PhysicalTable, Columns:[sale_id, store_id, sale_date, price, request_timestamp] */
+            /* Path:2-1-0 */
+            sales AS s
+        WHERE
+            NOT EXISTS (
+                SELECT
+                    *
+                FROM
+                    /* Index:3, Alias:x, MaxLv:2, SourceType:PhysicalTable, Columns:[sale_id] */
+                    /* Path:3-1-0 */
+                    sale_journals AS x
+                WHERE
+                    x.sale_id = s.sale_id
+            )
+            AND s.request_timestamp >= :lower_limit
+    )
+SELECT
+    f.sale_id,
+    f.store_id,
+    f.journal_date,
+    f.journal_price,
+    f.request_timestamp
+FROM
+    /* Index:1, Alias:f, MaxLv:1, SourceType:CommonTableExtension, Columns:[sale_id, store_id, journal_date, journal_price, request_timestamp] */
+    /* Path:1-0 */
+    final AS f";
 
         Assert.Equal(expect, query.ToText());
     }

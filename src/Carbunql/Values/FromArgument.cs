@@ -111,4 +111,27 @@ public class FromArgument : ValueBase
             yield return item;
         }
     }
+
+    public override IEnumerable<ValueBase> GetValues()
+    {
+        yield return this;
+
+        foreach (var item in Unit.GetValues())
+        {
+            yield return item;
+        }
+
+        foreach (var item in Value.GetValues())
+        {
+            yield return item;
+        }
+
+        if (OperatableValue != null)
+        {
+            foreach (var item in OperatableValue.Value.GetValues())
+            {
+                yield return item;
+            }
+        }
+    }
 }

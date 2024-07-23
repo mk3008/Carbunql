@@ -102,6 +102,16 @@ public static class RelationExtension
         return source.Table;
     }
 
+    public static SelectableTable On(this Relation source, string condition)
+    {
+        return source.On(_ => ValueParser.Parse(condition));
+    }
+
+    public static SelectableTable On(this Relation source, Func<string> builder)
+    {
+        return source.On(_ => ValueParser.Parse(builder()));
+    }
+
     /// <summary>
     /// Specifies a condition for the relation based on a column.
     /// </summary>

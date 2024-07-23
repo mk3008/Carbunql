@@ -8,7 +8,6 @@ using Carbunql.Values;
 using MessagePack;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 
 namespace Carbunql;
 
@@ -867,6 +866,27 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         return q;
     }
 
+    public SelectQuery AddCTEQuery(string query, string alias)
+    {
+        this.With(query).As(alias);
+        return this;
+    }
+
+    public SelectQuery AddFrom(string table, string alias)
+    {
+        if (FromClause != null) throw new InvalidOperationException("FromClause is already exists.");
+        FromClause = new FromClause(TableParser.Parse(table).ToSelectable(alias));
+        return this;
+    }
+
+    public SelectQuery AddFrom(string table, string alias, IEnumerable<string> selectColumns)
+    {
+        if (FromClause != null) throw new InvalidOperationException("FromClause is already exists.");
+        FromClause = new FromClause(TableParser.Parse(table).ToSelectable(alias));
+        selectColumns.ForEach(x => this.Select(new ColumnValue(alias, x)));
+        return this;
+    }
+
     /// <summary>
     /// Adds a column to the select clause.
     /// </summary>
@@ -876,6 +896,41 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     public SelectQuery AddSelect(string column, string alias)
     {
         this.Select(column).As(alias);
+        return this;
+    }
+
+    public SelectQuery AddSelectAll(string tableName)
+    {
+        var t = GetSelectableTables().Where(x => x.Alias.IsEqualNoCase(tableName)).First();
+
+        GetQuerySources()
+            .Where(x => x.Source.Equals(t))
+            .GetRootsBySource()
+            .EnsureAny()
+            .ForEach(x =>
+            {
+                x.ColumnNames.ForEach(column => this.Select(x.Alias, column));
+            });
+        return this;
+    }
+
+    public SelectQuery RenameSelect(string columnName, string newName)
+    {
+        var c = GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnName)).First();
+        c.SetAlias(newName);
+        return this;
+    }
+
+    public SelectQuery RemoveSelect(string columnName)
+    {
+        var c = GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnName)).First();
+        SelectClause!.Remove(c);
+        return this;
+    }
+
+    public SelectQuery RemoveSelectAll()
+    {
+        SelectClause = null;
         return this;
     }
 
@@ -939,9 +994,34 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             .EnsureAny()
             .ForEach(x =>
             {
-                x.Query.Where(adder(x));
+                if (x.ColumnNames.Where(column => column.IsEqualNoCase(columnName)).Any())
+                {
+                    x.Query.Where(adder(x));
+                }
             });
 
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a search condition.
+    /// </summary>
+    /// <param name="condition">search condition.</param>
+    /// <returns>The modified select query.</returns>
+    public SelectQuery AddWhere(string condition)
+    {
+        this.Where(condition);
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a search condition.
+    /// </summary>
+    /// <param name="adder">The function to create the search condition.</param>
+    /// <returns>The modified select query.</returns>
+    public SelectQuery AddWhere(Func<string> adder)
+    {
+        this.Where(adder());
         return this;
     }
 
@@ -1076,6 +1156,36 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
                 action?.Invoke(qs);
             });
 
+        return this;
+    }
+
+    public SelectQuery AddJoin(string joinType, string table, string alias, string condition)
+    {
+        var f = FromClause!;
+        var t = TableParser.Parse(table);
+        var r = f.Join(t.ToSelectable(alias), joinType);
+        r.On(condition);
+        return this;
+    }
+
+    public SelectQuery AddJoin(string joinType, string table, string alias, Func<string> builder)
+    {
+        var f = FromClause!;
+        var t = TableParser.Parse(table);
+        var r = f.Join(t.ToSelectable(alias), joinType);
+        r.On(builder);
+        return this;
+    }
+
+    public SelectQuery AddSelectQuery(string jointType, Func<SelectQuery, SelectQuery> builder)
+    {
+        AddOperatableValue(jointType, builder(this));
+        return this;
+    }
+
+    public SelectQuery ImportCTEQueries(SelectQuery from)
+    {
+        from.GetCommonTables().ForEach(x => this.With(x));
         return this;
     }
 }

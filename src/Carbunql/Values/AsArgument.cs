@@ -106,9 +106,28 @@ public class AsArgument : ValueBase
         {
             yield return item;
         }
-        foreach (var item in Type.GetColumns())
+    }
+
+    public override IEnumerable<ValueBase> GetValues()
+    {
+        yield return this;
+
+        foreach (var item in Value.GetValues())
         {
             yield return item;
+        }
+
+        foreach (var item in Type.GetValues())
+        {
+            yield return item;
+        }
+
+        if (OperatableValue != null)
+        {
+            foreach (var item in OperatableValue.Value.GetValues())
+            {
+                yield return item;
+            }
         }
     }
 }

@@ -90,4 +90,16 @@ public class WhereClause : IQueryCommandable
             yield return item;
         }
     }
+
+    public IEnumerable<SelectableTable> GetSelectableTables()
+    {
+        foreach (var item in Condition.GetValues()
+            .OfType<QueryContainer>()
+            .Select(x => x.Query)
+            .OfType<SelectQuery>()
+            .SelectMany(x => x.GetSelectableTables()))
+        {
+            yield return item;
+        }
+    }
 }

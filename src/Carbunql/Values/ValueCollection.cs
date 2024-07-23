@@ -153,11 +153,21 @@ public class ValueCollection : ValueBase, IList<ValueBase>, IQueryCommandable
     /// <inheritdoc/>
     public override IEnumerable<ValueBase> GetValues()
     {
+        yield return this;
+
         foreach (var item in this)
         {
             foreach (var value in item.GetValues())
             {
                 yield return value;
+            }
+        }
+
+        if (OperatableValue != null)
+        {
+            foreach (var item in OperatableValue.Value.GetValues())
+            {
+                yield return item;
             }
         }
     }

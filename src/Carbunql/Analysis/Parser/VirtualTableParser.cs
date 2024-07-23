@@ -15,7 +15,7 @@ public class VirtualTableParser
     /// <returns>The parsed virtual table.</returns>
     public static VirtualTable Parse(ITokenReader r)
     {
-        r.Read("(");
+        r.ReadOrDefault("(");
 
         var first = r.Peek();
 
