@@ -144,4 +144,26 @@ public class CastValue : ValueBase
             yield return item;
         }
     }
+
+    public override IEnumerable<ValueBase> GetValues()
+    {
+        yield return this;
+
+        foreach (var item in Inner.GetValues())
+        {
+            yield return item;
+        }
+        foreach (var item in Type.GetValues())
+        {
+            yield return item;
+        }
+
+        if (OperatableValue != null)
+        {
+            foreach (var item in OperatableValue.Value.GetValues())
+            {
+                yield return item;
+            }
+        }
+    }
 }
