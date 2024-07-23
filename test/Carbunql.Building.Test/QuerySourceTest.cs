@@ -1143,7 +1143,7 @@ from
 sales s
 inner join target t on s.sale_id = t.sale_id --use relation ship
 where
-exists (select * from dat where x.sale_id = s.sale_id) --use wildcard";
+exists (select * from dat x where x.sale_id = s.sale_id) --use wildcard";
 
         var query = new SelectQuery(sql);
         query.GetQuerySources().ForEach(x =>
@@ -1168,7 +1168,9 @@ WHERE
         SELECT
             *
         FROM
-            dat
+            /* Index:3, Alias:x, MaxLv:1, SourceType:PhysicalTable, Columns:[sale_id] */
+            /* Path:3-0 */
+            dat AS x
         WHERE
             x.sale_id = s.sale_id
     )";
@@ -1254,6 +1256,56 @@ GROUP BY
         Assert.Equal(expect, query.ToText());
     }
 
+    [Fact]
+    public void ExistsTest()
+    {
+        var sql = @"
+with
+target as (
+select * from dat
+)
+select
+*
+from
+sale s
+where
+exists (select * from target x where x.sale_id = s.sale_id)";
 
+        var query = new SelectQuery(sql);
+        query.GetQuerySources().ForEach(x =>
+        {
+            x.AddSourceComment($"Index:{x.Index}, Alias:{x.Alias}, MaxLv:{x.MaxLevel}, SourceType:{x.SourceType}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
+        });
+        Monitor.Log(query);
 
+        var expect = @"WITH
+    target AS (
+        SELECT
+            *
+        FROM
+            /* Index:3, Alias:dat, MaxLv:2, SourceType:PhysicalTable, Columns:[] */
+            /* Path:3-2-0 */
+            dat
+    )
+SELECT
+    *
+FROM
+    /* Index:1, Alias:s, MaxLv:1, SourceType:PhysicalTable, Columns:[sale_id] */
+    /* Path:1-0 */
+    sale AS s
+WHERE
+    EXISTS (
+        SELECT
+            *
+        FROM
+            /* Index:2, Alias:x, MaxLv:1, SourceType:CommonTableExtension, Columns:[sale_id] */
+            /* Path:2-0 */
+            target AS x
+        WHERE
+            x.sale_id = s.sale_id
+    )";
+
+        Assert.Equal(expect, query.ToText());
+    }
 }
