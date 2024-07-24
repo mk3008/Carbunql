@@ -465,9 +465,8 @@ FROM
     }
 
     [Fact]
-    public void MergeTest()
+    public void ImmutableInsertTest()
     {
-
         var sql = """
     select
         s.sale_id
@@ -587,6 +586,470 @@ SELECT
     c.collect_price AS journal_price
 FROM
     diff AS c";
+
+        Assert.Equal(expect, query.ToText(), true, true, true);
+    }
+
+    private string SelectCustomers => """
+    SELECT
+        c.customer_id,
+        c.first_name,
+        c.last_name,
+        c.birthday,
+        c.city
+    FROM
+        customers AS c
+    ORDER BY
+        c.first_name,
+        c.last_name,
+        c.birthday,
+        c.city,
+        c.customer_id
+    LIMIT 20
+    OFFSET :page_index;
+    """;
+
+    [Fact]
+    public void DynamicConditionTest_City_BirthDay()
+    {
+        var pageIndex = 0;
+
+        var firstName = "Ichiro";
+        var lastName = "Tanaka";
+        var city = "Tokyo";
+        DateTime? birthday = new DateTime(1980, 5, 15);
+
+        var query = new SelectQuery(SelectCustomers)
+            .AddParameter(new QueryParameter(":page_index", pageIndex));
+
+        if (!string.IsNullOrEmpty(firstName))
+        {
+            var pname = ":first_name";
+            query.AddParameter(new QueryParameter(pname, firstName))
+                        .AddWhere("first_name", x => $"{x.Alias}.first_name = {pname}");
+        }
+        if (!string.IsNullOrEmpty(lastName))
+        {
+            var pname = ":last_name";
+            query.AddParameter(new QueryParameter(pname, lastName))
+                            .AddWhere("last_name", x => $"{x.Alias}.last_name = {pname}");
+        }
+        if (!string.IsNullOrEmpty(city))
+        {
+            var pname = ":city";
+            query.AddParameter(new QueryParameter(pname, lastName))
+                .AddWhere("city", x => $"{x.Alias}.city = {pname}");
+        }
+        if (birthday != null)
+        {
+            var pname = ":birthday";
+            query.AddParameter(new QueryParameter(pname, birthday.Value))
+                .AddWhere("birthday", x => $"{x.Alias}.birthday = {pname}");
+        }
+
+        Monitor.Log(query, exportTokens: false);
+
+        var expect = @"/*
+  :page_index = 0
+  :first_name = 'Ichiro'
+  :last_name = 'Tanaka'
+  :city = 'Tanaka'
+  :birthday = '1980/05/15 0:00:00'
+*/
+SELECT
+    c.customer_id,
+    c.first_name,
+    c.last_name,
+    c.birthday,
+    c.city
+FROM
+    customers AS c
+WHERE
+    c.first_name = :first_name
+    AND c.last_name = :last_name
+    AND c.city = :city
+    AND c.birthday = :birthday
+ORDER BY
+    c.first_name,
+    c.last_name,
+    c.birthday,
+    c.city,
+    c.customer_id
+LIMIT
+    20 OFFSET :page_index";
+
+        Assert.Equal(expect, query.ToText(), true, true, true);
+    }
+
+    [Fact]
+    public void DynamicConditionTest_SaleId_Exists()
+    {
+        var pageIndex = 0;
+
+        var firstName = "Ichiro";
+        var lastName = "Tanaka";
+        long? customerId = 1234567890;
+        long? saleId = 9999999;
+
+        var query = new SelectQuery(SelectCustomers)
+            .AddParameter(new QueryParameter(":page_index", pageIndex));
+
+        if (!string.IsNullOrEmpty(firstName))
+        {
+            var pname = ":first_name";
+            query.AddParameter(new QueryParameter(pname, firstName))
+                .AddWhere("first_name", x => $"{x.Alias}.first_name = {pname}");
+        }
+        if (!string.IsNullOrEmpty(lastName))
+        {
+            var pname = ":last_name";
+            query.AddParameter(new QueryParameter(pname, lastName))
+                            .AddWhere("last_name", x => $"{x.Alias}.last_name = {pname}");
+        }
+        if (customerId != null)
+        {
+            var pname = ":customer_id";
+            query.AddParameter(new QueryParameter(pname, customerId.Value))
+                .AddWhere("customer_id", x => $"{x.Alias}.customer_id = {pname}");
+        }
+        if (saleId != null)
+        {
+            var pname = ":sale_id";
+            query.AddParameter(new QueryParameter(pname, saleId.Value))
+                .AddExists(["customer_id"], "sales");
+        }
+
+        Monitor.Log(query, exportTokens: false);
+
+        var expect = @"/*
+  :page_index = 0
+  :first_name = 'Ichiro'
+  :last_name = 'Tanaka'
+  :customer_id = 1234567890
+  :sale_id = 9999999
+*/
+SELECT
+    c.customer_id,
+    c.first_name,
+    c.last_name,
+    c.birthday,
+    c.city
+FROM
+    customers AS c
+WHERE
+    c.first_name = :first_name
+    AND c.last_name = :last_name
+    AND c.customer_id = :customer_id
+    AND EXISTS (
+        SELECT
+            *
+        FROM
+            sales AS x
+        WHERE
+            x.customer_id = c.customer_id
+    )
+ORDER BY
+    c.first_name,
+    c.last_name,
+    c.birthday,
+    c.city,
+    c.customer_id
+LIMIT
+    20 OFFSET :page_index";
+
+        Assert.Equal(expect, query.ToText(), true, true, true);
+    }
+
+    [Fact]
+    public void DynamicConditionTest_SaleId_Join()
+    {
+        var pageIndex = 0;
+
+        var firstName = "Ichiro";
+        var lastName = "Tanaka";
+        long? customerId = 1234567890;
+        long? saleId = 9999999;
+
+        var query = new SelectQuery(SelectCustomers)
+            .AddParameter(new QueryParameter(":page_index", pageIndex));
+
+        if (!string.IsNullOrEmpty(firstName))
+        {
+            var pname = ":first_name";
+            query.AddParameter(new QueryParameter(pname, firstName))
+                .AddWhere("first_name", x => $"{x.Alias}.first_name = {pname}");
+        }
+        if (!string.IsNullOrEmpty(lastName))
+        {
+            var pname = ":last_name";
+            query.AddParameter(new QueryParameter(pname, lastName))
+                            .AddWhere("last_name", x => $"{x.Alias}.last_name = {pname}");
+        }
+        if (customerId != null)
+        {
+            var pname = ":customer_id";
+            query.AddParameter(new QueryParameter(pname, customerId.Value))
+                .AddWhere("customer_id", x => $"{x.Alias}.customer_id = {pname}");
+        }
+        if (saleId != null)
+        {
+            var pname = ":sale_id";
+            query.AddParameter(new QueryParameter(pname, saleId.Value))
+                .AddJoin("inner join", "sales", "s", "c.customer_id = s.customer_id")
+                .AddWhere($"s.sale_id = {pname}");
+        }
+
+        Monitor.Log(query, exportTokens: false);
+
+        var expect = @"/*
+  :page_index = 0
+  :first_name = 'Ichiro'
+  :last_name = 'Tanaka'
+  :customer_id = 1234567890
+  :sale_id = 9999999
+*/
+SELECT
+    c.customer_id,
+    c.first_name,
+    c.last_name,
+    c.birthday,
+    c.city
+FROM
+    customers AS c
+    INNER JOIN sales AS s ON c.customer_id = s.customer_id
+WHERE
+    c.first_name = :first_name
+    AND c.last_name = :last_name
+    AND c.customer_id = :customer_id
+    AND s.sale_id = :sale_id
+ORDER BY
+    c.first_name,
+    c.last_name,
+    c.birthday,
+    c.city,
+    c.customer_id
+LIMIT
+    20 OFFSET :page_index";
+
+        Assert.Equal(expect, query.ToText(), true, true, true);
+    }
+
+    [Fact]
+    public void DynamicConditionTest_StoreName_Exists()
+    {
+        var pageIndex = 0;
+
+        var firstName = "Ichiro";
+        var lastName = "Tanaka";
+        long? customerId = 1234567890;
+        var storeName = "Osaka";
+
+        var query = new SelectQuery(SelectCustomers)
+            .AddParameter(new QueryParameter(":page_index", pageIndex));
+
+        if (!string.IsNullOrEmpty(storeName))
+        {
+            var pname = ":store_name";
+            query.AddCTEQuery("select s.sale_id, s.customer_id, st.store_name from sales s inner join store st on s.store_id = st.store_id", "target_sales")
+                .AddExists(["customer_id"], "target_sales")
+                .AddParameter(new QueryParameter(pname, storeName))
+                .AddWhere("store_name", x => $"{x.Alias}.store_name = {pname}");
+        }
+        if (!string.IsNullOrEmpty(firstName))
+        {
+            var pname = ":first_name";
+            query.AddParameter(new QueryParameter(pname, firstName))
+                .AddWhere("first_name", x => $"{x.Alias}.first_name = {pname}");
+        }
+        if (!string.IsNullOrEmpty(lastName))
+        {
+            var pname = ":last_name";
+            query.AddParameter(new QueryParameter(pname, lastName))
+                .AddWhere("last_name", x => $"{x.Alias}.last_name = {pname}");
+        }
+        if (customerId != null)
+        {
+            var pname = ":customer_id";
+            query.AddParameter(new QueryParameter(pname, customerId.Value))
+                .AddWhere("customer_id", x => $"{x.Alias}.customer_id = {pname}");
+        }
+
+        Monitor.Log(query, exportTokens: false);
+
+        var expect = @"/*
+  :page_index = 0
+  :store_name = 'Osaka'
+  :first_name = 'Ichiro'
+  :last_name = 'Tanaka'
+  :customer_id = 1234567890
+*/
+WITH
+    target_sales AS (
+        SELECT
+            s.sale_id,
+            s.customer_id,
+            st.store_name
+        FROM
+            sales AS s
+            INNER JOIN store AS st ON s.store_id = st.store_id
+        WHERE
+            st.store_name = :store_name
+            AND s.customer_id = :customer_id
+    )
+SELECT
+    c.customer_id,
+    c.first_name,
+    c.last_name,
+    c.birthday,
+    c.city
+FROM
+    customers AS c
+WHERE
+    EXISTS (
+        SELECT
+            *
+        FROM
+            target_sales AS x
+        WHERE
+            x.customer_id = c.customer_id
+    )
+    AND c.first_name = :first_name
+    AND c.last_name = :last_name
+    AND c.customer_id = :customer_id
+ORDER BY
+    c.first_name,
+    c.last_name,
+    c.birthday,
+    c.city,
+    c.customer_id
+LIMIT
+    20 OFFSET :page_index";
+
+        Assert.Equal(expect, query.ToText(), true, true, true);
+    }
+
+    [Fact]
+    public void DynamicConditionTest()
+    {
+        var pageIndex = 0;
+
+        var firstName = "Ichiro";
+        var lastName = "Tanaka";
+        long? customerId = 1234567890;
+        long? saleId = 9999999;
+        var storeName = "Osaka";
+        var city = "Tokyo";
+        DateTime? birthday = new DateTime(1980, 5, 15);
+
+        var query = new SelectQuery(SelectCustomers)
+            .AddParameter(new QueryParameter(":page_index", pageIndex));
+
+        // add CTE
+        if (!string.IsNullOrEmpty(storeName) || saleId != null)
+        {
+            query.AddCTEQuery("select s.sale_id, s.customer_id, st.store_name from sales s inner join store st on s.store_id = st.store_id", "target_sales")
+                .AddExists(["customer_id"], "target_sales");
+        }
+
+        if (saleId != null)
+        {
+            var pname = ":sale_id";
+            query.AddParameter(new QueryParameter(pname, storeName))
+                .AddWhere("sale_id", x => $"{x.Alias}.sale_id = {pname}");
+        }
+        if (!string.IsNullOrEmpty(storeName))
+        {
+            var pname = ":store_name";
+            query.AddParameter(new QueryParameter(pname, storeName))
+                .AddWhere("store_name", x => $"{x.Alias}.store_name = {pname}");
+        }
+        if (!string.IsNullOrEmpty(firstName))
+        {
+            var pname = ":first_name";
+            query.AddParameter(new QueryParameter(pname, firstName))
+                .AddWhere("first_name", x => $"{x.Alias}.first_name = {pname}");
+        }
+        if (!string.IsNullOrEmpty(lastName))
+        {
+            var pname = ":last_name";
+            query.AddParameter(new QueryParameter(pname, lastName))
+                .AddWhere("last_name", x => $"{x.Alias}.last_name = {pname}");
+        }
+        if (customerId != null)
+        {
+            var pname = ":customer_id";
+            query.AddParameter(new QueryParameter(pname, customerId.Value))
+                .AddWhere("customer_id", x => $"{x.Alias}.customer_id = {pname}");
+        }
+        if (!string.IsNullOrEmpty(city))
+        {
+            var pname = ":city";
+            query.AddParameter(new QueryParameter(pname, lastName))
+                .AddWhere("city", x => $"{x.Alias}.city = {pname}");
+        }
+        if (birthday != null)
+        {
+            var pname = ":birthday";
+            query.AddParameter(new QueryParameter(pname, birthday.Value))
+                .AddWhere("birthday", x => $"{x.Alias}.birthday = {pname}");
+        }
+
+        Monitor.Log(query, exportTokens: false);
+
+        var expect = @"/*
+  :page_index = 0
+  :sale_id = 'Osaka'
+  :store_name = 'Osaka'
+  :first_name = 'Ichiro'
+  :last_name = 'Tanaka'
+  :customer_id = 1234567890
+  :city = 'Tanaka'
+  :birthday = '1980/05/15 0:00:00'
+*/
+WITH
+    target_sales AS (
+        SELECT
+            s.sale_id,
+            s.customer_id,
+            st.store_name
+        FROM
+            sales AS s
+            INNER JOIN store AS st ON s.store_id = st.store_id
+        WHERE
+            s.sale_id = :sale_id
+            AND st.store_name = :store_name
+            AND s.customer_id = :customer_id
+    )
+SELECT
+    c.customer_id,
+    c.first_name,
+    c.last_name,
+    c.birthday,
+    c.city
+FROM
+    customers AS c
+WHERE
+    EXISTS (
+        SELECT
+            *
+        FROM
+            target_sales AS x
+        WHERE
+            x.customer_id = c.customer_id
+    )
+    AND c.first_name = :first_name
+    AND c.last_name = :last_name
+    AND c.customer_id = :customer_id
+    AND c.city = :city
+    AND c.birthday = :birthday
+ORDER BY
+    c.first_name,
+    c.last_name,
+    c.birthday,
+    c.city,
+    c.customer_id
+LIMIT
+    20 OFFSET :page_index";
 
         Assert.Equal(expect, query.ToText(), true, true, true);
     }

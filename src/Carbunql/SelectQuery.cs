@@ -1188,4 +1188,10 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         from.GetCommonTables().ForEach(x => this.With(x));
         return this;
     }
+
+    public SelectQuery AddParameter(QueryParameter prm)
+    {
+        Parameters.Add(prm);
+        return this;
+    }
 }
