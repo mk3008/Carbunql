@@ -145,4 +145,32 @@ public class CaseExpression : ValueBase
             }
         }
     }
+
+    public override IEnumerable<ValueBase> GetValues()
+    {
+        yield return this;
+
+        if (CaseCondition != null)
+        {
+            foreach (var item in CaseCondition.GetValues())
+            {
+                yield return item;
+            }
+        }
+        foreach (var exp in WhenExpressions)
+        {
+            foreach (var item in exp.GetValues())
+            {
+                yield return item;
+            }
+        }
+
+        if (OperatableValue != null)
+        {
+            foreach (var item in OperatableValue.Value.GetValues())
+            {
+                yield return item;
+            }
+        }
+    }
 }
