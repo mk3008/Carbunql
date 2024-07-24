@@ -850,7 +850,7 @@ LIMIT
         if (!string.IsNullOrEmpty(storeName))
         {
             var pname = ":store_name";
-            query.AddCTEQuery("select s.sale_id, s.customer_id, st.store_name from sales s inner join store st on s.store_id = st.store_id", "target_sales")
+            query.AddCTEQuery("select s.sale_id, s.customer_id, st.store_name from sales s inner join stores st on s.store_id = st.store_id", "target_sales")
                 .AddExists(["customer_id"], "target_sales")
                 .AddParameter(new QueryParameter(pname, storeName))
                 .AddWhere("store_name", x => $"{x.Alias}.store_name = {pname}");
@@ -891,7 +891,7 @@ WITH
             st.store_name
         FROM
             sales AS s
-            INNER JOIN store AS st ON s.store_id = st.store_id
+            INNER JOIN stores AS st ON s.store_id = st.store_id
         WHERE
             st.store_name = :store_name
             AND s.customer_id = :customer_id
@@ -947,7 +947,7 @@ LIMIT
         // add CTE
         if (!string.IsNullOrEmpty(storeName) || saleId != null)
         {
-            query.AddCTEQuery("select s.sale_id, s.customer_id, st.store_name from sales s inner join store st on s.store_id = st.store_id", "target_sales")
+            query.AddCTEQuery("select s.sale_id, s.customer_id, st.store_name from sales s inner join stores st on s.store_id = st.store_id", "target_sales")
                 .AddExists(["customer_id"], "target_sales");
         }
 
@@ -1014,7 +1014,7 @@ WITH
             st.store_name
         FROM
             sales AS s
-            INNER JOIN store AS st ON s.store_id = st.store_id
+            INNER JOIN stores AS st ON s.store_id = st.store_id
         WHERE
             s.sale_id = :sale_id
             AND st.store_name = :store_name
