@@ -144,4 +144,19 @@ public class WhenExpression : IQueryCommandable, IColumnContainer
             yield return item;
         }
     }
+
+    public IEnumerable<ValueBase> GetValues()
+    {
+        if (Condition != null)
+        {
+            foreach (var item in Condition.GetValues())
+            {
+                yield return item;
+            }
+        }
+        foreach (var item in Value.GetValues())
+        {
+            yield return item;
+        }
+    }
 }

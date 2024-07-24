@@ -1391,4 +1391,49 @@ FROM
 
         Assert.Equal(expect, query.ToText());
     }
+
+    [Fact]
+    public void CaseTest()
+    {
+        var sql = @"
+SELECT employee_id, first_name, last_name, salary
+FROM employees
+WHERE
+    CASE
+        WHEN (SELECT AVG(salary) FROM employees) < 50000 THEN salary > 40000
+        ELSE salary > 60000
+    END";
+
+        var query = new SelectQuery(sql);
+        query.GetQuerySources().ForEach(x =>
+        {
+            x.AddSourceComment($"Index:{x.Index}, Alias:{x.Alias}, MaxLv:{x.MaxLevel}, SourceType:{x.SourceType}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
+        });
+        Monitor.Log(query);
+
+        var expect = @"SELECT
+    employee_id,
+    first_name,
+    last_name,
+    salary
+FROM
+    /* Index:1, Alias:employees, MaxLv:1, SourceType:PhysicalTable, Columns:[employee_id, first_name, last_name, salary] */
+    /* Path:1-0 */
+    employees
+WHERE
+    CASE
+        WHEN (
+            SELECT
+                AVG(salary)
+            FROM
+                /* Index:2, Alias:employees, MaxLv:1, SourceType:PhysicalTable, Columns:[employee_id, first_name, last_name, salary] */
+                /* Path:2-0 */
+                employees
+        ) < 50000 THEN salary > 40000
+        ELSE salary > 60000
+    END";
+
+        Assert.Equal(expect, query.ToText());
+    }
 }
