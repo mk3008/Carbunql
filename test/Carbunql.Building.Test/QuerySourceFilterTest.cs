@@ -933,11 +933,11 @@ LIMIT
     {
         var pageIndex = 0;
 
-        var firstName = "Ichiro";
-        var lastName = "Tanaka";
-        long? customerId = 1234567890;
-        long? saleId = 9999999;
-        var storeName = "Osaka";
+        var first_name = "Ichiro";
+        var last_name = "Tanaka";
+        long? customer_id = 1234567890;
+        long? sale_id = 9999999;
+        var store_name = "Osaka";
         var city = "Tokyo";
         DateTime? birthday = new DateTime(1980, 5, 15);
 
@@ -945,9 +945,9 @@ LIMIT
             .AddParameter(new QueryParameter(":page_index", pageIndex));
 
         // add CTE
-        if (!string.IsNullOrEmpty(storeName) || saleId != null)
+        if (!string.IsNullOrEmpty(store_name) || sale_id != null)
         {
-            if (!string.IsNullOrEmpty(storeName))
+            if (!string.IsNullOrEmpty(store_name))
             {
                 query.AddCTEQuery("select s.sale_id, s.customer_id, st.store_name from sales s inner join stores st on s.store_id = st.store_id", "target_sales")
                     .AddExists(["customer_id"], "target_sales");
@@ -959,59 +959,34 @@ LIMIT
             }
         }
 
-        if (saleId != null)
+        //list
+        var items = new Dictionary<string, object>();
+        if (sale_id.HasValue) items.Add(nameof(sale_id), sale_id.Value);
+        if (!string.IsNullOrEmpty(store_name)) items.Add(nameof(store_name), store_name);
+        if (!string.IsNullOrEmpty(first_name)) items.Add(nameof(first_name), first_name);
+        if (!string.IsNullOrEmpty(last_name)) items.Add(nameof(last_name), last_name);
+        if (!string.IsNullOrEmpty(city)) items.Add(nameof(city), city);
+        if (customer_id.HasValue) items.Add(nameof(customer_id), customer_id.Value);
+        if (birthday.HasValue) items.Add(nameof(birthday), birthday.Value);
+
+        foreach (var item in items)
         {
-            var pname = ":sale_id";
-            query.AddParameter(new QueryParameter(pname, storeName))
-                .AddWhere("sale_id", x => $"{x.Alias}.sale_id = {pname}");
-        }
-        if (!string.IsNullOrEmpty(storeName))
-        {
-            var pname = ":store_name";
-            query.AddParameter(new QueryParameter(pname, storeName))
-                .AddWhere("store_name", x => $"{x.Alias}.store_name = {pname}");
-        }
-        if (!string.IsNullOrEmpty(firstName))
-        {
-            var pname = ":first_name";
-            query.AddParameter(new QueryParameter(pname, firstName))
-                .AddWhere("first_name", x => $"{x.Alias}.first_name = {pname}");
-        }
-        if (!string.IsNullOrEmpty(lastName))
-        {
-            var pname = ":last_name";
-            query.AddParameter(new QueryParameter(pname, lastName))
-                .AddWhere("last_name", x => $"{x.Alias}.last_name = {pname}");
-        }
-        if (customerId != null)
-        {
-            var pname = ":customer_id";
-            query.AddParameter(new QueryParameter(pname, customerId.Value))
-                .AddWhere("customer_id", x => $"{x.Alias}.customer_id = {pname}");
-        }
-        if (!string.IsNullOrEmpty(city))
-        {
-            var pname = ":city";
-            query.AddParameter(new QueryParameter(pname, lastName))
-                .AddWhere("city", x => $"{x.Alias}.city = {pname}");
-        }
-        if (birthday != null)
-        {
-            var pname = ":birthday";
-            query.AddParameter(new QueryParameter(pname, birthday.Value))
-                .AddWhere("birthday", x => $"{x.Alias}.birthday = {pname}");
+            var column = item.Key;
+            var pname = $":{column}";
+            query.AddParameter(new QueryParameter(pname, item.Value))
+                .AddWhere(column, x => $"{x.Alias}.{column} = {pname}");
         }
 
         Monitor.Log(query, exportTokens: false);
 
         var expect = @"/*
   :page_index = 0
-  :sale_id = 'Osaka'
+  :sale_id = 9999999
   :store_name = 'Osaka'
   :first_name = 'Ichiro'
   :last_name = 'Tanaka'
+  :city = 'Tokyo'
   :customer_id = 1234567890
-  :city = 'Tanaka'
   :birthday = '1980/05/15 0:00:00'
 */
 WITH
@@ -1047,8 +1022,8 @@ WHERE
     )
     AND c.first_name = :first_name
     AND c.last_name = :last_name
-    AND c.customer_id = :customer_id
     AND c.city = :city
+    AND c.customer_id = :customer_id
     AND c.birthday = :birthday
 ORDER BY
     c.first_name,
