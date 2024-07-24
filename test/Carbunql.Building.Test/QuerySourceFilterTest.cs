@@ -947,8 +947,16 @@ LIMIT
         // add CTE
         if (!string.IsNullOrEmpty(storeName) || saleId != null)
         {
-            query.AddCTEQuery("select s.sale_id, s.customer_id, st.store_name from sales s inner join stores st on s.store_id = st.store_id", "target_sales")
-                .AddExists(["customer_id"], "target_sales");
+            if (!string.IsNullOrEmpty(storeName))
+            {
+                query.AddCTEQuery("select s.sale_id, s.customer_id, st.store_name from sales s inner join stores st on s.store_id = st.store_id", "target_sales")
+                    .AddExists(["customer_id"], "target_sales");
+            }
+            else
+            {
+                query.AddCTEQuery("select s.sale_id, s.customer_id from sales s", "target_sales")
+                    .AddExists(["customer_id"], "target_sales");
+            }
         }
 
         if (saleId != null)
