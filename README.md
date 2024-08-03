@@ -5,358 +5,515 @@
 [![SqModel](https://img.shields.io/nuget/v/Carbunql.svg)](https://www.nuget.org/packages/Carbunql/) 
 [![SqModel](https://img.shields.io/nuget/dt/Carbunql.svg)](https://www.nuget.org/packages/Carbunql/) 
 
-This C# library provides a feature to convert a selection query into an object. By objectifying, it becomes easier to modify the selection query and perform more complex manipulations such as adding join expressions. 
+This C# library can convert select queries into object models, and also convert object models back into SQL select queries.
 
-Using this library allows for a more versatile use of existing selection queries.
+This library allows you to dynamically modify columns, search conditions, and even CTEs (Common Table Expressions) for select queries, dramatically increasing the reusability of your select queries.
 
-## Demo
-
-This code adds an inner join expression to an existing select query and also adds a where condition.
-
-No DBMS is required to run this demo 😊
+## Demo 1: Dynamic Filtering
 
 ```cs
 using Carbunql;
-using Carbunql.Building;
-using Carbunql.Clauses;
 
-// Convert select query to SelectQuery class.
-SelectQuery sq = new SelectQuery("select s.sale_id, s.shop_id, s.sale_price from sales s");
-
-/*
- Use the "ToCommand" method to convert the SelectQuery class to a SQL statement.
-
-    SELECT
-        s.sale_id,
-        s.sale_price
-    FROM
-        sales AS s
- */
-Console.WriteLine(sq.ToCommand().CommandText);
-
-//Getting the From clause.
-FromClause from = sq.FromClause!;
-
-//Get the root table defined in the From clause.
-SelectableTable s = from.Root;
-
-//Inner join with "shops" master.
-//The column used in the join expression is "shop_id".
-SelectableTable sh = from.InnerJoin("shops").As("sh").On(s, "shop_id");
-
-//Add column "shop_name" in "shops" master to select columns.
-sq.Select(sh, "shop_name");
-
-//Added extraction condition to where clause.
-string parameterName = sq.AddParameter(":shop_id", 1);
-sq.Where(sh, "shop_id").Equal(parameterName);
-
-/*
- The result written back to the select query.
-
-	SELECT
-	    s.sale_id,
-	    s.shop_id,
-	    s.sale_price,
-	    sh.shop_name
-	FROM
-	    sales AS s
-	    INNER JOIN shops AS sh ON s.shop_id = sh.shop_id
-	WHERE
-	    sh.shop_id = :shop_id
-*/
-Console.WriteLine(sq.ToCommand().CommandText);
-
-/*
- You can also get parameters from the ToCommand method.
- 
- 　　:shop_id = 1
- */
-foreach (KeyValuePair<string, object?> prm in sq.ToCommand().Parameters)
+internal class Program
 {
-	Console.WriteLine($"{prm.Key} = {prm.Value}");
-}
+    private static void Main(string[] args)
+    {
+        Console.WriteLine("Enter minimum price (or leave blank to omit):");
+        string? minPriceInput = Console.ReadLine();
+        decimal? minPrice = string.IsNullOrEmpty(minPriceInput) ? null : Convert.ToDecimal(minPriceInput);
 
-/*
- If you use "Carbunql.Dapper", you can execute SQL as SelectQuery class.
- https://www.nuget.org/packages/Carbunql.Dapper
- */
-//var cn = IDbConnection;
-//cn.Execute(sq);
+        Console.WriteLine("Enter maximum price (or leave blank to omit):");
+        string? maxPriceInput = Console.ReadLine();
+        decimal? maxPrice = string.IsNullOrEmpty(maxPriceInput) ? null : Convert.ToDecimal(maxPriceInput);
+
+        Console.WriteLine("Enter category (or leave blank to omit):");
+        string? category = Console.ReadLine();
+
+        Console.WriteLine("Enter in-stock status (true/false) (or leave blank to omit):");
+        string? inStockInput = Console.ReadLine();
+        bool? inStock = string.IsNullOrEmpty(inStockInput) ? null : Convert.ToBoolean(inStockInput);
+
+        var query = GenerateProductQuery(minPrice, maxPrice, category, inStock);
+        Console.WriteLine("Generated SQL Query:");
+        Console.WriteLine(query);
+    }
+
+    private static string GenerateProductQuery(decimal? minPrice, decimal? maxPrice, string? category, bool? inStock)
+    {
+        var sql = """
+    SELECT
+        p.product_id,
+        p.product_name,
+        p.price,
+        p.category,
+        p.in_stock
+    FROM
+        product as p
+    """;
+
+        // Convert the selection query to an object
+        var sq = new SelectQuery(sql);
+
+        // Dynamically add search conditions
+        if (minPrice != null)
+        {
+            sq.AddWhere("price", (source, column) => $"{source.Alias}.{column} >= {minPrice.Value}");
+        }
+        if (maxPrice != null)
+        {
+            sq.AddWhere("price", (source, column) => $"{source.Alias}.{column} <= {maxPrice.Value}");
+        }
+        if (!string.IsNullOrEmpty(category))
+        {
+            // Parameterize string values before adding them to search conditions
+            var pname = ":category";
+            sq.AddParameter(new QueryParameter(pname, category))
+                .AddWhere("category", (source, column) => $"{source.Alias}.{column} = {pname}");
+        }
+        if (inStock != null)
+        {
+            sq.AddWhere("in_stock", (source, column) => $"{source.Alias}.{column} = {inStock.Value}");
+        }
+        return sq.ToText();
+    }
+}
 ```
 
-It is also possible to convert existing queries into subqueries and CTEs.
-Additionally, you can convert them to add, update, delete, and merge queries.
 
-[Please refer to the online site for the above conversion demo](https://mk3008.github.io/Carbunql).
+### Example
 
-![demosite screenshot](https://user-images.githubusercontent.com/7686540/218080149-27085450-563a-4706-8ae4-5fb365c090f1.png)
+```
+Enter minimum price (or leave blank to omit):
+
+Enter maximum price (or leave blank to omit):
+100
+Enter category (or leave blank to omit):
+tea
+Enter in-stock status (true/false) (or leave blank to omit):
+true
+Generated SQL Query:
+/*
+  :category = 'tea'
+*/
+SELECT
+    p.product_id,
+    p.product_name,
+    p.price,
+    p.category,
+    p.in_stock
+FROM
+    product AS p
+WHERE
+    p.price <= 100
+    AND p.category = :category
+    AND p.in_stock = True
+```
+
+## Demo 2: Dynamic column selection
+```cs
+using Carbunql;
+
+public class Program
+{
+    public static void Main()
+    {
+        // Define available columns
+        var availableColumns = new Dictionary<string, string>
+        {
+            { "1", "customer_name" },
+            { "2", "email" },
+            { "3", "purchase_history" }
+        };
+
+        Console.WriteLine("Available columns to select:");
+        foreach (var column in availableColumns)
+        {
+            Console.WriteLine($"{column.Key}: {column.Value}");
+        }
+
+        Console.WriteLine("Enter the numbers of the columns you want to include, separated by commas (e.g., 1,2):");
+        string? input = Console.ReadLine();
+        var selectedColumnNumbers = input?.Split(',', StringSplitOptions.RemoveEmptyEntries);
+
+        var selectedColumns = new List<string>();
+        if (selectedColumnNumbers != null)
+        {
+            foreach (var number in selectedColumnNumbers)
+            {
+                if (availableColumns.TryGetValue(number.Trim(), out var column))
+                {
+                    selectedColumns.Add(column);
+                }
+            }
+        }
+
+        var query = GenerateCustomReportQuery(selectedColumns);
+        Console.WriteLine("Generated SQL Query:");
+        Console.WriteLine(query);
+    }
+
+    public static string GenerateCustomReportQuery(List<string> columns)
+    {
+        var sql = """
+            SELECT
+                customer_name,
+                email,
+                purchase_history
+            FROM
+                customer
+            """;
+
+        // Convert the query to an object
+        var sq = new SelectQuery(sql);
+
+        // Restrict the selected columns
+        sq.FilterInColumns(columns);
+
+        // Convert the query to text format
+        return sq.ToText();
+    }
+}
+```
+
+### Example
+```
+Available columns to select:
+1: customer_name
+2: email
+3: purchase_history
+Enter the numbers of the columns you want to include, separated by commas (e.g., 1,2):
+1,3
+Generated SQL Query:
+SELECT
+    customer_name,
+    purchase_history
+FROM
+    customer
+```
+
+## Demo 3: Dynamic CTE creation
+
+
+```cs
+using Carbunql;
+
+public class Program
+{
+    public static void Main()
+    {
+        Console.WriteLine("Which month to summarize? (yyyy-mm-dd)");
+        DateTime summaryMonth = Convert.ToDateTime(Console.ReadLine());
+
+        Console.WriteLine("Include monthly summary rows? (true/false)");
+        bool includeMonthly = Convert.ToBoolean(Console.ReadLine());
+
+        var query = GenerateReportQuery(includeMonthly, summaryMonth);
+        Console.WriteLine("Generated SQL Query:");
+        Console.WriteLine(query);
+    }
+
+    public static string GenerateReportQuery(bool includeSummary, DateTime summaryMonth)
+    {
+        string dailySummaryQuery = """
+            SELECT
+                sale_date
+                , sum(amount) AS amount_total
+                , '' as caption 
+                , 1 as sort_number
+            FROM
+                salse
+            GROUP BY
+                sale_date
+            """;
+
+        string monthlySummaryQuery = """
+            SELECT
+                date_trunc('month', sale_date) + '1 month -1 day' as sale_date
+                , sum(amount) AS amount_total
+                , 'monthly total' as caption 
+                , 2 as sort_number
+            FROM
+                salse
+            GROUP BY
+                date_trunc('month', sale_date) + '1 month -1 day'
+            """;
+
+        // Create daily summary query
+        var sq = new SelectQuery();
+        sq.AddCTEQuery(dailySummaryQuery, "daily_summary");
+        sq.AddFrom("daily_summary", "d");
+        sq.AddSelectAll("d");
+
+        if (includeSummary)
+        {
+            // Add monthly summary query with UNION ALL
+            sq.AddSelectQuery("union all", _ =>
+            {
+                var xsq = new SelectQuery();
+                xsq.AddCTEQuery(monthlySummaryQuery, "monthly_summary");
+                xsq.AddFrom("monthly_summary", "m");
+                xsq.AddSelectAll("m");
+                return xsq;
+            });
+        }
+
+        // Add date filter condition
+        var pname = ":sale_date";
+        sq.AddParameter(new QueryParameter(pname, summaryMonth))
+            .AddWhere("sale_date", (source, column) => $"{pname} <= {source.Alias}.{column} and {source.Alias}.{column} < {pname}::timestamp + '1 month'");
+
+        // Convert the entire query to a CTE
+        sq = sq.ToCTEQuery("final", "f");
+
+        // Add sorting conditions
+        sq.RemoveSelect("sort_number")
+            .AddOrder("sale_date", (source, column) => $"{source.Alias}.{column}")
+            .AddOrder("sort_number", (source, column) => $"{source.Alias}.{column}");
+
+        return sq.ToText();
+    }
+}
+```
+
+### Example
+
+```
+Which month to summarize? (yyyy-mm-dd)
+2024-08-01
+Include monthly summary rows? (true/false)
+true
+Generated SQL Query:
+/*
+  :sale_date = '2024/08/01 0:00:00'
+*/
+WITH
+    daily_summary AS (
+        SELECT
+            sale_date,
+            SUM(amount) AS amount_total,
+            '' AS caption,
+            1 AS sort_number
+        FROM
+            salse
+        WHERE
+            :sale_date <= salse.sale_date
+            AND salse.sale_date < :sale_date::timestamp + '1 month'
+        GROUP BY
+            sale_date
+    ),
+    monthly_summary AS (
+        SELECT
+            DATE_TRUNC('month', sale_date) + '1 month -1 day' AS sale_date,
+            SUM(amount) AS amount_total,
+            'monthly total' AS caption,
+            2 AS sort_number
+        FROM
+            salse
+        WHERE
+            :sale_date <= salse.sale_date
+            AND salse.sale_date < :sale_date::timestamp + '1 month'
+        GROUP BY
+            DATE_TRUNC('month', sale_date) + '1 month -1 day'
+    ),
+    final AS (
+        SELECT
+            d.sale_date,
+            d.amount_total,
+            d.caption,
+            d.sort_number
+        FROM
+            daily_summary AS d
+        UNION ALL
+        SELECT
+            m.sale_date,
+            m.amount_total,
+            m.caption,
+            m.sort_number
+        FROM
+            monthly_summary AS m
+    )
+SELECT
+    f.sale_date,
+    f.amount_total,
+    f.caption
+FROM
+    final AS f
+ORDER BY
+    f.sale_date,
+    f.sort_number
+```
 
 ## Features
-- DBMS agnostic
-- Supports parsing select queries
-- Supports processing select queries
+
+- You can model select queries and perform advanced editing.
+- The model can be written back to select, create table, add, update, merge, and delete queries.
+- No DBMS reference.
+- No configuration or entity classes required.
+
+You can try out some of the processing on the online demo site.
+
+https://mk3008.github.io/Carbunql/
 
 ## Constraints
-- Minimum grammar check
-- Only select queries can be parsed
-- Comment is removed
 
-If you want to execute modified queries, please use the [Dapper](https://github.com/DapperLib/Dapper) library "[Carbunql.Dapper](https://www.nuget.org/packages/Carbunql.Dapper)".
+- Syntax checking is modest.
+- Comments are removed when modeling.
+- No mapper function.
 
-# Getting started
+If you want to execute queries or perform mapping, use "Carbunql.Dapper" and use it together with Dapper.
 
-> PM> Install-Package [Carbunql](https://www.nuget.org/packages/Carbunql/)
+https://www.nuget.org/packages/Carbunql.Dapper
 
-The main usage is listed below. Please refer to [Wiki](https://github.com/mk3008/Carbunql/wiki) for detailed usage.
+## Getting started
+Install the package from NuGet.
 
-## Parse
+PM> Install-Package Carbunql
+
+https://www.nuget.org/packages/Carbunql/
+
+### Model a select query
+
 Just pass the select query string to the constructor of the SelectQuery class.
+
 ```cs
 using Carbunql;
 
-var text = @"
-select a.column_1 as col1, a.column_2 as col2
-from table_a as a
-left join table_b as b on a.id = b.table_a_id
-where b.table_a_id is null
-";
-
+var text = "select s.sale_id, s.store_id, date_trunc('month', s.sale_date) as allocate_ym, s.sale_price from sales as s";
 var sq = new SelectQuery(text);
-string sql = sq.ToCommand().CommandText;
 ```
 
-```sql
-SELECT
-    a.column_1 AS col1,
-    a.column_2 AS col2
-FROM
-    table_a AS a
-    LEFT JOIN table_b AS b ON a.id = b.table_a_id
-WHERE
-    b.table_a_id IS null
-```
+### Return the model to a select query
 
-## Building
-You can build using the SelectQuery class.
+Use the ToText or ToOneLineText method.
+
+The ToText method will return a formatted select query. Parameter information will also be added as a comment.
+
+The ToOneLineText method will output a single line without formatting. Use the ToOneLineText method if performance is important.
+
 ```cs
 using Carbunql;
-using Carbunql.Building;
 
-var sq = new SelectQuery();
-
-// from clause
-var (from, a) = sq.From("table_a").As("a");
-var b = from.InnerJoin("table_b").As("b").On(a, "table_a_id");
-var c = from.LeftJoin("table_c").As("c").On(b, "table_b_id");
-
-// select clause
-sq.Select(a, "id").As("a_id");
-sq.Select(b, "table_a_id").As("b_id");
-
-// where clause
-sq.Where(a, "id").Equal(":id").And(b, "is_visible").True().And(c, "table_b_id").IsNull();
-
-// parameter
-sq.Parameters.Add(":id", 1);
-
-string sql = sq.ToCommand().CommandText;
+var text = "select s.sale_id, s.store_id, date_trunc('month', s.sale_date) as allocate_ym, s.sale_price from sales as s";
+var sq = new SelectQuery(text);
+var query = sq.ToOneLineText();
 ```
 
-```sql
-/*
-    :id = 1
-*/
-SELECT
-    a.id AS a_id,
-    b.table_a_id AS b_id
-FROM
-    table_a AS a
-    INNER JOIN table_b AS b ON a.table_a_id = b.table_a_id
-    LEFT JOIN table_c AS c ON b.table_b_id = c.table_b_id
-WHERE
-    a.id = :id
-    AND b.is_visible = true
-    AND c.table_b_id IS null
-```
+### Create an empty select query
 
-## Build subquery
+If you do not specify arguments in the constructor, a model without SELECT and FROM clauses will be created. Please add SELECT and FROM clauses manually.
+
 ```cs
 using Carbunql;
-using Carbunql.Building;
 
 var sq = new SelectQuery();
-sq.From(() =>
-{
-    var x = new SelectQuery();
-    x.From("table_a").As("a");
-    x.SelectAll();
-    return x;
-}).As("b");
-sq.SelectAll();
-
-string sql = sq.ToCommand().CommandText;
 ```
 
+### Add a FROM clause
+
+If you added an empty select query, use the AddFrom function to manually add a FROM clause. The first argument is the table name, and the second argument is the alias name.
+
+```cs
+using Carbunql;
+
+var sq = new SelectQuery();
+sq.AddFrom("customer", "c");
+```
+
+### Add a column to select
+
+You can add a column to select by using the AddSelect function. The first argument is the column name, and the second argument is the column alias name. The column alias name is optional.
+
+```cs
+using Carbunql;
+
+var sq = new SelectQuery();
+sq.AddFrom("customer", "c");
+sq.AddSelect("c.customer_id")
+  .AddSelect("c.first_name || c.last_name", "customer_name");
+```
+
+### Add search conditions
+
+You can add search conditions by using the AddWhere method.
+
+The first argument is the name of the column to which you want to add a condition.
+
+The second argument is a delegate (or lambda expression) that takes the column source and column name as input and generates the condition part of the SQL.
+
+```cs
+using Carbunql;
+
+var text = "select s.sale_id, s.store_id, date_trunc('month', s.sale_date) as allocate_ym, s.sale_price from sales as s";
+var sq = new SelectQuery(text);
+sq.AddWhere("sale_id", (source, column) => $"{source.Alias}.{column} = 1");
+```
+
+### About the AddWhere function
+
+Please note the following specifications.
+
+- It is added with AND conditions.
+- If the column name to be searched does not exist, an error will occur.
+- The search target is the entire query. The query reference order is analyzed, and the conditions are inserted only for the query source at the deepest position.
+
+For example, the search condition for the column "sale_id" is inserted only for "s" in the subquery.
+It is not inserted for the query source "subq". This is because it references a query source to which the search condition has already been applied.
+
 ```sql
-SELECT
-    *
-FROM
+select
+    subq.sale_id
+from
     (
-        SELECT
-            *
-        FROM
-            table_a AS a
-    ) AS b
+        select
+            s.sale_id
+        from
+            sale as s --the deepest query source to which sale_id belongs
+    ) subq
 ```
 
-## Build condition
-```cs
-using Carbunql;
-using Carbunql.Building;
-using Carbunql.Values;
+In this way, since the reference order of the query source is analyzed, the search condition is inserted in the optimal position without any consideration of the insertion location.
 
-var sq = new SelectQuery();
-var (from, a) = sq.From("table_a").As("a");
-sq.SelectAll();
+However, since this library does not reference the DBMS (table definition), it cannot detect column names that are not explicitly stated in the select query.
 
-sq.Where(() =>
-{
-    // a.id = 1 and a.value = 2
-    var c1 = new ColumnValue(a, "id").Equal(1);
-    c1.And(a, "value").Equal(2));
+If you try to insert a search condition for the column "price" into the select query above, an error will occur even if the column is defined in the DBMS.
 
-    // a.value = 3 and a.value = 4
-    var c2 = new ColumnValue(a, "id").Equal(3);
-    c2.And(a, "value").Equal(4);
-
-    // (
-    //     (a.id = 1 and a.value = 2)
-    //     or
-    //     (a.value = 3 and a.value = 4)
-    // )
-    return c1.ToGroup().Or(c2.ToGroup()).ToGroup();
-});
-
-string sql = sq.ToCommand().CommandText;
-```
+In this case, make it clear that there is a column name in the select query. If you write it like this, the column "price" will be detected.
 
 ```sql
-SELECT
-    *
-FROM
-    table_a AS a
-WHERE
-    ((a.id = 1 AND a.value = 2) OR (a.id = 3 AND a.value = 4))
+select
+    subq.sale_id
+from
+    (
+        select
+            s.sale_id
+            , s.price
+        from
+            sale as s
+    ) subq
 ```
 
-## Build exists
-```cs
-using Carbunql;
-using Carbunql.Building;
+Also, when searching for a column, it checks which query source it is attributed to. For this reason, if the alias name of the query source is omitted, it may not be detected correctly.
 
-var sq = new SelectQuery();
-var (from, a) = sq.From("table_a").As("a");
-sq.SelectAll();
-sq.Where(() =>
-{
-    var x = new SelectQuery();
-    var (_, b) = x.From("table_b").As("b");
-    x.SelectAll();
-    x.Where(b, "id").Equal(a, "id");
-    return x.ToExists();
-});
-sq.Where(() =>
-{
-    var x = new SelectQuery();
-    var (_, b) = x.From("table_b").As("b");
-    x.SelectAll();
-    x.Where(b, "id").Equal(a, "id");
-    return x.ToNotExists();
-});
+For example, in the case of a single query source like the one below, the query source is only "s", so it is possible to identify the column "price".
 
-string sql = sq.ToCommand().CommandText;
+```
+select
+    sale_id
+    , price
+from
+    sale as s
 ```
 
-```sql
-SELECT
-    *
-FROM
-    table_a AS a
-WHERE
-    EXISTS (
-        SELECT
-            *
-        FROM
-            table_b AS b
-        WHERE
-            b.id = a.id
-    )
-    AND NOT EXISTS (
-        SELECT
-            *
-        FROM
-            table_b AS b
-        WHERE
-            b.id = a.id
-    )
+However, if a table is joined, parsing will fail even if the SQL is executable because it does not refer to the DBMS (table definition). In the following query, it is not possible to determine whether the column "price" belongs to "s" or "c" based on the information in the select query alone.
+
 ```
-
-## Build CTE
-```cs
-using Carbunql;
-using Carbunql.Building;
-
-var sq = new SelectQuery();
-
-// a as (select * from table_a)
-var ct_a = sq.With(() =>
-{
-    var q = new SelectQuery();
-    q.From("table_a");
-    q.SelectAll();
-    return q;
-}).As("a");
-
-// b as (select * from table_b)
-var ct_b = sq.With(() =>
-{
-    var q = new SelectQuery();
-    q.From("table_b");
-    q.SelectAll();
-    return q;
-}).As("b");
-
-// select * from a iner join b a.id = b.id
-var (from, a) = sq.From(ct_a).As("a");
-from.InnerJoin(ct_b).On(a, "id");
-
-sq.SelectAll();
-
-string sql = sq.ToCommand().CommandText;
+select
+    sale_id
+    , price
+from
+    sale as s
+    inner join customer as c on s.customer_id = c.customer_id
 ```
-
-```sql
-WITH
-    a AS (
-        SELECT
-            *
-        FROM
-            table_a
-    ),
-    b AS (
-        SELECT
-            *
-        FROM
-            table_b
-    )
-SELECT
-    *
-FROM
-    a
-    INNER JOIN b ON a.id = b.id
-```
-
 
 ## Referenced Libraries
 ### ZString / MIT License
