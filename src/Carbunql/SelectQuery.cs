@@ -899,6 +899,22 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         return this;
     }
 
+    /// <summary>
+    /// Adds a column to the select clause.
+    /// </summary>
+    /// <param name="column">The column information.</param>
+    /// <returns>The modified select query.</returns>
+    public SelectQuery AddSelect(string column)
+    {
+        var val = ValueParser.Parse(column);
+        if (val is ColumnValue c)
+        {
+            this.Select(c).As(c.GetDefaultName());
+            return this;
+        }
+        throw new InvalidOperationException();
+    }
+
     public SelectQuery AddSelectAll(string tableName)
     {
         var t = GetSelectableTables().Where(x => x.Alias.IsEqualNoCase(tableName)).First();
@@ -997,6 +1013,29 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
                 if (x.ColumnNames.Where(column => column.IsEqualNoCase(columnName)).Any())
                 {
                     x.Query.Where(adder(x));
+                }
+            });
+
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a search condition.
+    /// </summary>
+    /// <param name="columnName">The name of the column to search in.</param>
+    /// <param name="adder">The function to create the search condition.</param>
+    /// <returns>The modified select query.</returns>
+    public SelectQuery AddWhere(string columnName, Func<IQuerySource, string, string> adder)
+    {
+        GetQuerySources()
+            .Where(x => x.Query.GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnName)).Any())
+            .GetRootsBySource()
+            .EnsureAny()
+            .ForEach(x =>
+            {
+                if (x.ColumnNames.Where(column => column.IsEqualNoCase(columnName)).Any())
+                {
+                    x.Query.Where(adder(x, columnName));
                 }
             });
 
@@ -1192,6 +1231,26 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     public SelectQuery AddParameter(QueryParameter prm)
     {
         Parameters.Add(prm);
+        return this;
+    }
+
+    public SelectQuery AddOrder(string columnName, Func<IQuerySource, string, string> adder)
+    {
+        GetQuerySources()
+            .Where(x => x.Query.Equals(this))
+            .ForEach(x =>
+            {
+                x.Query.OrderClause ??= new();
+                x.Query.OrderClause.Add(SortableItemParser.Parse(adder(x, columnName)));
+            });
+
+        return this;
+    }
+
+    public SelectQuery FilterInColumns(IEnumerable<string> columnNames)
+    {
+        if (SelectClause == null) throw new NullReferenceException(nameof(SelectClause));
+        SelectClause.FilterInColumns(columnNames);
         return this;
     }
 }
