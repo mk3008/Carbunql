@@ -354,6 +354,8 @@ You can try out some of the processing on the online demo site.
 
 https://mk3008.github.io/Carbunql/
 
+![image](https://github.com/user-attachments/assets/21ddb1af-ae13-4405-a2c9-40b15f372e84)
+
 ## Constraints
 
 - Syntax checking is modest.
@@ -448,7 +450,7 @@ var sq = new SelectQuery(text);
 sq.AddWhere("sale_id", (source, column) => $"{source.Alias}.{column} = 1");
 ```
 
-### About the AddWhere function
+## About the AddWhere function
 
 Please note the following specifications.
 
