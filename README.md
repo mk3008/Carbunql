@@ -369,7 +369,9 @@ https://www.nuget.org/packages/Carbunql.Dapper
 ## Getting started
 Install the package from NuGet.
 
+```
 PM> Install-Package Carbunql
+```
 
 https://www.nuget.org/packages/Carbunql/
 
