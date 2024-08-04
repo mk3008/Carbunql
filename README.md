@@ -386,11 +386,11 @@ var sq = new SelectQuery(text);
 
 ### Return the model to a select query
 
-Use the ToText or ToOneLineText method.
+Use the `ToText` or `ToOneLineText` method.
 
-The ToText method will return a formatted select query. Parameter information will also be added as a comment.
+The `ToText` method will return a formatted select query. Parameter information will also be added as a comment.
 
-The ToOneLineText method will output a single line without formatting. Use the ToOneLineText method if performance is important.
+The `ToOneLineText` method will output a single line without formatting. Use the ToOneLineText method if performance is important.
 
 ```cs
 using Carbunql;
@@ -412,7 +412,7 @@ var sq = new SelectQuery();
 
 ### Add a FROM clause
 
-If you added an empty select query, use the AddFrom function to manually add a FROM clause. The first argument is the table name, and the second argument is the alias name.
+If you added an empty select query, use the `AddFrom` function to manually add a FROM clause. The first argument is the table name, and the second argument is the alias name.
 
 ```cs
 using Carbunql;
@@ -423,7 +423,7 @@ sq.AddFrom("customer", "c");
 
 ### Add a column to select
 
-You can add a column to select by using the AddSelect function. The first argument is the column name, and the second argument is the column alias name. The column alias name is optional.
+You can add a column to select by using the `AddSelect` function. The first argument is the column name, and the second argument is the column alias name. The column alias name is optional.
 
 ```cs
 using Carbunql;
@@ -436,7 +436,7 @@ sq.AddSelect("c.customer_id")
 
 ### Add search conditions
 
-You can add search conditions by using the AddWhere method.
+You can add search conditions by using the `AddWhere` method.
 
 The first argument is the name of the column to which you want to add a condition.
 
@@ -458,8 +458,8 @@ Please note the following specifications.
 - If the column name to be searched does not exist, an error will occur.
 - The search target is the entire query. The query reference order is analyzed, and the conditions are inserted only for the query source at the deepest position.
 
-For example, the search condition for the column "sale_id" is inserted only for "s" in the subquery.
-It is not inserted for the query source "subq". This is because it references a query source to which the search condition has already been applied.
+For example, the search condition for the column `sale_id` is inserted only for `s` in the subquery.
+It is not inserted for the query source `subq`. This is because it references a query source to which the search condition has already been applied.
 
 ```sql
 select
@@ -477,9 +477,9 @@ In this way, since the reference order of the query source is analyzed, the sear
 
 However, since this library does not reference the DBMS (table definition), it cannot detect column names that are not explicitly stated in the select query.
 
-If you try to insert a search condition for the column "price" into the select query above, an error will occur even if the column is defined in the DBMS.
+If you try to insert a search condition for the column `price` into the select query above, an error will occur even if the column is defined in the DBMS.
 
-In this case, make it clear that there is a column name in the select query. If you write it like this, the column "price" will be detected.
+In this case, make it clear that there is a column name in the select query. If you write it like this, the column `price` will be detected.
 
 ```sql
 select
@@ -496,7 +496,7 @@ from
 
 Also, when searching for a column, it checks which query source it is attributed to. For this reason, if the alias name of the query source is omitted, it may not be detected correctly.
 
-For example, in the case of a single query source like the one below, the query source is only "s", so it is possible to identify the column "price".
+For example, in the case of a single query source like the one below, the query source is only `s`, so it is possible to identify the column `price`.
 
 ```
 select
@@ -506,7 +506,7 @@ from
     sale as s
 ```
 
-However, if a table is joined, parsing will fail even if the SQL is executable because it does not refer to the DBMS (table definition). In the following query, it is not possible to determine whether the column "price" belongs to "s" or "c" based on the information in the select query alone.
+However, if a table is joined, parsing will fail even if the SQL is executable because it does not refer to the DBMS (table definition). In the following query, it is not possible to determine whether the column "price" belongs to `s` or `c` based on the information in the select query alone.
 
 ```
 select
