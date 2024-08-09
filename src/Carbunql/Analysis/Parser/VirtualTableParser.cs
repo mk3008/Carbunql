@@ -8,6 +8,8 @@ namespace Carbunql.Analysis.Parser;
 /// </summary>
 public class VirtualTableParser
 {
+    private static string[] QueryOperators = ["union", "union all", "except", "minus", "intersect"];
+
     /// <summary>
     /// Parses a virtual table from the token stream.
     /// </summary>
@@ -15,7 +17,7 @@ public class VirtualTableParser
     /// <returns>The parsed virtual table.</returns>
     public static VirtualTable Parse(ITokenReader r)
     {
-        r.ReadOrDefault("(");
+        r.Read("(");
 
         var first = r.Peek();
 
@@ -24,9 +26,29 @@ public class VirtualTableParser
         // virtualTable
         if (first.IsEqualNoCase("select"))
         {
-            var t = new VirtualTable(SelectQueryParser.Parse(r));
-            r.ReadOrDefault(")");
-            return t;
+            var sq = SelectQueryParser.Parse(r);
+            r.Read(")");
+
+            // check operatorable query
+            if (r.Peek().IsEqualNoCase(QueryOperators))
+            {
+                // read operator
+                var op = r.Read();
+
+                if (r.Peek() == "(")
+                {
+                    var vt = Parse(r);
+                    var sq2 = vt.GetSelectQuery();
+                    sq.AddOperatableValue(op, sq2);
+                }
+                else
+                {
+                    var sq2 = ReadQueryParser.Parse(r);
+                    sq.AddOperatableValue(op, sq2);
+                }
+            }
+
+            return new VirtualTable(sq);
         }
         else if (first.IsEqualNoCase("values"))
         {
@@ -34,11 +56,41 @@ public class VirtualTableParser
             r.Read(")");
             return t;
         }
-        else if (first == "(")
+        else if (first == ")")
         {
             // empty bracket pattern
-            var t = new VirtualTable(Parse(r));
             r.Read(")");
+        }
+        else if (first == "(")
+        {
+            var t = Parse(r);
+            r.Read(")");
+
+            // check operatorable query
+            if (r.Peek().IsEqualNoCase(QueryOperators))
+            {
+                // convert to SelectQuery
+                var sq = t.GetSelectQuery();
+
+                // read operator
+                var op = r.Read();
+
+                if (r.Peek() == "(")
+                {
+                    var vt = Parse(r);
+                    var sq2 = vt.GetSelectQuery();
+
+                    sq.AddOperatableValue(op, sq2);
+                    return new VirtualTable(sq);
+                }
+                else
+                {
+                    var sq2 = ReadQueryParser.Parse(r);
+                    sq.AddOperatableValue(op, sq2);
+                    return new VirtualTable(sq);
+                }
+            }
+
             return t;
         }
 

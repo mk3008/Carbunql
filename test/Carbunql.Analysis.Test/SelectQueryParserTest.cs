@@ -622,6 +622,117 @@ select 1";
     }
 
     [Fact]
+    public void UnionIssue501_SelectQuery()
+    {
+        var text = @"
+select
+*
+from
+(
+    select 1 as v
+    union
+    (select 2 as v)
+    union all
+    ((select 3 as v))
+    union all
+    (((select 4 as v)))
+) d";
+
+        var sq = new SelectQuery(text);
+        Monitor.Log(sq);
+
+        var expect = @"SELECT
+    *
+FROM
+    (
+        SELECT
+            1 AS v
+        UNION
+        SELECT
+            2 AS v
+        UNION ALL
+        SELECT
+            3 AS v
+        UNION ALL
+        SELECT
+            4 AS v
+    ) AS d";
+
+        Assert.Equal(expect, sq.ToText());
+    }
+
+    [Fact]
+    public void UnionIssue501_VirtualTableParser()
+    {
+        var text = @"
+select
+*
+from
+(
+    (select 1 as v)
+    union
+    select 2 as v
+    union
+    ((select 3 as v))
+    union all
+    (((select 4 as v)))
+) d";
+
+        var sq = new SelectQuery(text);
+        Monitor.Log(sq);
+
+        var expect = @"SELECT
+    *
+FROM
+    (
+        SELECT
+            1 AS v
+        UNION
+        SELECT
+            2 AS v
+        UNION
+        SELECT
+            3 AS v
+        UNION ALL
+        SELECT
+            4 AS v
+    ) AS d";
+
+        Assert.Equal(expect, sq.ToText());
+    }
+
+    [Fact]
+    public void UnionIssue501_VirtualTableParser2()
+    {
+        var text = @"
+select
+*
+from
+(
+    (select 1 as v)
+    union
+    (select 2 as v)
+) d";
+
+        var sq = new SelectQuery(text);
+        Monitor.Log(sq);
+
+        var expect = @"SELECT
+    *
+FROM
+    (
+        SELECT
+            1 AS v
+        UNION
+        SELECT
+            2 AS v
+    ) AS d";
+
+        Assert.Equal(expect, sq.ToText());
+    }
+
+
+    [Fact]
     public void JsonFunction()
     {
         var text = @"
@@ -734,10 +845,8 @@ from
     v1
 FROM
     (
-        (
-            SELECT
-                1 AS v1
-        )
+        SELECT
+            1 AS v1
     ) AS d";
 
         Assert.Equal(sql, item.ToText(), true, true, true);

@@ -131,12 +131,31 @@ public abstract class ReadQuery : IReadQuery
     public IEnumerable<Token> GetTokens(Token? parent)
     {
         foreach (var item in GetCurrentTokens(parent)) yield return item;
-        foreach (var oq in OperatableQueries)
+
+        // root or group
+        if (parent == null || parent.Text == "(")
         {
-            foreach (var item in oq.GetTokens(parent)) yield return item;
+            foreach (var oq in GetOperatableQueries())
+            {
+                foreach (var item in oq.GetTokens(parent)) yield return item;
+            }
         }
+
         if (OrderClause != null) foreach (var item in OrderClause.GetTokens(parent)) yield return item;
         if (LimitClause != null) foreach (var item in LimitClause.GetTokens(parent)) yield return item;
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<OperatableQuery> GetOperatableQueries()
+    {
+        foreach (var op in OperatableQueries)
+        {
+            yield return op;
+            foreach (var subop in op.Query.GetOperatableQueries())
+            {
+                yield return subop;
+            }
+        }
     }
 
     public ReadQuery GetQuery()
