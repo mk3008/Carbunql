@@ -76,12 +76,22 @@ public class VirtualTable : TableBase
     }
 
     /// <inheritdoc/>
-    public override bool IsSelectQuery => _isSelectQuery;
+    public override bool IsSelectQuery => IsSelectQueryCore();
+
+    internal bool IsSelectQueryCore()
+    {
+        if (_isSelectQuery) return true;
+        if (Query is VirtualTable vt) return vt.IsSelectQueryCore();
+
+        return false;
+    }
 
     /// <inheritdoc/>
     public override SelectQuery GetSelectQuery()
     {
         if (_isSelectQuery) return (SelectQuery)Query;
+        if (Query is VirtualTable vt) return vt.GetSelectQuery();
+
         return base.GetSelectQuery();
     }
 

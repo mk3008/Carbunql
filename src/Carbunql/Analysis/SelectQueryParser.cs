@@ -48,8 +48,9 @@ public static class SelectQueryParser
         var tokens = new string[] { "union", "union all", "except", "minus", "intersect" };
         while (r.Peek().IsEqualNoCase(tokens))
         {
+            //read operator
             var op = r.Read();
-            sq.AddOperatableValue(op, ParseMain(r));
+            sq.AddOperatableValue(op, ReadQueryParser.ParseIgnoringBrackets(r));
         }
 
         sq.LimitClause = ParseLimitOrDefault(r);
@@ -65,7 +66,6 @@ public static class SelectQueryParser
     private static SelectQuery ParseMain(ITokenReader r)
     {
         var sq = new SelectQuery();
-
         r.Read("select");
 
         sq.SelectClause = SelectClauseParser.Parse(r);

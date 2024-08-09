@@ -12,29 +12,36 @@ namespace Carbunql;
 public interface IReadQuery : IQueryCommandable
 {
     /// <summary>
-    /// Gets the select clause of the read query.
+    /// Gets the SELECT clause of the read query.
     /// </summary>
-    /// <returns>The select clause if present, otherwise null.</returns>
+    /// <returns>The SELECT clause if present; otherwise, null.</returns>
     SelectClause? GetSelectClause();
 
     /// <summary>
-    /// Gets the with clause of the read query.
+    /// Gets the WITH clause of the read query.
     /// </summary>
-    /// <returns>The with clause if present, otherwise null.</returns>
+    /// <returns>The WITH clause if present; otherwise, null.</returns>
     WithClause? GetWithClause();
 
     /// <summary>
     /// Gets or creates a new <see cref="SelectQuery"/> associated with this read query.
     /// </summary>
-    /// <returns>The <see cref="SelectQuery"/>.</returns>
+    /// <returns>A <see cref="SelectQuery"/> instance.</returns>
     SelectQuery GetOrNewSelectQuery();
 
     /// <summary>
-    /// Gets the column names involved in the read query.
+    /// Gets the names of the columns involved in the read query.
     /// </summary>
-    /// <returns>An enumerable of column names.</returns>
+    /// <returns>An enumerable collection of column names.</returns>
     IEnumerable<string> GetColumnNames();
+
+    /// <summary>
+    /// Gets the operatable queries associated with this read query.
+    /// </summary>
+    /// <returns>An enumerable collection of <see cref="OperatableQuery"/> instances.</returns>
+    IEnumerable<OperatableQuery> GetOperatableQueries();
 }
+
 
 /// <summary>
 /// Extension methods for <see cref="IReadQuery"/>.
