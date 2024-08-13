@@ -1436,4 +1436,38 @@ WHERE
 
         Assert.Equal(expect, query.ToText());
     }
+
+    [Fact]
+    public void CurrentTimestampTest()
+    {
+        var sql = @"
+select
+s.sale_is
+, current_timestamp as created_at
+from
+sale s
+inner join product p on s.product_id = p.product_id";
+
+        var query = new SelectQuery(sql);
+        query.GetQuerySources().ForEach(x =>
+        {
+            x.AddSourceComment($"Index:{x.Index}, Alias:{x.Alias}, MaxLv:{x.MaxLevel}, SourceType:{x.SourceType}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+            x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
+        });
+        Monitor.Log(query);
+
+        var expect = @"SELECT
+    s.sale_is,
+    CURRENT_TIMESTAMP AS created_at
+FROM
+    /* Index:1, Alias:s, MaxLv:1, SourceType:PhysicalTable, Columns:[sale_is, product_id] */
+    /* Path:1-0 */
+    sale AS s
+    INNER JOIN
+    /* Index:2, Alias:p, MaxLv:1, SourceType:PhysicalTable, Columns:[product_id] */
+    /* Path:2-0 */
+    product AS p ON s.product_id = p.product_id";
+
+        Assert.Equal(expect, query.ToText());
+    }
 }

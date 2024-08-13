@@ -19,6 +19,17 @@ public static class ValueParser
         "and", "is", "is distinct from", "is not", "is not distinct from", "or", "uescape"
     };
 
+    private static string[] BareFunctions = new[]{
+        "current_date",
+        "current_time",
+        "current_timestamp",
+        "localtime",
+        "localtimestamp",
+        "session_user",
+        "user",
+        "current_user"
+    };
+
     /// <summary>
     /// Parses a SQL value from the provided text.
     /// </summary>
@@ -181,6 +192,11 @@ public static class ValueParser
             var table = value.Substring(0, value.Length - column.Length - 1);
 
             return new ColumnValue(table, column);
+        }
+
+        if (item.IsEqualNoCase(BareFunctions))
+        {
+            return new BareFunctionValue(item);
         }
 
         // Omit table column
