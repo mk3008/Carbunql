@@ -27,6 +27,7 @@ namespace Carbunql.Clauses;
 [Union(14, typeof(Interval))]
 [Union(15, typeof(LikeClause))]
 [Union(16, typeof(ExistsExpression))]
+[Union(17, typeof(BareFunctionValue))]
 public abstract class ValueBase : IQueryCommandable
 {
     /// <summary>
