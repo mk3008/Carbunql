@@ -33,7 +33,7 @@ public class FluentSelectQuery : SelectQuery
         var analyzed = ExpressionReader.Analyze(expression);
 #endif
         var parameters = QueryParameterMerger.Merge(GetParameters());
-        var prmManager = new ParameterRegistory(parameters, AddParameter);
+        var prmManager = new ParameterRegistory(parameters, this.AddParameter);
         var engine = new BuilderEngine(SqlDialect, prmManager);
 
         if (expression.Body is MemberExpression mem)
@@ -137,7 +137,7 @@ public class FluentSelectQuery : SelectQuery
         var analyzed = ExpressionReader.Analyze(expression);
 #endif
         var parameters = QueryParameterMerger.Merge(GetParameters());
-        var prmManager = new ParameterRegistory(parameters, AddParameter);
+        var prmManager = new ParameterRegistory(parameters, this.AddParameter);
         var engine = new BuilderEngine(SqlDialect, prmManager);
 
         if (expression.Body is NewExpression ne)
@@ -171,7 +171,7 @@ public class FluentSelectQuery : SelectQuery
         var table = compiledExpression();
 
         var parameters = QueryParameterMerger.Merge(GetParameters());
-        var prmManager = new ParameterRegistory(parameters, AddParameter);
+        var prmManager = new ParameterRegistory(parameters, this.AddParameter);
         var engine = new BuilderEngine(SqlDialect, prmManager);
 
         var condition = conditionExpression.Body.ToValue(engine);
@@ -194,7 +194,7 @@ public class FluentSelectQuery : SelectQuery
         var table = compiledExpression();
 
         var parameters = QueryParameterMerger.Merge(GetParameters());
-        var prmManager = new ParameterRegistory(parameters, AddParameter);
+        var prmManager = new ParameterRegistory(parameters, this.AddParameter);
         var engine = new BuilderEngine(SqlDialect, prmManager);
 
         var condition = conditionExpression.Body.ToValue(engine);
@@ -217,7 +217,7 @@ public class FluentSelectQuery : SelectQuery
         var table = compiledExpression();
 
         var parameters = QueryParameterMerger.Merge(GetParameters());
-        var prmManager = new ParameterRegistory(parameters, AddParameter);
+        var prmManager = new ParameterRegistory(parameters, this.AddParameter);
         var engine = new BuilderEngine(SqlDialect, prmManager);
 
         var condition = conditionExpression.Body.ToValue(engine);
@@ -248,7 +248,7 @@ public class FluentSelectQuery : SelectQuery
 #endif
 
         var parameters = QueryParameterMerger.Merge(GetParameters());
-        var prmManager = new ParameterRegistory(parameters, AddParameter);
+        var prmManager = new ParameterRegistory(parameters, this.AddParameter);
         var engine = new BuilderEngine(SqlDialect, prmManager);
 
         var value = expression.Body.ToValue(engine);
@@ -264,7 +264,7 @@ public class FluentSelectQuery : SelectQuery
         var analyzed = ExpressionReader.Analyze(expression);
 #endif
         var parameters = QueryParameterMerger.Merge(GetParameters());
-        var prmManager = new ParameterRegistory(parameters, AddParameter);
+        var prmManager = new ParameterRegistory(parameters, this.AddParameter);
         var engine = new BuilderEngine(SqlDialect, prmManager);
 
         var value = expression.Body.ToValue(engine);
@@ -286,7 +286,7 @@ public class FluentSelectQuery : SelectQuery
         var analyzed = ExpressionReader.Analyze(expression);
 #endif
         var parameters = QueryParameterMerger.Merge(GetParameters());
-        var prmManager = new ParameterRegistory(parameters, AddParameter);
+        var prmManager = new ParameterRegistory(parameters, this.AddParameter);
         var engine = new BuilderEngine(SqlDialect, prmManager);
 
         var value = expression.Body.ToValue(engine);
@@ -310,7 +310,7 @@ public class FluentSelectQuery : SelectQuery
         var analyzed = ExpressionReader.Analyze(expression);
 #endif
         var parameters = QueryParameterMerger.Merge(GetParameters());
-        var prmManager = new ParameterRegistory(parameters, AddParameter);
+        var prmManager = new ParameterRegistory(parameters, this.AddParameter);
         var engine = new BuilderEngine(SqlDialect, prmManager);
 
         var value = expression.Body.ToValue(engine);
@@ -330,7 +330,7 @@ public class FluentSelectQuery : SelectQuery
         var analyzed = ExpressionReader.Analyze(expression);
 #endif
 
-        var prmManager = new ParameterRegistory(GetParameters(), AddParameter);
+        var prmManager = new ParameterRegistory(GetParameters(), this.AddParameter);
 
         if (expression.Body is not MemberExpression me)
         {

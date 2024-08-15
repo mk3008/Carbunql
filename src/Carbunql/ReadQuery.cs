@@ -182,7 +182,7 @@ public abstract class ReadQuery : IReadQuery
     /// <param name="name">The name of the parameter.</param>
     /// <param name="value">The value of the parameter.</param>
     /// <returns>The name of the added parameter.</returns>
-    public string AddParameter(string name, object? Value)
+    internal string AddParameter(string name, object? Value)
     {
         Parameters.Add(new QueryParameter(name, Value));
         return name;

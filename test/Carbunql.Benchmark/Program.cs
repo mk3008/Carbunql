@@ -2,6 +2,7 @@
 using BenchmarkDotNet.Running;
 using Carbunql;
 using Carbunql.Analysis;
+using Carbunql.Building;
 using Carbunql.Extensions;
 
 class Program

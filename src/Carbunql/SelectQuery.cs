@@ -866,7 +866,13 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         return q;
     }
 
+    [Obsolete("use AddCteQuery method")]
     public SelectQuery AddCTEQuery(string query, string alias)
+    {
+        return AddCteQuery(query, alias);
+    }
+
+    public SelectQuery AddCteQuery(string query, string alias)
     {
         this.With(query).As(alias);
         return this;
@@ -1081,6 +1087,28 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             .ForEach(x =>
             {
                 x.Query.Where(adder(x));
+            });
+
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a search condition.
+    /// </summary>
+    /// <param name="tableName">The name of the table to search in.</param>
+    /// <param name="columnName">The name of the column to search in.</param>
+    /// <param name="adder">The function to create the search condition.</param>
+    /// <returns>The modified select query.</returns>
+    public SelectQuery AddWhere(string tableName, string columnName, Func<IQuerySource, string, string> adder)
+    {
+        GetQuerySources()
+            .Where(x => x.GetTableFullName().IsEqualNoCase(tableName))
+            .Where(x => x.Query.GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnName)).Any())
+            .GetRootsBySource()
+            .EnsureAny()
+            .ForEach(x =>
+            {
+                x.Query.Where(adder(x, columnName));
             });
 
         return this;

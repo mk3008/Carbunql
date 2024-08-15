@@ -1,4 +1,5 @@
-﻿using Xunit.Abstractions;
+﻿using Carbunql.Building;
+using Xunit.Abstractions;
 
 namespace Carbunql.Dapper.Test;
 

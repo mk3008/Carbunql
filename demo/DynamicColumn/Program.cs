@@ -1,4 +1,5 @@
 ﻿using Carbunql;
+using Carbunql.Fluent;
 
 public class Program
 {
@@ -38,10 +39,10 @@ public class Program
         Console.WriteLine("Generated SQL Query:");
         Console.WriteLine(query);
 
-        var sq = new SelectQuery();
-        sq.AddFrom("customer", "c");
-        sq.AddSelect("c.customer_id");
-        sq.AddSelect("c.first_name || c.last_name", "customer_name");
+        var sq = new SelectQuery()
+            .From("customer", "c")
+            .Select("c.customer_id")
+            .Select("c.first_name || c.last_name", "customer_name");
         Console.WriteLine(sq.ToText());
     }
 
