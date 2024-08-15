@@ -1,4 +1,5 @@
 ﻿using Carbunql;
+using Carbunql.Fluent;
 
 public class Program
 {
@@ -42,36 +43,36 @@ public class Program
             """;
 
         // Create daily summary query
-        var sq = new SelectQuery();
-        sq.AddCTEQuery(dailySummaryQuery, "daily_summary");
-        sq.AddFrom("daily_summary", "d");
-        sq.AddSelectAll("d");
+        var sq = new SelectQuery()
+            .With(dailySummaryQuery, "daily_summary")
+            .From("daily_summary", "d")
+            .SelectAll("d");
 
         if (includeSummary)
         {
             // Add monthly summary query with UNION ALL
-            sq.AddSelectQuery("union all", _ =>
+            sq.UnionAll(() =>
             {
-                var xsq = new SelectQuery();
-                xsq.AddCTEQuery(monthlySummaryQuery, "monthly_summary");
-                xsq.AddFrom("monthly_summary", "m");
-                xsq.AddSelectAll("m");
+                var xsq = new SelectQuery()
+                    .With(monthlySummaryQuery, "monthly_summary")
+                    .From("monthly_summary", "m")
+                    .SelectAll("m");
                 return xsq;
             });
         }
 
         // Add date filter condition
-        var pname = ":sale_date";
-        sq.AddParameter(new QueryParameter(pname, summaryMonth))
-            .AddWhere("sale_date", (source, column) => $"{pname} <= {source.Alias}.{column} and {source.Alias}.{column} < {pname}::timestamp + '1 month'");
+        var saleDate = ":sale_date";
+        sq.AddParameter(saleDate, summaryMonth)
+            .BetweenInclusiveStart("sale_date", saleDate, $"{saleDate}::timestamp + '1 month'");
 
         // Convert the entire query to a CTE
         sq = sq.ToCTEQuery("final", "f");
 
         // Add sorting conditions
         sq.RemoveSelect("sort_number")
-            .AddOrder("sale_date", (source, column) => $"{source.Alias}.{column}")
-            .AddOrder("sort_number", (source, column) => $"{source.Alias}.{column}");
+            .OrderBy("sale_date")
+            .OrderBy("sort_number");
 
         return sq.ToText();
     }

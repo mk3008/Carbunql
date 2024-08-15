@@ -497,4 +497,10 @@ public static class ReadQueryExtension
     {
         return new MergeQuery(source, destination, keys, datasourceAlias);
     }
+
+    public static string AddParameter(this ReadQuery query, string name, object? value)
+    {
+        query.Parameters.Add(new QueryParameter(name, value));
+        return name;
+    }
 }

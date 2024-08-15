@@ -1,4 +1,5 @@
 ﻿using Carbunql;
+using Carbunql.Fluent;
 
 internal class Program
 {
@@ -37,29 +38,16 @@ internal class Program
         product as p
     """;
 
-        // Convert the selection query to an object
-        var sq = new SelectQuery(sql);
+        var pname = ":category";
 
-        // Dynamically add search conditions
-        if (minPrice != null)
-        {
-            sq.AddWhere("price", (source, column) => $"{source.Alias}.{column} >= {minPrice.Value}");
-        }
-        if (maxPrice != null)
-        {
-            sq.AddWhere("price", (source, column) => $"{source.Alias}.{column} <= {maxPrice.Value}");
-        }
-        if (!string.IsNullOrEmpty(category))
-        {
-            // Parameterize string values before adding them to search conditions
-            var pname = ":category";
-            sq.AddParameter(new QueryParameter(pname, category))
-                .AddWhere("category", (source, column) => $"{source.Alias}.{column} = {pname}");
-        }
-        if (inStock != null)
-        {
-            sq.AddWhere("in_stock", (source, column) => $"{source.Alias}.{column} = {inStock.Value}");
-        }
+        // Convert the selection query to an object
+        var sq = new SelectQuery(sql)
+            .GreaterThanOrEqualIfNotNullOrEmpty("price", minPrice)
+            .LessThanOrEqualIfNotNullOrEmpty("price", maxPrice)
+            .AddParameter(pname, category)
+            .EqualIfNotNullOrEmpty("category", pname)
+            .EqualIfNotNullOrEmpty("in_stock", inStock);
+
         return sq.ToText();
     }
 }
