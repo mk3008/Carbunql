@@ -8,7 +8,7 @@
 		<Title></Title>
 		<Copyright>mk3008net</Copyright>
 		<Description>Carbunql provides query parsing and building functionality.</Description>
-		<Version>0.8.8</Version>
+		<Version>0.8.9</Version>
 		<Authors>mk3008net</Authors>
 		<PackageProjectUrl>https://github.com/mk3008/Carbunql</PackageProjectUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
