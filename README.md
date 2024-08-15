@@ -11,78 +11,11 @@ This library allows you to dynamically modify columns, search conditions, and ev
 
 ## Demo 1: Dynamic Filtering
 
-```cs
-using Carbunql;
-
-internal class Program
-{
-    private static void Main(string[] args)
-    {
-        Console.WriteLine("Enter minimum price (or leave blank to omit):");
-        string? minPriceInput = Console.ReadLine();
-        decimal? minPrice = string.IsNullOrEmpty(minPriceInput) ? null : Convert.ToDecimal(minPriceInput);
-
-        Console.WriteLine("Enter maximum price (or leave blank to omit):");
-        string? maxPriceInput = Console.ReadLine();
-        decimal? maxPrice = string.IsNullOrEmpty(maxPriceInput) ? null : Convert.ToDecimal(maxPriceInput);
-
-        Console.WriteLine("Enter category (or leave blank to omit):");
-        string? category = Console.ReadLine();
-
-        Console.WriteLine("Enter in-stock status (true/false) (or leave blank to omit):");
-        string? inStockInput = Console.ReadLine();
-        bool? inStock = string.IsNullOrEmpty(inStockInput) ? null : Convert.ToBoolean(inStockInput);
-
-        var query = GenerateProductQuery(minPrice, maxPrice, category, inStock);
-        Console.WriteLine("Generated SQL Query:");
-        Console.WriteLine(query);
-    }
-
-    private static string GenerateProductQuery(decimal? minPrice, decimal? maxPrice, string? category, bool? inStock)
-    {
-        var sql = """
-    SELECT
-        p.product_id,
-        p.product_name,
-        p.price,
-        p.category,
-        p.in_stock
-    FROM
-        product as p
-    """;
-
-        // Convert the selection query to an object
-        var sq = new SelectQuery(sql);
-
-        // Dynamically add search conditions
-        if (minPrice != null)
-        {
-            sq.AddWhere("price", (source, column) => $"{source.Alias}.{column} >= {minPrice.Value}");
-        }
-        if (maxPrice != null)
-        {
-            sq.AddWhere("price", (source, column) => $"{source.Alias}.{column} <= {maxPrice.Value}");
-        }
-        if (!string.IsNullOrEmpty(category))
-        {
-            // Parameterize string values before adding them to search conditions
-            var pname = ":category";
-            sq.AddParameter(new QueryParameter(pname, category))
-                .AddWhere("category", (source, column) => $"{source.Alias}.{column} = {pname}");
-        }
-        if (inStock != null)
-        {
-            sq.AddWhere("in_stock", (source, column) => $"{source.Alias}.{column} = {inStock.Value}");
-        }
-        return sq.ToText();
-    }
-}
-```
-
+https://github.com/mk3008/Carbunql/blob/f82f30283e4d3369b50596f91385bf83629dd432/demo/DynamicFiltering/Program.cs#L28-L52
 
 ### Example
 
-```
+```sql
 Enter minimum price (or leave blank to omit):
 
 Enter maximum price (or leave blank to omit):
@@ -110,73 +43,12 @@ WHERE
 ```
 
 ## Demo 2: Dynamic column selection
-```cs
-using Carbunql;
 
-public class Program
-{
-    public static void Main()
-    {
-        // Define available columns
-        var availableColumns = new Dictionary<string, string>
-        {
-            { "1", "customer_name" },
-            { "2", "email" },
-            { "3", "purchase_history" }
-        };
-
-        Console.WriteLine("Available columns to select:");
-        foreach (var column in availableColumns)
-        {
-            Console.WriteLine($"{column.Key}: {column.Value}");
-        }
-
-        Console.WriteLine("Enter the numbers of the columns you want to include, separated by commas (e.g., 1,2):");
-        string? input = Console.ReadLine();
-        var selectedColumnNumbers = input?.Split(',', StringSplitOptions.RemoveEmptyEntries);
-
-        var selectedColumns = new List<string>();
-        if (selectedColumnNumbers != null)
-        {
-            foreach (var number in selectedColumnNumbers)
-            {
-                if (availableColumns.TryGetValue(number.Trim(), out var column))
-                {
-                    selectedColumns.Add(column);
-                }
-            }
-        }
-
-        var query = GenerateCustomReportQuery(selectedColumns);
-        Console.WriteLine("Generated SQL Query:");
-        Console.WriteLine(query);
-    }
-
-    public static string GenerateCustomReportQuery(List<string> columns)
-    {
-        var sql = """
-            SELECT
-                customer_name,
-                email,
-                purchase_history
-            FROM
-                customer
-            """;
-
-        // Convert the query to an object
-        var sq = new SelectQuery(sql);
-
-        // Restrict the selected columns
-        sq.FilterInColumns(columns);
-
-        // Convert the query to text format
-        return sq.ToText();
-    }
-}
-```
+https://github.com/mk3008/Carbunql/blob/f82f30283e4d3369b50596f91385bf83629dd432/demo/DynamicColumn/Program.cs#L49-L68
 
 ### Example
-```
+
+```sql
 Available columns to select:
 1: customer_name
 2: email
@@ -193,91 +65,11 @@ FROM
 
 ## Demo 3: Dynamic CTE creation
 
-
-```cs
-using Carbunql;
-
-public class Program
-{
-    public static void Main()
-    {
-        Console.WriteLine("Which month to summarize? (yyyy-mm-dd)");
-        DateTime summaryMonth = Convert.ToDateTime(Console.ReadLine());
-
-        Console.WriteLine("Include monthly summary rows? (true/false)");
-        bool includeMonthly = Convert.ToBoolean(Console.ReadLine());
-
-        var query = GenerateReportQuery(includeMonthly, summaryMonth);
-        Console.WriteLine("Generated SQL Query:");
-        Console.WriteLine(query);
-    }
-
-    public static string GenerateReportQuery(bool includeSummary, DateTime summaryMonth)
-    {
-        string dailySummaryQuery = """
-            SELECT
-                sale_date
-                , sum(amount) AS amount_total
-                , '' as caption 
-                , 1 as sort_number
-            FROM
-                salse
-            GROUP BY
-                sale_date
-            """;
-
-        string monthlySummaryQuery = """
-            SELECT
-                date_trunc('month', sale_date) + '1 month -1 day' as sale_date
-                , sum(amount) AS amount_total
-                , 'monthly total' as caption 
-                , 2 as sort_number
-            FROM
-                salse
-            GROUP BY
-                date_trunc('month', sale_date) + '1 month -1 day'
-            """;
-
-        // Create daily summary query
-        var sq = new SelectQuery();
-        sq.AddCTEQuery(dailySummaryQuery, "daily_summary");
-        sq.AddFrom("daily_summary", "d");
-        sq.AddSelectAll("d");
-
-        if (includeSummary)
-        {
-            // Add monthly summary query with UNION ALL
-            sq.AddSelectQuery("union all", _ =>
-            {
-                var xsq = new SelectQuery();
-                xsq.AddCTEQuery(monthlySummaryQuery, "monthly_summary");
-                xsq.AddFrom("monthly_summary", "m");
-                xsq.AddSelectAll("m");
-                return xsq;
-            });
-        }
-
-        // Add date filter condition
-        var pname = ":sale_date";
-        sq.AddParameter(new QueryParameter(pname, summaryMonth))
-            .AddWhere("sale_date", (source, column) => $"{pname} <= {source.Alias}.{column} and {source.Alias}.{column} < {pname}::timestamp + '1 month'");
-
-        // Convert the entire query to a CTE
-        sq = sq.ToCTEQuery("final", "f");
-
-        // Add sorting conditions
-        sq.RemoveSelect("sort_number")
-            .AddOrder("sale_date", (source, column) => $"{source.Alias}.{column}")
-            .AddOrder("sort_number", (source, column) => $"{source.Alias}.{column}");
-
-        return sq.ToText();
-    }
-}
-```
+https://github.com/mk3008/Carbunql/blob/f82f30283e4d3369b50596f91385bf83629dd432/demo/DynamicCTE/Program.cs#L19-L78
 
 ### Example
 
-```
+```sql
 Which month to summarize? (yyyy-mm-dd)
 2024-08-01
 Include monthly summary rows? (true/false)
@@ -416,11 +208,15 @@ var sq = new SelectQuery();
 
 If you added an empty select query, use the `AddFrom` function to manually add a FROM clause. The first argument is the table name, and the second argument is the alias name.
 
+> [!NOTE]
+> Don't forget to import the namespace Carbunql.Fluent.
+
 ```cs
 using Carbunql;
+using Carbunql.Fluent;
 
-var sq = new SelectQuery();
-sq.AddFrom("customer", "c");
+var sq = new SelectQuery()
+  .From("customer", "c");
 ```
 
 ### Add a column to select
@@ -429,11 +225,12 @@ You can add a column to select by using the `AddSelect` function. The first argu
 
 ```cs
 using Carbunql;
+using Carbunql.Fluent;
 
-var sq = new SelectQuery();
-sq.AddFrom("customer", "c");
-sq.AddSelect("c.customer_id")
-  .AddSelect("c.first_name || c.last_name", "customer_name");
+var sq = new SelectQuery()
+  .From("customer", "c")
+  .Select("c.customer_id")
+  .Select("c.first_name || c.last_name", "customer_name");
 ```
 
 ### Add search conditions
@@ -448,8 +245,19 @@ The second argument is a delegate (or lambda expression) that takes the column s
 using Carbunql;
 
 var text = "select s.sale_id, s.store_id, date_trunc('month', s.sale_date) as allocate_ym, s.sale_price from sales as s";
-var sq = new SelectQuery(text);
-sq.AddWhere("sale_id", (source, column) => $"{source.Alias}.{column} = 1");
+var sq = new SelectQuery(text)
+  .AddWhere("sale_id", (source, column) => $"{source.Alias}.{column} = 1");
+```
+
+The above code can be written even more succinctly if we import the namespace Carbunql.Fluent:
+
+```cs
+using Carbunql;
+using Carbunql.Fluent;
+
+var text = "select s.sale_id, s.store_id, date_trunc('month', s.sale_date) as allocate_ym, s.sale_price from sales as s";
+var sq = new SelectQuery(text)
+  .Equal("sale_id", "1");
 ```
 
 ## About the AddWhere function
