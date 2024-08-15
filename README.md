@@ -221,7 +221,7 @@ var sq = new SelectQuery()
 
 ### Add a column to select
 
-You can add a column to select by using the `AddSelect` function. The first argument is the column name, and the second argument is the column alias name. The column alias name is optional.
+You can add a column to select by using the `Select` function. The first argument is the column name, and the second argument is the column alias name. The column alias name is optional.
 
 ```cs
 using Carbunql;
