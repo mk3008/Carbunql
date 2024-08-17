@@ -257,7 +257,7 @@ using Carbunql.Fluent;
 
 var text = "select s.sale_id, s.store_id, date_trunc('month', s.sale_date) as allocate_ym, s.sale_price from sales as s";
 var sq = new SelectQuery(text)
-  .Equal("sale_id", "1");
+  .Equal("sale_id", 1);
 ```
 
 ## About the AddWhere function
