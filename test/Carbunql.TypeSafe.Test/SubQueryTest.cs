@@ -90,10 +90,7 @@ FROM
         var actual = query.ToText();
         Output.WriteLine(actual);
 
-        var expect = @"/*
-  :store_id = 1
-*/
-SELECT
+        var expect = @"SELECT
     o.store_id
 FROM
     (
@@ -172,10 +169,7 @@ FROM
         var actual = query.ToText();
         Output.WriteLine(actual);
 
-        var expect = @"/*
-  :localtion = 'japan'
-*/
-SELECT
+        var expect = @"SELECT
     r.order_date,
     r.customer_name,
     r.store_id,

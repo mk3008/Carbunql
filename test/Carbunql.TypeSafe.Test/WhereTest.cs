@@ -45,10 +45,7 @@ WHERE
         var actual = query.ToText();
         Output.WriteLine(query.ToText());
 
-        var expect = @"/*
-  :id = 1
-*/
-SELECT
+        var expect = @"SELECT
     *
 FROM
     sale AS a
@@ -189,10 +186,7 @@ WHERE
         var actual = query.ToText();
         Output.WriteLine(query.ToText());
 
-        var expect = @"/*
-  :const_0 = 'a'
-*/
-SELECT
+        var expect = @"SELECT
     *
 FROM
     sale AS a
@@ -240,10 +234,7 @@ WHERE
         var actual = query.ToText();
         Output.WriteLine(query.ToText());
 
-        var expect = @"/*
-  :id_array = System.Collections.Generic.List`1[System.Int32]
-*/
-SELECT
+        var expect = @"SELECT
     *
 FROM
     sale AS a
@@ -266,10 +257,7 @@ WHERE
         var actual = query.ToText();
         Output.WriteLine(query.ToText());
 
-        var expect = @"/*
-  :id_array = System.Collections.Generic.List`1[System.Int32]
-*/
-SELECT
+        var expect = @"SELECT
     *
 FROM
     sale AS a

@@ -117,13 +117,7 @@ FROM
 
         Monitor.Log(sq);
 
-        var sql = @"
-/*
-  :method_trim = 'abc'
-  :member_text = '';delete'
-  :invoke_fn = '';delete'
-*/
-SELECT
+        var sql = @"SELECT
     'abc ',
     :method_trim,
     '',

@@ -127,10 +127,7 @@ select a.* from articles as a order by CreatedOn desc
         Output.WriteLine(sq.ToText());
 
         Assert.True(filtered);
-        var expect = @"/*
-  @currentUser = 1
-*/
-/* user filter injected */
+        var expect = @"/* user filter injected */
 SELECT
     a.*
 FROM
@@ -176,10 +173,7 @@ order by
         Output.WriteLine(sq.ToText());
 
         Assert.True(filtered);
-        var expect = @"/*
-  @currentUser = 1
-*/
-/* user filter injected */
+        var expect = @"/* user filter injected */
 SELECT
     c.categoryname,
     a.*
@@ -227,10 +221,7 @@ order by
         Output.WriteLine(sq.ToText());
 
         Assert.True(filtered);
-        var expect = @"/*
-  @currentUser = 1
-*/
-SELECT
+        var expect = @"SELECT
     a2.*
 FROM
     (
@@ -283,10 +274,7 @@ order by
         Output.WriteLine(sq.ToText());
 
         Assert.True(filtered);
-        var expect = @"/*
-  @currentUser = 1
-*/
-WITH
+        var expect = @"WITH
     a2 AS (
         /* user filter injected */
         SELECT

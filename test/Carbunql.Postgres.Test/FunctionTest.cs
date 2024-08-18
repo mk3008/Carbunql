@@ -36,12 +36,7 @@ public class FunctionTest
 
         Monitor.Log(sq);
 
-        var sql = @"
-/*
-  :member_list = System.Collections.Generic.List`1[System.Int32]
-  :member_array = System.Int32[]
-*/
-SELECT
+        var sql = @"SELECT
     *
 FROM
     table_a AS a
@@ -88,11 +83,7 @@ FROM
 
         Monitor.Log(sq);
 
-        var sql = @"
-/*
-  :method_trim = 'value'
-*/
-SELECT
+        var sql = @"SELECT
     TRIM(a.text),
     :method_trim
 FROM
@@ -113,11 +104,7 @@ FROM
 
         Monitor.Log(sq);
 
-        var sql = @"
-/*
-  :method_trim_start = 'value '
-*/
-SELECT
+        var sql = @"SELECT
     LTRIM(a.text),
     :method_trim_start
 FROM
@@ -138,11 +125,7 @@ FROM
 
         Monitor.Log(sq);
 
-        var sql = @"
-/*
-  :method_trim_end = ' value'
-*/
-SELECT
+        var sql = @"SELECT
     RTRIM(a.text),
     :method_trim_end
 FROM
@@ -167,11 +150,7 @@ FROM
 
         Monitor.Log(sq);
 
-        var sql = @"
-/*
-  :member_text = 'word'
-*/
-SELECT
+        var sql = @"SELECT
     *
 FROM
     table_a AS a
@@ -198,11 +177,7 @@ WHERE
 
         Monitor.Log(sq);
 
-        var sql = @"
-/*
-  :member_text = 'word'
-*/
-SELECT
+        var sql = @"SELECT
     *
 FROM
     table_a AS a
@@ -229,11 +204,7 @@ WHERE
 
         Monitor.Log(sq);
 
-        var sql = @"
-/*
-  :member_text = 'word'
-*/
-SELECT
+        var sql = @"SELECT
     *
 FROM
     table_a AS a
@@ -260,11 +231,7 @@ WHERE
 
         Monitor.Log(sq);
 
-        var sql = @"
-/*
-  :member_text = 'word'
-*/
-SELECT
+        var sql = @"SELECT
     *
 FROM
     table_a AS a

@@ -29,24 +29,7 @@ public class IEnumerableTest
         var actual = q.ToText(true);
         Output.WriteLine(actual);
 
-        var expect = @"/*
-  r0c0 = 1
-  r0c1 = 'a'
-  r0c2 = 10
-  r0c3 = '2000/01/01 0:00:00'
-  r0c4 = True
-  r1c0 = 2
-  r1c1 = 'b'
-  r1c2 = 20
-  r1c3 = '2010/10/10 0:00:00'
-  r1c4 = False
-  r2c0 = 3
-  r2c1 is NULL
-  r2c2 is NULL
-  r2c3 is NULL
-  r2c4 is NULL
-*/
-VALUES
+        var expect = @"VALUES
     (:r0c0, :r0c1, :r0c2, :r0c3, :r0c4),
     (:r1c0, :r1c1, :r1c2, :r1c3, :r1c4),
     (:r2c0, :r2c1, :r2c2, :r2c3, :r2c4)";
@@ -69,24 +52,7 @@ VALUES
         var actual = q.ToText(true);
         Output.WriteLine(actual);
 
-        var expect = @"/*
-  r0c0 = 1
-  r0c1 = 'a'
-  r0c2 = 10
-  r0c3 = '2000/01/01 0:00:00'
-  r0c4 = True
-  r1c0 = 2
-  r1c1 = 'b'
-  r1c2 = 20
-  r1c3 = '2010/10/10 0:00:00'
-  r1c4 = False
-  r2c0 = 3
-  r2c1 is NULL
-  r2c2 is NULL
-  r2c3 is NULL
-  r2c4 is NULL
-*/
-SELECT
+        var expect = @"SELECT
     v.result_id,
     v.result_text,
     v.result_value,

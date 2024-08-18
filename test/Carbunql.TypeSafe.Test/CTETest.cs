@@ -164,10 +164,7 @@ FROM
         var actual = query.ToText();
         Output.WriteLine(actual);
 
-        var expect = @"/*
-  :localtion = 'japan'
-*/
-WITH
+        var expect = @"WITH
     order_detail_report AS (
         SELECT
             od.order_detail_id,

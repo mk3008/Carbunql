@@ -194,12 +194,7 @@ WHERE
 
         Monitor.Log(sq);
 
-        var sql = @"
-/*
-  :member_text = '';delete'
-  :invoke_fn = '';delete'
-*/
-SELECT
+        var sql = @"SELECT
     *
 FROM
     table_a AS a
