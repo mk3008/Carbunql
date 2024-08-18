@@ -97,11 +97,7 @@ FROM
         var actual = query.ToText();
         Output.WriteLine(actual);
 
-        var expect = @"/*
-  :const_0 = 'test'
-  :const_1 = '2000/01/01 10:10:00'
-*/
-SELECT
+        var expect = @"SELECT
     1 AS id,
     10 AS value,
     0.1 AS rate,
@@ -164,15 +160,7 @@ FROM
         var actual = query.ToText();
         Output.WriteLine(actual);
 
-        var expect = @"/*
-  :id = 1
-  :value = 10
-  :rate = 0.1
-  :tf_value = True
-  :remarks = 'test'
-  :created_at = '2000/01/01 10:10:00'
-*/
-SELECT
+        var expect = @"SELECT
     :id AS id,
     :value AS value,
     :rate AS rate,
@@ -268,10 +256,7 @@ FROM
         var actual = query.ToText();
         Output.WriteLine(actual);
 
-        var expect = @"/*
-  :d = '2000/10/20 0:00:00'
-*/
-SELECT
+        var expect = @"SELECT
     DATE_TRUNC('year', :d) AS v_trunc_year,
     DATE_TRUNC('quarter', :d) AS v_trunc_quarter,
     DATE_TRUNC('month', :d) AS v_trunc_month,
@@ -310,10 +295,7 @@ FROM
         var actual = query.ToText();
         Output.WriteLine(actual);
 
-        var expect = @"/*
-  :d = '2000/10/20 0:00:00'
-*/
-SELECT
+        var expect = @"SELECT
     DATE_TRUNC('year', :d) AS v_trunc_year,
     DATE_TRUNC('quarter', :d) AS v_trunc_quarter,
     DATE_TRUNC('month', :d) AS v_trunc_month,
@@ -580,11 +562,7 @@ FROM
         var actual = query.ToText();
         Output.WriteLine(actual);
 
-        var expect = @"/*
-  :const_0 = 'YYYY/MM/DD HH24:MI:SS.US'
-  :const_1 = 'YYYY/MM/DD HH24:MI:SS.MS'
-*/
-SELECT
+        var expect = @"SELECT
     CAST(a.product_name AS text) AS product_name,
     CAST(a.sale_id AS text) AS sale_id,
     TO_CHAR(a.created_at, :const_0) AS created_at,

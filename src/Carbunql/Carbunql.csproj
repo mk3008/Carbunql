@@ -8,12 +8,12 @@
 		<Title></Title>
 		<Copyright>mk3008net</Copyright>
 		<Description>Carbunql is an advanced dynamic SQL building library.</Description>
-		<Version>0.8.9.1</Version>
+		<Version>0.8.10</Version>
 		<Authors>mk3008net</Authors>
 		<PackageProjectUrl>https://github.com/mk3008/Carbunql</PackageProjectUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/mk3008/Carbunql.git</RepositoryUrl>
-		<PackageTags>sql;migration;sql-parser;query-builder;sql-builder;sqlbuilder;sqlparser;dynamic programming</PackageTags>
+		<PackageTags>sql;rawsql;sqlparser;sqlbuilder;dynamic</PackageTags>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 	</PropertyGroup>
 

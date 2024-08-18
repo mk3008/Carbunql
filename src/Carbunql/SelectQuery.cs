@@ -5,6 +5,7 @@ using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
+using Cysharp.Text;
 using MessagePack;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
@@ -1285,5 +1286,37 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         if (SelectClause == null) throw new NullReferenceException(nameof(SelectClause));
         SelectClause.FilterInColumns(columnNames);
         return this;
+    }
+
+    public string GetParameterText()
+    {
+        var prms = GetParameters();
+        if (!prms.Any()) return string.Empty;
+
+        var names = new List<string>();
+
+        var sb = ZString.CreateStringBuilder();
+        sb.AppendLine("/*");
+        foreach (var item in prms)
+        {
+            if (names.Contains(item.ParameterName)) continue;
+
+            names.Add(item.ParameterName);
+            if (item.Value == null)
+            {
+                sb.AppendLine($"  {item.ParameterName} is NULL");
+            }
+            else if (item.Value.GetType() == typeof(string) || item.Value.GetType() == typeof(DateTime))
+            {
+                sb.AppendLine($"  {item.ParameterName} = '{item.Value}'");
+            }
+            else
+            {
+                sb.AppendLine($"  {item.ParameterName} = {item.Value}");
+            }
+        }
+        sb.Append("*/");
+
+        return sb.ToString();
     }
 }

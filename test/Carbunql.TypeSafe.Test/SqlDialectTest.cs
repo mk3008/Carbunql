@@ -35,11 +35,7 @@ public class SqlDialectTest(DependencySetupFixture fixture, ITestOutputHelper ou
         var actual = query.ToText();
         Output.WriteLine(actual);
 
-        var expect = @"/*
-  :id = 1
-  :value = 10.5
-*/
-SELECT
+        var expect = @"SELECT
     :id AS parameter_symbol,
     NOW() AS now_command,
     current_timestamp AS timestamp_command,
@@ -83,11 +79,7 @@ SELECT
         var actual = query.ToText();
         Output.WriteLine(actual);
 
-        var expect = @"/*
-  @id = 1
-  @value = 10.5
-*/
-SELECT
+        var expect = @"SELECT
     @id AS parameter_symbol,
     DATETIME('now') AS now_command,
     current_timestamp AS timestamp_command,
@@ -131,11 +123,7 @@ SELECT
         var actual = query.ToText();
         Output.WriteLine(actual);
 
-        var expect = @"/*
-  @id = 1
-  @value = 10.5
-*/
-SELECT
+        var expect = @"SELECT
     @id AS parameter_symbol,
     DATETIME('now') AS now_command,
     current_timestamp AS timestamp_command,

@@ -123,10 +123,7 @@ WHERE
         var actual = query.ToText();
         Output.WriteLine(query.ToText());
 
-        var expect = @"/*
-  :localtion = 'japan'
-*/
-SELECT
+        var expect = @"SELECT
     *
 FROM
     order AS o

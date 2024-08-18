@@ -55,10 +55,7 @@ FROM
         var actual = query.ToText();
         Output.WriteLine(actual);
 
-        var expect = @"/*
-  :const_0 = 'test'
-*/
-SELECT
+        var expect = @"SELECT
     o.order_id,
     o.store_id,
     o.order_date,

@@ -141,18 +141,24 @@ public static class IQueryCommandableExtension
     /// Converts the query commandable to text.
     /// </summary>
     /// <param name="source">The source <see cref="IQueryCommandable"/>.</param>
-    /// <param name="exportParameterInfo">Determines whether to export parameter information.</param>
     /// <returns>Text representation of the query commandable.</returns>
+    public static string ToText(this IQueryCommandable source)
+    {
+        var cmd = source.ToCommand();
+        return cmd.CommandText;
+    }
+
+    /// <summary>
+    /// Converts the query commandable to text.
+    /// </summary>
+    /// <param name="source">The source <see cref="IQueryCommandable"/>.</param>
+    /// <param name="exportParameterInfo">This parameter is invalid</param>
+    /// <returns>Text representation of the query commandable.</returns>
+    [Obsolete("use ToText method.")]
     public static string ToText(this IQueryCommandable source, bool exportParameterInfo = true)
     {
         var cmd = source.ToCommand();
-        var text = cmd.CommandText;
-
-        if (!cmd.Parameters.Any() || !exportParameterInfo) return text;
-
-        var head = GetParameterText(cmd);
-        if (string.IsNullOrEmpty(head)) return text;
-        return head + text;
+        return cmd.CommandText;
     }
 
     /// <summary>
@@ -163,16 +169,10 @@ public static class IQueryCommandableExtension
     public static string ToOneLineText(this IQueryCommandable source)
     {
         var cmd = source.ToOneLineCommand();
-        var text = cmd.CommandText;
-
-        if (!cmd.Parameters.Any()) return text;
-
-        var head = GetParameterText(cmd);
-        if (string.IsNullOrEmpty(head)) return text;
-        return head + text;
+        return cmd.CommandText;
     }
 
-    private static string GetParameterText(this QueryCommand source)
+    public static string GetParameterText(this QueryCommand source)
     {
         var prms = source.Parameters;
         if (!prms.Any()) return string.Empty;
@@ -199,7 +199,7 @@ public static class IQueryCommandableExtension
                 sb.AppendLine($"  {item.Key} = {item.Value}");
             }
         }
-        sb.AppendLine("*/");
+        sb.Append("*/");
 
         return sb.ToString();
     }

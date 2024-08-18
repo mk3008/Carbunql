@@ -29,9 +29,10 @@ select a.column_1 as c1 from table_a as a";
         sq.AddParameter(":id", 1);
         sq.AddParameter(":value", "test");
 
+        Output.WriteLine(sq.GetParameterText());
         Output.WriteLine(sq.ToText());
 
-        Assert.Equal(TruncateControlString(sql), TruncateControlString(sq.ToText()));
+        Assert.Equal(TruncateControlString(sql), TruncateControlString(sq.GetParameterText() + "\r\n" + sq.ToText()));
     }
 
     [Fact]
@@ -47,9 +48,10 @@ select a.column_1 as c1 from table_a as a";
         sq.AddParameter(":id", 1);
         sq.AddParameter(":value", "test");
 
+        Output.WriteLine(sq.GetParameterText());
         Output.WriteLine(sq.ToOneLineText());
 
-        Assert.Equal(TruncateControlString(sql), TruncateControlString(sq.ToOneLineText()));
+        Assert.Equal(TruncateControlString(sql), TruncateControlString(sq.GetParameterText() + "\r\n" + sq.ToOneLineText()));
     }
 
     [Fact]

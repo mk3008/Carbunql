@@ -144,11 +144,7 @@ FROM
         Assert.Equal("V3", items[5].Alias);
         Assert.Equal(":member_pi", items[5].Value.ToText());
 
-        var sql = @"
-/*
-  :member_pi = 3.14
-*/
-SELECT
+        var sql = @"SELECT
     a.a_id AS ID,
     a.text AS TEXT,
     a.value AS VALUE,
