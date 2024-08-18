@@ -7,13 +7,13 @@
 		<Nullable>enable</Nullable>
 		<Title></Title>
 		<Copyright>mk3008net</Copyright>
-		<Description>Carbunql provides query parsing and building functionality.</Description>
-		<Version>0.8.9</Version>
+		<Description>Carbunql is an advanced dynamic SQL building library.</Description>
+		<Version>0.8.9.1</Version>
 		<Authors>mk3008net</Authors>
 		<PackageProjectUrl>https://github.com/mk3008/Carbunql</PackageProjectUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/mk3008/Carbunql.git</RepositoryUrl>
-		<PackageTags>sql;migration;sql-parser;query-builder;sql-builder;sqlbuilder;sqlparser;sqlrebuilder</PackageTags>
+		<PackageTags>sql;migration;sql-parser;query-builder;sql-builder;sqlbuilder;sqlparser;dynamic programming</PackageTags>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 	</PropertyGroup>
 
@@ -35,7 +35,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Dapper" Version="2.0.123" />
 		<PackageReference Include="MessagePack" Version="2.5.124" />
 		<PackageReference Include="MessagePackAnalyzer" Version="2.5.124">
 			<PrivateAssets>all</PrivateAssets>
