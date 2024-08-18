@@ -923,7 +923,11 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
 
     public SelectQuery AddSelectAll(string tableName)
     {
-        var t = GetSelectableTables().Where(x => x.Alias.IsEqualNoCase(tableName)).First();
+        var t = GetSelectableTables().Where(x => x.Table.GetTableFullName().IsEqualNoCase(tableName) || x.Alias.IsEqualNoCase(tableName)).FirstOrDefault();
+        if (t == null)
+        {
+            throw new InvalidProgramException($"Table not found. table:{tableName}");
+        }
 
         GetQuerySources()
             .Where(x => x.Source.Equals(t))
@@ -936,16 +940,16 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         return this;
     }
 
-    public SelectQuery RenameSelect(string columnName, string newName)
+    public SelectQuery RenameSelect(string columnAliasName, string newAliasName)
     {
-        var c = GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnName)).First();
-        c.SetAlias(newName);
+        var c = GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnAliasName)).First();
+        c.SetAlias(newAliasName);
         return this;
     }
 
-    public SelectQuery RemoveSelect(string columnName)
+    public SelectQuery RemoveSelect(string selectableColumnName)
     {
-        var c = GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnName)).First();
+        var c = GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(selectableColumnName)).First();
         SelectClause!.Remove(c);
         return this;
     }
@@ -959,18 +963,18 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     /// <summary>
     /// Searches for the specified column and overrides it.
     /// </summary>
-    /// <param name="columnName">The name of the column to search for.</param>
+    /// <param name="columnAliasName">The name of the column to search for.</param>
     /// <param name="overrider">The function to modify the column value.</param>
     /// <returns>The modified select query.</returns>
-    public SelectQuery OverrideSelect(string columnName, Func<IQuerySource, string, string> overrider)
+    public SelectQuery OverrideSelect(string columnAliasName, Func<IQuerySource, string, string> overrider)
     {
         GetQuerySources()
-            .Where(x => x.Query.GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnName)).Any())
+            .Where(x => x.Query.GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnAliasName)).Any())
+            .EnsureAny($"column alias:{columnAliasName}")
             .GetRootsBySource()
-            .EnsureAny()
             .ForEach(x =>
             {
-                var si = x.Query.GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnName)).First();
+                var si = x.Query.GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnAliasName)).First();
                 //override
                 si.Value = ValueParser.Parse(overrider(x, si.Value.ToOneLineText()));
             });
@@ -982,19 +986,21 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     /// Searches for the specified column in the specified table and overrides it.
     /// </summary>
     /// <param name="tableName">The name of the table to search in.</param>
-    /// <param name="columnName">The name of the column to search for.</param>
+    /// <param name="columnAliasName">The name of the column to search for.</param>
     /// <param name="overrider">The function to modify the column value.</param>
     /// <returns>The modified select query.</returns>
-    public SelectQuery OverrideSelect(string tableName, string columnName, Func<IQuerySource, SelectableItem, string> overrider)
+    public SelectQuery OverrideSelect(string tableName, string columnAliasName, Func<IQuerySource, SelectableItem, string> overrider)
     {
         GetQuerySources()
-            .Where(x => x.GetTableFullName().IsEqualNoCase(tableName))
-            .Where(x => x.Query.GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnName)).Any())
+            .Where(x => x.GetTableFullName().IsEqualNoCase(tableName) || x.Alias.IsEqualNoCase(tableName))
+            .EnsureAny($"table:{tableName}")
+            .Where(x => x.Query.GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnAliasName)).Any())
+            .EnsureAny($"The table exists, but there is no corresponding column in the table. table:{tableName}, column alias:{columnAliasName}")
             .GetRootsBySource()
             .EnsureAny()
             .ForEach(x =>
             {
-                var si = x.Query.GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnName)).First();
+                var si = x.Query.GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnAliasName)).First();
                 //override
                 si.Value = ValueParser.Parse(overrider(x, si));
             });
@@ -1011,15 +1017,12 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     public SelectQuery AddWhere(string columnName, Func<IQuerySource, string> adder)
     {
         GetQuerySources()
-            .Where(x => x.Query.GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnName)).Any())
+            .Where(x => x.ColumnNames.Where(x => x.IsEqualNoCase(columnName)).Any())
+            .EnsureAny($"column:{columnName}")
             .GetRootsBySource()
-            .EnsureAny()
             .ForEach(x =>
             {
-                if (x.ColumnNames.Where(column => column.IsEqualNoCase(columnName)).Any())
-                {
-                    x.Query.Where(adder(x));
-                }
+                x.Query.Where(adder(x));
             });
 
         return this;
@@ -1034,15 +1037,12 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     public SelectQuery AddWhere(string columnName, Func<IQuerySource, string, string> adder)
     {
         GetQuerySources()
-            .Where(x => x.Query.GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnName)).Any())
+            .Where(x => x.ColumnNames.Where(x => x.IsEqualNoCase(columnName)).Any())
+            .EnsureAny($"column:{columnName}")
             .GetRootsBySource()
-            .EnsureAny()
             .ForEach(x =>
             {
-                if (x.ColumnNames.Where(column => column.IsEqualNoCase(columnName)).Any())
-                {
-                    x.Query.Where(adder(x, columnName));
-                }
+                x.Query.Where(adder(x, columnName));
             });
 
         return this;
@@ -1081,9 +1081,10 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     {
         GetQuerySources()
             .Where(x => x.GetTableFullName().IsEqualNoCase(tableName))
-            .Where(x => x.Query.GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnName)).Any())
+            .EnsureAny($"table:{tableName}")
+            .Where(x => x.ColumnNames.Where(x => x.IsEqualNoCase(columnName)).Any())
+            .EnsureAny($"The table exists, but there is no corresponding column in the table. table:{tableName}, column:{columnName}")
             .GetRootsBySource()
-            .EnsureAny()
             .ForEach(x =>
             {
                 x.Query.Where(adder(x));
@@ -1102,10 +1103,11 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     public SelectQuery AddWhere(string tableName, string columnName, Func<IQuerySource, string, string> adder)
     {
         GetQuerySources()
-            .Where(x => x.GetTableFullName().IsEqualNoCase(tableName))
-            .Where(x => x.Query.GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnName)).Any())
+            .Where(x => x.GetTableFullName().IsEqualNoCase(tableName) || x.Alias.IsEqualNoCase(tableName))
+            .EnsureAny($"table:{tableName}")
+            .Where(x => x.ColumnNames.Where(x => x.IsEqualNoCase(columnName)).Any())
+            .EnsureAny($"The table exists, but there is no corresponding column in the table. table:{tableName}, column:{columnName}")
             .GetRootsBySource()
-            .EnsureAny()
             .ForEach(x =>
             {
                 x.Query.Where(adder(x, columnName));
@@ -1125,8 +1127,8 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     {
         GetQuerySources()
             .Where(x => keyColumnNames.All(keyColumn => x.ColumnNames.Contains(keyColumn)))
+            .EnsureAny($"columns:{string.Join(",", keyColumnNames)}")
             .GetRootsBySource()
-            .EnsureAny()
             .ForEach(qs =>
             {
                 qs.Query.Where(() =>
@@ -1152,8 +1154,10 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     public SelectQuery AddExists(string sourceTableName, IEnumerable<string> keyColumnNames, string validationTableName, Action<IQuerySource>? action = null)
     {
         GetQuerySources()
-            .Where(x => x.GetTableFullName().IsEqualNoCase(sourceTableName))
+            .Where(x => x.GetTableFullName().IsEqualNoCase(sourceTableName) || x.Alias.IsEqualNoCase(sourceTableName))
+            .EnsureAny($"table:{sourceTableName}")
             .Where(x => keyColumnNames.All(keyColumn => x.ColumnNames.Contains(keyColumn)))
+            .EnsureAny($"The table exists, but there is no corresponding column in the table. table:{sourceTableName}, columns:{string.Join(",", keyColumnNames)}")
             .GetRootsBySource()
             .EnsureAny()
             .ForEach(qs =>
@@ -1181,8 +1185,8 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     {
         GetQuerySources()
             .Where(x => keyColumnNames.All(keyColumn => x.ColumnNames.Contains(keyColumn)))
+            .EnsureAny($"columns:{string.Join(",", keyColumnNames)}")
             .GetRootsBySource()
-            .EnsureAny()
             .ForEach(qs =>
             {
                 qs.Query.Where(() =>
@@ -1209,9 +1213,10 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     {
         GetQuerySources()
             .Where(x => x.GetTableFullName().IsEqualNoCase(sourceTableName))
+            .EnsureAny($"table:{sourceTableName}")
             .Where(x => keyColumnNames.All(keyColumn => x.ColumnNames.Contains(keyColumn)))
+            .EnsureAny($"The table exists, but there is no corresponding column in the table. table:{sourceTableName}, columns:{string.Join(",", keyColumnNames)}")
             .GetRootsBySource()
-            .EnsureAny()
             .ForEach(qs =>
             {
                 qs.Query.Where(() =>

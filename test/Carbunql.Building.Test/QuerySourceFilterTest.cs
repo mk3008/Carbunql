@@ -1,21 +1,21 @@
-﻿using System.Xml.Linq;
+﻿using Carbunql.Fluent;
 using Xunit.Abstractions;
 
 namespace Carbunql.Building.Test;
 
 public class QuerySourceFilterTest
 {
-    private readonly QueryCommandMonitor Monitor;
+	private readonly QueryCommandMonitor Monitor;
 
-    public QuerySourceFilterTest(ITestOutputHelper output)
-    {
-        Monitor = new QueryCommandMonitor(output);
-    }
+	public QuerySourceFilterTest(ITestOutputHelper output)
+	{
+		Monitor = new QueryCommandMonitor(output);
+	}
 
-    [Fact]
-    public void ShowDataSet()
-    {
-        var sql = @"
+	[Fact]
+	public void ShowDataSet()
+	{
+		var sql = @"
 select 
     s.sale_id
     , s.store_id
@@ -23,23 +23,23 @@ select
 from
     sale as s";
 
-        var query = new SelectQuery(sql);
-        query.GetQuerySources().ForEach(x =>
-        {
-            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
-        });
-        Monitor.Log(query, exportTokens: false);
+		var query = new SelectQuery(sql);
+		query.GetQuerySources().ForEach(x =>
+		{
+			x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+		});
+		Monitor.Log(query, exportTokens: false);
 
-        var datasets = query.GetQuerySources().ToList();
-        Monitor.Log(datasets);
+		var datasets = query.GetQuerySources().ToList();
+		Monitor.Log(datasets);
 
-        Assert.Single(datasets);
-    }
+		Assert.Single(datasets);
+	}
 
-    [Fact]
-    public void EqualTest()
-    {
-        var sql = @"
+	[Fact]
+	public void EqualTest()
+	{
+		var sql = @"
 SELECT
     s.sale_id,
     s.store_id,
@@ -48,24 +48,24 @@ FROM
     /* Lv:1, Seq:1, Refs:0-1, Columns:[sale_id, store_id, price] */
     sale AS s";
 
-        var query = new SelectQuery(sql);
-        query.GetQuerySources().ForEach(x =>
-        {
-            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
-        });
-        Monitor.Log(query, exportTokens: false);
+		var query = new SelectQuery(sql);
+		query.GetQuerySources().ForEach(x =>
+		{
+			x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+		});
+		Monitor.Log(query, exportTokens: false);
 
-        var column = "sale_id";
-        var value = 1;
+		var column = "sale_id";
+		var value = 1;
 
-        query.GetQuerySources()
-            .Where(ds => ds.ColumnNames.Contains(column))
-            .GetRootsBySource()
-            .ForEach(ds => ds.Query.Where(ds.Alias, column).Equal(value));
+		query.GetQuerySources()
+			.Where(ds => ds.ColumnNames.Contains(column))
+			.GetRootsBySource()
+			.ForEach(ds => ds.Query.Where(ds.Alias, column).Equal(value));
 
-        Monitor.Log(query);
+		Monitor.Log(query);
 
-        var expect = @"SELECT
+		var expect = @"SELECT
     s.sale_id,
     s.store_id,
     s.price
@@ -76,13 +76,13 @@ WHERE
     s.sale_id = 1";
 
 
-        Assert.Equal(expect, query.ToText(), true, true, true);
-    }
+		Assert.Equal(expect, query.ToText(), true, true, true);
+	}
 
-    [Fact]
-    public void SubQueryTest()
-    {
-        var sql = @"
+	[Fact]
+	public void SubQueryTest()
+	{
+		var sql = @"
 SELECT
     s2.sale_id,
     s2.store_id,
@@ -99,24 +99,24 @@ FROM
             sale AS s1
     ) AS s2";
 
-        var query = new SelectQuery(sql);
-        query.GetQuerySources().ForEach(x =>
-        {
-            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
-        });
-        Monitor.Log(query, exportTokens: false);
+		var query = new SelectQuery(sql);
+		query.GetQuerySources().ForEach(x =>
+		{
+			x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+		});
+		Monitor.Log(query, exportTokens: false);
 
-        var column = "sale_id";
-        var value = 1;
+		var column = "sale_id";
+		var value = 1;
 
-        query.GetQuerySources()
-            .Where(ds => ds.ColumnNames.Contains(column))
-            .GetRootsBySource()
-            .ForEach(ds => ds.Query.Where(ds.Alias, column).Equal(value));
+		query.GetQuerySources()
+			.Where(ds => ds.ColumnNames.Contains(column))
+			.GetRootsBySource()
+			.ForEach(ds => ds.Query.Where(ds.Alias, column).Equal(value));
 
-        Monitor.Log(query);
+		Monitor.Log(query);
 
-        var expect = @"SELECT
+		var expect = @"SELECT
     s2.sale_id,
     s2.store_id,
     s2.price
@@ -134,13 +134,13 @@ FROM
             s1.sale_id = 1
     ) AS s2";
 
-        Assert.Equal(expect, query.ToText(), true, true, true);
-    }
+		Assert.Equal(expect, query.ToText(), true, true, true);
+	}
 
-    [Fact]
-    public void InnerJoinTest()
-    {
-        var sql = @"
+	[Fact]
+	public void InnerJoinTest()
+	{
+		var sql = @"
 SELECT
     s.sale_id,
     s.store_id,
@@ -152,25 +152,25 @@ FROM
     /* Lv:1, Seq:2, Refs:0-2, Columns:[store_id] */
     store AS st ON s.store_id = st.store_id";
 
-        var query = new SelectQuery(sql);
-        query.GetQuerySources().ForEach(x =>
-        {
-            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
-        });
-        Monitor.Log(query, exportTokens: false);
+		var query = new SelectQuery(sql);
+		query.GetQuerySources().ForEach(x =>
+		{
+			x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+		});
+		Monitor.Log(query, exportTokens: false);
 
-        var column = "store_id";
-        var value = 1;
+		var column = "store_id";
+		var value = 1;
 
-        query.GetQuerySources()
-            .Where(ds => ds.ColumnNames.Contains(column))
-            .GetRootsBySource()
-            .ForEach(ds => ds.Query.Where(ds.Alias, column).Equal(value));
+		query.GetQuerySources()
+			.Where(ds => ds.ColumnNames.Contains(column))
+			.GetRootsBySource()
+			.ForEach(ds => ds.Query.Where(ds.Alias, column).Equal(value));
 
-        Monitor.Log(query);
+		Monitor.Log(query);
 
-        //Other query sources within the same query may also be included in the search.
-        var expect = @"SELECT
+		//Other query sources within the same query may also be included in the search.
+		var expect = @"SELECT
     s.sale_id,
     s.store_id,
     s.price
@@ -184,13 +184,13 @@ WHERE
     s.store_id = 1
     AND st.store_id = 1";
 
-        Assert.Equal(expect, query.ToText(), true, true, true);
-    }
+		Assert.Equal(expect, query.ToText(), true, true, true);
+	}
 
-    [Fact]
-    public void InnerJoinTest_GetRootDataSetsByBranchGetRootDataSetsByQuery()
-    {
-        var sql = @"
+	[Fact]
+	public void InnerJoinTest_GetRootDataSetsByBranchGetRootDataSetsByQuery()
+	{
+		var sql = @"
 SELECT
     s.sale_id,
     s.store_id,
@@ -203,30 +203,30 @@ FROM
     /* Lv:1, Seq:2, Refs:0-2, Columns:[store_name, store_id] */
     store AS st ON s.store_id = st.store_id";
 
-        var query = new SelectQuery(sql);
-        query.GetQuerySources().ForEach(x =>
-        {
-            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
-        });
-        Monitor.Log(query, exportTokens: false);
+		var query = new SelectQuery(sql);
+		query.GetQuerySources().ForEach(x =>
+		{
+			x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+		});
+		Monitor.Log(query, exportTokens: false);
 
-        var datasets = query.GetQuerySources().ToList();
-        Monitor.Log(datasets);
+		var datasets = query.GetQuerySources().ToList();
+		Monitor.Log(datasets);
 
-        var column = "store_id";
-        var value = 1;
+		var column = "store_id";
+		var value = 1;
 
-        //If you want to apply a single search condition to a query, write it like this.
-        //However, when considering outer joins, it may be best to refrain from modifying it to this extent.
-        query.GetQuerySources()
-            .Where(ds => ds.ColumnNames.Contains(column))
-            .GetRootsBySource()
-            .GetRootsByQuery()
-            .ForEach(ds => ds.Query.Where(ds.Alias, column).Equal(value));
+		//If you want to apply a single search condition to a query, write it like this.
+		//However, when considering outer joins, it may be best to refrain from modifying it to this extent.
+		query.GetQuerySources()
+			.Where(ds => ds.ColumnNames.Contains(column))
+			.GetRootsBySource()
+			.GetRootsByQuery()
+			.ForEach(ds => ds.Query.Where(ds.Alias, column).Equal(value));
 
-        Monitor.Log(query);
+		Monitor.Log(query);
 
-        var expect = @"SELECT
+		var expect = @"SELECT
     s.sale_id,
     s.store_id,
     st.store_name,
@@ -240,13 +240,13 @@ FROM
 WHERE
     s.store_id = 1";
 
-        Assert.Equal(expect, query.ToText(), true, true, true);
-    }
+		Assert.Equal(expect, query.ToText(), true, true, true);
+	}
 
-    [Fact]
-    public void CTETest()
-    {
-        var sql = @"
+	[Fact]
+	public void CTETest()
+	{
+		var sql = @"
 WITH
     sx AS (
         SELECT
@@ -265,24 +265,24 @@ FROM
     /* Lv:1, Seq:1, Refs:0-1, Columns:[sale_id, store_id, price] */
     sx AS s2";
 
-        var query = new SelectQuery(sql);
-        query.GetQuerySources().ForEach(x =>
-        {
-            x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
-        });
-        Monitor.Log(query, exportTokens: false);
+		var query = new SelectQuery(sql);
+		query.GetQuerySources().ForEach(x =>
+		{
+			x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+		});
+		Monitor.Log(query, exportTokens: false);
 
-        var column = "store_id";
-        var value = 1;
+		var column = "store_id";
+		var value = 1;
 
-        query.GetQuerySources()
-            .Where(ds => ds.ColumnNames.Contains(column))
-            .GetRootsBySource()
-            .ForEach(ds => ds.Query.Where(ds.Alias, column).Equal(value));
+		query.GetQuerySources()
+			.Where(ds => ds.ColumnNames.Contains(column))
+			.GetRootsBySource()
+			.ForEach(ds => ds.Query.Where(ds.Alias, column).Equal(value));
 
-        Monitor.Log(query, exportTokens: false);
+		Monitor.Log(query, exportTokens: false);
 
-        var expect = @"WITH
+		var expect = @"WITH
     sx AS (
         SELECT
             s1.sale_id,
@@ -302,13 +302,13 @@ FROM
     /* Lv:1, Columns:[sale_id, store_id, price] */
     sx AS s2";
 
-        Assert.Equal(expect, query.ToText(), true, true, true);
-    }
+		Assert.Equal(expect, query.ToText(), true, true, true);
+	}
 
-    [Fact]
-    public void PracticalTest()
-    {
-        var sql = @"WITH
+	[Fact]
+	public void PracticalTest()
+	{
+		var sql = @"WITH
     monthly_sales AS (
         SELECT
             customer_id,
@@ -339,29 +339,29 @@ ORDER BY
     c.customer_id,
     ms.sale_month";
 
-        var query = new SelectQuery(sql);
-        query.GetQuerySources().ForEach(x =>
-        {
-            x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
-            x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
-        });
-        Monitor.Log(query, exportTokens: false);
+		var query = new SelectQuery(sql);
+		query.GetQuerySources().ForEach(x =>
+		{
+			x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
+			x.ToTreePaths().ForEach(path => x.AddSourceComment($"Path:{string.Join("-", path)}"));
+		});
+		Monitor.Log(query, exportTokens: false);
 
-        var column = "customer_id";
-        var value = 1;
+		var column = "customer_id";
+		var value = 1;
 
-        query.GetQuerySources()
-            .Where(ds => ds.ColumnNames.Contains(column))
-            .GetRootsBySource()
-            .ForEach(ds =>
-            {
-                ds.AddSourceComment("inject filter");
-                ds.Query.Where(ds.Alias, column).Equal(value);
-            });
+		query.GetQuerySources()
+			.Where(ds => ds.ColumnNames.Contains(column))
+			.GetRootsBySource()
+			.ForEach(ds =>
+			{
+				ds.AddSourceComment("inject filter");
+				ds.Query.Where(ds.Alias, column).Equal(value);
+			});
 
-        Monitor.Log(query, exportTokens: false);
+		Monitor.Log(query, exportTokens: false);
 
-        var expect = @"WITH
+		var expect = @"WITH
     monthly_sales AS (
         SELECT
             customer_id,
@@ -398,13 +398,13 @@ ORDER BY
     c.customer_id,
     ms.sale_month";
 
-        Assert.Equal(expect, query.ToText(), true, true, true);
-    }
+		Assert.Equal(expect, query.ToText(), true, true, true);
+	}
 
-    [Fact]
-    public void NotExistsInsertTest()
-    {
-        var sql = """
+	[Fact]
+	public void NotExistsInsertTest()
+	{
+		var sql = """
     select
         s.sale_id
         , s.store_id
@@ -415,18 +415,18 @@ ORDER BY
         sales as s
     """;
 
-        var lower_limit = new DateTime(2024, 7, 20);
+		var lower_limit = new DateTime(2024, 7, 20);
 
-        var query = new SelectQuery(sql)
-            .OverrideSelect("journal_date", (source, item) => $"greatest({item}, {source.Query.AddParameter(":lower_limit", lower_limit)})")
-            .AddNotExists(["sale_id"], "sale_journals")
-            .AddWhere("request_timestamp", (source) => $"{source.Alias}.request_timestamp >= :lower_limit")
-            .ToCTEQuery("final", "f")
-            .ToInsertQuery("sale_journals");
+		var query = new SelectQuery(sql)
+			.OverrideSelect("journal_date", (source, item) => $"greatest({item}, {source.Query.AddParameter(":lower_limit", lower_limit)})")
+			.AddNotExists(["sale_id"], "sale_journals")
+			.AddWhere("request_timestamp", (source) => $"{source.Alias}.request_timestamp >= :lower_limit")
+			.ToCTEQuery("final", "f")
+			.ToInsertQuery("sale_journals");
 
-        Monitor.Log(query, exportTokens: false);
+		Monitor.Log(query, exportTokens: false);
 
-        var expect = @"/*
+		var expect = @"/*
   :lower_limit = '2024/07/20 0:00:00'
 */
 INSERT INTO
@@ -461,13 +461,13 @@ SELECT
 FROM
     final AS f";
 
-        Assert.Equal(expect, query.ToText(), true, true, true);
-    }
+		Assert.Equal(expect, query.ToText(), true, true, true);
+	}
 
-    [Fact]
-    public void ImmutableInsertTest()
-    {
-        var sql = """
+	[Fact]
+	public void ImmutableInsertTest()
+	{
+		var sql = """
     select
         s.sale_id
         , s.store_id
@@ -478,10 +478,10 @@ FROM
         sales as s
     """;
 
-        var d = new DateTime(2024, 7, 1);
-        var query = new SelectQuery()
-            // Define expected values (current values) as a CTE named 'expect'
-            .AddCTEQuery("""
+		var d = new DateTime(2024, 7, 1);
+		var query = new SelectQuery()
+			// Define expected values (current values) as a CTE named 'expect'
+			.AddCTEQuery("""
         select distinct on(sale_id) 
             sale_id
             , store_id
@@ -495,40 +495,40 @@ FROM
             sale_id
             , sale_journal_id desc
     """, "expect")
-            // Define the correct values as a CTE named 'actual'
-            .AddCTEQuery(sql, "actual")
-            // Compare the expected and correct values, and format the differences with red/black formatting
-            .AddFrom("expect", "exp")
-            .AddJoin("inner join", "actual", "act", "exp.sale_id = act.sale_id")
-            .AddWhere("exp.journal_price <> act.journal_price")
-            .OverrideSelect("journal_date", (source, item) => $"greatest({item}, {source.Query.AddParameter(":mod_date", d)})")
-            .AddSelectAll("exp")
-            .RemoveSelect("journal_price")
-            .AddSelect("exp.journal_price * -1", "reverse_price")
-            .AddSelect("act.journal_price * +1", "collect_price")
-            // Define the query result with red/black formatting as a CTE named 'diff' and select it
-            .ToCTEQuery("diff", "r")
-            // Since we want to process red entries, the collect_price value is unnecessary; use reverse_price as the journal value
-            .RemoveSelect("collect_price")
-            .RenameSelect("reverse_price", "journal_price")
-            // To process black entries, generate a UNION ALL query
-            .AddSelectQuery("union all", owner =>
-            {
-                return new SelectQuery()
-                    // Since we want to use the CTE 'diff', import the CTE information
-                    .ImportCTEQueries(owner)
-                    // Define the black entry selection query, similar to the red entry
-                    .AddFrom("diff", "c")
-                    .AddSelectAll("c")
-                    .RemoveSelect("reverse_price")
-                    .RenameSelect("collect_price", "journal_price");
-            })
-            // Convert to an insert query
-            .ToInsertQuery("sale_journals");
+			// Define the correct values as a CTE named 'actual'
+			.AddCTEQuery(sql, "actual")
+			// Compare the expected and correct values, and format the differences with red/black formatting
+			.AddFrom("expect", "exp")
+			.AddJoin("inner join", "actual", "act", "exp.sale_id = act.sale_id")
+			.AddWhere("exp.journal_price <> act.journal_price")
+			.OverrideSelect("journal_date", (source, item) => $"greatest({item}, {source.Query.AddParameter(":mod_date", d)})")
+			.AddSelectAll("exp")
+			.RemoveSelect("journal_price")
+			.AddSelect("exp.journal_price * -1", "reverse_price")
+			.AddSelect("act.journal_price * +1", "collect_price")
+			// Define the query result with red/black formatting as a CTE named 'diff' and select it
+			.ToCTEQuery("diff", "r")
+			// Since we want to process red entries, the collect_price value is unnecessary; use reverse_price as the journal value
+			.RemoveSelect("collect_price")
+			.RenameSelect("reverse_price", "journal_price")
+			// To process black entries, generate a UNION ALL query
+			.AddSelectQuery("union all", owner =>
+			{
+				return new SelectQuery()
+					// Since we want to use the CTE 'diff', import the CTE information
+					.ImportCTEQueries(owner)
+					// Define the black entry selection query, similar to the red entry
+					.AddFrom("diff", "c")
+					.AddSelectAll("c")
+					.RemoveSelect("reverse_price")
+					.RenameSelect("collect_price", "journal_price");
+			})
+			// Convert to an insert query
+			.ToInsertQuery("sale_journals");
 
-        Monitor.Log(query, exportTokens: false);
+		Monitor.Log(query, exportTokens: false);
 
-        var expect = @"/*
+		var expect = @"/*
   :mod_date = '2024/07/01 0:00:00'
 */
 INSERT INTO
@@ -587,10 +587,10 @@ SELECT
 FROM
     diff AS c";
 
-        Assert.Equal(expect, query.ToText(), true, true, true);
-    }
+		Assert.Equal(expect, query.ToText(), true, true, true);
+	}
 
-    private string SelectCustomers => """
+	private string SelectCustomers => """
     SELECT
         c.customer_id,
         c.first_name,
@@ -609,47 +609,47 @@ FROM
     OFFSET :page_index;
     """;
 
-    [Fact]
-    public void DynamicConditionTest_City_BirthDay()
-    {
-        var pageIndex = 0;
+	[Fact]
+	public void DynamicConditionTest_City_BirthDay()
+	{
+		var pageIndex = 0;
 
-        var firstName = "Ichiro";
-        var lastName = "Tanaka";
-        var city = "Tokyo";
-        DateTime? birthday = new DateTime(1980, 5, 15);
+		var firstName = "Ichiro";
+		var lastName = "Tanaka";
+		var city = "Tokyo";
+		DateTime? birthday = new DateTime(1980, 5, 15);
 
-        var query = new SelectQuery(SelectCustomers)
-            .AddParameter(new QueryParameter(":page_index", pageIndex));
+		var query = new SelectQuery(SelectCustomers)
+			.AddParameter(new QueryParameter(":page_index", pageIndex));
 
-        if (!string.IsNullOrEmpty(firstName))
-        {
-            var pname = ":first_name";
-            query.AddParameter(new QueryParameter(pname, firstName))
-                        .AddWhere("first_name", x => $"{x.Alias}.first_name = {pname}");
-        }
-        if (!string.IsNullOrEmpty(lastName))
-        {
-            var pname = ":last_name";
-            query.AddParameter(new QueryParameter(pname, lastName))
-                            .AddWhere("last_name", x => $"{x.Alias}.last_name = {pname}");
-        }
-        if (!string.IsNullOrEmpty(city))
-        {
-            var pname = ":city";
-            query.AddParameter(new QueryParameter(pname, lastName))
-                .AddWhere("city", x => $"{x.Alias}.city = {pname}");
-        }
-        if (birthday != null)
-        {
-            var pname = ":birthday";
-            query.AddParameter(new QueryParameter(pname, birthday.Value))
-                .AddWhere("birthday", x => $"{x.Alias}.birthday = {pname}");
-        }
+		if (!string.IsNullOrEmpty(firstName))
+		{
+			var pname = ":first_name";
+			query.AddParameter(new QueryParameter(pname, firstName))
+						.AddWhere("first_name", x => $"{x.Alias}.first_name = {pname}");
+		}
+		if (!string.IsNullOrEmpty(lastName))
+		{
+			var pname = ":last_name";
+			query.AddParameter(new QueryParameter(pname, lastName))
+							.AddWhere("last_name", x => $"{x.Alias}.last_name = {pname}");
+		}
+		if (!string.IsNullOrEmpty(city))
+		{
+			var pname = ":city";
+			query.AddParameter(new QueryParameter(pname, lastName))
+				.AddWhere("city", x => $"{x.Alias}.city = {pname}");
+		}
+		if (birthday != null)
+		{
+			var pname = ":birthday";
+			query.AddParameter(new QueryParameter(pname, birthday.Value))
+				.AddWhere("birthday", x => $"{x.Alias}.birthday = {pname}");
+		}
 
-        Monitor.Log(query, exportTokens: false);
+		Monitor.Log(query, exportTokens: false);
 
-        var expect = @"/*
+		var expect = @"/*
   :page_index = 0
   :first_name = 'Ichiro'
   :last_name = 'Tanaka'
@@ -678,50 +678,50 @@ ORDER BY
 LIMIT
     20 OFFSET :page_index";
 
-        Assert.Equal(expect, query.ToText(), true, true, true);
-    }
+		Assert.Equal(expect, query.ToText(), true, true, true);
+	}
 
-    [Fact]
-    public void DynamicConditionTest_SaleId_Exists()
-    {
-        var pageIndex = 0;
+	[Fact]
+	public void DynamicConditionTest_SaleId_Exists()
+	{
+		var pageIndex = 0;
 
-        var firstName = "Ichiro";
-        var lastName = "Tanaka";
-        long? customerId = 1234567890;
-        long? saleId = 9999999;
+		var firstName = "Ichiro";
+		var lastName = "Tanaka";
+		long? customerId = 1234567890;
+		long? saleId = 9999999;
 
-        var query = new SelectQuery(SelectCustomers)
-            .AddParameter(new QueryParameter(":page_index", pageIndex));
+		var query = new SelectQuery(SelectCustomers)
+			.AddParameter(new QueryParameter(":page_index", pageIndex));
 
-        if (!string.IsNullOrEmpty(firstName))
-        {
-            var pname = ":first_name";
-            query.AddParameter(new QueryParameter(pname, firstName))
-                .AddWhere("first_name", x => $"{x.Alias}.first_name = {pname}");
-        }
-        if (!string.IsNullOrEmpty(lastName))
-        {
-            var pname = ":last_name";
-            query.AddParameter(new QueryParameter(pname, lastName))
-                            .AddWhere("last_name", x => $"{x.Alias}.last_name = {pname}");
-        }
-        if (customerId != null)
-        {
-            var pname = ":customer_id";
-            query.AddParameter(new QueryParameter(pname, customerId.Value))
-                .AddWhere("customer_id", x => $"{x.Alias}.customer_id = {pname}");
-        }
-        if (saleId != null)
-        {
-            var pname = ":sale_id";
-            query.AddParameter(new QueryParameter(pname, saleId.Value))
-                .AddExists(["customer_id"], "sales");
-        }
+		if (!string.IsNullOrEmpty(firstName))
+		{
+			var pname = ":first_name";
+			query.AddParameter(new QueryParameter(pname, firstName))
+				.AddWhere("first_name", x => $"{x.Alias}.first_name = {pname}");
+		}
+		if (!string.IsNullOrEmpty(lastName))
+		{
+			var pname = ":last_name";
+			query.AddParameter(new QueryParameter(pname, lastName))
+							.AddWhere("last_name", x => $"{x.Alias}.last_name = {pname}");
+		}
+		if (customerId != null)
+		{
+			var pname = ":customer_id";
+			query.AddParameter(new QueryParameter(pname, customerId.Value))
+				.AddWhere("customer_id", x => $"{x.Alias}.customer_id = {pname}");
+		}
+		if (saleId != null)
+		{
+			var pname = ":sale_id";
+			query.AddParameter(new QueryParameter(pname, saleId.Value))
+				.AddExists(["customer_id"], "sales");
+		}
 
-        Monitor.Log(query, exportTokens: false);
+		Monitor.Log(query, exportTokens: false);
 
-        var expect = @"/*
+		var expect = @"/*
   :page_index = 0
   :first_name = 'Ichiro'
   :last_name = 'Tanaka'
@@ -757,51 +757,51 @@ ORDER BY
 LIMIT
     20 OFFSET :page_index";
 
-        Assert.Equal(expect, query.ToText(), true, true, true);
-    }
+		Assert.Equal(expect, query.ToText(), true, true, true);
+	}
 
-    [Fact]
-    public void DynamicConditionTest_SaleId_Join()
-    {
-        var pageIndex = 0;
+	[Fact]
+	public void DynamicConditionTest_SaleId_Join()
+	{
+		var pageIndex = 0;
 
-        var firstName = "Ichiro";
-        var lastName = "Tanaka";
-        long? customerId = 1234567890;
-        long? saleId = 9999999;
+		var firstName = "Ichiro";
+		var lastName = "Tanaka";
+		long? customerId = 1234567890;
+		long? saleId = 9999999;
 
-        var query = new SelectQuery(SelectCustomers)
-            .AddParameter(new QueryParameter(":page_index", pageIndex));
+		var query = new SelectQuery(SelectCustomers)
+			.AddParameter(new QueryParameter(":page_index", pageIndex));
 
-        if (!string.IsNullOrEmpty(firstName))
-        {
-            var pname = ":first_name";
-            query.AddParameter(new QueryParameter(pname, firstName))
-                .AddWhere("first_name", x => $"{x.Alias}.first_name = {pname}");
-        }
-        if (!string.IsNullOrEmpty(lastName))
-        {
-            var pname = ":last_name";
-            query.AddParameter(new QueryParameter(pname, lastName))
-                            .AddWhere("last_name", x => $"{x.Alias}.last_name = {pname}");
-        }
-        if (customerId != null)
-        {
-            var pname = ":customer_id";
-            query.AddParameter(new QueryParameter(pname, customerId.Value))
-                .AddWhere("customer_id", x => $"{x.Alias}.customer_id = {pname}");
-        }
-        if (saleId != null)
-        {
-            var pname = ":sale_id";
-            query.AddParameter(new QueryParameter(pname, saleId.Value))
-                .AddJoin("inner join", "sales", "s", "c.customer_id = s.customer_id")
-                .AddWhere($"s.sale_id = {pname}");
-        }
+		if (!string.IsNullOrEmpty(firstName))
+		{
+			var pname = ":first_name";
+			query.AddParameter(new QueryParameter(pname, firstName))
+				.AddWhere("first_name", x => $"{x.Alias}.first_name = {pname}");
+		}
+		if (!string.IsNullOrEmpty(lastName))
+		{
+			var pname = ":last_name";
+			query.AddParameter(new QueryParameter(pname, lastName))
+							.AddWhere("last_name", x => $"{x.Alias}.last_name = {pname}");
+		}
+		if (customerId != null)
+		{
+			var pname = ":customer_id";
+			query.AddParameter(new QueryParameter(pname, customerId.Value))
+				.AddWhere("customer_id", x => $"{x.Alias}.customer_id = {pname}");
+		}
+		if (saleId != null)
+		{
+			var pname = ":sale_id";
+			query.AddParameter(new QueryParameter(pname, saleId.Value))
+				.AddJoin("inner join", "sales", "s", "c.customer_id = s.customer_id")
+				.AddWhere($"s.sale_id = {pname}");
+		}
 
-        Monitor.Log(query, exportTokens: false);
+		Monitor.Log(query, exportTokens: false);
 
-        var expect = @"/*
+		var expect = @"/*
   :page_index = 0
   :first_name = 'Ichiro'
   :last_name = 'Tanaka'
@@ -831,52 +831,52 @@ ORDER BY
 LIMIT
     20 OFFSET :page_index";
 
-        Assert.Equal(expect, query.ToText(), true, true, true);
-    }
+		Assert.Equal(expect, query.ToText(), true, true, true);
+	}
 
-    [Fact]
-    public void DynamicConditionTest_StoreName_Exists()
-    {
-        var pageIndex = 0;
+	[Fact]
+	public void DynamicConditionTest_StoreName_Exists()
+	{
+		var pageIndex = 0;
 
-        var firstName = "Ichiro";
-        var lastName = "Tanaka";
-        long? customerId = 1234567890;
-        var storeName = "Osaka";
+		var firstName = "Ichiro";
+		var lastName = "Tanaka";
+		long? customerId = 1234567890;
+		var storeName = "Osaka";
 
-        var query = new SelectQuery(SelectCustomers)
-            .AddParameter(new QueryParameter(":page_index", pageIndex));
+		var query = new SelectQuery(SelectCustomers)
+			.AddParameter(new QueryParameter(":page_index", pageIndex));
 
-        if (!string.IsNullOrEmpty(storeName))
-        {
-            var pname = ":store_name";
-            query.AddCTEQuery("select s.sale_id, s.customer_id, st.store_name from sales s inner join stores st on s.store_id = st.store_id", "target_sales")
-                .AddExists(["customer_id"], "target_sales")
-                .AddParameter(new QueryParameter(pname, storeName))
-                .AddWhere("store_name", x => $"{x.Alias}.store_name = {pname}");
-        }
-        if (!string.IsNullOrEmpty(firstName))
-        {
-            var pname = ":first_name";
-            query.AddParameter(new QueryParameter(pname, firstName))
-                .AddWhere("first_name", x => $"{x.Alias}.first_name = {pname}");
-        }
-        if (!string.IsNullOrEmpty(lastName))
-        {
-            var pname = ":last_name";
-            query.AddParameter(new QueryParameter(pname, lastName))
-                .AddWhere("last_name", x => $"{x.Alias}.last_name = {pname}");
-        }
-        if (customerId != null)
-        {
-            var pname = ":customer_id";
-            query.AddParameter(new QueryParameter(pname, customerId.Value))
-                .AddWhere("customer_id", x => $"{x.Alias}.customer_id = {pname}");
-        }
+		if (!string.IsNullOrEmpty(storeName))
+		{
+			var pname = ":store_name";
+			query.AddCTEQuery("select s.sale_id, s.customer_id, st.store_name from sales s inner join stores st on s.store_id = st.store_id", "target_sales")
+				.AddExists(["customer_id"], "target_sales")
+				.AddParameter(new QueryParameter(pname, storeName))
+				.AddWhere("store_name", x => $"{x.Alias}.store_name = {pname}");
+		}
+		if (!string.IsNullOrEmpty(firstName))
+		{
+			var pname = ":first_name";
+			query.AddParameter(new QueryParameter(pname, firstName))
+				.AddWhere("first_name", x => $"{x.Alias}.first_name = {pname}");
+		}
+		if (!string.IsNullOrEmpty(lastName))
+		{
+			var pname = ":last_name";
+			query.AddParameter(new QueryParameter(pname, lastName))
+				.AddWhere("last_name", x => $"{x.Alias}.last_name = {pname}");
+		}
+		if (customerId != null)
+		{
+			var pname = ":customer_id";
+			query.AddParameter(new QueryParameter(pname, customerId.Value))
+				.AddWhere("customer_id", x => $"{x.Alias}.customer_id = {pname}");
+		}
 
-        Monitor.Log(query, exportTokens: false);
+		Monitor.Log(query, exportTokens: false);
 
-        var expect = @"/*
+		var expect = @"/*
   :page_index = 0
   :store_name = 'Osaka'
   :first_name = 'Ichiro'
@@ -925,61 +925,61 @@ ORDER BY
 LIMIT
     20 OFFSET :page_index";
 
-        Assert.Equal(expect, query.ToText(), true, true, true);
-    }
+		Assert.Equal(expect, query.ToText(), true, true, true);
+	}
 
-    [Fact]
-    public void DynamicConditionTest()
-    {
-        var pageIndex = 0;
+	[Fact]
+	public void DynamicConditionTest()
+	{
+		var pageIndex = 0;
 
-        var first_name = "Ichiro";
-        var last_name = "Tanaka";
-        long? customer_id = 1234567890;
-        long? sale_id = 9999999;
-        var store_name = "Osaka";
-        var city = "Tokyo";
-        DateTime? birthday = new DateTime(1980, 5, 15);
+		var first_name = "Ichiro";
+		var last_name = "Tanaka";
+		long? customer_id = 1234567890;
+		long? sale_id = 9999999;
+		var store_name = "Osaka";
+		var city = "Tokyo";
+		DateTime? birthday = new DateTime(1980, 5, 15);
 
-        var query = new SelectQuery(SelectCustomers)
-            .AddParameter(new QueryParameter(":page_index", pageIndex));
+		var query = new SelectQuery(SelectCustomers)
+			.AddParameter(new QueryParameter(":page_index", pageIndex));
 
-        // add CTE
-        if (!string.IsNullOrEmpty(store_name) || sale_id != null)
-        {
-            if (!string.IsNullOrEmpty(store_name))
-            {
-                query.AddCTEQuery("select s.sale_id, s.customer_id, st.store_name from sales s inner join stores st on s.store_id = st.store_id", "target_sales")
-                    .AddExists(["customer_id"], "target_sales");
-            }
-            else
-            {
-                query.AddCTEQuery("select s.sale_id, s.customer_id from sales s", "target_sales")
-                    .AddExists(["customer_id"], "target_sales");
-            }
-        }
+		// add CTE
+		if (!string.IsNullOrEmpty(store_name) || sale_id != null)
+		{
+			if (!string.IsNullOrEmpty(store_name))
+			{
+				query.AddCTEQuery("select s.sale_id, s.customer_id, st.store_name from sales s inner join stores st on s.store_id = st.store_id", "target_sales")
+					.AddExists(["customer_id"], "target_sales");
+			}
+			else
+			{
+				query.AddCTEQuery("select s.sale_id, s.customer_id from sales s", "target_sales")
+					.AddExists(["customer_id"], "target_sales");
+			}
+		}
 
-        //list
-        var items = new Dictionary<string, object>();
-        if (sale_id.HasValue) items.Add(nameof(sale_id), sale_id.Value);
-        if (!string.IsNullOrEmpty(store_name)) items.Add(nameof(store_name), store_name);
-        if (!string.IsNullOrEmpty(first_name)) items.Add(nameof(first_name), first_name);
-        if (!string.IsNullOrEmpty(last_name)) items.Add(nameof(last_name), last_name);
-        if (!string.IsNullOrEmpty(city)) items.Add(nameof(city), city);
-        if (customer_id.HasValue) items.Add(nameof(customer_id), customer_id.Value);
-        if (birthday.HasValue) items.Add(nameof(birthday), birthday.Value);
+		//list
+		var items = new Dictionary<string, object>();
+		if (sale_id.HasValue) items.Add(nameof(sale_id), sale_id.Value);
+		if (!string.IsNullOrEmpty(store_name)) items.Add(nameof(store_name), store_name);
+		if (!string.IsNullOrEmpty(first_name)) items.Add(nameof(first_name), first_name);
+		if (!string.IsNullOrEmpty(last_name)) items.Add(nameof(last_name), last_name);
+		if (!string.IsNullOrEmpty(city)) items.Add(nameof(city), city);
+		if (customer_id.HasValue) items.Add(nameof(customer_id), customer_id.Value);
+		if (birthday.HasValue) items.Add(nameof(birthday), birthday.Value);
 
-        foreach (var item in items)
-        {
-            var column = item.Key;
-            var pname = $":{column}";
-            query.AddParameter(new QueryParameter(pname, item.Value))
-                .AddWhere(column, x => $"{x.Alias}.{column} = {pname}");
-        }
+		foreach (var item in items)
+		{
+			var column = item.Key;
+			var pname = $":{column}";
+			query.AddParameter(new QueryParameter(pname, item.Value))
+				.AddWhere(column, x => $"{x.Alias}.{column} = {pname}");
+		}
 
-        Monitor.Log(query, exportTokens: false);
+		Monitor.Log(query, exportTokens: false);
 
-        var expect = @"/*
+		var expect = @"/*
   :page_index = 0
   :sale_id = 9999999
   :store_name = 'Osaka'
@@ -1034,6 +1034,82 @@ ORDER BY
 LIMIT
     20 OFFSET :page_index";
 
-        Assert.Equal(expect, query.ToText(), true, true, true);
-    }
+		Assert.Equal(expect, query.ToText(), true, true, true);
+	}
+
+
+	[Fact]
+	public void ColumnAliasTest()
+	{
+		var sql = """
+            select
+                *
+            from
+                (
+                    select 
+                        s.id as sale_id
+                    from
+                        sale as s
+                ) d
+            """;
+
+		var query = new SelectQuery(sql)
+			.Equal("sale_id", 1);
+
+		Monitor.Log(query, exportTokens: false);
+
+		var expect = """
+            SELECT
+                *
+            FROM
+                (
+                    SELECT
+                        s.id AS sale_id
+                    FROM
+                        sale AS s
+                ) AS d
+            WHERE
+                d.sale_id = 1
+            """;
+
+		Assert.Equal(expect, query.ToText(), true, true, true);
+	}
+
+
+	[Fact]
+	public void ColumnAliasTest_Table()
+	{
+		var sql = """
+            select
+                *
+            from
+                (
+                    select 
+                        s.id as sale_id
+                    from
+                        sale as s
+                ) d
+            """;
+
+		var query = new SelectQuery(sql)
+			.Equal("d", "sale_id", 1);
+
+		Monitor.Log(query, exportTokens: false);
+
+		var expect = """
+            SELECT
+                *
+            FROM
+                (
+                    SELECT
+                        s.id AS sale_id
+                    FROM
+                        sale AS s
+                ) AS d
+            WHERE
+                d.sale_id = 1
+            """;
+
+		Assert.Equal(expect, query.ToText(), true, true, true);
+	}
 }
