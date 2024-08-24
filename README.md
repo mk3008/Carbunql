@@ -1,21 +1,57 @@
 # Carbunql
+
+![image](https://github.com/user-attachments/assets/3c364944-8de3-4200-8293-3492f7680e06)
+
 ![GitHub](https://img.shields.io/github/license/mk3008/Carbunql)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/mk3008/Carbunql)
 ![Github Last commit](https://img.shields.io/github/last-commit/mk3008/Carbunql)  
 [![SqModel](https://img.shields.io/nuget/v/Carbunql.svg)](https://www.nuget.org/packages/Carbunql/) 
 [![SqModel](https://img.shields.io/nuget/dt/Carbunql.svg)](https://www.nuget.org/packages/Carbunql/) 
 
-This C# library can convert select queries into object models, and also convert object models back into SQL select queries.
+This C# library allows you to flexibly edit Raw SQL as object models. It supports easy addition and modification of columns and search conditions, as well as transformations to CTEs (Common Table Expressions), subqueries, and even insert and update queries.
 
-This library allows you to dynamically modify columns, search conditions, and even CTEs (Common Table Expressions) for select queries, dramatically increasing the reusability of your select queries.
+By using Carbunql, you can maximize the reusability of Raw SQL and efficiently manage your queries.
 
-## Demo 1: Dynamic Filtering
+## Demo
 
-https://github.com/mk3008/Carbunql/blob/f82f30283e4d3369b50596f91385bf83629dd432/demo/DynamicFiltering/Program.cs#L28-L52
+This is a sample that accepts any search conditions and adds them as search conditions. If no conditions are entered, they will be excluded from the search conditions.
 
-### Example
+### Source code
 
-```sql
+I will only extract the parts that process SQL. Please refer to the link below for the complete source.
+https://github.com/mk3008/Carbunql/blob/main/demo/DynamicFiltering/Program.cs
+
+```cs
+private static string GenerateProductQuery(decimal? minPrice, decimal? maxPrice, string? category, bool? inStock)
+{
+    var sql = """
+SELECT
+    p.product_id,
+    p.product_name,
+    p.price,
+    p.category,
+    p.in_stock
+FROM
+    product as p
+""";
+
+    var pname = ":category";
+
+    // Convert the selection query to an object
+    var sq = new SelectQuery(sql)
+        .GreaterThanOrEqualIfNotNullOrEmpty("price", minPrice)
+        .LessThanOrEqualIfNotNullOrEmpty("price", maxPrice)
+        .AddParameter(pname, category)
+        .EqualIfNotNullOrEmpty("category", pname)
+        .EqualIfNotNullOrEmpty("in_stock", inStock);
+
+    return sq.ToText();
+}
+```
+
+### Parameter
+
+```
 Enter minimum price (or leave blank to omit):
 
 Enter maximum price (or leave blank to omit):
@@ -24,7 +60,13 @@ Enter category (or leave blank to omit):
 tea
 Enter in-stock status (true/false) (or leave blank to omit):
 true
-Generated SQL Query:
+```
+
+### Generated SQL
+
+You can see that only the specified search criteria has been inserted.
+
+```sql
 /*
   :category = 'tea'
 */
@@ -42,39 +84,96 @@ WHERE
     AND p.in_stock = True
 ```
 
-## Demo 2: Dynamic column selection
+## Advanced Demo
 
-https://github.com/mk3008/Carbunql/blob/f82f30283e4d3369b50596f91385bf83629dd432/demo/DynamicColumn/Program.cs#L49-L68
+This is a sample that displays an aggregate report for a specified year and month.
 
-### Example
+You can see that even complex processing using CTE and UNION can be written simply.
 
-```sql
-Available columns to select:
-1: customer_name
-2: email
-3: purchase_history
-Enter the numbers of the columns you want to include, separated by commas (e.g., 1,2):
-1,3
-Generated SQL Query:
-SELECT
-    customer_name,
-    purchase_history
-FROM
-    customer
+### Source code
+
+I will only extract the parts that process SQL. Please refer to the link below for the complete source.
+https://github.com/mk3008/Carbunql/blob/main/demo/DynamicCTE/Program.cs
+
+```cs
+public static string GenerateReportQuery(bool includeSummary, DateTime summaryMonth)
+{
+    string dailySummaryQuery = """
+        SELECT
+            sale_date
+            , sum(amount) AS amount_total
+            , '' as caption 
+            , 1 as sort_number
+        FROM
+            salse
+        GROUP BY
+            sale_date
+        """;
+
+    string monthlySummaryQuery = """
+        SELECT
+            date_trunc('month', sale_date) + '1 month -1 day' as sale_date
+            , sum(amount) AS amount_total
+            , 'monthly total' as caption 
+            , 2 as sort_number
+        FROM
+            salse
+        GROUP BY
+            date_trunc('month', sale_date) + '1 month -1 day'
+        """;
+
+    // Create daily summary query
+    var sq = new SelectQuery()
+        .With(dailySummaryQuery, "daily_summary")
+        .From("daily_summary", "d")
+        .SelectAll("d");
+
+    if (includeSummary)
+    {
+        // Add monthly summary query with UNION ALL
+        sq.UnionAll(() =>
+        {
+            var xsq = new SelectQuery()
+                .With(monthlySummaryQuery, "monthly_summary")
+                .From("monthly_summary", "m")
+                .SelectAll("m");
+            return xsq;
+        });
+    }
+
+    // Add date filter condition
+    var saleDate = ":sale_date";
+    sq.AddParameter(saleDate, summaryMonth)
+        .BetweenInclusiveStart("sale_date", saleDate, $"{saleDate}::timestamp + '1 month'");
+
+    // Convert the entire query to a CTE
+    sq = sq.ToCTEQuery("final", "f");
+
+    // Add sorting conditions
+    sq.RemoveSelect("sort_number")
+        .OrderBy("sale_date")
+        .OrderBy("sort_number");
+
+    return sq.ToText();
+}
 ```
 
-## Demo 3: Dynamic CTE creation
+### Parameter
 
-https://github.com/mk3008/Carbunql/blob/f82f30283e4d3369b50596f91385bf83629dd432/demo/DynamicCTE/Program.cs#L19-L78
-
-### Example
-
-```sql
+```
 Which month to summarize? (yyyy-mm-dd)
 2024-08-01
 Include monthly summary rows? (true/false)
 true
-Generated SQL Query:
+```
+
+### Generated SQL
+
+A query that combines a daily aggregation query and a monthly aggregation query will be output.
+
+Please also note that the search conditions are inserted in two places. Carbunql will insert the search conditions in the appropriate positions without you having to specify them in detail.
+
+```sql
 /*
   :sale_date = '2024/08/01 0:00:00'
 */
@@ -137,10 +236,19 @@ ORDER BY
 
 ## Features
 
-- You can model select queries and perform advanced editing.
-- The model can be written back to select, create table, add, update, merge, and delete queries.
-- No DBMS reference.
-- No configuration or entity classes required.
+- Convert Raw SQL to object models.
+- Convert object models back to Raw SQL.
+- Format Raw SQL.
+- Convert select queries to various query types:
+  - Insert queries
+  - Update queries
+  - Delete queries
+  - Merge queries
+  - Table creation queries
+- Edit columns and search conditions in select queries.
+- No DBMS environment or entity classes required.
+- Perform basic syntax checks.
+- The [Carbunql.Dapper](https://www.nuget.org/packages/Carbunql.Dapper) library allows you to run queries with Dapper.
 
 You can try out some of the processing on the online demo site.
 
@@ -150,13 +258,7 @@ https://mk3008.github.io/Carbunql/
 
 ## Constraints
 
-- Syntax checking is modest.
 - Comments are removed when modeling.
-- No mapper function.
-
-If you want to execute queries or perform mapping, use "Carbunql.Dapper" and use it together with Dapper.
-
-https://www.nuget.org/packages/Carbunql.Dapper
 
 ## Getting started
 Install the package from NuGet.
@@ -167,7 +269,7 @@ PM> Install-Package Carbunql
 
 https://www.nuget.org/packages/Carbunql/
 
-### Model a select query
+## Model a select query
 
 Just pass the select query string to the constructor of the SelectQuery class.
 
@@ -178,7 +280,7 @@ var text = "select s.sale_id, s.store_id, date_trunc('month', s.sale_date) as al
 var sq = new SelectQuery(text);
 ```
 
-### Return the model to a select query
+## Return the model to a select query
 
 Use the `ToText` or `ToOneLineText` method.
 
@@ -194,7 +296,51 @@ var sq = new SelectQuery(text);
 var query = sq.ToOneLineText();
 ```
 
-### Create an empty select query
+## Execute the query
+
+If you use [Carbunql.Dapper](https://www.nuget.org/packages/Carbunql.Dapper), you can execute it directly without writing it back to RawSQL.
+
+This is the recommended method because parameter information is also passed.
+
+```
+PM> Install-Package Carbunql.Dapper
+```
+
+The full source code for the demo can be found below.
+https://github.com/mk3008/Carbunql/blob/main/test/Carbunql.Dapper.Test/DapperTest.cs
+
+```cs
+using var cn = PostgresDB.ConnectionOpenAsNew(Logger);
+
+var sql = @"with
+data_ds(c1, c2) as (
+    values
+    (1,1)
+    , (1,2)
+    , (2,1)
+    , (2,2)
+)
+select
+    *
+from
+    data_ds
+where
+    c1 = :val
+";
+
+var sq = new SelectQuery(sql);
+sq.AddParameter(":val", 1);
+
+using var r = cn.ExecuteReader(sq);
+var cnt = 0;
+while (r.Read())
+{
+    cnt++;
+}
+Assert.Equal(2, cnt);
+```
+
+## Create an empty select query
 
 If you do not specify arguments in the constructor, a model without SELECT and FROM clauses will be created. Please add SELECT and FROM clauses manually.
 
@@ -204,9 +350,9 @@ using Carbunql;
 var sq = new SelectQuery();
 ```
 
-### Add a FROM clause
+## Add a FROM clause
 
-If you added an empty select query, use the `AddFrom` function to manually add a FROM clause. The first argument is the table name, and the second argument is the alias name.
+If you added an empty select query, use the `From` function to manually add a FROM clause. The first argument is the table name, and the second argument is the alias name.
 
 > [!NOTE]
 > Don't forget to import the namespace Carbunql.Fluent.
@@ -219,7 +365,7 @@ var sq = new SelectQuery()
   .From("customer", "c");
 ```
 
-### Add a column to select
+## Add a column to select
 
 You can add a column to select by using the `Select` function. The first argument is the column name, and the second argument is the column alias name. The column alias name is optional.
 
@@ -233,7 +379,7 @@ var sq = new SelectQuery()
   .Select("c.first_name || c.last_name", "customer_name");
 ```
 
-### Add search conditions
+## Add search conditions
 
 You can add search conditions by using the `AddWhere` method.
 
