@@ -7,7 +7,7 @@
 		<Nullable>enable</Nullable>
 		<Title></Title>
 		<Copyright>mk3008net</Copyright>
-		<Description>Carbunql is an advanced dynamic SQL building library.</Description>
+		<Description>Carbunql is an advanced Raw SQL editing library.</Description>
 		<Version>0.8.10</Version>
 		<Authors>mk3008net</Authors>
 		<PackageProjectUrl>https://github.com/mk3008/Carbunql</PackageProjectUrl>
