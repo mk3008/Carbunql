@@ -2,7 +2,7 @@
 
 public static class SelectQueryWhereExtensions
 {
-    private static char[] parameterSymbols = { '@', ':', '$' };
+    internal static char[] ParameterSymbols = { '@', ':', '$' };
 
     private static (string, string) GenerateComparison(string operatorSymbol, object? value)
     {
@@ -12,7 +12,7 @@ public static class SelectQueryWhereExtensions
         }
         else if (value is string s)
         {
-            if (!parameterSymbols.Where(s.StartsWith).Any())
+            if (!ParameterSymbols.Where(s.StartsWith).Any())
             {
                 throw new InvalidOperationException("The string type must be parameterized.");
             }
