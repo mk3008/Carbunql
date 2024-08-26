@@ -995,6 +995,44 @@ LIMIT
 
 
     [Fact]
+    public void ColumnTest()
+    {
+        var sql = """
+            select
+                *
+            from
+                (
+                    select 
+                        s.id as sale_id
+                    from
+                        sale as s
+                ) d
+            """;
+
+        var query = new SelectQuery(sql)
+            .Equal("id", 1);
+
+        Monitor.Log(query, exportTokens: false);
+
+        // Detect by alias name
+        var expect = """
+            SELECT
+                *
+            FROM
+                (
+                    SELECT
+                        s.id AS sale_id
+                    FROM
+                        sale AS s
+                    WHERE
+                        s.id = 1
+                ) AS d
+            """;
+
+        Assert.Equal(expect, query.ToText(), true, true, true);
+    }
+
+    [Fact]
     public void ColumnAliasTest()
     {
         var sql = """
@@ -1014,6 +1052,7 @@ LIMIT
 
         Monitor.Log(query, exportTokens: false);
 
+        // Detect by alias name
         var expect = """
             SELECT
                 *
@@ -1023,14 +1062,51 @@ LIMIT
                         s.id AS sale_id
                     FROM
                         sale AS s
+                    WHERE
+                        s.id = 1
                 ) AS d
-            WHERE
-                d.sale_id = 1
             """;
 
         Assert.Equal(expect, query.ToText(), true, true, true);
     }
 
+    [Fact]
+    public void ColumnAliasTest_calc()
+    {
+        var sql = """
+            select
+                *
+            from
+                (
+                    select 
+                        s.unit_price * s.amount as price
+                    from
+                        sale as s
+                ) d
+            """;
+
+        var query = new SelectQuery(sql)
+            .Equal("price", 10);
+
+        Monitor.Log(query, exportTokens: false);
+
+        // Detect by alias name
+        var expect = """
+            SELECT
+                *
+            FROM
+                (
+                    SELECT
+                        s.unit_price * s.amount AS price
+                    FROM
+                        sale AS s
+                    WHERE
+                        s.unit_price * s.amount = 10
+                ) AS d
+            """;
+
+        Assert.Equal(expect, query.ToText(), true, true, true);
+    }
 
     [Fact]
     public void ColumnAliasTest_Table()
@@ -1064,6 +1140,85 @@ LIMIT
                 ) AS d
             WHERE
                 d.sale_id = 1
+            """;
+
+        Assert.Equal(expect, query.ToText(), true, true, true);
+    }
+
+    [Fact]
+    public void OrderByTest()
+    {
+        var sql = """
+            select 
+                s.unit_price * s.amount as price
+            from
+                sale as s
+            """;
+
+        var query = new SelectQuery(sql)
+            .OrderBy("unit_price");
+
+        Monitor.Log(query, exportTokens: false);
+
+        var expect = """
+            SELECT
+                s.unit_price * s.amount AS price
+            FROM
+                sale AS s
+            ORDER BY
+                s.unit_price
+            """;
+
+        Assert.Equal(expect, query.ToText(), true, true, true);
+    }
+
+    [Fact]
+    public void OrderByTest_Alias()
+    {
+        var sql = """
+            select 
+                s.unit_price * s.amount as price
+            from
+                sale as s
+            """;
+
+        var query = new SelectQuery(sql)
+            .OrderBy("price");
+
+        Monitor.Log(query, exportTokens: false);
+
+        var expect = """
+            SELECT
+                s.unit_price * s.amount AS price
+            FROM
+                sale AS s
+            ORDER BY
+                s.unit_price * s.amount
+            """;
+
+        Assert.Equal(expect, query.ToText(), true, true, true);
+    }
+
+    [Fact]
+    public void OerrideSelectTest()
+    {
+        var sql = """
+            select 
+                s.sale_date as journal_date
+            from
+                sale as s
+            """;
+
+        var query = new SelectQuery(sql)
+            .OverrideSelect("journal_date", (sourse, col) => $"greatest({col}, :lower_limit)");
+
+        Monitor.Log(query, exportTokens: false);
+
+        var expect = """
+            SELECT
+                GREATEST(s.sale_date, :lower_limit) AS journal_date
+            FROM
+                sale AS s
             """;
 
         Assert.Equal(expect, query.ToText(), true, true, true);
