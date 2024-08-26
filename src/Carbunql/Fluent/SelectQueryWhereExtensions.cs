@@ -1,6 +1,4 @@
-﻿using Carbunql.Clauses;
-
-namespace Carbunql.Fluent;
+﻿namespace Carbunql.Fluent;
 
 public static class SelectQueryWhereExtensions
 {
@@ -40,15 +38,15 @@ public static class SelectQueryWhereExtensions
         var (op, val) = GenerateComparison(operatorSymbol, value);
         if (op == ">")
         {
-            query.AddWhere(columnName, (source, column) => $"{val} < {source.Alias}.{column}");
+            query.AddWhere(columnName, (source, column) => $"{val} < {column}", true);
         }
         if (op == ">=")
         {
-            query.AddWhere(columnName, (source, column) => $"{val} <= {source.Alias}.{column}");
+            query.AddWhere(columnName, (source, column) => $"{val} <= {column}", true);
         }
         else
         {
-            query.AddWhere(columnName, (source, column) => $"{source.Alias}.{column} {op} {val}");
+            query.AddWhere(columnName, (source, column) => $"{column} {op} {val}", true);
         }
     }
 
@@ -62,15 +60,15 @@ public static class SelectQueryWhereExtensions
         var (op, val) = GenerateComparison(operatorSymbol, value);
         if (op == ">")
         {
-            query.AddWhere(tableName, columnName, (source, column) => $"{val} < {source.Alias}.{column}");
+            query.AddWhere(tableName, columnName, (source, column) => $"{val} < {column}", true);
         }
         if (op == ">=")
         {
-            query.AddWhere(tableName, columnName, (source, column) => $"{val} <= {source.Alias}.{column}");
+            query.AddWhere(tableName, columnName, (source, column) => $"{val} <= {column}", true);
         }
         else
         {
-            query.AddWhere(tableName, columnName, (source, column) => $"{source.Alias}.{column} {op} {val}");
+            query.AddWhere(tableName, columnName, (source, column) => $"{column} {op} {val}", true);
         }
     }
 
