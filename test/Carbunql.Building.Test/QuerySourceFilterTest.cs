@@ -1223,4 +1223,29 @@ LIMIT
 
         Assert.Equal(expect, query.ToText(), true, true, true);
     }
+
+    [Fact]
+    public void GreatestTest()
+    {
+        var sql = """
+            select 
+                s.sale_date as journal_date
+            from
+                sale as s
+            """;
+
+        var query = new SelectQuery(sql)
+            .Greatest("journal_date", ":lower_limit");
+
+        Monitor.Log(query, exportTokens: false);
+
+        var expect = """
+            SELECT
+                GREATEST(s.sale_date, :lower_limit) AS journal_date
+            FROM
+                sale AS s
+            """;
+
+        Assert.Equal(expect, query.ToText(), true, true, true);
+    }
 }
