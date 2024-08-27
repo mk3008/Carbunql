@@ -50,7 +50,34 @@ public static class SelectQueryParser
         {
             //read operator
             var op = r.Read();
-            sq.AddOperatableValue(op, ReadQueryParser.ParseIgnoringBrackets(r));
+
+            // Skip opening brackets
+            var cnt = 0;
+            while (r.TryRead("(", out _))
+            {
+                cnt++;
+            }
+
+            if (r.Peek().IsEqualNoCase("select"))
+            {
+                sq.AddOperatableValue(op, ParseMain(r));
+            }
+            else if (r.Peek().IsEqualNoCase("values"))
+            {
+                sq.AddOperatableValue(op, ValuesQueryParser.Parse(r));
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+
+            // Skip closing brackets
+            while (cnt > 0)
+            {
+                r.Read(")");
+                cnt--;
+            }
+
         }
 
         sq.LimitClause = ParseLimitOrDefault(r);
