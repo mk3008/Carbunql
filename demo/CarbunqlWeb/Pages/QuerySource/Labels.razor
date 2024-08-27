@@ -50,7 +50,7 @@
 
     string sourcecode = @"using Carbunql;
 
-var q = new SelectQuery(sql);
+var q = SelectQuery.Parse(sql);
 var sources = q.GetQuerySources().ToList();
 
 q.GetQuerySources().ForEach(x =>
@@ -80,7 +80,7 @@ Console.WriteLine(q.ToText());";
         }
         try
         {
-            var q = new SelectQuery(sql);
+            var q = SelectQuery.Parse(sql);
             var sources = q.GetQuerySources().ToList();
 
             q.GetQuerySources().ForEach(x =>

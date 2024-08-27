@@ -51,7 +51,7 @@
 
 	string sourcecode = @"using Carbunql;
 
-var sq = new SelectQuery(sql);
+var sq = SelectQuery.Parse(sql);
 foreach (var item in sq.GetPhysicalTables())
 {
 	Console.WriteLine(item.ToText());
@@ -87,7 +87,7 @@ exists (select * from c where a.table_a_id = c.table_a_id)";
 		}
 		try
 		{
-			var sq = new SelectQuery(sql);
+			var sq = SelectQuery.Parse(sql);
 			var sb = new StringBuilder();
 
 			fsql = string.Empty;

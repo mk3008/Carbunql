@@ -51,7 +51,7 @@
 	string sourcecode = @"using Carbunql;
 using Carbunql.Building;
 
-var sq = new SelectQuery(""select id, val from table_a as a"");
+var sq = SelectQuery.Parse(""select id, val from table_a as a"");
 var q = sq.ToCountQuery();
 Console.WriteLine(q.ToCommand().CommandText);";
 
@@ -77,7 +77,7 @@ Console.WriteLine(q.ToCommand().CommandText);";
 		}
 		try
 		{
-			var sq = new SelectQuery(sql);
+			var sq = SelectQuery.Parse(sql);
 			fsql = sq.ToCountQuery().ToCommand().CommandText;
 		}
 		catch (Exception ex)

@@ -16,7 +16,7 @@ public class EscapedIdentiferTest
     {
         var expect = @"SELECT
 	1 AS ""a b""";
-        var sq = new SelectQuery(expect);
+        var sq = SelectQuery.Parse(expect);
         Monitor.Log(sq);
 
         var lst = sq.GetTokens().ToList();
@@ -32,7 +32,7 @@ public class EscapedIdentiferTest
 	1 AS ""a b""
 FROM
 	dual";
-        var sq = new SelectQuery(expect);
+        var sq = SelectQuery.Parse(expect);
         Monitor.Log(sq);
 
         var lst = sq.GetTokens().ToList();
@@ -46,7 +46,7 @@ FROM
     {
         var expect = @"SELECT
 	1 AS `a b`";
-        var sq = new SelectQuery(expect);
+        var sq = SelectQuery.Parse(expect);
         Monitor.Log(sq);
 
         var lst = sq.GetTokens().ToList();
@@ -60,7 +60,7 @@ FROM
     {
         var expect = @"SELECT
 	1 AS [a b]";
-        var sq = new SelectQuery(expect);
+        var sq = SelectQuery.Parse(expect);
         Monitor.Log(sq);
 
         var lst = sq.GetTokens().ToList();
@@ -74,7 +74,7 @@ FROM
     {
         var expect = @"SELECT
 	'It''s raining' AS ""column name""";
-        var sq = new SelectQuery(expect);
+        var sq = SelectQuery.Parse(expect);
         Monitor.Log(sq);
 
         var lst = sq.GetTokens().ToList();

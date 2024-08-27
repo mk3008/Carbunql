@@ -97,8 +97,8 @@ from
 	v2";
         var keys = new[] { "id" };
 
-        var expectsq = new SelectQuery(expectSql);
-        var actualsq = new SelectQuery(actualSql);
+        var expectsq = SelectQuery.Parse(expectSql);
+        var actualsq = SelectQuery.Parse(actualSql);
 
         var sq = DiffQueryBuilder.Execute(expectsq, actualsq, keys);
 

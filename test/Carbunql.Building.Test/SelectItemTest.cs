@@ -176,8 +176,8 @@ public class SelectItemTest
     [Fact]
     public void SubQuerySelectAll()
     {
-        var query_a = new SelectQuery("select table_a_id, v1, v2 from table_a");
-        var query_b = new SelectQuery("select table_b_id, table_a_id, v11, v12 from table_b");
+        var query_a = SelectQuery.Parse("select table_a_id, v1, v2 from table_a");
+        var query_b = SelectQuery.Parse("select table_b_id, table_a_id, v11, v12 from table_b");
 
         var sq = new SelectQuery();
         var (f, a) = sq.From(query_a).As("a");
@@ -200,8 +200,8 @@ public class SelectItemTest
     [Fact]
     public void SubQuerySelectAll_override()
     {
-        var query_a = new SelectQuery("select table_a_id, v1, v2 from table_a");
-        var query_b = new SelectQuery("select table_b_id, table_a_id, v11, v12 from table_b");
+        var query_a = SelectQuery.Parse("select table_a_id, v1, v2 from table_a");
+        var query_b = SelectQuery.Parse("select table_b_id, table_a_id, v11, v12 from table_b");
 
         var sq = new SelectQuery();
         var (f, a) = sq.From(query_a).As("a");

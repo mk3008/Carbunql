@@ -32,7 +32,7 @@ from
 	data_ds
 ";
 
-        var sq = new SelectQuery(sql);
+        var sq = SelectQuery.Parse(sql);
         using var r = cn.ExecuteReader(sq);
         var cnt = 0;
         while (r.Read())
@@ -63,7 +63,7 @@ where
 	c1 = :val
 ";
 
-        var sq = new SelectQuery(sql);
+        var sq = SelectQuery.Parse(sql);
         sq.AddParameter(":val", 1);
 
         using var r = cn.ExecuteReader(sq);

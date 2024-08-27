@@ -22,7 +22,7 @@ public partial class SerializeTest
     [Fact]
     public void VirtualTable()
     {
-        var sq = new VirtualTable(new SelectQuery("select 1"));
+        var sq = new VirtualTable(SelectQuery.Parse("select 1"));
 
         var json = MessagePackSerializer.Serialize(sq);
         Output.WriteLine(MessagePackSerializer.ConvertToJson(json));

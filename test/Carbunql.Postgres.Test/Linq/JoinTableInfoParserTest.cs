@@ -133,8 +133,8 @@ FROM
     [Fact]
     public void InnerJoinSelectQueryTest()
     {
-        var articleQuery = new SelectQuery("select x.article_id, x.category_id, x.article_name, x.price from table_x as x where x.article_id = 1");
-        var categoryQuery = new SelectQuery("select y.category_id, y.category_name from table_y as y where y.category_id = 2");
+        var articleQuery = SelectQuery.Parse("select x.article_id, x.category_id, x.article_name, x.price from table_x as x where x.article_id = 1");
+        var categoryQuery = SelectQuery.Parse("select y.category_id, y.category_name from table_y as y where y.category_id = 2");
 
         var query = from s in FromTable<sale>()
                     from a in InnerJoinTable<article>(articleQuery, x => s.article_id == x.article_id)

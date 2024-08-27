@@ -56,7 +56,7 @@ FROM
     [Fact]
     public void SelectQueryCommonTableTest()
     {
-        var preset = new SelectQuery("select x.a_id, x.value, x.text from table_x as x where x.a_id = 1");
+        var preset = SelectQuery.Parse("select x.a_id, x.value, x.text from table_x as x where x.a_id = 1");
 
         var query = from cte in CommonTable<table_a>(preset)
                     from x in FromTable(cte)

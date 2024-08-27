@@ -24,7 +24,7 @@ public class StackOverFlowTest
 
         var exception = Record.Exception(() =>
         {
-            var sq = new SelectQuery(sb.ToString());
+            var sq = SelectQuery.Parse(sb.ToString());
             sq.GetTokens();
 
             Output.WriteLine(sq.ToText());

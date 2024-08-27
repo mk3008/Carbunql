@@ -23,6 +23,20 @@ namespace Carbunql;
 public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
 {
     /// <summary>
+    /// Parses the given SQL query string and returns a corresponding <see cref="SelectQuery"/> object.
+    /// </summary>
+    /// <param name="query">The SQL query string to be parsed.</param>
+    /// <returns>A <see cref="SelectQuery"/> object representing the parsed SQL query.</returns>
+    /// <remarks>
+    /// This method utilizes the <see cref="SelectQueryParser"/> to interpret the SQL string
+    /// and construct a <see cref="SelectQuery"/> object.
+    /// </remarks>
+    public static SelectQuery Parse(string query)
+    {
+        return SelectQueryParser.Parse(query);
+    }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="SelectQuery"/> class.
     /// </summary>
     /// <remarks>
@@ -39,6 +53,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     /// This constructor parses the provided SQL query string and initializes the select query object with its components, such as SELECT, FROM, WHERE, GROUP BY, HAVING, and ORDER BY clauses.
     /// The query string may contain additional clauses such as WITH, WINDOW, and LIMIT, which are also parsed and initialized if present.
     /// </remarks>
+    /// Obsolete("This constructor is obsolete. Use the static Parse method instead, e.g., SelectQuery.Parse(query).")
     public SelectQuery(string query)
     {
         var parsedQuery = SelectQueryParser.Parse(query);
@@ -1178,7 +1193,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             {
                 qs.Query.Where(() =>
                 {
-                    var sq = new SelectQuery($"select * from {validationTableName} as x");
+                    var sq = SelectQuery.Parse($"select * from {validationTableName} as x");
                     keyColumnNames.ForEach(keyColumn => sq.Where($"x.{keyColumn} = {qs.Alias}.{keyColumn}"));
                     return sq.ToExists();
                 });
@@ -1209,7 +1224,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             {
                 qs.Query.Where(() =>
                 {
-                    var sq = new SelectQuery($"select * from {validationTableName} as x");
+                    var sq = SelectQuery.Parse($"select * from {validationTableName} as x");
                     keyColumnNames.ForEach(keyColumn => sq.Where($"x.{keyColumn} = {qs.Alias}.{keyColumn}"));
                     return sq.ToExists();
                 });
@@ -1236,7 +1251,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             {
                 qs.Query.Where(() =>
                 {
-                    var sq = new SelectQuery($"select * from {validationTableName} as x");
+                    var sq = SelectQuery.Parse($"select * from {validationTableName} as x");
                     keyColumnNames.ForEach(keyColumn => sq.Where($"x.{keyColumn} = {qs.Alias}.{keyColumn}"));
                     return sq.ToNotExists();
                 });
@@ -1266,7 +1281,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             {
                 qs.Query.Where(() =>
                 {
-                    var sq = new SelectQuery($"select * from {validationTableName} as x");
+                    var sq = SelectQuery.Parse($"select * from {validationTableName} as x");
                     keyColumnNames.ForEach(keyColumn => sq.Where($"x.{keyColumn} = {qs.Alias}.{keyColumn}"));
                     return sq.ToNotExists();
                 });

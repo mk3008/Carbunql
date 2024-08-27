@@ -63,7 +63,7 @@
 	string sourcecode = @"using Carbunql;
 using Carbunql.Building;
 
-var sq = new SelectQuery(""select id, val from table_a as a"");
+var sq = SelectQuery.Parse(""select id, val from table_a as a"");
 var q = sq.ToUpdateQuery(""destination"", new[] { ""id"" });
 Console.WriteLine(q.ToCommand().CommandText);";
 
@@ -92,7 +92,7 @@ Console.WriteLine(q.ToCommand().CommandText);";
 		try
 		{
 			var groupkeys = keys.Split(",").ToList().Select(x => x.Trim()).ToList();
-			var sq =new SelectQuery(sql);
+			var sq =SelectQuery.Parse(sql);
 			fsql = sq.ToUpdateQuery(table, groupkeys).ToCommand().CommandText;
 		}
 		catch (Exception ex)

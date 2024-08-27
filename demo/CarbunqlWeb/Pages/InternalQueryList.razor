@@ -50,7 +50,7 @@
 
     string sourcecode = @"using Carbunql;
 
-var sq = new SelectQuery(sql);
+var sq = SelectQuery.Parse(sql);
 foreach (var item in sq.GetInternalQueries())
 {
 	Console.WriteLine(item.ToCommand().CommandText);
@@ -149,7 +149,7 @@ order by
         }
         try
         {
-            var sq = new SelectQuery(sql);
+            var sq = SelectQuery.Parse(sql);
             var sb = new StringBuilder();
 
             fsql = string.Empty;

@@ -69,7 +69,7 @@
     string sourcecode = @"using Carbunql;
 using Carbunql.Building;
 
-var q = new SelectQuery(sql);
+var q = SelectQuery.Parse(sql);
 q.GetQuerySources()
     .Where(x => x.ColumnNames.Contains(columnName))
     .GetRootsBySource()
@@ -99,7 +99,7 @@ Console.WriteLine(q.ToText());";
         }
         try
         {
-            var q = new SelectQuery(sql);
+            var q = SelectQuery.Parse(sql);
             var sources = q.GetQuerySources().ToList();
 
             q.GetQuerySources()

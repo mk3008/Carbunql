@@ -118,7 +118,7 @@ public static class QueryBaseExtension
     /// <returns>The constructed common table expression.</returns>
     public static CommonTable With(this SelectQuery source, string query)
     {
-        var subQuery = new SelectQuery(query);
+        var subQuery = SelectQuery.Parse(query);
         return source.With(subQuery.ToCommonTable("cte"));
     }
 
