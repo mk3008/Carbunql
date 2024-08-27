@@ -44,6 +44,18 @@ public static class SelectQuerySelectExtensions
         return query;
     }
 
+    public static SelectQuery ReverseSign(this SelectQuery query, string columnAlias)
+    {
+        query.OverrideSelect(columnAlias, (source, col) => $"({col}) * -1");
+        return query;
+    }
+
+    public static SelectQuery ReverseSign(this SelectQuery query, string tableName, string columnAlias)
+    {
+        query.OverrideSelect(tableName, columnAlias, (source, col) => $"({col}) * -1");
+        return query;
+    }
+
     private static string ToValueText(object value)
     {
         if (value is string s)

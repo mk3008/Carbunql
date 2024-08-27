@@ -1248,4 +1248,29 @@ LIMIT
 
         Assert.Equal(expect, query.ToText(), true, true, true);
     }
+
+    [Fact]
+    public void ReverseSignTest()
+    {
+        var sql = """
+            select 
+                s.unit_price * s.amount as price
+            from
+                sale as s
+            """;
+
+        var query = SelectQuery.Parse(sql)
+            .ReverseSign("price");
+
+        Monitor.Log(query, exportTokens: false);
+
+        var expect = """
+            SELECT
+                (s.unit_price * s.amount) * -1 AS price
+            FROM
+                sale AS s
+            """;
+
+        Assert.Equal(expect, query.ToText(), true, true, true);
+    }
 }
