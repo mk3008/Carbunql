@@ -216,7 +216,7 @@ public partial class SerializeTest
     [Fact]
     public void QueryContainer()
     {
-        var sq = new QueryContainer(new SelectQuery("select 1"));
+        var sq = new QueryContainer(SelectQuery.Parse("select 1"));
 
         var json = MessagePackSerializer.Serialize(sq);
         Output.WriteLine(MessagePackSerializer.ConvertToJson(json));

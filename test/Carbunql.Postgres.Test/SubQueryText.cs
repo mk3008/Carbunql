@@ -70,7 +70,7 @@ FROM
     public void SubQueryTest()
     {
         var sq = new SelectQuery();
-        var (from, a) = sq.From(new SelectQuery("select * from table_a")).As<RecordA>("a"); ;
+        var (from, a) = sq.From(SelectQuery.Parse("select * from table_a")).As<RecordA>("a"); ;
 
         sq.Select("a", "a_id");
         sq.Select(nameof(a), "a_id");

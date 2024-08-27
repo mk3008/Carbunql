@@ -37,7 +37,7 @@
         <RadzenTabsItem Text="Source">
 	        <RadzenText Style="font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" >using Carbunql;
 
-var sql = new SelectQuery("select id, val from table_a as a")
+var sql = SelectQuery.Parse("select id, val from table_a as a")
 	.ToSubQuery(alias)
 	.ToText();</RadzenText>
         </RadzenTabsItem>
@@ -109,7 +109,7 @@ ORDER BY
 		}
 		try
 		{
-			fsql = new SelectQuery(sql)
+			fsql = SelectQuery.Parse(sql)
 				.ToSubQuery(alias)
 				.ToText();
 		}

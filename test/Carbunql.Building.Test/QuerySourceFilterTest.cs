@@ -23,7 +23,7 @@ select
 from
     sale as s";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -48,7 +48,7 @@ FROM
     /* Lv:1, Seq:1, Refs:0-1, Columns:[sale_id, store_id, price] */
     sale AS s";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -99,7 +99,7 @@ FROM
             sale AS s1
     ) AS s2";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -152,7 +152,7 @@ FROM
     /* Lv:1, Seq:2, Refs:0-2, Columns:[store_id] */
     store AS st ON s.store_id = st.store_id";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -203,7 +203,7 @@ FROM
     /* Lv:1, Seq:2, Refs:0-2, Columns:[store_name, store_id] */
     store AS st ON s.store_id = st.store_id";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -265,7 +265,7 @@ FROM
     /* Lv:1, Seq:1, Refs:0-1, Columns:[sale_id, store_id, price] */
     sx AS s2";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Lv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -339,7 +339,7 @@ ORDER BY
     c.customer_id,
     ms.sale_month";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -417,7 +417,7 @@ ORDER BY
 
         var lower_limit = new DateTime(2024, 7, 20);
 
-        var query = new SelectQuery(sql)
+        var query = SelectQuery.Parse(sql)
             .OverrideSelect("journal_date", (source, item) => $"greatest({item}, {source.Query.AddParameter(":lower_limit", lower_limit)})")
             .AddNotExists(["sale_id"], "sale_journals")
             .AddWhere("request_timestamp", (source) => $"{source.Alias}.request_timestamp >= :lower_limit")
@@ -613,7 +613,7 @@ FROM
         var city = "Tokyo";
         DateTime? birthday = new DateTime(1980, 5, 15);
 
-        var query = new SelectQuery(SelectCustomers)
+        var query = SelectQuery.Parse(SelectCustomers)
             .AddParameter(new QueryParameter(":page_index", pageIndex));
 
         if (!string.IsNullOrEmpty(firstName))
@@ -678,7 +678,7 @@ LIMIT
         long? customerId = 1234567890;
         long? saleId = 9999999;
 
-        var query = new SelectQuery(SelectCustomers)
+        var query = SelectQuery.Parse(SelectCustomers)
             .AddParameter(new QueryParameter(":page_index", pageIndex));
 
         if (!string.IsNullOrEmpty(firstName))
@@ -750,7 +750,7 @@ LIMIT
         long? customerId = 1234567890;
         long? saleId = 9999999;
 
-        var query = new SelectQuery(SelectCustomers)
+        var query = SelectQuery.Parse(SelectCustomers)
             .AddParameter(new QueryParameter(":page_index", pageIndex));
 
         if (!string.IsNullOrEmpty(firstName))
@@ -817,7 +817,7 @@ LIMIT
         long? customerId = 1234567890;
         var storeName = "Osaka";
 
-        var query = new SelectQuery(SelectCustomers)
+        var query = SelectQuery.Parse(SelectCustomers)
             .AddParameter(new QueryParameter(":page_index", pageIndex));
 
         if (!string.IsNullOrEmpty(storeName))
@@ -907,7 +907,7 @@ LIMIT
         var city = "Tokyo";
         DateTime? birthday = new DateTime(1980, 5, 15);
 
-        var query = new SelectQuery(SelectCustomers)
+        var query = SelectQuery.Parse(SelectCustomers)
             .AddParameter(new QueryParameter(":page_index", pageIndex));
 
         // add CTE
@@ -1009,7 +1009,7 @@ LIMIT
                 ) d
             """;
 
-        var query = new SelectQuery(sql)
+        var query = SelectQuery.Parse(sql)
             .Equal("id", 1);
 
         Monitor.Log(query, exportTokens: false);
@@ -1047,7 +1047,7 @@ LIMIT
                 ) d
             """;
 
-        var query = new SelectQuery(sql)
+        var query = SelectQuery.Parse(sql)
             .Equal("sale_id", 1);
 
         Monitor.Log(query, exportTokens: false);
@@ -1085,7 +1085,7 @@ LIMIT
                 ) d
             """;
 
-        var query = new SelectQuery(sql)
+        var query = SelectQuery.Parse(sql)
             .Equal("price", 10);
 
         Monitor.Log(query, exportTokens: false);
@@ -1123,7 +1123,7 @@ LIMIT
                 ) d
             """;
 
-        var query = new SelectQuery(sql)
+        var query = SelectQuery.Parse(sql)
             .Equal("d", "sale_id", 1);
 
         Monitor.Log(query, exportTokens: false);
@@ -1155,7 +1155,7 @@ LIMIT
                 sale as s
             """;
 
-        var query = new SelectQuery(sql)
+        var query = SelectQuery.Parse(sql)
             .OrderBy("unit_price");
 
         Monitor.Log(query, exportTokens: false);
@@ -1182,7 +1182,7 @@ LIMIT
                 sale as s
             """;
 
-        var query = new SelectQuery(sql)
+        var query = SelectQuery.Parse(sql)
             .OrderBy("price");
 
         Monitor.Log(query, exportTokens: false);
@@ -1209,7 +1209,7 @@ LIMIT
                 sale as s
             """;
 
-        var query = new SelectQuery(sql)
+        var query = SelectQuery.Parse(sql)
             .OverrideSelect("journal_date", (sourse, col) => $"greatest({col}, :lower_limit)");
 
         Monitor.Log(query, exportTokens: false);
@@ -1234,7 +1234,7 @@ LIMIT
                 sale as s
             """;
 
-        var query = new SelectQuery(sql)
+        var query = SelectQuery.Parse(sql)
             .Greatest("journal_date", ":lower_limit");
 
         Monitor.Log(query, exportTokens: false);

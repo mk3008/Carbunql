@@ -58,7 +58,7 @@ public class Program
             """;
 
         // Convert the query to an object
-        var sq = new SelectQuery(sql);
+        var sq = SelectQuery.Parse(sql);
 
         // Restrict the selected columns
         sq.FilterInColumns(columns);

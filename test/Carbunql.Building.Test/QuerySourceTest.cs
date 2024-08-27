@@ -24,7 +24,7 @@ select
 from
     sale as s";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -59,7 +59,7 @@ from
 where
     s.store_id = 1";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -92,7 +92,7 @@ from
 order by
     s.store_id = 1";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -126,7 +126,7 @@ from
 group by
     s.store_id";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -161,7 +161,7 @@ group by
 having
     sum(s.price) = 0";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -199,7 +199,7 @@ where
     --but they can be identified because there is no table join.
     store_id = 1";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -236,7 +236,7 @@ where
     --Although the SQL is correct, it cannot be parsed by the library.
     sale_id = 1";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
 
         var exception = Assert.Throws<InvalidProgramException>(() =>
         {
@@ -267,7 +267,7 @@ FROM
             sale AS s
     ) AS d";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -400,7 +400,7 @@ ORDER BY
     ms.month,
     ms.product_id";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -451,7 +451,7 @@ FROM
 WHERE
     s.sale_id = 3";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -525,7 +525,7 @@ FROM
             ) AS d
     ) AS q";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -606,7 +606,7 @@ WHERE
     st.store_id = 1
 ";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -705,7 +705,7 @@ ORDER BY
     r.customer_id,
     r.sale_month";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -868,7 +868,7 @@ FROM
 ORDER BY
     line_id";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Index:{x.Index}, Alias:{x.Alias}, MaxLv:{x.MaxLevel}, SourceType:{x.SourceType}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -1076,7 +1076,7 @@ ORDER BY
     ms.month,
     ms.product_id";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Index:{x.Index}, MaxLv:{x.MaxLevel}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -1103,7 +1103,7 @@ select
 from
     sales";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Index:{x.Index}, Alias:{x.Alias}, MaxLv:{x.MaxLevel}, SourceType:{x.SourceType}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -1145,7 +1145,7 @@ inner join target t on s.sale_id = t.sale_id --use relation ship
 where
 exists (select * from dat x where x.sale_id = s.sale_id) --use wildcard";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Index:{x.Index}, Alias:{x.Alias}, MaxLv:{x.MaxLevel}, SourceType:{x.SourceType}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -1192,7 +1192,7 @@ sales s --has not relationship
 where
 not exists (select dat.v1 from dat where x.sale_id = s.sale_id) --use wildcard";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Index:{x.Index}, Alias:{x.Alias}, MaxLv:{x.MaxLevel}, SourceType:{x.SourceType}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -1235,7 +1235,7 @@ GROUP BY
     customer_id,
     DATE_TRUNC('month', sale_date)";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Index:{x.Index}, Alias:{x.Alias}, MaxLv:{x.MaxLevel}, SourceType:{x.SourceType}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -1273,7 +1273,7 @@ sale s
 where
 exists (select * from target x where x.sale_id = s.sale_id)";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Index:{x.Index}, Alias:{x.Alias}, MaxLv:{x.MaxLevel}, SourceType:{x.SourceType}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -1345,7 +1345,7 @@ SELECT
 FROM
     final AS f";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Index:{x.Index}, Alias:{x.Alias}, MaxLv:{x.MaxLevel}, SourceType:{x.SourceType}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -1404,7 +1404,7 @@ WHERE
         ELSE salary > 60000
     END";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Index:{x.Index}, Alias:{x.Alias}, MaxLv:{x.MaxLevel}, SourceType:{x.SourceType}, Columns:[{string.Join(", ", x.ColumnNames)}]");
@@ -1448,7 +1448,7 @@ from
 sale s
 inner join product p on s.product_id = p.product_id";
 
-        var query = new SelectQuery(sql);
+        var query = SelectQuery.Parse(sql);
         query.GetQuerySources().ForEach(x =>
         {
             x.AddSourceComment($"Index:{x.Index}, Alias:{x.Alias}, MaxLv:{x.MaxLevel}, SourceType:{x.SourceType}, Columns:[{string.Join(", ", x.ColumnNames)}]");

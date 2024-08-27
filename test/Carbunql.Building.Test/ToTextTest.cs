@@ -25,7 +25,7 @@ public class ToTextTest
   :value = 'test'
 */
 select a.column_1 as c1 from table_a as a";
-        var sq = new SelectQuery(sql);
+        var sq = SelectQuery.Parse(sql);
         sq.AddParameter(":id", 1);
         sq.AddParameter(":value", "test");
 
@@ -44,7 +44,7 @@ select a.column_1 as c1 from table_a as a";
   :value = 'test'
 */
 select a.column_1 as c1 from table_a as a";
-        var sq = new SelectQuery(sql);
+        var sq = SelectQuery.Parse(sql);
         sq.AddParameter(":id", 1);
         sq.AddParameter(":value", "test");
 
@@ -143,11 +143,11 @@ FROM
     ) AS q
 ORDER BY
     line_id";
-        var sq = new SelectQuery(sql);
+        var sq = SelectQuery.Parse(sql);
         Output.WriteLine(sq.ToText());
         Output.WriteLine(sq.ToOneLineText());
 
-        var sq2 = new SelectQuery(sq.ToOneLineCommand().CommandText);
+        var sq2 = SelectQuery.Parse(sq.ToOneLineCommand().CommandText);
         Assert.Equal(sql, sq2.ToCommand().CommandText);
     }
 }

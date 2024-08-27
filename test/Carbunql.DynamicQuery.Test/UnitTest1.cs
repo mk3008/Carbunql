@@ -18,7 +18,7 @@ public class UnitTest1
     public void AddCondition(int? parameter)
     {
         //sql parse
-        var sq = new SelectQuery(@"select a.a_id, a.val from table as a");
+        var sq = SelectQuery.Parse(@"select a.a_id, a.val from table as a");
 
         //get FROM table
         var a = sq.FromClause!.Root;
@@ -53,7 +53,7 @@ WHERE
     public void AddCondition_ValueParse(int? parameter)
     {
         //sql parse
-        var sq = new SelectQuery(@"select a.a_id, a.val from table as a");
+        var sq = SelectQuery.Parse(@"select a.a_id, a.val from table as a");
 
         //get FROM table
         var a = sq.FromClause!.Root;
@@ -87,7 +87,7 @@ WHERE
     public void AddConditions()
     {
         //sql parse
-        var sq = new SelectQuery(@"select a.a_id, a.val1, a.val2 from table as a");
+        var sq = SelectQuery.Parse(@"select a.a_id, a.val1, a.val2 from table as a");
 
         //get FROM table
         var a = sq.FromClause!.Root;
@@ -118,7 +118,7 @@ WHERE
     public void AddOrCondition(int prm1, int prm2)
     {
         //sql parse
-        var sq = new SelectQuery(@"select a.a_id, a.val from table as a");
+        var sq = SelectQuery.Parse(@"select a.a_id, a.val from table as a");
 
         //get FROM table
         var a = sq.FromClause!.Root;
@@ -162,7 +162,7 @@ WHERE
     public void SelectColumnFilter(params string[] columns)
     {
         //sql parse
-        var sq = new SelectQuery(@"select a.a_id, a.val1, a.val2, a.val2 as val3 from table as a");
+        var sq = SelectQuery.Parse(@"select a.a_id, a.val1, a.val2, a.val2 as val3 from table as a");
 
         //get FROM table
         var a = sq.FromClause!.Root;
@@ -191,7 +191,7 @@ FROM
     public void SelectColumnFilter_Remove(params string[] columns)
     {
         //sql parse
-        var sq = new SelectQuery(@"select a.a_id, a.val1, a.val2, a.val2 as val3 from table as a");
+        var sq = SelectQuery.Parse(@"select a.a_id, a.val1, a.val2, a.val2 as val3 from table as a");
 
         //filter in
         sq.SelectClause!.FilterInColumns(columns);
@@ -213,7 +213,7 @@ FROM
     public void AddOutJoinFilter()
     {
         //sql parse
-        var sq = new SelectQuery(@"select a.a_id, a.val from table as a");
+        var sq = SelectQuery.Parse(@"select a.a_id, a.val from table as a");
 
         //get FROM table
         var a = sq.FromClause!.Root;
@@ -244,7 +244,7 @@ WHERE
     public void AddConnditionToCommonTableExpression()
     {
         //sql parse
-        var sq = new SelectQuery(@"with
+        var sq = SelectQuery.Parse(@"with
 cte as (
 	select a_id, val from table
 )

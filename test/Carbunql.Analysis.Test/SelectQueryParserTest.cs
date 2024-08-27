@@ -288,7 +288,7 @@ select
 from
     b";
 
-        var item = new SelectQuery(text);
+        var item = SelectQuery.Parse(text);
         Monitor.Log(item);
 
         var lst = item.GetTokens().ToList();
@@ -638,7 +638,7 @@ from
     (((select 4 as v)))
 ) d";
 
-        var sq = new SelectQuery(text);
+        var sq = SelectQuery.Parse(text);
         Monitor.Log(sq);
 
         var expect = @"SELECT
@@ -678,7 +678,7 @@ from
     (((select 4 as v)))
 ) d";
 
-        var sq = new SelectQuery(text);
+        var sq = SelectQuery.Parse(text);
         Monitor.Log(sq);
 
         var expect = @"SELECT
@@ -714,7 +714,7 @@ from
     (select 2 as v)
 ) d";
 
-        var sq = new SelectQuery(text);
+        var sq = SelectQuery.Parse(text);
         Monitor.Log(sq);
 
         var expect = @"SELECT

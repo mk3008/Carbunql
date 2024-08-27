@@ -38,7 +38,7 @@ FROM
     var pname = ":category";
 
     // Convert the selection query to an object
-    var sq = new SelectQuery(sql)
+    var sq = SelectQuery.Parse(sql)
         .GreaterThanOrEqualIfNotNullOrEmpty("price", minPrice)
         .LessThanOrEqualIfNotNullOrEmpty("price", maxPrice)
         .AddParameter(pname, category)
@@ -277,7 +277,7 @@ Just pass the select query string to the constructor of the SelectQuery class.
 using Carbunql;
 
 var text = "select s.sale_id, s.store_id, date_trunc('month', s.sale_date) as allocate_ym, s.sale_price from sales as s";
-var sq = new SelectQuery(text);
+var sq = SelectQuery.Parse(text);
 ```
 
 ## Return the model to a select query
@@ -292,7 +292,7 @@ The `ToOneLineText` method will output a single line without formatting. Use the
 using Carbunql;
 
 var text = "select s.sale_id, s.store_id, date_trunc('month', s.sale_date) as allocate_ym, s.sale_price from sales as s";
-var sq = new SelectQuery(text);
+var sq = SelectQuery.Parse(text);
 var query = sq.ToOneLineText();
 ```
 
@@ -328,7 +328,7 @@ where
     c1 = :val
 ";
 
-var sq = new SelectQuery(sql);
+var sq = SelectQuery.Parse(sql);
 sq.AddParameter(":val", 1);
 
 using var r = cn.ExecuteReader(sq);
@@ -391,7 +391,7 @@ The second argument is a delegate (or lambda expression) that takes the column s
 using Carbunql;
 
 var text = "select s.sale_id, s.store_id, date_trunc('month', s.sale_date) as allocate_ym, s.sale_price from sales as s";
-var sq = new SelectQuery(text)
+var sq = SelectQuery.Parse(text)
   .AddWhere("sale_id", (source, column) => $"{source.Alias}.{column} = 1");
 ```
 
@@ -402,7 +402,7 @@ using Carbunql;
 using Carbunql.Fluent;
 
 var text = "select s.sale_id, s.store_id, date_trunc('month', s.sale_date) as allocate_ym, s.sale_price from sales as s";
-var sq = new SelectQuery(text)
+var sq = SelectQuery.Parse(text)
   .Equal("sale_id", 1);
 ```
 

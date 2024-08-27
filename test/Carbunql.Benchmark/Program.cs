@@ -108,7 +108,7 @@ order by
 
     private SelectQuery GetCarbunqlQuery()
     {
-        var sq = new SelectQuery(Sql);
+        var sq = SelectQuery.Parse(Sql);
         for (int i = 0; i < 100; i++)
         {
             sq.AddParameter(":" + i, i);

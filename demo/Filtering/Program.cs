@@ -1,6 +1,6 @@
 ﻿using Carbunql;
-using Carbunql.TypeSafe;
 using Carbunql.Building;
+using Carbunql.TypeSafe;
 
 internal class Program
 {

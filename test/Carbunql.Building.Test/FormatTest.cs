@@ -19,7 +19,7 @@ public class FormatTest
     [Fact]
     public void Issuse280_CreateTable()
     {
-        var sq = new SelectQuery("SELECT x.id FROM x");
+        var sq = SelectQuery.Parse("SELECT x.id FROM x");
         var q = sq.ToCreateTableQuery("test");
 
         Monitor.Log(q);
@@ -39,7 +39,7 @@ FROM
     [Fact]
     public void Issuse280_Union()
     {
-        var sq = new SelectQuery("select x.id from x union select y.id from y");
+        var sq = SelectQuery.Parse("select x.id from x union select y.id from y");
 
         Monitor.Log(sq);
 
@@ -61,7 +61,7 @@ FROM
     [Fact]
     public void Issuse280_SubQuery()
     {
-        var sq = new SelectQuery("select x.id from (select select y.id from y) as x");
+        var sq = SelectQuery.Parse("select x.id from (select select y.id from y) as x");
 
         Monitor.Log(sq);
 

@@ -136,7 +136,7 @@ from
     [Fact]
     public void SelectQueryClassTest()
     {
-        var preset = new SelectQuery("select x.a_id, x.value, x.text from table_x as x where x.a_id = 1");
+        var preset = SelectQuery.Parse("select x.a_id, x.value, x.text from table_x as x where x.a_id = 1");
 
         var query = from a in FromTable<table_a>(preset)
                     select a;

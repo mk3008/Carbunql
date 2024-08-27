@@ -41,7 +41,7 @@ internal class Program
         var pname = ":category";
 
         // Convert the selection query to an object
-        var sq = new SelectQuery(sql)
+        var sq = SelectQuery.Parse(sql)
             .GreaterThanOrEqualIfNotNullOrEmpty("price", minPrice)
             .LessThanOrEqualIfNotNullOrEmpty("price", maxPrice)
             .AddParameter(pname, category)

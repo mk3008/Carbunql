@@ -35,7 +35,7 @@ left join table_b as b on a.id = b.table_a_id
 where b.table_a_id is null
 ";
 
-        var q = new SelectQuery(text);
+        var q = SelectQuery.Parse(text);
         DebugPrint(q.ToCommand());
     }
 }

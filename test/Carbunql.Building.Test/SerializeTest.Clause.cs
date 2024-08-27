@@ -147,7 +147,7 @@ public partial class SerializeTest
     [Fact]
     public void CommonTable()
     {
-        var sq = new CommonTable(new VirtualTable(new SelectQuery("select 1")), "a", new ValueCollection(new[] { "v1" }));
+        var sq = new CommonTable(new VirtualTable(SelectQuery.Parse("select 1")), "a", new ValueCollection(new[] { "v1" }));
 
         var json = MessagePackSerializer.Serialize(sq);
         Output.WriteLine(MessagePackSerializer.ConvertToJson(json));
@@ -191,7 +191,7 @@ public partial class SerializeTest
     {
         var sq = new WithClause()
         {
-            new CommonTable(new VirtualTable(new SelectQuery("select 1")), "a", new ValueCollection(new[] { "v1" }))
+            new CommonTable(new VirtualTable(SelectQuery.Parse("select 1")), "a", new ValueCollection(new[] { "v1" }))
         };
 
         var json = MessagePackSerializer.Serialize(sq);

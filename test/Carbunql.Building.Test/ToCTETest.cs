@@ -14,7 +14,7 @@ public class ToCTETest
     [Fact]
     public void Old()
     {
-        var tmp = new SelectQuery("with x as (select id, val from table_a as a) select x.id from x");
+        var tmp = SelectQuery.Parse("with x as (select id, val from table_a as a) select x.id from x");
 
         //Convert select query to Common table
         //Return value is SelectQuery class and CommonTable class

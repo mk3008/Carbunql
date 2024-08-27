@@ -62,7 +62,7 @@ using Carbunql.Building;
 string table = ""destinations"";
 string[] keys = new[] { ""id"", ""sub_id"" };
 
-var sq = new SelectQuery(sql);
+var sq = SelectQuery.Parse(sql);
 var mq = sq.ToMergeQuery(table, keys);
 mq.AddMatchedUpdate();
 mq.AddNotMathcedInsertAsAutoNumber();
@@ -95,7 +95,7 @@ Console.WriteLine(mq.ToCommand().CommandText);";
 		try
 		{
 			var groupkeys = keys.Split(",").ToList().Select(x => x.Trim()).ToList();
-			var sq =new SelectQuery(sql);
+			var sq =SelectQuery.Parse(sql);
 			var mq = sq.ToMergeQuery(table, groupkeys);
 			mq.AddMatchedUpdate();
 			mq.AddNotMathcedInsertAsAutoNumber();

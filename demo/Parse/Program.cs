@@ -83,7 +83,7 @@ order by
 ";
 }
 
-var sq = new SelectQuery(sql);
+var sq = SelectQuery.Parse(sql);
 Console.WriteLine("\n> Format:");
 Console.WriteLine(sq.ToText());
 Console.WriteLine("\n> Model:");

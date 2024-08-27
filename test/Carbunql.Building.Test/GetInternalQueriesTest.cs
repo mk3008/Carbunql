@@ -18,7 +18,7 @@ public class GetInternalQueriesTest
     [Fact]
     public void CountTest()
     {
-        var sq = new SelectQuery(@"
+        var sq = SelectQuery.Parse(@"
 with
 cte_a as (
 	--index:0 cte query
@@ -84,7 +84,7 @@ select
 
     private void InjectUserFilter(SelectQuery sq, string filteredTable, out bool isSuccess)
     {
-        var filterQuery = new SelectQuery(@"
+        var filterQuery = SelectQuery.Parse(@"
 select 
 	userid
 from
@@ -118,7 +118,7 @@ where
     [Fact]
     public void InjectWhereTest()
     {
-        var sq = new SelectQuery(@"
+        var sq = SelectQuery.Parse(@"
 select a.* from articles as a order by CreatedOn desc
 ");
 
@@ -157,7 +157,7 @@ ORDER BY
     [Fact]
     public void InjectWhereTest_Joined()
     {
-        var sq = new SelectQuery(@"
+        var sq = SelectQuery.Parse(@"
 select 
     c.categoryname
     , a.*
@@ -205,7 +205,7 @@ ORDER BY
     [Fact]
     public void InjectWhereTest_SubQuery()
     {
-        var sq = new SelectQuery(@"
+        var sq = SelectQuery.Parse(@"
 select 
     a2.*
 from
@@ -256,7 +256,7 @@ ORDER BY
     [Fact]
     public void InjectWhereTest_CTE()
     {
-        var sq = new SelectQuery(@"
+        var sq = SelectQuery.Parse(@"
 with
 a2 as (
 	select a1.* from articles as a1
@@ -311,7 +311,7 @@ ORDER BY
     [Fact]
     public void CountTest_SubQuery()
     {
-        var sq = new SelectQuery(@"
+        var sq = SelectQuery.Parse(@"
 select
 	*
 from

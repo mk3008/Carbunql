@@ -50,7 +50,7 @@
 
 	string sourcecode = @"using Carbunql;
 
-var sq = new SelectQuery(sql);
+var sq = SelectQuery.Parse(sql);
 foreach (var item in sq.GetColumnNames())
 {
 	Console.WriteLine(item);
@@ -82,7 +82,7 @@ from
 		}
 		try
 		{
-			var sq = new SelectQuery(sql);
+			var sq = SelectQuery.Parse(sql);
 			var sb = new StringBuilder();
 
 			fsql = string.Empty;
