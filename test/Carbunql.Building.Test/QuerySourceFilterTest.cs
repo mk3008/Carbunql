@@ -881,7 +881,6 @@ WHERE
     )
     AND c.first_name = :first_name
     AND c.last_name = :last_name
-    AND c.customer_id = :customer_id
 ORDER BY
     c.first_name,
     c.last_name,
@@ -979,7 +978,6 @@ WHERE
     AND c.first_name = :first_name
     AND c.last_name = :last_name
     AND c.city = :city
-    AND c.customer_id = :customer_id
     AND c.birthday = :birthday
 ORDER BY
     c.first_name,

@@ -1,5 +1,4 @@
-﻿using Carbunql.Building;
-using Carbunql.Definitions;
+﻿using Carbunql.Definitions;
 
 namespace Carbunql;
 

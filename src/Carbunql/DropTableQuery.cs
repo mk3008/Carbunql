@@ -1,4 +1,4 @@
-﻿using Carbunql.Building;
+﻿using Carbunql;
 using Carbunql.Clauses;
 using Carbunql.Definitions;
 using Carbunql.Tables;

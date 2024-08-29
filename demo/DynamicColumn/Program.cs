@@ -41,8 +41,8 @@ public class Program
 
         var sq = new SelectQuery()
             .From("customer", "c")
-            .Select("c.customer_id")
-            .Select("c.first_name || c.last_name", "customer_name");
+            .Select("c", "customer_id")
+            .SelectValue("c.first_name || c.last_name", "customer_name");
         Console.WriteLine(sq.ToText());
     }
 

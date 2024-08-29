@@ -114,5 +114,16 @@ public static class IQuerySourceExtension
             }
         }
     }
+
+    public static HashSet<int> GetReferenceIndexes(this IQuerySource source)
+    {
+        var q0 = new int[] { source.Index };
+        var q1 = source.References.Select(x => x.Index);
+        var q2 = source.References.SelectMany(x => x.References).SelectMany(x => x.GetReferenceIndexes());
+
+        var q = q0.Union(q1).Union(q2);
+        var lst = q.ToHashSet();
+        return lst;
+    }
 }
 

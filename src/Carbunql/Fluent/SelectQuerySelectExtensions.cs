@@ -8,15 +8,21 @@ public static class SelectQuerySelectExtensions
         return query;
     }
 
-    public static SelectQuery Select(this SelectQuery query, string column)
+    public static SelectQuery Select(this SelectQuery query, string tableAlias, string column, string coluimnAlias = "")
     {
-        query.AddSelect(column);
+        query.AddSelect($"{tableAlias}.{column}", coluimnAlias);
         return query;
     }
 
-    public static SelectQuery Select(this SelectQuery query, string column, string alias)
+    public static SelectQuery Select(this SelectQuery query, string tableAlias, IEnumerable<string> columnNames)
     {
-        query.AddSelect(column, alias);
+        columnNames.ForEach(x => query.AddSelect($"{tableAlias}.{x}"));
+        return query;
+    }
+
+    public static SelectQuery SelectValue(this SelectQuery query, string value, string alias)
+    {
+        query.AddSelect(value, alias);
         return query;
     }
 
@@ -53,6 +59,18 @@ public static class SelectQuerySelectExtensions
     public static SelectQuery ReverseSign(this SelectQuery query, string tableName, string columnAlias)
     {
         query.OverrideSelect(tableName, columnAlias, (source, col) => $"({col}) * -1");
+        return query;
+    }
+
+    public static SelectQuery ReverseSign(this SelectQuery query, IEnumerable<string> columnAliases)
+    {
+        columnAliases.ForEach(x => ReverseSign(query, x));
+        return query;
+    }
+
+    public static SelectQuery ReverseSign(this SelectQuery query, string tableName, IEnumerable<string> columnAliases)
+    {
+        columnAliases.ForEach(x => ReverseSign(query, tableName, x));
         return query;
     }
 

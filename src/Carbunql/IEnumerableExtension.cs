@@ -18,36 +18,19 @@ public static class IEnumerableExtension
     /// </summary>
     public static IEnumerable<IQuerySource> GetRootsBySource(this IEnumerable<IQuerySource> querySources)
     {
+        var maxLevel = querySources.Max(x => x.MaxLevel);
         var querySourceList = querySources.OrderByDescending(x => x.MaxLevel).ToList();
-
         var rootQuerySources = new List<IQuerySource>();
-        var roots = new List<List<int>>();
 
-        foreach (var qs in querySourceList)
+        var references = new List<int>();
+        foreach (var item in querySourceList)
         {
-            var paths = qs.ToTreePaths();
-            var isRoot = true;
-
-            foreach (var root in roots)
+            if (item.MaxLevel == maxLevel || !references.Contains(item.Index))
             {
-                foreach (var path in paths)
-                {
-                    if (root.Contains(path.First()))
-                    {
-                        isRoot = false;
-                    }
-                }
-            }
-            if (isRoot)
-            {
-                rootQuerySources.Add(qs);
-                foreach (var path in paths)
-                {
-                    roots.Add(path);
-                }
+                rootQuerySources.Add(item);
+                references.AddRange(item.GetReferenceIndexes().ToList());
             }
         }
-
         return rootQuerySources;
     }
 
@@ -59,7 +42,8 @@ public static class IEnumerableExtension
     /// <returns>A collection of QuerySources, one per query, ordered by descending Level and ascending Sequence.</returns>
     public static IEnumerable<T> GetRootsByQuery<T>(this IEnumerable<T> source) where T : IQuerySource
     {
-        return source.GroupBy(ds => ds.Query).Select(ds => ds.OrderByDescending(s => s.MaxLevel).ThenBy(s => s.Index).First());
+        var maxLevel = source.Max(x => x.MaxLevel);
+        return source.Where(x => x.MaxLevel == maxLevel).GroupBy(ds => ds.Query).Select(ds => ds.OrderByDescending(s => s.MaxLevel).ThenBy(s => s.Index).First());
     }
 
     /// <summary>

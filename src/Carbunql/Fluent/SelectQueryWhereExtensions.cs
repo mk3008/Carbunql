@@ -331,4 +331,20 @@ public static class SelectQueryWhereExtensions
         query.AddNotExists(tableName, keyColumnNames, validationTableName);
         return query;
     }
+
+    public static SelectQuery HasDifferent(this SelectQuery query, string leftTableAlias, string rightTableAlias, IEnumerable<string> validationColumns)
+    {
+        var conditions = validationColumns.Select(column =>
+            $"CASE WHEN {leftTableAlias}.{column} IS NULL AND {rightTableAlias}.{column} IS NULL THEN 0 " +
+            $"WHEN {leftTableAlias}.{column} IS NOT NULL AND {rightTableAlias}.{column} IS NULL THEN 1 " +
+            $"WHEN {leftTableAlias}.{column} IS NULL AND {rightTableAlias}.{column} IS NOT NULL THEN 1 " +
+            $"WHEN {leftTableAlias}.{column} <> {rightTableAlias}.{column} THEN 1 " +
+            "ELSE 0 END"
+        );
+
+        var fullCondition = string.Join(" + ", conditions);
+        query.AddWhere($"{fullCondition} > 0");
+
+        return query;
+    }
 }
