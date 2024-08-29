@@ -131,7 +131,7 @@ public static class ValueParser
             return NegativeValueParser.Parse(r);
         }
 
-        if (item == "null" || LiteralValueParser.IsLiteralValue(item))
+        if (item.IsEqualNoCase("null") || LiteralValueParser.IsLiteralValue(item))
         {
             return LiteralValueParser.Parse(r);
         }
