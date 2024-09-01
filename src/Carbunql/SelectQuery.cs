@@ -1222,7 +1222,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             .EnsureAny($"table:{sourceTableName}")
             .Where(x => keyColumnNames.All(keyColumn => x.ColumnNames.Contains(keyColumn)))
             .EnsureAny($"The table exists, but there is no corresponding column in the table. table:{sourceTableName}, columns:{string.Join(",", keyColumnNames)}")
-            .GetRootsBySource()
+            .GetRootsByQuery()
             .EnsureAny()
             .ForEach(qs =>
             {
@@ -1301,6 +1301,14 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         var t = TableParser.Parse(table);
         var r = f.Join(t.ToSelectable(alias), joinType);
         if (!string.IsNullOrEmpty(condition)) r.On(condition);
+        return this;
+    }
+
+    public SelectQuery AddJoin(string joinType, SelectableTable table, string condition = "")
+    {
+        var f = FromClause!;
+        var r = f.Join(table, joinType);
+        r.On(condition);
         return this;
     }
 

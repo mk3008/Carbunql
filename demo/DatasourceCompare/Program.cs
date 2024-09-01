@@ -1,7 +1,7 @@
 ﻿using Carbunql;
 using Carbunql.Fluent;
 
-var actual = """
+var actualQuery = """
     select
         s.sale_id
         , s.sale_date  as journal_date
@@ -11,7 +11,7 @@ var actual = """
         sale as s
     """;
 
-var expect = """
+var expectQuery = """
     select
         m.sale_id
         , j.journal_date
@@ -22,8 +22,11 @@ var expect = """
         inner join journal__map_sale as m on j.journal_id = m.journal_id
     """;
 
+var actual = FluentTable.Create(actualQuery, "actual", "a");
+var expect = FluentTable.Create(expectQuery, "expect", "e");
+
 var keycolumns = new[] { "sale_id" };
-var validationColumns = new[] { "shop_id", "price" };
+var validationColumns = new[] { "journal_date", "shop_id", "price" };
 var reverseColumns = new[] { "price" };
 
 var dt = DateTime.Now;
@@ -42,10 +45,11 @@ Console.WriteLine(ctq.ToText());
 Console.WriteLine(";");
 
 /*
+-- GenerateMissingCreateTableQuery
 CREATE TEMPORARY TABLE missing
 AS
 WITH
-    _actual AS (
+    actual AS (
         SELECT
             s.sale_id,
             s.sale_date AS journal_date,
@@ -54,7 +58,7 @@ WITH
         FROM
             sale AS s
     ),
-    _expect AS (
+    expect AS (
         SELECT
             m.sale_id,
             j.journal_date,
@@ -64,32 +68,23 @@ WITH
             journal AS j
             INNER JOIN journal__map_sale AS m ON j.journal_id = m.journal_id
     )
--- Missing
 SELECT
     a.sale_id,
-    GREATEST(a.journal_date, '2024/08/28 0:00:00') AS journal_date,
+    GREATEST(a.journal_date, '2024/09/01 0:00:00') AS journal_date,
     a.shop_id,
     a.price,
     NEXTVAL('journal_id_journal_id_seq') AS journal_id
 FROM
-    _actual AS a
-    LEFT JOIN _expect AS e ON a.sale_id = e.sale_id
+    actual AS a
+    LEFT JOIN expect AS e ON a.sale_id = e.sale_id
 WHERE
     e.sale_id IS null
 ;
+-- GenerateExcessCreateTableQuery
 CREATE TEMPORARY TABLE excess
 AS
 WITH
-    _actual AS (
-        SELECT
-            s.sale_id,
-            s.sale_date AS journal_date,
-            s.shop_id,
-            s.price
-        FROM
-            sale AS s
-    ),
-    _expect AS (
+    expect AS (
         SELECT
             m.sale_id,
             j.journal_date,
@@ -98,33 +93,39 @@ WITH
         FROM
             journal AS j
             INNER JOIN journal__map_sale AS m ON j.journal_id = m.journal_id
+    ),
+    actual AS (
+        SELECT
+            s.sale_id,
+            s.sale_date AS journal_date,
+            s.shop_id,
+            s.price
+        FROM
+            sale AS s
     )
--- Excess
 SELECT
     e.sale_id,
-    GREATEST(e.journal_date, '2024/08/28 0:00:00') AS journal_date,
+    GREATEST(e.journal_date, '2024/09/01 0:00:00') AS journal_date,
     e.shop_id,
     (e.price) * -1 AS price,
     NEXTVAL('journal_id_journal_id_seq') AS journal_id
 FROM
-    _expect AS e
-    LEFT JOIN _actual AS a ON e.sale_id = a.sale_id
+    expect AS e
+    LEFT JOIN actual AS a ON e.sale_id = a.sale_id
 WHERE
     e.sale_id IS null
 ;
+-- GenerateDifferentCreateTableQuery
 CREATE TEMPORARY TABLE different
 AS
 WITH
-    _actual AS (
+    req AS (
         SELECT
-            s.sale_id,
-            s.sale_date AS journal_date,
-            s.shop_id,
-            s.price
+            sale_id
         FROM
-            sale AS s
+            request
     ),
-    _expect AS (
+    expect AS (
         SELECT
             m.sale_id,
             j.journal_date,
@@ -133,200 +134,203 @@ WITH
         FROM
             journal AS j
             INNER JOIN journal__map_sale AS m ON j.journal_id = m.journal_id
+        WHERE
+            EXISTS (
+                SELECT
+                    *
+                FROM
+                    req AS r
+                WHERE
+                    r.sale_id = m.sale_id
+            )
     ),
-    _different AS (
+    actual AS (
+        SELECT
+            s.sale_id,
+            s.sale_date AS journal_date,
+            s.shop_id,
+            s.price
+        FROM
+            sale AS s
+        WHERE
+            EXISTS (
+                SELECT
+                    *
+                FROM
+                    req AS r
+                WHERE
+                    r.sale_id = s.sale_id
+            )
+    ),
+    different AS (
         SELECT
             e.sale_id,
             NEXTVAL('journal_different_id_journal_different_id_seq') AS journal_different_id
         FROM
-            _expect AS e
-            LEFT JOIN _actual AS a ON e.sale_id = a.sale_id
+            expect AS e
+            LEFT JOIN actual AS a ON e.sale_id = a.sale_id
         WHERE
             CASE
-                WHEN a.shop_id IS NULL AND e.shop_id IS NULL THEN 0
-                WHEN a.shop_id IS NOT NULL AND e.shop_id IS NULL THEN 1
-                WHEN a.shop_id IS NULL AND e.shop_id IS NOT NULL THEN 1
-                WHEN a.shop_id <> e.shop_id THEN 1
+                WHEN e.journal_date IS NULL AND a.journal_date IS NULL THEN 0
+                WHEN e.journal_date IS NOT NULL AND a.journal_date IS NULL THEN 1
+                WHEN e.journal_date IS NULL AND a.journal_date IS NOT NULL THEN 1
+                WHEN e.journal_date <> a.journal_date THEN 1
                 ELSE 0
             END + CASE
-                WHEN a.price IS NULL AND e.price IS NULL THEN 0
-                WHEN a.price IS NOT NULL AND e.price IS NULL THEN 1
-                WHEN a.price IS NULL AND e.price IS NOT NULL THEN 1
-                WHEN a.price <> e.price THEN 1
+                WHEN e.shop_id IS NULL AND a.shop_id IS NULL THEN 0
+                WHEN e.shop_id IS NOT NULL AND a.shop_id IS NULL THEN 1
+                WHEN e.shop_id IS NULL AND a.shop_id IS NOT NULL THEN 1
+                WHEN e.shop_id <> a.shop_id THEN 1
+                ELSE 0
+            END + CASE
+                WHEN e.price IS NULL AND a.price IS NULL THEN 0
+                WHEN e.price IS NOT NULL AND a.price IS NULL THEN 1
+                WHEN e.price IS NULL AND a.price IS NOT NULL THEN 1
+                WHEN e.price <> a.price THEN 1
                 ELSE 0
             END > 0
     )
 -- Reverse
 SELECT
     e.sale_id,
-    GREATEST(e.journal_date, '2024/08/28 0:00:00') AS journal_date,
+    GREATEST(e.journal_date, '2024/09/01 0:00:00') AS journal_date,
     e.shop_id,
     (e.price) * -1 AS price,
     NEXTVAL('journal_id_journal_id_seq') AS journal_id,
     d.journal_different_id
 FROM
-    _different AS d
-    INNER JOIN _expect AS e ON d.sale_id = e.sale_id
+    different AS d
+    INNER JOIN expect AS e ON d.sale_id = e.sale_id
 UNION ALL
 -- Current
 SELECT
     a.sale_id,
-    GREATEST(a.journal_date, '2024/08/28 0:00:00') AS journal_date,
+    GREATEST(a.journal_date, '2024/09/01 0:00:00') AS journal_date,
     a.shop_id,
     a.price,
     NEXTVAL('journal_id_journal_id_seq') AS journal_id,
     d.journal_different_id
 FROM
-    _different AS d
-    INNER JOIN _actual AS a ON d.sale_id = a.sale_id
+    different AS d
+    INNER JOIN actual AS a ON d.sale_id = a.sale_id
 ;
- */
+*/
 
 static CreateTableQuery GenerateMissingCreateTableQuery(
     string tableName,
-    string actualQuery,
-    string expectQuery,
+    FluentTable actual,
+    FluentTable expect,
     DateTime lowerLimit,
     IEnumerable<string> keyColumns)
 {
-    var actualCte = "_actual";
-    var actualAlias = "a";
-    var expectCte = "_expect";
-    var expectAlias = "e";
-
     var q = new SelectQuery()
-        .With(actualQuery, actualCte)
-        .With(expectQuery, expectCte)
-        .From(actualCte, actualAlias)
-        .LeftJoin(expectCte, expectAlias, actualAlias, keyColumns)
-        .Equal(expectAlias, keyColumns.First(), null)
-        .SelectAll(actualAlias)
-        .Greatest(actualAlias, "journal_date", lowerLimit)
+        .From(actual)
+        .LeftJoin(actual, expect, keyColumns)
+        .Equal(expect, keyColumns.First(), null)
+        .SelectAll(actual)
+        .Greatest(actual, "journal_date", lowerLimit)
         .SelectValue("nextval('journal_id_journal_id_seq')", "journal_id")
-        .Comment("Missing")
-        .ToCreateTableQuery(tableName, true);
+        .ToCreateTableQuery(tableName, true)
+        .Comment(nameof(GenerateMissingCreateTableQuery));
 
     return q;
 }
 
 static CreateTableQuery GenerateExcessCreateTableQuery(
     string tableName,
-    string actualQuery,
-    string expectQuery,
+    FluentTable actual,
+    FluentTable expect,
     DateTime lowerLimit,
     IEnumerable<string> keyColumns,
     IEnumerable<string> reverseColumns)
 {
-    var actualCte = "_actual";
-    var actualAlias = "a";
-    var expectCte = "_expect";
-    var expectAlias = "e";
-
     var q = new SelectQuery()
-        .With(actualQuery, actualCte)
-        .With(expectQuery, expectCte)
-        .From(expectCte, expectAlias)
-        .LeftJoin(actualCte, actualAlias, expectAlias, keyColumns)
-        .Equal(expectAlias, keyColumns.First(), null)
-        .SelectAll(expectAlias)
-        .Greatest(expectAlias, "journal_date", lowerLimit)
-        .ReverseSign(expectAlias, reverseColumns)
+        .From(expect)
+        .LeftJoin(expect, actual, keyColumns)
+        .Equal(expect, keyColumns.First(), null)
+        .SelectAll(expect)
+        .Greatest(expect, "journal_date", lowerLimit)
+        .ReverseSign(expect, reverseColumns)
         .SelectValue("nextval('journal_id_journal_id_seq')", "journal_id")
-        .Comment("Excess")
-        .ToCreateTableQuery(tableName, true);
+        .ToCreateTableQuery(tableName, true)
+        .Comment(nameof(GenerateExcessCreateTableQuery));
 
     return q;
 }
 
 static CreateTableQuery GenerateDifferentCreateTableQuery(string tableName,
-    string actualQuery,
-    string expectQuery,
+    FluentTable actual,
+    FluentTable expect,
     DateTime lowerLimit,
     IEnumerable<string> keyColumns,
     IEnumerable<string> validateColumns,
     IEnumerable<string> reverseColumns)
 {
-    var actualCte = "_actual";
-    var actualAlias = "a";
-    var expectCte = "_expect";
-    var expectAlias = "e";
-    var differentCte = "_different";
-    var differentAlias = "d";
-
     var differentQuery = new SelectQuery()
-        .With(actualQuery, actualCte)
-        .With(expectQuery, expectCte)
-        .From(expectCte, expectAlias)
-        .LeftJoin(actualCte, actualAlias, expectAlias, keyColumns)
-        .HasDifferent(actualAlias, expectAlias, validateColumns)
-        .Select(expectAlias, keyColumns)
+        .From(expect)
+        .LeftJoin(expect, actual, keyColumns)
+        .HasDifferent(expect, actual, validateColumns)
+        .Select(expect, keyColumns)
         .SelectValue("nextval('journal_different_id_journal_different_id_seq')", "journal_different_id");
 
+    var different = FluentTable.Create(differentQuery, "different", "d");
+
     var reverseQuery = GenerateDifferentQueryAsReverse(
-        differentQuery,
-        differentCte,
-        differentAlias,
-        expectCte,
-        expectAlias,
+        different,
+        expect,
         lowerLimit,
         keyColumns,
         reverseColumns);
 
     var currentQuery = GenerateDifferentQueryAsCurrent(differentQuery,
-        differentCte,
-        differentAlias,
-        actualCte,
-        actualAlias,
+        different,
+        actual,
         lowerLimit,
         keyColumns);
 
-    var query = reverseQuery.UnionAll(_ => currentQuery)
-        .Equal("sale_id", 1) //QuerySourceFilter
-        .ToCreateTableQuery(tableName, true);
+    var request = FluentTable.Create("select sale_id from request", "req", "r");
+
+    var query = reverseQuery.UnionAll(currentQuery)
+        .Exists(request, ["sale_id"])
+        .ToCreateTableQuery(tableName, true)
+        .Comment(nameof(GenerateDifferentCreateTableQuery));
 
     return query;
 }
 
 static SelectQuery GenerateDifferentQueryAsReverse(
-    SelectQuery differentQuery,
-    string differentCte,
-    string differentAlias,
-    string expectCte,
-    string expectAlias,
+    FluentTable different,
+    FluentTable expect,
     DateTime lowerLimit,
     IEnumerable<string> keyColumns,
     IEnumerable<string> reverseColumns)
 {
     var reverseQuery = new SelectQuery()
-        .With(differentQuery, differentCte)
-        .From(differentCte, differentAlias)
-        .InnerJoin(expectCte, expectAlias, differentAlias, keyColumns)
-        .SelectAll(expectAlias)
-        .Greatest(expectAlias, "journal_date", lowerLimit)
-        .ReverseSign(expectAlias, reverseColumns)
+        .From(different)
+        .InnerJoin(different, expect, keyColumns)
+        .SelectAll(expect)
+        .Greatest(expect, "journal_date", lowerLimit)
+        .ReverseSign(expect, reverseColumns)
         .SelectValue("nextval('journal_id_journal_id_seq')", "journal_id")
-        .Select(differentAlias, "journal_different_id")
+        .Select(different, "journal_different_id")
         .Comment("Reverse");
 
     return reverseQuery;
 }
 
 static SelectQuery GenerateDifferentQueryAsCurrent(SelectQuery differentQuery,
-    string differentCte,
-    string differentAlias,
-    string actualCte,
-    string actualAlias,
+    FluentTable different,
+    FluentTable actual,
     DateTime lowerLimit,
     IEnumerable<string> keyColumns)
 {
     var currentQuery = new SelectQuery()
-        .With(differentQuery, differentCte)
-        .From(differentCte, differentAlias)
-        .InnerJoin(actualCte, actualAlias, differentAlias, keyColumns)
-        .SelectAll(actualAlias)
-        .Greatest(actualAlias, "journal_date", lowerLimit)
+        .From(different)
+        .InnerJoin(different, actual, keyColumns)
+        .SelectAll(actual)
+        .Greatest(actual, "journal_date", lowerLimit)
         .SelectValue("nextval('journal_id_journal_id_seq')", "journal_id")
-        .Select(differentAlias, "journal_different_id")
+        .Select(different, "journal_different_id")
         .Comment("Current");
 
     return currentQuery;

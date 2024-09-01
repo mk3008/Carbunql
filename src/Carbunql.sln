@@ -45,7 +45,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demo.DynamicCTE", "..\demo\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demo.DynamicColumn", "..\demo\DynamicColumn\Demo.DynamicColumn.csproj", "{259C9133-529D-4E5F-9DA1-93D2FEC534A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo.DatasourceCompare", "..\demo\DatasourceCompare\Demo.DatasourceCompare.csproj", "{474E5EDD-E41E-4394-B2E5-F1DF745F75E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demo.DatasourceCompare", "..\demo\DatasourceCompare\Demo.DatasourceCompare.csproj", "{474E5EDD-E41E-4394-B2E5-F1DF745F75E7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carbunql.Fluent.Test", "..\test\Carbunql.Fluent.Test\Carbunql.Fluent.Test.csproj", "{596E923B-6E21-4A17-9E83-50B5DE44EBD6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -141,6 +143,10 @@ Global
 		{474E5EDD-E41E-4394-B2E5-F1DF745F75E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{474E5EDD-E41E-4394-B2E5-F1DF745F75E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{474E5EDD-E41E-4394-B2E5-F1DF745F75E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{596E923B-6E21-4A17-9E83-50B5DE44EBD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{596E923B-6E21-4A17-9E83-50B5DE44EBD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{596E923B-6E21-4A17-9E83-50B5DE44EBD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{596E923B-6E21-4A17-9E83-50B5DE44EBD6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -14,7 +14,6 @@ namespace Carbunql.Clauses;
 /// </remarks>
 [MessagePackObject(keyAsPropertyName: true)]
 public class CommonTable : SelectableTable
-
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="CommonTable"/> class with the specified table and alias.

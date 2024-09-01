@@ -4,6 +4,12 @@ namespace Carbunql.Fluent;
 
 public static class SelectQueryWithExtensions
 {
+    public static SelectQuery With(this SelectQuery sq, FluentTable cte)
+    {
+        sq.With(cte.ToCommonTable);
+        return sq;
+    }
+
     public static SelectQuery With(this SelectQuery sq, string query, string alias)
     {
         sq.With(query).As(alias);

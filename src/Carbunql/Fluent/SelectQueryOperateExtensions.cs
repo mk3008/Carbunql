@@ -38,51 +38,45 @@ public static class SelectQueryOperateExtensions
         return query;
     }
 
-    public static SelectQuery Minus(this SelectQuery query, Func<SelectQuery> builder)
+    public static SelectQuery Union(this SelectQuery query, SelectQuery additionalQuery)
     {
-        query.AddSelectQuery("minus", _ => builder());
+        query.AddSelectQuery("union", _ => additionalQuery);
         return query;
     }
 
-    public static SelectQuery Union(this SelectQuery query, Func<SelectQuery, SelectQuery> builder)
+    public static SelectQuery UnionAll(this SelectQuery query, SelectQuery additionalQuery)
     {
-        query.AddSelectQuery("union", builder);
+        query.AddSelectQuery("union all", _ => additionalQuery);
         return query;
     }
 
-    public static SelectQuery UnionAll(this SelectQuery query, Func<SelectQuery, SelectQuery> builder)
+    public static SelectQuery Intersect(this SelectQuery query, SelectQuery additionalQuery)
     {
-        query.AddSelectQuery("union all", builder);
+        query.AddSelectQuery("intersect", _ => additionalQuery);
         return query;
     }
 
-    public static SelectQuery Intersect(this SelectQuery query, Func<SelectQuery, SelectQuery> builder)
+    public static SelectQuery IntersectAll(this SelectQuery query, SelectQuery additionalQuery)
     {
-        query.AddSelectQuery("intersect", builder);
+        query.AddSelectQuery("intersect all", _ => additionalQuery);
         return query;
     }
 
-    public static SelectQuery IntersectAll(this SelectQuery query, Func<SelectQuery, SelectQuery> builder)
+    public static SelectQuery Except(this SelectQuery query, SelectQuery additionalQuery)
     {
-        query.AddSelectQuery("intersect all", builder);
+        query.AddSelectQuery("except", _ => additionalQuery);
         return query;
     }
 
-    public static SelectQuery Except(this SelectQuery query, Func<SelectQuery, SelectQuery> builder)
+    public static SelectQuery ExceptAll(this SelectQuery query, SelectQuery additionalQuery)
     {
-        query.AddSelectQuery("except", builder);
+        query.AddSelectQuery("except all", _ => additionalQuery);
         return query;
     }
 
-    public static SelectQuery ExceptAll(this SelectQuery query, Func<SelectQuery, SelectQuery> builder)
+    public static SelectQuery Minus(this SelectQuery query, SelectQuery additionalQuery)
     {
-        query.AddSelectQuery("except all", builder);
-        return query;
-    }
-
-    public static SelectQuery Minus(this SelectQuery query, Func<SelectQuery, SelectQuery> builder)
-    {
-        query.AddSelectQuery("minus", builder);
+        query.AddSelectQuery("minus", _ => additionalQuery);
         return query;
     }
 }

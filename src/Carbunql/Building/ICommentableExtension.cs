@@ -12,6 +12,7 @@ public static class ICommentableExtension
     /// </summary>
     /// <param name="source">The object implementing the <see cref="ICommentable"/> interface.</param>
     /// <param name="comment">The comment to add.</param>
+    [Obsolete]
     public static void AddComment(this ICommentable source, string comment)
     {
         source.CommentClause ??= new CommentClause();
