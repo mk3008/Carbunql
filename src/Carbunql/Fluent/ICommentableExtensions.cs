@@ -5,7 +5,7 @@ namespace Carbunql.Fluent;
 /// <summary>
 /// Provides extension methods for adding and clearing comment clauses for objects implementing the <see cref="ICommentable"/> interface.
 /// </summary>
-public static class ICommentableExtension
+public static class ICommentableExtensions
 {
     /// <summary>
     /// Adds a comment to the object.

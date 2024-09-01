@@ -848,6 +848,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     /// <exception cref="InvalidProgramException">
     /// Thrown if a CTE with the same name already exists.
     /// </exception>
+    [Obsolete("use ToCteQuery")]
     public SelectQuery ToCTEQuery(string name, string alias = "")
     {
         if (GetCommonTables().Where(x => x.Alias.IsEqualNoCase(name)).Any())
