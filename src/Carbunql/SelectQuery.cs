@@ -1250,7 +1250,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         GetQuerySources()
             .Where(x => keyColumnNames.All(keyColumn => x.ColumnNames.Contains(keyColumn)))
             .EnsureAny($"columns:{string.Join(",", keyColumnNames)}")
-            .GetRootsBySource()
+            .GetRootsByQuery()
             .ForEach(qs =>
             {
                 qs.Query.Where(() =>

@@ -138,6 +138,8 @@ public class FluentTable(TableBase table, IEnumerable<string> columnAliases, str
     /// </summary>
     public string Alias { get; } = alias;
 
+    public Materialized Materialized { get; set; } = Materialized.Undefined;
+
     /// <summary>
     /// Gets a value indicating whether the table is a Common Table Expression (CTE).
     /// </summary>
@@ -156,11 +158,17 @@ public class FluentTable(TableBase table, IEnumerable<string> columnAliases, str
 
         if (ColumnAliases.Any())
         {
-            return new CommonTable(Table, CteName, columnAliases);
+            return new CommonTable(Table, CteName, columnAliases)
+            {
+                Materialized = Materialized
+            };
         }
         else
         {
-            return new CommonTable(Table, CteName);
+            return new CommonTable(Table, CteName)
+            {
+                Materialized = Materialized
+            };
         }
     }
 

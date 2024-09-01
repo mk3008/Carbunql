@@ -23,6 +23,7 @@ var expectQuery = """
     """;
 
 var actual = FluentTable.Create(actualQuery, "actual", "a");
+
 var expect = FluentTable.Create(expectQuery, "expect", "e");
 
 var keycolumns = new[] { "sale_id" };
