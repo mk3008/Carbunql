@@ -648,76 +648,80 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     /// <inheritdoc/>
     public override IEnumerable<CommonTable> GetCommonTables()
     {
+        var dic = new Dictionary<string, CommonTable>();
+
         if (WithClause != null)
         {
             foreach (var item in WithClause.GetCommonTables())
             {
-                yield return item;
+                if (!dic.ContainsKey(item.Alias)) dic.Add(item.Alias, item);
             }
         }
         if (SelectClause != null)
         {
             foreach (var item in SelectClause.GetCommonTables())
             {
-                yield return item;
+                if (!dic.ContainsKey(item.Alias)) dic.Add(item.Alias, item);
             }
         }
         if (FromClause != null)
         {
             foreach (var item in FromClause.GetCommonTables())
             {
-                yield return item;
+                if (!dic.ContainsKey(item.Alias)) dic.Add(item.Alias, item);
             }
         }
         if (WhereClause != null)
         {
             foreach (var item in WhereClause.GetCommonTables())
             {
-                yield return item;
+                if (!dic.ContainsKey(item.Alias)) dic.Add(item.Alias, item);
             }
         }
         if (GroupClause != null)
         {
             foreach (var item in GroupClause.GetCommonTables())
             {
-                yield return item;
+                if (!dic.ContainsKey(item.Alias)) dic.Add(item.Alias, item);
             }
         }
         if (HavingClause != null)
         {
             foreach (var item in HavingClause.GetCommonTables())
             {
-                yield return item;
+                if (!dic.ContainsKey(item.Alias)) dic.Add(item.Alias, item);
             }
         }
         if (WindowClause != null)
         {
             foreach (var item in WindowClause.GetCommonTables())
             {
-                yield return item;
+                if (!dic.ContainsKey(item.Alias)) dic.Add(item.Alias, item);
             }
         }
         foreach (var oq in OperatableQueries)
         {
             foreach (var item in oq.GetCommonTables())
             {
-                yield return item;
+                if (!dic.ContainsKey(item.Alias)) dic.Add(item.Alias, item);
             }
         }
         if (OrderClause != null)
         {
             foreach (var item in OrderClause.GetCommonTables())
             {
-                yield return item;
+                if (!dic.ContainsKey(item.Alias)) dic.Add(item.Alias, item);
             }
         }
         if (LimitClause != null)
         {
             foreach (var item in LimitClause.GetCommonTables())
             {
-                yield return item;
+                if (!dic.ContainsKey(item.Alias)) dic.Add(item.Alias, item);
             }
         }
+
+        return dic.Select(x => x.Value);
     }
 
     public override IEnumerable<ColumnValue> GetColumns()
@@ -844,6 +848,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     /// <exception cref="InvalidProgramException">
     /// Thrown if a CTE with the same name already exists.
     /// </exception>
+    [Obsolete("use ToCteQuery")]
     public SelectQuery ToCTEQuery(string name, string alias = "")
     {
         if (GetCommonTables().Where(x => x.Alias.IsEqualNoCase(name)).Any())
@@ -1005,7 +1010,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     /// <param name="columnAliasName">The name of the column to search for.</param>
     /// <param name="overrider">The function to modify the column value.</param>
     /// <returns>The modified select query.</returns>
-    public SelectQuery OverrideSelect(string tableName, string columnAliasName, Func<IQuerySource, SelectableItem, string> overrider)
+    public SelectQuery OverrideSelect(string tableName, string columnAliasName, Func<IQuerySource, string, string> overrider)
     {
         GetQuerySources()
             .Where(x => x.GetTableFullName().IsEqualNoCase(tableName) || x.Alias.IsEqualNoCase(tableName))
@@ -1018,7 +1023,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             {
                 var si = x.Query.GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnAliasName)).First();
                 //override
-                si.Value = ValueParser.Parse(overrider(x, si));
+                si.Value = ValueParser.Parse(overrider(x, si.Value.ToOneLineText()));
             });
 
         return this;
@@ -1035,7 +1040,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         GetQuerySources()
             .Where(x => HasColumn(x, columnName, isAliasIncluded))
             .EnsureAny($"column:{columnName}")
-            .GetRootsBySource()
+            .GetRootsByQuery()
             .ForEach(x =>
             {
                 x.Query.Where(adder(x));
@@ -1055,7 +1060,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         GetQuerySources()
             .Where(x => HasColumn(x, columnName, isAliasIncluded))
             .EnsureAny($"column:{columnName}")
-            .GetRootsBySource()
+            .GetRootsByQuery()
             .ForEach(x =>
             {
                 x.Query.Where(adder(x, GetColumn(x, columnName, isAliasIncluded)));
@@ -1144,7 +1149,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             .EnsureAny($"table:{tableName}")
             .Where(x => HasColumn(x, columnName, isAliasIncluded))
             .EnsureAny($"The table exists, but there is no corresponding column in the table. table:{tableName}, column:{columnName}")
-            .GetRootsBySource()
+            .GetRootsByQuery()
             .ForEach(x =>
             {
                 x.Query.Where(adder(x));
@@ -1167,7 +1172,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             .EnsureAny($"table:{tableName}")
             .Where(x => HasColumn(x, columnName, isAliasIncluded))
             .EnsureAny($"The table exists, but there is no corresponding column in the table. table:{tableName}, column:{columnName}")
-            .GetRootsBySource()
+            .GetRootsByQuery()
             .ForEach(x =>
             {
                 x.Query.Where(adder(x, GetColumn(x, columnName, isAliasIncluded)));
@@ -1218,7 +1223,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             .EnsureAny($"table:{sourceTableName}")
             .Where(x => keyColumnNames.All(keyColumn => x.ColumnNames.Contains(keyColumn)))
             .EnsureAny($"The table exists, but there is no corresponding column in the table. table:{sourceTableName}, columns:{string.Join(",", keyColumnNames)}")
-            .GetRootsBySource()
+            .GetRootsByQuery()
             .EnsureAny()
             .ForEach(qs =>
             {
@@ -1246,7 +1251,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         GetQuerySources()
             .Where(x => keyColumnNames.All(keyColumn => x.ColumnNames.Contains(keyColumn)))
             .EnsureAny($"columns:{string.Join(",", keyColumnNames)}")
-            .GetRootsBySource()
+            .GetRootsByQuery()
             .ForEach(qs =>
             {
                 qs.Query.Where(() =>
@@ -1291,11 +1296,19 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         return this;
     }
 
-    public SelectQuery AddJoin(string joinType, string table, string alias, string condition)
+    public SelectQuery AddJoin(string joinType, string table, string alias, string condition = "")
     {
         var f = FromClause!;
         var t = TableParser.Parse(table);
         var r = f.Join(t.ToSelectable(alias), joinType);
+        if (!string.IsNullOrEmpty(condition)) r.On(condition);
+        return this;
+    }
+
+    public SelectQuery AddJoin(string joinType, SelectableTable table, string condition = "")
+    {
+        var f = FromClause!;
+        var r = f.Join(table, joinType);
         r.On(condition);
         return this;
     }

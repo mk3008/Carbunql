@@ -1,4 +1,7 @@
-﻿namespace Carbunql.Fluent;
+﻿using Carbunql.Building;
+using Carbunql.Fluent;
+
+namespace Carbunql.Fluent;
 
 public static class SelectQueryWhereExtensions
 {
@@ -72,6 +75,11 @@ public static class SelectQueryWhereExtensions
         }
     }
 
+    public static SelectQuery EqualIfNotNullOrEmpty(this SelectQuery query, FluentTable table, string columnName, object? value)
+    {
+        return query.EqualIfNotNullOrEmpty(table.Alias, columnName, value);
+    }
+
     public static SelectQuery EqualIfNotNullOrEmpty(this SelectQuery query, string tableName, string columnName, object? value)
     {
         if (value != null && !(value is string s && string.IsNullOrEmpty(s)))
@@ -88,6 +96,11 @@ public static class SelectQueryWhereExtensions
             AddComparison(query, columnName, "=", value);
         }
         return query;
+    }
+
+    public static SelectQuery NotEqualIfNotNullOrEmpty(this SelectQuery query, FluentTable table, string columnName, object? value)
+    {
+        return query.NotEqualIfNotNullOrEmpty(table.Alias, columnName, value);
     }
 
     public static SelectQuery NotEqualIfNotNullOrEmpty(this SelectQuery query, string tableName, string columnName, object? value)
@@ -108,6 +121,11 @@ public static class SelectQueryWhereExtensions
         return query;
     }
 
+    public static SelectQuery LessThanIfNotNullOrEmpty(this SelectQuery query, FluentTable table, string columnName, object? value)
+    {
+        return query.LessThanIfNotNullOrEmpty(table.Alias, columnName, value);
+    }
+
     public static SelectQuery LessThanIfNotNullOrEmpty(this SelectQuery query, string tableName, string columnName, object? value)
     {
         if (value != null && !(value is string s && string.IsNullOrEmpty(s)))
@@ -124,6 +142,11 @@ public static class SelectQueryWhereExtensions
             AddComparison(query, columnName, "<", value);
         }
         return query;
+    }
+
+    public static SelectQuery LessThanOrEqualIfNotNullOrEmpty(this SelectQuery query, FluentTable table, string columnName, object? value)
+    {
+        return query.LessThanOrEqualIfNotNullOrEmpty(table.Alias, columnName, value);
     }
 
     public static SelectQuery LessThanOrEqualIfNotNullOrEmpty(this SelectQuery query, string tableName, string columnName, object? value)
@@ -144,6 +167,11 @@ public static class SelectQueryWhereExtensions
         return query;
     }
 
+    public static SelectQuery GreaterThanIfNotNullOrEmpty(this SelectQuery query, FluentTable table, string columnName, object? value)
+    {
+        return query.GreaterThanIfNotNullOrEmpty(table.Alias, columnName, value);
+    }
+
     public static SelectQuery GreaterThanIfNotNullOrEmpty(this SelectQuery query, string tableName, string columnName, object? value)
     {
         if (value != null && !(value is string s && string.IsNullOrEmpty(s)))
@@ -160,6 +188,11 @@ public static class SelectQueryWhereExtensions
             AddComparison(query, columnName, ">", value);
         }
         return query;
+    }
+
+    public static SelectQuery GreaterThanOrEqualIfNotNullOrEmpty(this SelectQuery query, FluentTable table, string columnName, object? value)
+    {
+        return query.GreaterThanOrEqualIfNotNullOrEmpty(table.Alias, columnName, value);
     }
 
     public static SelectQuery GreaterThanOrEqualIfNotNullOrEmpty(this SelectQuery query, string tableName, string columnName, object? value)
@@ -180,6 +213,11 @@ public static class SelectQueryWhereExtensions
         return query;
     }
 
+    public static SelectQuery Equal(this SelectQuery query, FluentTable table, string columnName, object? value)
+    {
+        return query.Equal(table.Alias, columnName, value);
+    }
+
     public static SelectQuery Equal(this SelectQuery query, string tableName, string columnName, object? value)
     {
         AddComparison(query, tableName, columnName, "=", value);
@@ -190,6 +228,11 @@ public static class SelectQueryWhereExtensions
     {
         AddComparison(query, columnName, "=", value);
         return query;
+    }
+
+    public static SelectQuery NotEqual(this SelectQuery query, FluentTable table, string columnName, object? value)
+    {
+        return query.NotEqual(table.Alias, columnName, value);
     }
 
     public static SelectQuery NotEqual(this SelectQuery query, string tableName, string columnName, object? value)
@@ -204,6 +247,11 @@ public static class SelectQueryWhereExtensions
         return query;
     }
 
+    public static SelectQuery LessThan(this SelectQuery query, FluentTable table, string columnName, object? value)
+    {
+        return query.LessThan(table.Alias, columnName, value);
+    }
+
     public static SelectQuery LessThan(this SelectQuery query, string tableName, string columnName, object? value)
     {
         AddComparison(query, tableName, columnName, "<", value);
@@ -214,6 +262,11 @@ public static class SelectQueryWhereExtensions
     {
         AddComparison(query, columnName, "<", value);
         return query;
+    }
+
+    public static SelectQuery LessThanOrEqual(this SelectQuery query, FluentTable table, string columnName, object? value)
+    {
+        return query.LessThanOrEqual(table.Alias, columnName, value);
     }
 
     public static SelectQuery LessThanOrEqual(this SelectQuery query, string tableName, string columnName, object? value)
@@ -228,6 +281,11 @@ public static class SelectQueryWhereExtensions
         return query;
     }
 
+    public static SelectQuery GreaterThan(this SelectQuery query, FluentTable table, string columnName, object? value)
+    {
+        return query.GreaterThan(table.Alias, columnName, value);
+    }
+
     public static SelectQuery GreaterThan(this SelectQuery query, string tableName, string columnName, object? value)
     {
         AddComparison(query, tableName, columnName, ">", value);
@@ -240,6 +298,11 @@ public static class SelectQueryWhereExtensions
         return query;
     }
 
+    public static SelectQuery GreaterThanOrEqual(this SelectQuery query, FluentTable table, string columnName, object? value)
+    {
+        return query.GreaterThanOrEqual(table.Alias, columnName, value);
+    }
+
     public static SelectQuery GreaterThanOrEqual(this SelectQuery query, string tableName, string columnName, object? value)
     {
         AddComparison(query, tableName, columnName, ">=", value);
@@ -250,6 +313,11 @@ public static class SelectQueryWhereExtensions
     {
         AddComparison(query, columnName, ">=", value);
         return query;
+    }
+
+    public static SelectQuery BetweenExclusive(this SelectQuery query, FluentTable table, string columnName, object minValue, object maxValue)
+    {
+        return query.BetweenExclusive(table.Alias, columnName, minValue, maxValue);
     }
 
     public static SelectQuery BetweenExclusive(this SelectQuery query, string columnName, object minValue, object maxValue)
@@ -266,6 +334,11 @@ public static class SelectQueryWhereExtensions
         return query;
     }
 
+    public static SelectQuery BetweenInclusiveEnd(this SelectQuery query, FluentTable table, string columnName, object minValue, object maxValue)
+    {
+        return query.BetweenInclusiveEnd(table.Alias, columnName, minValue, maxValue);
+    }
+
     public static SelectQuery BetweenInclusiveEnd(this SelectQuery query, string columnName, object minValue, object maxValue)
     {
         AddComparison(query, columnName, ">", minValue);
@@ -278,6 +351,11 @@ public static class SelectQueryWhereExtensions
         AddComparison(query, tableName, columnName, ">", minValue);
         AddComparison(query, tableName, columnName, "<=", maxValue);
         return query;
+    }
+
+    public static SelectQuery BetweenInclusiveStart(this SelectQuery query, FluentTable table, string columnName, object minValue, object maxValue)
+    {
+        return query.BetweenInclusiveStart(table.Alias, columnName, minValue, maxValue);
     }
 
     public static SelectQuery BetweenInclusiveStart(this SelectQuery query, string columnName, object minValue, object maxValue)
@@ -294,6 +372,11 @@ public static class SelectQueryWhereExtensions
         return query;
     }
 
+    public static SelectQuery BetweenInclusive(this SelectQuery query, FluentTable table, string columnName, object minValue, object maxValue)
+    {
+        return query.BetweenInclusive(table.Alias, columnName, minValue, maxValue);
+    }
+
     public static SelectQuery BetweenInclusive(this SelectQuery query, string columnName, object minValue, object maxValue)
     {
         AddComparison(query, columnName, ">=", minValue);
@@ -305,6 +388,30 @@ public static class SelectQueryWhereExtensions
     {
         AddComparison(query, tableName, columnName, ">=", minValue);
         AddComparison(query, tableName, columnName, "<=", maxValue);
+        return query;
+    }
+
+    public static SelectQuery Exists(this SelectQuery query, FluentTable table, IEnumerable<string> keyColumnNames)
+    {
+        if (table.IsCommonTable)
+        {
+            query.With(table);
+        }
+
+        query.GetQuerySources()
+            .Where(x => keyColumnNames.All(keyColumn => x.ColumnNames.Contains(keyColumn)))
+            .EnsureAny($"columns:{string.Join(",", keyColumnNames)}")
+            .GetRootsByQuery()
+            .ForEach(qs =>
+            {
+                qs.Query.Where(() =>
+                {
+                    var sq = new SelectQuery().From(table);
+                    keyColumnNames.ForEach(keyColumn => sq.Where($"{table.Alias}.{keyColumn} = {qs.Alias}.{keyColumn}"));
+                    return sq.ToExists();
+                });
+            });
+
         return query;
     }
 
@@ -320,6 +427,30 @@ public static class SelectQueryWhereExtensions
         return query;
     }
 
+    public static SelectQuery NotExists(this SelectQuery query, FluentTable table, IEnumerable<string> keyColumnNames)
+    {
+        if (table.IsCommonTable)
+        {
+            query.With(table);
+        }
+
+        query.GetQuerySources()
+            .Where(x => keyColumnNames.All(keyColumn => x.ColumnNames.Contains(keyColumn)))
+            .EnsureAny($"columns:{string.Join(",", keyColumnNames)}")
+            .GetRootsByQuery()
+            .ForEach(qs =>
+            {
+                qs.Query.Where(() =>
+                {
+                    var sq = new SelectQuery().From(table);
+                    keyColumnNames.ForEach(keyColumn => sq.Where($"{table.Alias}.{keyColumn} = {qs.Alias}.{keyColumn}"));
+                    return sq.ToNotExists();
+                });
+            });
+
+        return query;
+    }
+
     public static SelectQuery NotExists(this SelectQuery query, IEnumerable<string> keyColumnNames, string validationTableName)
     {
         query.AddNotExists(keyColumnNames, validationTableName);
@@ -330,5 +461,26 @@ public static class SelectQueryWhereExtensions
     {
         query.AddNotExists(tableName, keyColumnNames, validationTableName);
         return query;
+    }
+
+    public static SelectQuery HasDifferent(this SelectQuery query, string leftTableAlias, string rightTableAlias, IEnumerable<string> validationColumns)
+    {
+        var conditions = validationColumns.Select(column =>
+            $"CASE WHEN {leftTableAlias}.{column} IS NULL AND {rightTableAlias}.{column} IS NULL THEN 0 " +
+            $"WHEN {leftTableAlias}.{column} IS NOT NULL AND {rightTableAlias}.{column} IS NULL THEN 1 " +
+            $"WHEN {leftTableAlias}.{column} IS NULL AND {rightTableAlias}.{column} IS NOT NULL THEN 1 " +
+            $"WHEN {leftTableAlias}.{column} <> {rightTableAlias}.{column} THEN 1 " +
+            "ELSE 0 END"
+        );
+
+        var fullCondition = string.Join(" + ", conditions);
+        query.AddWhere($"{fullCondition} > 0");
+
+        return query;
+    }
+
+    public static SelectQuery HasDifferent(this SelectQuery query, FluentTable left, FluentTable right, IEnumerable<string> validationColumns)
+    {
+        return query.HasDifferent(left.Alias, right.Alias, validationColumns);
     }
 }

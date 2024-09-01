@@ -2,13 +2,14 @@
 using Carbunql.Clauses;
 using Carbunql.Tables;
 using Carbunql.Values;
+using MessagePack;
 
 namespace Carbunql;
 
 /// <summary>
 /// Represents a merge query.
 /// </summary>
-public class MergeQuery : IQueryCommandable
+public class MergeQuery : IQueryCommandable, ICommentable
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="MergeQuery"/> class.
@@ -93,6 +94,12 @@ public class MergeQuery : IQueryCommandable
     /// Gets or sets the alias for the datasource.
     /// </summary>
     public string DatasourceAlias { get; set; }
+
+    /// <summary>
+    /// Gets or sets the comment clause.
+    /// </summary>
+    [IgnoreMember]
+    public CommentClause? CommentClause { get; set; }
 
     /// <summary>
     /// Retrieves the internal queries associated with the merge query.
@@ -235,6 +242,8 @@ public class MergeQuery : IQueryCommandable
     public IEnumerable<Token> GetTokens(Token? parent)
     {
         if (WhenClause == null) throw new NullReferenceException();
+
+        if (CommentClause != null) foreach (var item in CommentClause.GetTokens(parent)) yield return item;
 
         if (WithClause != null) foreach (var item in WithClause.GetTokens(parent)) yield return item;
         foreach (var item in MergeClause.GetTokens(parent)) yield return item;

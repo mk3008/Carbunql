@@ -16,7 +16,25 @@ public static class ReadQueryExtension
     /// <param name="source">The source IReadQuery.</param>
     /// <param name="alias">The alias for the CTE.</param>
     /// <returns>A tuple containing the SelectQuery and the CommonTable representing the CTE.</returns>
+    [Obsolete("use ToCte")]
     public static (SelectQuery, CommonTable) ToCTE(this IReadQuery source, string alias)
+    {
+        var sq = new SelectQuery();
+
+        sq.WithClause ??= new WithClause();
+        var ct = source.ToCommonTable(alias);
+        sq.WithClause.Add(ct);
+
+        return (sq, ct);
+    }
+
+    /// <summary>
+    /// Converts the IReadQuery to a CommonTableExpression (CTE) with the specified alias.
+    /// </summary>
+    /// <param name="source">The source IReadQuery.</param>
+    /// <param name="alias">The alias for the CTE.</param>
+    /// <returns>A tuple containing the SelectQuery and the CommonTable representing the CTE.</returns>
+    public static (SelectQuery, CommonTable) ToCte(this IReadQuery source, string alias)
     {
         var sq = new SelectQuery();
 

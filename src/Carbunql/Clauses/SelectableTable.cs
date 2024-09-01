@@ -1,5 +1,4 @@
-﻿using Carbunql.Building;
-using Carbunql.Tables;
+﻿using Carbunql.Tables;
 using Carbunql.Values;
 using MessagePack;
 

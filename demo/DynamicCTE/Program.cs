@@ -30,6 +30,8 @@ public class Program
                 sale_date
             """;
 
+        var dailySummary = FluentTable.Create(dailySummaryQuery, "daily_summary", "d");
+
         string monthlySummaryQuery = """
             SELECT
                 date_trunc('month', sale_date) + '1 month -1 day' as sale_date
@@ -42,11 +44,12 @@ public class Program
                 date_trunc('month', sale_date) + '1 month -1 day'
             """;
 
+        var monthlySummary = FluentTable.Create(monthlySummaryQuery, "monthly_summary", "m");
+
         // Create daily summary query
         var sq = new SelectQuery()
-            .With(dailySummaryQuery, "daily_summary")
-            .From("daily_summary", "d")
-            .SelectAll("d");
+            .From(dailySummary)
+            .SelectAll(dailySummary);
 
         if (includeSummary)
         {
@@ -54,9 +57,8 @@ public class Program
             sq.UnionAll(() =>
             {
                 var xsq = new SelectQuery()
-                    .With(monthlySummaryQuery, "monthly_summary")
-                    .From("monthly_summary", "m")
-                    .SelectAll("m");
+                    .From(monthlySummary)
+                    .SelectAll(monthlySummary);
                 return xsq;
             });
         }
