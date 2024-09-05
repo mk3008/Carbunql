@@ -1271,4 +1271,153 @@ LIMIT
 
         Assert.Equal(expect, query.ToText(), true, true, true);
     }
+
+    [Fact]
+    public void IfTest()
+    {
+        var sql = """
+            select 
+                s.unit_price * s.amount as price
+            from
+                sale as s
+            """;
+
+        int? price = null;
+
+        var query = SelectQuery.Parse(sql)
+            .If(price != null, x => x.Equal(nameof(price), price));
+
+        Monitor.Log(query, exportTokens: false);
+
+        var expect = """
+            SELECT
+                s.unit_price * s.amount AS price
+            FROM
+                sale AS s
+            """;
+
+        Assert.Equal(expect, query.ToText(), true, true, true);
+
+        price = 10;
+
+        query = SelectQuery.Parse(sql)
+            .If(price != null, x => x.Equal(nameof(price), price));
+
+        Monitor.Log(query, exportTokens: false);
+
+        expect = """
+            SELECT
+                s.unit_price * s.amount AS price
+            FROM
+                sale AS s
+            WHERE
+                s.unit_price * s.amount = 10
+            """;
+
+        Assert.Equal(expect, query.ToText(), true, true, true);
+    }
+
+    [Fact]
+    public void IfNotNullTest()
+    {
+        var sql = """
+            select 
+                s.unit_price * s.amount as price
+            from
+                sale as s
+            """;
+
+        int? price = null;
+
+        var query = SelectQuery.Parse(sql)
+            .IfNotNull(price, x => x.Equal(nameof(price), price));
+
+        Monitor.Log(query, exportTokens: false);
+
+        var expect = """
+            SELECT
+                s.unit_price * s.amount AS price
+            FROM
+                sale AS s
+            """;
+
+        Assert.Equal(expect, query.ToText(), true, true, true);
+
+        price = 10;
+
+        query = SelectQuery.Parse(sql)
+            .IfNotNull(price, x => x.Equal(nameof(price), price));
+
+        Monitor.Log(query, exportTokens: false);
+
+        expect = """
+            SELECT
+                s.unit_price * s.amount AS price
+            FROM
+                sale AS s
+            WHERE
+                s.unit_price * s.amount = 10
+            """;
+
+        Assert.Equal(expect, query.ToText(), true, true, true);
+    }
+
+    [Fact]
+    public void IfNotNullOrEmptyTest()
+    {
+        var sql = """
+            select 
+                s.product_name
+            from
+                sale as s
+            """;
+
+        string? product_name = null;
+
+        var query = SelectQuery.Parse(sql)
+            .IfNotNullOrEmpty(product_name, x =>
+            {
+                x.FluentParameter(":product_name"
+                    , product_name
+                    , name => x.Equal(nameof(product_name), name)
+                );
+                return x;
+            });
+
+        Monitor.Log(query, exportTokens: false);
+
+        var expect = """
+            SELECT
+                s.product_name
+            FROM
+                sale AS s
+            """;
+
+        Assert.Equal(expect, query.ToText(), true, true, true);
+
+        product_name = "test";
+
+        query = SelectQuery.Parse(sql)
+            .IfNotNullOrEmpty(product_name, x =>
+            {
+                x.FluentParameter(":product_name"
+                    , product_name
+                    , name => x.Equal(nameof(product_name), name)
+                );
+                return x;
+            });
+
+        Monitor.Log(query, exportTokens: false);
+
+        expect = """
+            SELECT
+                s.product_name
+            FROM
+                sale AS s
+            WHERE
+                s.product_name = :product_name
+            """;
+
+        Assert.Equal(expect, query.ToText(), true, true, true);
+    }
 }

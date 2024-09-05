@@ -7,6 +7,48 @@ public static class SelectQueryWhereExtensions
 {
     internal static char[] ParameterSymbols = { '@', ':', '$' };
 
+    /// <summary>
+    /// Conditionally applies the specified function to the query if the condition is true.
+    /// </summary>
+    /// <param name="query">The query to apply the function to.</param>
+    /// <param name="condition">The condition to evaluate.</param>
+    /// <param name="func">The function to apply if the condition is true.</param>
+    /// <returns>The modified query if the condition is true; otherwise, the original query.</returns>
+    public static SelectQuery If(this SelectQuery query, bool condition, Func<SelectQuery, SelectQuery> func)
+    {
+        return condition
+            ? func(query)
+            : query;
+    }
+
+    /// <summary>
+    /// Applies the specified function to the query if the value is not null.
+    /// </summary>
+    /// <param name="query">The query to apply the function to.</param>
+    /// <param name="value">The value to check for null.</param>
+    /// <param name="func">The function to apply if the value is not null.</param>
+    /// <returns>The modified query if the value is not null; otherwise, the original query.</returns>
+    public static SelectQuery IfNotNull(this SelectQuery query, object? value, Func<SelectQuery, SelectQuery> func)
+    {
+        return value != null
+            ? func(query)
+            : query;
+    }
+
+    /// <summary>
+    /// Applies the specified function to the query if the string value is not null or empty.
+    /// </summary>
+    /// <param name="query">The query to apply the function to.</param>
+    /// <param name="value">The string value to check for null or emptiness.</param>
+    /// <param name="func">The function to apply if the string value is not null or empty.</param>
+    /// <returns>The modified query if the string value is not null or empty; otherwise, the original query.</returns>
+    public static SelectQuery IfNotNullOrEmpty(this SelectQuery query, string? value, Func<SelectQuery, SelectQuery> func)
+    {
+        return !string.IsNullOrEmpty(value)
+            ? func(query)
+            : query;
+    }
+
     private static (string, string) GenerateComparison(string operatorSymbol, object? value)
     {
         if (value == null)
