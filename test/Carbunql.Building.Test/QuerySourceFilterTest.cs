@@ -1,4 +1,5 @@
 ﻿using Carbunql.Fluent;
+using System.Diagnostics;
 using Xunit.Abstractions;
 
 namespace Carbunql.Building.Test;
@@ -1418,6 +1419,141 @@ LIMIT
                 sale AS s
             WHERE
                 s.product_name = :product_name
+            """;
+
+        Assert.Equal(expect, query.ToText(), true, true, true);
+    }
+
+    [Fact]
+    public void InTest()
+    {
+        var sql = """
+            select 
+                s.unit_price * s.amount as price
+            from
+                sale as s
+            """;
+
+        int[] prices = [10, 20, 30];
+
+        var query = SelectQuery.Parse(sql)
+            .In("price", prices);
+
+        Monitor.Log(query, exportTokens: false);
+
+        var expect = """
+            SELECT
+                s.unit_price * s.amount AS price
+            FROM
+                sale AS s
+            WHERE
+                s.unit_price * s.amount IN (10, 20, 30)
+            """;
+
+        Assert.Equal(expect, query.ToText(), true, true, true);
+    }
+
+    [Fact]
+    public void IfNotEmpty()
+    {
+        var sql = """
+            select 
+                s.unit_price * s.amount as price
+            from
+                sale as s
+            """;
+
+        int[] prices = [];
+
+        var query = SelectQuery.Parse(sql)
+            .IfNotEmpty(prices, x => x.In("price", prices));
+
+        Monitor.Log(query, exportTokens: false);
+
+        var expect = """
+            SELECT
+                s.unit_price * s.amount AS price
+            FROM
+                sale AS s
+            """;
+
+        Assert.Equal(expect, query.ToText(), true, true, true);
+
+        prices = [10, 20, 30];
+
+        query = SelectQuery.Parse(sql)
+            .IfNotEmpty(prices, x => x.In("price", prices));
+
+        Monitor.Log(query, exportTokens: false);
+
+        expect = """
+            SELECT
+                s.unit_price * s.amount AS price
+            FROM
+                sale AS s
+            WHERE
+                s.unit_price * s.amount IN (10, 20, 30)
+            """;
+
+        Assert.Equal(expect, query.ToText(), true, true, true);
+    }
+
+    [Fact]
+    public void InSelectQueryTest()
+    {
+        var sql = """
+            select 
+                s.unit_price * s.amount as price
+            from
+                sale as s
+            """;
+
+        var query = SelectQuery.Parse(sql)
+            .In("price", SelectQuery.Parse("select x.value from table_x as x"));
+
+        Monitor.Log(query, exportTokens: false);
+
+        var expect = """
+            SELECT
+                s.unit_price * s.amount AS price
+            FROM
+                sale AS s
+            WHERE
+                s.unit_price * s.amount IN (
+                    SELECT
+                        x.value
+                    FROM
+                        table_x AS x
+                )
+            """;
+
+        Assert.Equal(expect, query.ToText(), true, true, true);
+    }
+
+    [Fact]
+    public void AnyTest_PostgresOnly()
+    {
+        var sql = """
+            select 
+                s.unit_price * s.amount as price
+            from
+                sale as s
+            """;
+
+        int[] prices = [10, 20, 30];
+
+        var query = SelectQuery.Parse(sql)
+            .Parameter(":prices", prices, (q, parameter) => q.Any("price", parameter));
+
+        Monitor.Log(query, exportTokens: false);
+
+        var expect = """
+            SELECT
+                s.unit_price * s.amount AS price
+            FROM
+                sale AS s
+            WHERE
+                s.unit_price * s.amount = ANY(:prices)
             """;
 
         Assert.Equal(expect, query.ToText(), true, true, true);
