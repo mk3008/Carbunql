@@ -19,6 +19,22 @@ public static class SelectQueryConvertExtension
     /// <exception cref="InvalidProgramException">
     /// Thrown if a CTE with the same name already exists.
     /// </exception>
+    public static SelectQuery ToCteQuery(this SelectQuery source, string name, string alias)
+    {
+        return source.ToCteQuery(name, alias, out _);
+    }
+
+    /// <summary>
+    /// Returns a select query that references itself as a CTE (Common Table Expression).
+    /// </summary>
+    /// <param name="name">The name of the CTE.</param>
+    /// <param name="alias">
+    /// The alias to use. If omitted, the select clause will use a wildcard.
+    /// </param>
+    /// <returns>The modified select query with the CTE reference.</returns>
+    /// <exception cref="InvalidProgramException">
+    /// Thrown if a CTE with the same name already exists.
+    /// </exception>
     public static SelectQuery ToCteQuery(this SelectQuery source, string name, string alias, out FluentTable table)
     {
         if (source.GetCommonTables().Where(x => x.Alias.IsEqualNoCase(name)).Any())

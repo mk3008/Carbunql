@@ -1379,7 +1379,7 @@ LIMIT
         var query = SelectQuery.Parse(sql)
             .IfNotNullOrEmpty(product_name, x =>
             {
-                x.FluentParameter(":product_name"
+                x.Parameter(":product_name"
                     , product_name
                     , name => x.Equal(nameof(product_name), name)
                 );
@@ -1402,7 +1402,7 @@ LIMIT
         query = SelectQuery.Parse(sql)
             .IfNotNullOrEmpty(product_name, x =>
             {
-                x.FluentParameter(":product_name"
+                x.Parameter(":product_name"
                     , product_name
                     , name => x.Equal(nameof(product_name), name)
                 );
