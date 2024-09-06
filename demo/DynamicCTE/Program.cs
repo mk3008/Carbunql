@@ -65,11 +65,11 @@ public class Program
 
         // Add date filter condition
         var saleDate = ":sale_date";
-        sq.AddParameter(saleDate, summaryMonth)
+        sq.Parameter(saleDate, summaryMonth)
             .BetweenInclusiveStart("sale_date", saleDate, $"{saleDate}::timestamp + '1 month'");
 
         // Convert the entire query to a CTE
-        sq = sq.ToCTEQuery("final", "f");
+        sq = sq.ToCteQuery("final", "f");
 
         // Add sorting conditions
         sq.RemoveSelect("sort_number")

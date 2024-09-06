@@ -44,7 +44,7 @@ internal class Program
         var sq = SelectQuery.Parse(sql)
             .GreaterThanOrEqualIfNotNullOrEmpty("price", minPrice)
             .LessThanOrEqualIfNotNullOrEmpty("price", maxPrice)
-            .AddParameter(pname, category)
+            .Parameter(pname, category)
             .EqualIfNotNullOrEmpty("category", pname)
             .EqualIfNotNullOrEmpty("in_stock", inStock);
 

@@ -16,7 +16,7 @@ var sql = """
 var lower_limit = new DateTime(2024, 7, 20);
 
 var query = SelectQuery.Parse(sql)
-    .OverrideSelect("journal_date", (source, item) => $"greatest({item}, {source.Query.AddParameter(":lower_limit", lower_limit)})")
+    .OverrideSelect("journal_date", (source, item) => $"greatest({item}, {source.Query.Parameter(":lower_limit", lower_limit)})")
     .NotExists(["sale_id"], "sale_journals")
     .GreaterThanOrEqual("request_timestamp", ":lower_limit")
     .ToCteQuery("final", "f", out var final)
