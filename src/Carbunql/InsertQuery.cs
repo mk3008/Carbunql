@@ -1,7 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql;
@@ -24,7 +23,6 @@ public class InsertQuery : IQueryCommandable, IReturning, ICommentable
     /// <summary>
     /// Gets or sets the comment clause.
     /// </summary>
-    [IgnoreMember]
     public CommentClause? CommentClause { get; set; }
 
     /// <summary>

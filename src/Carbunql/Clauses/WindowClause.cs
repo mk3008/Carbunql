@@ -1,6 +1,5 @@
 ﻿using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
 using System.Collections;
 
 namespace Carbunql.Clauses;
@@ -12,7 +11,7 @@ namespace Carbunql.Clauses;
 /// The WINDOW clause defines window specifications for window functions used in the query.
 /// It allows specifying named windows, which can be referenced in window function calls.
 /// </remarks>
-[MessagePackObject(keyAsPropertyName: true)]
+
 public class WindowClause : IList<NamedWindowDefinition>, IQueryCommandable
 
 {

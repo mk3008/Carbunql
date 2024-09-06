@@ -2,7 +2,6 @@
 using Carbunql.Building;
 using Carbunql.Clauses;
 using Carbunql.Tables;
-using MessagePack;
 using System.Collections;
 
 namespace Carbunql.Values;
@@ -10,7 +9,6 @@ namespace Carbunql.Values;
 /// <summary>
 /// Represents a collection of values.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class ValueCollection : ValueBase, IList<ValueBase>, IQueryCommandable
 {
     /// <summary>

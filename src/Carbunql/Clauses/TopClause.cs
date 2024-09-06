@@ -1,15 +1,11 @@
 ﻿using Carbunql.Tables;
-using MessagePack;
+using Carbunql.Values;
 
 namespace Carbunql.Clauses;
-
-using Carbunql.Values;
-using System.Collections.Generic;
 
 /// <summary>
 /// Represents a clause for specifying the number of rows to be returned in a query result.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class TopClause : IQueryCommandable
 {
     /// <summary>

@@ -1,7 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
 
 namespace Carbunql;
 
@@ -47,7 +46,6 @@ public class CreateIndexQuery : IAlterIndexQuery
     /// <summary>
     /// Gets or sets the comment clause for the index.
     /// </summary>
-    [IgnoreMember]
     public CommentClause? CommentClause { get; set; }
 
     /// <summary>

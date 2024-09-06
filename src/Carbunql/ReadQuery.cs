@@ -1,7 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
 
 namespace Carbunql;
 
@@ -13,8 +12,6 @@ namespace Carbunql;
 /// A selection query is a query used to retrieve data from a database.
 /// A values query is a query used to specify values.
 /// </remarks>
-[Union(0, typeof(SelectQuery))]
-[Union(1, typeof(ValuesQuery))]
 public abstract class ReadQuery : IReadQuery
 {
     public abstract SelectClause? GetSelectClause();

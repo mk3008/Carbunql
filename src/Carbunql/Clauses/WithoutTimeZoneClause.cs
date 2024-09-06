@@ -1,13 +1,11 @@
 ﻿using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
 
 namespace Carbunql.Clauses;
 
 /// <summary>
 /// Represents a WITHOUT TIME ZONE clause in a query.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class WithoutTimeZoneClause : ValueBase
 {
     /// <summary>

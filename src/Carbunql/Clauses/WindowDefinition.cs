@@ -1,13 +1,11 @@
 ﻿using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
 
 namespace Carbunql.Clauses;
 
 /// <summary>
 /// Represents a window definition used in a WINDOW clause of a query.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class WindowDefinition : IQueryCommandable
 {
     /// <summary>

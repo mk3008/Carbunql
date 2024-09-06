@@ -1,10 +1,10 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
-using MessagePack;
+
 
 namespace Carbunql.Values;
 
-[MessagePackObject(keyAsPropertyName: true)]
+
 public class Interval : ValueBase
 {
     public Interval(ValueBase argument)

@@ -1,11 +1,8 @@
-﻿using MessagePack;
-
-namespace Carbunql;
+﻿namespace Carbunql;
 
 /// <summary>
 /// Represents a parameter of a query.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class QueryParameter
 {
     /// <summary>

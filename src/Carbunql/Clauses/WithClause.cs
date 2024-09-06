@@ -1,6 +1,5 @@
 ﻿using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
 using System.Collections;
 
 namespace Carbunql.Clauses;
@@ -8,7 +7,6 @@ namespace Carbunql.Clauses;
 /// <summary>
 /// Represents a WITH clause in a query, which contains a list of common tables.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class WithClause : IList<CommonTable>, IQueryCommandable
 {
     /// <summary>

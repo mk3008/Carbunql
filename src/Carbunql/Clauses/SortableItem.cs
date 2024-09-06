@@ -1,14 +1,12 @@
 ﻿using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
 
 namespace Carbunql.Clauses;
 
 /// <summary>
 /// Represents a sortable item used in ORDER BY clauses in a query.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class SortableItem : IQueryCommandable
 {
     /// <summary>

@@ -1,13 +1,11 @@
 ﻿using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
 
 namespace Carbunql.Clauses;
 
 /// <summary>
 /// Represents an IN clause in a SQL query.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class InClause : ValueBase
 {
     /// <summary>

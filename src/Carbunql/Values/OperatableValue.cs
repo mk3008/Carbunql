@@ -1,13 +1,11 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
-using MessagePack;
 
 namespace Carbunql.Values;
 
 /// <summary>
 /// Represents an operatable value in a query.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class OperatableValue : IQueryCommandable, IColumnContainer
 {
     /// <summary>

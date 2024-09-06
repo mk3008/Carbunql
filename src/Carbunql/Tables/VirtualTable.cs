@@ -1,12 +1,10 @@
 ﻿using Carbunql.Clauses;
-using MessagePack;
 
 namespace Carbunql.Tables;
 
 /// <summary>
 /// Represents a virtual table, which wraps a subquery and behaves like a table.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class VirtualTable : TableBase
 {
     /// <summary>

@@ -1,13 +1,10 @@
 ﻿using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
-
 namespace Carbunql.Clauses;
 
 /// <summary>
 /// Represents a clause for specifying the time zone for a datetime value.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class AtTimeZoneClause : ValueBase
 {
     /// <summary>

@@ -1,14 +1,12 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Tables;
-using MessagePack;
 
 namespace Carbunql.Values;
 
 /// <summary>
 /// Represents a literal value in a query.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class LiteralValue : ValueBase
 {
     /// <summary>

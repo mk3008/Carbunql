@@ -1,13 +1,11 @@
 ﻿using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
 
 namespace Carbunql.Clauses;
 
 /// <summary>
 /// Represents a BETWEEN clause in SQL.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class BetweenClause : ValueBase
 {
     /// <summary>

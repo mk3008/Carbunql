@@ -1,7 +1,6 @@
 ﻿using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
 
 namespace Carbunql.Clauses;
 
@@ -12,7 +11,6 @@ namespace Carbunql.Clauses;
 /// A Common Table Expression (CTE) is a temporary result set that can be referenced within a SELECT, INSERT, UPDATE, or DELETE statement.
 /// It allows for defining a named temporary result set that can be referenced multiple times in a query.
 /// </remarks>
-[MessagePackObject(keyAsPropertyName: true)]
 public class CommonTable : SelectableTable
 {
     /// <summary>

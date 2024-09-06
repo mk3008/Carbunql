@@ -2,7 +2,6 @@
 using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
@@ -11,11 +10,6 @@ namespace Carbunql.Clauses;
 /// <summary>
 /// Represents the base class for various types of tables in a query, including physical tables, views, function tables, and lateral tables.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
-[Union(0, typeof(FunctionTable))]
-[Union(1, typeof(PhysicalTable))]
-[Union(2, typeof(VirtualTable))]
-[Union(3, typeof(LateralTable))]
 public abstract class TableBase : IQueryCommandable
 {
     /// <summary>

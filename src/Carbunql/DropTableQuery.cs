@@ -3,7 +3,6 @@ using Carbunql.Clauses;
 using Carbunql.Definitions;
 using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
 
 namespace Carbunql;
 
@@ -25,7 +24,6 @@ public class DropTableQuery : IQueryCommandable, ICommentable, ITable
     /// <summary>
     /// Gets or sets the comment clause.
     /// </summary>
-    [IgnoreMember]
     public CommentClause? CommentClause { get; set; }
 
     /// <summary>

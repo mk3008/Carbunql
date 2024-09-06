@@ -1,14 +1,12 @@
-﻿using Carbunql.Clauses;
+﻿using Carbunql.Analysis;
+using Carbunql.Clauses;
 using Carbunql.Values;
-using MessagePack;
 
 namespace Carbunql;
 
 /// <summary>
 /// Represents a query for reading data.
 /// </summary>
-[Union(0, typeof(SelectQuery))]
-[Union(1, typeof(ValuesQuery))]
 public interface IReadQuery : IQueryCommandable
 {
     /// <summary>
@@ -42,7 +40,6 @@ public interface IReadQuery : IQueryCommandable
     IEnumerable<OperatableQuery> GetOperatableQueries();
 }
 
-
 /// <summary>
 /// Extension methods for <see cref="IReadQuery"/>.
 /// </summary>
@@ -65,7 +62,6 @@ public static class IReadQueryExtension
     /// <returns>A deep copy of the <paramref name="source"/> <see cref="IReadQuery"/>.</returns>
     public static IReadQuery DeepCopy(this IReadQuery source)
     {
-        var json = MessagePackSerializer.Serialize(source);
-        return MessagePackSerializer.Deserialize<IReadQuery>(json);
+        return ReadQueryParser.Parse(source.ToOneLineText());
     }
 }

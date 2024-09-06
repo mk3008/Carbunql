@@ -1,6 +1,5 @@
 ﻿using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
 
 namespace Carbunql.Clauses;
 
@@ -8,7 +7,6 @@ namespace Carbunql.Clauses;
 /// Represents a relationship between tables in a query.
 /// This class manages the join command and condition for joining tables in a query.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class Relation : IQueryCommandable
 {
     /// <summary>

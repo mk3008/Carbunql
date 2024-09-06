@@ -1,6 +1,6 @@
 ﻿using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
+
 
 namespace Carbunql.Clauses;
 
@@ -11,7 +11,7 @@ namespace Carbunql.Clauses;
 /// The SELECT clause specifies the columns to be returned in the query result set.
 /// It can include individual columns, expressions, or even aggregate functions.
 /// </remarks>
-[MessagePackObject(keyAsPropertyName: true)]
+
 public class SelectClause : QueryCommandCollection<SelectableItem>, IQueryCommandable
 {
     /// <summary>

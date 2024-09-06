@@ -1,6 +1,5 @@
 ﻿using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
 
 namespace Carbunql.Clauses;
 
@@ -8,7 +7,6 @@ namespace Carbunql.Clauses;
 /// Represents a table or subquery that can be selected in a SQL query. 
 /// It allows for specifying an alias to reference the table or subquery within the query.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class SelectableTable : IQueryCommandable, ISelectable, ICommentable
 {
     /// <summary>
@@ -55,7 +53,6 @@ public class SelectableTable : IQueryCommandable, ISelectable, ICommentable
     /// </summary>
     public ValueCollection? ColumnAliases { get; init; }
 
-    [IgnoreMember]
     public CommentClause? CommentClause { get; set; }
 
     public IEnumerable<Token> GetAliasTokens(Token? parent)

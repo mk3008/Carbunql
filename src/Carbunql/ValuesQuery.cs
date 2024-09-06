@@ -5,7 +5,6 @@ using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
 
 namespace Carbunql;
 
@@ -13,7 +12,6 @@ namespace Carbunql;
 /// Represents a query that retrieves multiple rows of values from a database.
 /// This type of query is typically used for inserting multiple rows of data into a table.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class ValuesQuery : ReadQuery
 {
     /// <summary>

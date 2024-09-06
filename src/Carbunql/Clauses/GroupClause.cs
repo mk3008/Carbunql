@@ -1,6 +1,5 @@
 ﻿using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
 using System.Collections;
 
 namespace Carbunql.Clauses;
@@ -8,7 +7,6 @@ namespace Carbunql.Clauses;
 /// <summary>
 /// Represents a GROUP BY clause in a SQL query.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class GroupClause : IList<ValueBase>, IQueryCommandable
 {
     /// <summary>

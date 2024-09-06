@@ -1327,7 +1327,7 @@ LIMIT
                 sale as s
             """;
 
-        int? price = null;
+        int? price = 10;
 
         var query = SelectQuery.Parse(sql)
             .IfNotNull(price, x => x.Equal(nameof(price), price));
@@ -1339,6 +1339,8 @@ LIMIT
                 s.unit_price * s.amount AS price
             FROM
                 sale AS s
+            WHERE
+                s.unit_price * s.amount = 10
             """;
 
         Assert.Equal(expect, query.ToText(), true, true, true);

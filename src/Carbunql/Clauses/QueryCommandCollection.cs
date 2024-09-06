@@ -1,5 +1,4 @@
-﻿using MessagePack;
-using System.Collections;
+﻿using System.Collections;
 
 namespace Carbunql.Clauses;
 
@@ -7,7 +6,7 @@ namespace Carbunql.Clauses;
 /// Represents a collection of query commandable items.
 /// </summary>
 /// <typeparam name="T">The type of items in the collection, which must implement <see cref="IQueryCommandable"/>.</typeparam>
-[MessagePackObject(keyAsPropertyName: true)]
+
 public abstract class QueryCommandCollection<T> : IList<T> where T : IQueryCommandable
 {
     /// <summary>
@@ -64,13 +63,13 @@ public abstract class QueryCommandCollection<T> : IList<T> where T : IQueryComma
     }
 
     #region implements IList<T>
-    [IgnoreMember]
+
     public T this[int index] { get => ((IList<T>)Items)[index]; set => ((IList<T>)Items)[index] = value; }
 
-    [IgnoreMember]
+
     public int Count => ((ICollection<T>)Items).Count;
 
-    [IgnoreMember]
+
     public bool IsReadOnly => ((ICollection<T>)Items).IsReadOnly;
 
     public void Add(T item)

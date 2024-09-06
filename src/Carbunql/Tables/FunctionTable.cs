@@ -1,13 +1,11 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Values;
-using MessagePack;
 
 namespace Carbunql.Tables;
 
 /// <summary>
 /// Represents a function table.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class FunctionTable : TableBase
 {
     /// <summary>
