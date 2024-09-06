@@ -1,5 +1,6 @@
 ﻿using Carbunql.Building;
 using Carbunql.Fluent;
+using Cysharp.Text;
 
 namespace Carbunql.Fluent;
 
@@ -45,6 +46,20 @@ public static class SelectQueryWhereExtensions
     public static SelectQuery IfNotNullOrEmpty(this SelectQuery query, string? value, Func<SelectQuery, SelectQuery> func)
     {
         return !string.IsNullOrEmpty(value)
+            ? func(query)
+            : query;
+    }
+
+    /// <summary>
+    /// Applies the specified function to the query if the provided collection contains any elements.
+    /// </summary>
+    /// <param name="query">The query to which the function will be applied.</param>
+    /// <param name="value">The collection to check for any elements.</param>
+    /// <param name="func">The function to apply to the query if the collection contains any elements.</param>
+    /// <returns>The modified query if the collection contains any elements; otherwise, returns the original query.</returns>
+    public static SelectQuery IfNotEmpty<T>(this SelectQuery query, IEnumerable<T> value, Func<SelectQuery, SelectQuery> func)
+    {
+        return value.Any()
             ? func(query)
             : query;
     }
@@ -524,5 +539,107 @@ public static class SelectQueryWhereExtensions
     public static SelectQuery HasDifferent(this SelectQuery query, FluentTable left, FluentTable right, IEnumerable<string> validationColumns)
     {
         return query.HasDifferent(left.Alias, right.Alias, validationColumns);
+    }
+
+    /// <summary>
+    /// Adds an `IN` condition to the query where the specified column value matches any value in the given collection.
+    /// </summary>
+    /// <typeparam name="T">The type of the values in the collection. Must be a non-nullable type.</typeparam>
+    /// <param name="query">The query to which the `IN` condition will be added.</param>
+    /// <param name="columnName">The name of the column to check against the values.</param>
+    /// <param name="values">The collection of values to match against. Values are converted to strings and added to the condition.</param>
+    /// <returns>The modified query with the `IN` condition applied.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if the type of any string value is not parameterized properly.</exception>
+    public static SelectQuery In<T>(this SelectQuery query, string columnName, IEnumerable<T> values) where T : notnull
+    {
+        var sb = ZString.CreateStringBuilder();
+        foreach (var item in values)
+        {
+            // Check if the type is string
+            if (typeof(T) == typeof(string))
+            {
+                var stringItem = item as string;
+                if (stringItem != null && !ParameterSymbols.Any(stringItem.StartsWith))
+                {
+                    throw new InvalidOperationException("The string type must be parameterized.");
+                }
+            }
+
+            if (sb.Length != 0) sb.Append(", ");
+
+            if (typeof(T) == typeof(DateTime) && item is DateTime dateItem)
+            {
+                sb.Append($"'{dateItem.ToString()}'");
+            }
+            else
+            {
+                sb.Append(item);
+            }
+        }
+
+        query.AddWhere(columnName, (source, column) => $"{column} in ({sb.ToString()})", true);
+
+        return query;
+    }
+
+    /// <summary>
+    /// Adds an `IN` condition to the query where the specified column value matches any value in the results of the provided subquery.
+    /// </summary>
+    /// <param name="query">The query to which the `IN` condition will be added.</param>
+    /// <param name="columnName">The name of the column to check against the subquery results.</param>
+    /// <param name="selectQuery">The subquery whose results will be used for the `IN` condition.</param>
+    /// <returns>The modified query with the `IN` condition applied.</returns>
+    public static SelectQuery In(this SelectQuery query, string columnName, SelectQuery selectQuery)
+    {
+        // Import parameters from the subquery
+        selectQuery.GetParameters().ForEach(p =>
+        {
+            query.AddParameter(p.ParameterName, p.Value);
+        });
+
+        query.AddWhere(columnName, (source, column) => $"{column} in ({selectQuery.ToOneLineText()})", true);
+
+        return query;
+    }
+
+    /// <summary>
+    /// Adds an `IN` condition to the query where the specified column value matches any value in the results of the provided subquery.
+    /// This version allows specifying the table name for more complex queries.
+    /// </summary>
+    /// <param name="query">The query to which the `IN` condition will be added.</param>
+    /// <param name="tableName">The name of the table to apply the condition to.</param>
+    /// <param name="columnName">The name of the column to check against the subquery results.</param>
+    /// <param name="selectQuery">The subquery whose results will be used for the `IN` condition.</param>
+    /// <returns>The modified query with the `IN` condition applied.</returns>
+    public static SelectQuery In(this SelectQuery query, string tableName, string columnName, SelectQuery selectQuery)
+    {
+        // Import parameters from the subquery
+        selectQuery.GetParameters().ForEach(p =>
+        {
+            query.AddParameter(p.ParameterName, p.Value);
+        });
+
+        query.AddWhere(tableName, columnName, (source, column) => $"{column} in ({selectQuery.ToOneLineText()})");
+
+        return query;
+    }
+
+    /// <summary>
+    /// Applies an `ANY` condition to the query, checking if the specified column value matches any value in the array parameter.
+    /// </summary>
+    /// <param name="query">The query to which the condition will be applied.</param>
+    /// <param name="columnName">The name of the column to check against the array values.</param>
+    /// <param name="arrayParameter">The parameter representing the array of values to match against. This should be a parameterized placeholder.</param>
+    /// <returns>The modified query with the `ANY` condition applied.</returns>
+    public static SelectQuery Any(this SelectQuery query, string columnName, string arrayParameter)
+    {
+        if (!ParameterSymbols.Any(arrayParameter.StartsWith))
+        {
+            throw new InvalidOperationException("The string type must be parameterized.");
+        }
+
+        query.AddWhere(columnName, (source, column) => $"{column} = any ({arrayParameter})", true);
+
+        return query;
     }
 }
