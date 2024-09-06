@@ -1,15 +1,11 @@
 ﻿using Carbunql.Tables;
-using MessagePack;
+using Carbunql.Values;
 
 namespace Carbunql.Clauses;
-
-using Carbunql.Values;
-using System.Collections.Generic;
 
 /// <summary>
 /// Represents a WHERE clause in a SQL query.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class WhereClause : IQueryCommandable
 {
     /// <summary>

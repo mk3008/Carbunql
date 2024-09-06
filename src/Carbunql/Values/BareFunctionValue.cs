@@ -1,14 +1,11 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
-using MessagePack;
-
 namespace Carbunql.Values;
 
 /// <summary>
 /// Represents a SQL function that does not require parentheses or arguments.
 /// ex.curren_timestamp
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class BareFunctionValue(string name) : ValueBase
 {
 

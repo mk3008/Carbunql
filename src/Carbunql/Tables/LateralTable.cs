@@ -1,12 +1,10 @@
 ﻿using Carbunql.Clauses;
-using MessagePack;
 
 namespace Carbunql.Tables;
 
 /// <summary>
 /// Represents a lateral table.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class LateralTable : TableBase
 {
     /// <summary>

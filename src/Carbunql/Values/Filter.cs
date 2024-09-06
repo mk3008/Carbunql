@@ -1,13 +1,11 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
-using MessagePack;
 
 namespace Carbunql.Values;
 
 /// <summary>
 /// Represents a FILTER clause.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class Filter : IQueryCommandable
 {
     /// <summary>

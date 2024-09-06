@@ -1,6 +1,5 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Definitions;
-using MessagePack;
 using System.Collections.Immutable;
 
 namespace Carbunql.Tables;
@@ -8,7 +7,6 @@ namespace Carbunql.Tables;
 /// <summary>
 /// Represents a physical table in a database.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class PhysicalTable : TableBase
 {
     /// <summary>

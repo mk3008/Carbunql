@@ -1,13 +1,10 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
-using MessagePack;
-
 namespace Carbunql.Values;
 
 /// <summary>
 /// Represents an array value.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class ArrayValue : ValueBase
 {
     /// <summary>

@@ -1,13 +1,11 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
-using MessagePack;
 
 namespace Carbunql.Values;
 
 /// <summary>
 /// Represents a FROM argument.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class FromArgument : ValueBase
 {
     /// <summary>

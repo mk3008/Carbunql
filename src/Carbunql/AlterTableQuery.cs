@@ -2,7 +2,6 @@
 using Carbunql.Definitions;
 using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
 
 namespace Carbunql;
 
@@ -28,7 +27,6 @@ public class AlterTableQuery : IQueryCommandable, ICommentable, ITable
     /// <summary>
     /// Gets or sets the comment clause of the query.
     /// </summary>
-    [IgnoreMember]
     public CommentClause? CommentClause { get; set; }
 
     /// <summary>

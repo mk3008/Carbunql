@@ -6,7 +6,6 @@ using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
 using Cysharp.Text;
-using MessagePack;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 
@@ -19,7 +18,6 @@ namespace Carbunql;
 /// You can specify the columns to retrieve using SelectClause.
 /// Additionally, you can specify clauses such as WithClause, GroupClause, and HavingClause.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
 {
     /// <summary>
@@ -118,7 +116,6 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     /// A comment that is output before the selection clause. It is suitable for indicating the nature of the selection query.
     /// Since it is output after the With clause, it is less visible than the HeaderCommentClause.
     /// </remarks>
-    [IgnoreMember]
     public CommentClause? CommentClause { get; set; }
 
     /// <summary>
@@ -129,7 +126,6 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     /// This is printed before the With clause and is useful for debugging.
     /// However, it is not printed if it is not the root query.
     /// </remarks>
-    [IgnoreMember]
     public CommentClause? HeaderCommentClause { get; set; }
 
     public void AddHeaderComment(string comment)

@@ -1,13 +1,11 @@
 ﻿using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
 
 namespace Carbunql.Clauses;
 
 /// <summary>
 /// Represents a selectable item, such as a value or column, in a query.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class SelectableItem : IQueryCommandable, ISelectable
 {
     /// <summary>

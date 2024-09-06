@@ -1,14 +1,12 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
 
 namespace Carbunql;
 
 /// <summary>
 /// Represents a query with an operator, such as UNION or UNION ALL.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class OperatableQuery : IQueryCommandable
 {
     /// <summary>

@@ -2,32 +2,12 @@
 using Carbunql.Extensions;
 using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
 
 namespace Carbunql.Clauses;
 
 /// <summary>
 /// Represents the base class for SQL values used in queries.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
-[Union(0, typeof(LiteralValue))]
-[Union(1, typeof(AsArgument))]
-[Union(2, typeof(BetweenClause))]
-[Union(3, typeof(BracketValue))]
-[Union(4, typeof(CaseExpression))]
-[Union(5, typeof(CastValue))]
-[Union(6, typeof(ColumnValue))]
-[Union(7, typeof(FromArgument))]
-[Union(8, typeof(FunctionValue))]
-[Union(9, typeof(InClause))]
-[Union(10, typeof(NegativeValue))]
-[Union(11, typeof(ParameterValue))]
-[Union(12, typeof(QueryContainer))]
-[Union(13, typeof(ValueCollection))]
-[Union(14, typeof(Interval))]
-[Union(15, typeof(LikeClause))]
-[Union(16, typeof(ExistsExpression))]
-[Union(17, typeof(BareFunctionValue))]
 public abstract class ValueBase : IQueryCommandable
 {
     /// <summary>

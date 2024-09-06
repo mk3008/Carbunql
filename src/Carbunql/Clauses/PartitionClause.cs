@@ -1,13 +1,11 @@
 ﻿using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
 
 namespace Carbunql.Clauses;
 
 /// <summary>
 /// Represents a PARTITION BY clause in a SQL query.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class PartitionClause : QueryCommandCollection<ValueBase>, IQueryCommandable
 {
     /// <summary>

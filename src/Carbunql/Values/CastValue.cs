@@ -2,14 +2,12 @@
 using Carbunql.Clauses;
 using Carbunql.Extensions;
 using Carbunql.Tables;
-using MessagePack;
 
 namespace Carbunql.Values;
 
 /// <summary>
 /// Represents a cast value.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class CastValue : ValueBase
 {
     /// <summary>

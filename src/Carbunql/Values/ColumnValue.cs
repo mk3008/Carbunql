@@ -1,13 +1,11 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
-using MessagePack;
 
 namespace Carbunql.Values;
 
 /// <summary>
 /// Represents a column value.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class ColumnValue : ValueBase
 {
     /// <summary>

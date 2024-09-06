@@ -3,7 +3,6 @@ using Carbunql.Clauses;
 using Carbunql.Definitions;
 using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
 using System.Data;
 
 namespace Carbunql;
@@ -92,7 +91,6 @@ public class CreateTableQuery : IQueryCommandable, ICommentable, ITable
     /// <summary>
     /// Gets or sets the comment clause for the table.
     /// </summary>
-    [IgnoreMember]
     public CommentClause? CommentClause { get; set; }
 
     /// <summary>

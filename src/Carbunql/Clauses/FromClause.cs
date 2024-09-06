@@ -1,13 +1,11 @@
 ﻿using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
 
 namespace Carbunql.Clauses;
 
 /// <summary>
 /// Represents a FROM clause in a SQL query, managing the selection of tables and relationships.
 /// </summary>
-[MessagePackObject(keyAsPropertyName: true)]
 public class FromClause : IQueryCommandable
 {
     /// <summary>

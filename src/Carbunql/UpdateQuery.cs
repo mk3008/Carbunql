@@ -1,7 +1,6 @@
 ﻿using Carbunql.Clauses;
 using Carbunql.Tables;
 using Carbunql.Values;
-using MessagePack;
 
 namespace Carbunql;
 
@@ -43,7 +42,6 @@ public class UpdateQuery : IQueryCommandable, IReturning, ICommentable
     /// <summary>
     /// Gets or sets the comment clause.
     /// </summary>
-    [IgnoreMember]
     public CommentClause? CommentClause { get; set; }
 
     /// <summary>
