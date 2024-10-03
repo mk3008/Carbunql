@@ -1,4 +1,5 @@
 ﻿using Carbunql.Clauses;
+using Carbunql.Extensions;
 using Carbunql.Values;
 
 namespace Carbunql.Analysis.Parser;
@@ -32,6 +33,16 @@ public static class LikeClauseParser
         r.Read("like");
 
         var argument = ValueParser.ParseCore(r);
-        return new LikeClause(value, argument, isNegative);
+
+        if (r.Peek().IsEqualNoCase("escape"))
+        {
+            r.Read("escape");
+            var escape = r.Read();
+            return new LikeClause(value, argument, isNegative, escape);
+        }
+        else
+        {
+            return new LikeClause(value, argument, isNegative);
+        }
     }
 }

@@ -526,6 +526,17 @@ public class ValueParserTest
     }
 
     [Fact]
+    public void LikeEscape()
+    {
+        var text = "a.name LIKE 'x%3%' escape 'x'";
+        var v = ValueParser.Parse(text);
+        Monitor.Log(v);
+
+        var lst = v.GetTokens().ToList();
+        Assert.Equal(7, lst.Count);
+    }
+
+    [Fact]
     public void Bracket()
     {
         var text = "(1)";
