@@ -14,11 +14,12 @@ public class LikeClause : ValueBase
     /// <param name="value">The value to compare.</param>
     /// <param name="argument">The argument to compare against.</param>
     /// <param name="isNegative">Indicates whether the comparison is negated.</param>
-    public LikeClause(ValueBase value, ValueBase argument, bool isNegative = false)
+    public LikeClause(ValueBase value, ValueBase argument, bool isNegative = false, string escape = "")
     {
         Value = value;
         Argument = argument;
         IsNegative = isNegative;
+        Escape = escape;
     }
 
     /// <summary>
@@ -35,6 +36,12 @@ public class LikeClause : ValueBase
     /// Gets or sets a value indicating whether the comparison is negated.
     /// </summary>
     public bool IsNegative { get; set; }
+
+    /// <summary>
+    /// Gets or sets the escape character used in the LIKE clause.
+    /// This character allows special symbols (such as underscores or percent signs) to be treated as literal characters.
+    /// </summary>
+    public string Escape { get; set; }
 
     /// <inheritdoc/>
     protected override IEnumerable<SelectQuery> GetInternalQueriesCore()
@@ -58,6 +65,12 @@ public class LikeClause : ValueBase
 
         yield return Token.Reserved(this, parent, "like");
         foreach (var item in Argument.GetTokens(parent)) yield return item;
+
+        if (!string.IsNullOrEmpty(Escape))
+        {
+            yield return Token.Reserved(this, parent, "escape");
+            yield return new Token(this, parent, Escape);
+        }
     }
 
     /// <inheritdoc/>
