@@ -988,7 +988,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         GetQuerySources()
             .Where(x => x.Query.GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnAliasName)).Any())
             .EnsureAny($"column alias:{columnAliasName}")
-            .GetRootsBySource()
+            .GetRootsByQuery()
             .ForEach(x =>
             {
                 var si = x.Query.GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnAliasName)).First();
