@@ -9,15 +9,29 @@ public static class SelectQueryWhereExtensions
     internal static char[] ParameterSymbols = { '@', ':', '$' };
 
     /// <summary>
-    /// Conditionally applies the specified function to the query if the condition is true.
+    /// Conditionally applies the specified function to the query if the given condition is true.
     /// </summary>
-    /// <param name="query">The query to apply the function to.</param>
+    /// <param name="query">The query to which the function will be applied.</param>
     /// <param name="condition">The condition to evaluate.</param>
     /// <param name="func">The function to apply if the condition is true.</param>
     /// <returns>The modified query if the condition is true; otherwise, the original query.</returns>
     public static SelectQuery If(this SelectQuery query, bool condition, Func<SelectQuery, SelectQuery> func)
     {
         return condition
+            ? func(query)
+            : query;
+    }
+
+    /// <summary>
+    /// Conditionally applies the specified function to the query if the validation function returns true.
+    /// </summary>
+    /// <param name="query">The query to which the function will be applied.</param>
+    /// <param name="validation">The validation function to evaluate against the query.</param>
+    /// <param name="func">The function to apply if the validation function returns true.</param>
+    /// <returns>The modified query if the validation function returns true; otherwise, the original query.</returns>
+    public static SelectQuery If(this SelectQuery query, Func<SelectQuery, bool> validation, Func<SelectQuery, SelectQuery> func)
+    {
+        return validation(query)
             ? func(query)
             : query;
     }
@@ -62,6 +76,20 @@ public static class SelectQueryWhereExtensions
         return value.Any()
             ? func(query)
             : query;
+    }
+
+    /// <summary>
+    /// Checks whether the specified column name exists in the query.
+    /// You can specify whether to include aliases in the check.
+    /// </summary>
+    /// <param name="query">The <see cref="SelectQuery"/> object to search.</param>
+    /// <param name="columnName">The column name to check for.</param>
+    /// <param name="isAliasIncluded">If true, aliases are included in the check. The default value is true.</param>
+    /// <returns>Returns true if the specified column name exists in the query; otherwise, false.</returns>
+    public static bool HasColumn(this SelectQuery query, string columnName, bool isAliasIncluded = true)
+    {
+        return query.GetQuerySources()
+                 .Where(x => query.HasColumn(x, columnName, isAliasIncluded)).Any();
     }
 
     private static (string, string) GenerateComparison(string operatorSymbol, object? value)

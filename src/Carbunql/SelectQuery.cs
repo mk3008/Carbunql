@@ -1077,7 +1077,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         }
     }
 
-    private bool HasColumn(IQuerySource source, string columnName, bool isAliasIncluded)
+    internal bool HasColumn(IQuerySource source, string columnName, bool isAliasIncluded)
     {
         if (isAliasIncluded && source.Query.GetColumnNames().Where(x => x.IsEqualNoCase(columnName)).Any())
         {
