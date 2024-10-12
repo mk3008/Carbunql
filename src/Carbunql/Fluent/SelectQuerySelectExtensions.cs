@@ -2,6 +2,14 @@
 
 public static class SelectQuerySelectExtensions
 {
+    /// <summary>
+    /// Adds all columns of the specified table to the SELECT clause.
+    /// If column aliases are present, they are used; otherwise, the table's column names are used.
+    /// If no column names are available, a wildcard (*) is used.
+    /// </summary>
+    /// <param name="query">The <see cref="SelectQuery"/> object to which the columns will be added.</param>
+    /// <param name="table">The <see cref="FluentTable"/> object that contains the column information.</param>
+    /// <returns>The <see cref="SelectQuery"/> object with the columns added.</returns>
     public static SelectQuery SelectAll(this SelectQuery query, FluentTable table)
     {
         if (table.ColumnAliases.Any())
@@ -22,6 +30,20 @@ public static class SelectQuerySelectExtensions
     public static SelectQuery SelectAll(this SelectQuery query, string querySourceName)
     {
         query.AddSelectAll(querySourceName);
+        return query;
+    }
+
+    /// <summary>
+    /// Modifies the SELECT clause to include only the columns with the specified alias names, removing all other columns.
+    /// </summary>
+    /// <param name="query">The <see cref="SelectQuery"/> object to be modified.</param>
+    /// <param name="columnAliasNames">A list of column alias names to retain in the SELECT clause.</param>
+    /// <returns>The modified <see cref="SelectQuery"/> object.</returns>
+    /// <exception cref="NullReferenceException">Thrown if the SELECT clause (<see cref="query.SelectClause"/>) is null.</exception>
+    public static SelectQuery SelectOnlyByNames(this SelectQuery query, IEnumerable<string> columnAliasNames)
+    {
+        if (query.SelectClause == null) throw new NullReferenceException(nameof(query.SelectClause));
+        query.SelectClause.FilterInColumns(columnAliasNames);
         return query;
     }
 
