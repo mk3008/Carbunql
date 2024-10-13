@@ -125,5 +125,17 @@ public static class IQuerySourceExtension
         var lst = q.ToHashSet();
         return lst;
     }
+
+    public static bool HasTable(this IQuerySource source, string tableName, bool isAliasIncluded)
+    {
+        if (isAliasIncluded && source.Alias.IsEqualNoCase(tableName))
+        {
+            return true;
+        }
+        else
+        {
+            return source.GetTableFullName().IsEqualNoCase(tableName);
+        }
+    }
 }
 

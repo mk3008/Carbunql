@@ -292,7 +292,7 @@ static CreateTableQuery GenerateDifferentCreateTableQuery(string tableName,
     var request = FluentTable.Create("select sale_id from request", "req", "r");
 
     var query = reverseQuery.UnionAll(currentQuery)
-        .Exists(request, ["sale_id"])
+        .Exists(["sale_id"], request)
         .ToCreateTableQuery(tableName, true)
         .Comment(nameof(GenerateDifferentCreateTableQuery));
 
