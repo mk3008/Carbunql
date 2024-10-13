@@ -988,7 +988,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         GetQuerySources()
             .Where(x => x.Query.GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnAliasName)).Any())
             .EnsureAny($"column alias:{columnAliasName}")
-            .GetRootsBySource()
+            .GetRootsByQuery()
             .ForEach(x =>
             {
                 var si = x.Query.GetSelectableItems().Where(x => x.Alias.IsEqualNoCase(columnAliasName)).First();
@@ -1065,19 +1065,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         return this;
     }
 
-    private bool HasTable(IQuerySource source, string tableName, bool isAliasIncluded)
-    {
-        if (isAliasIncluded && source.Alias.IsEqualNoCase(tableName))
-        {
-            return true;
-        }
-        else
-        {
-            return source.GetTableFullName().IsEqualNoCase(tableName);
-        }
-    }
-
-    private bool HasColumn(IQuerySource source, string columnName, bool isAliasIncluded)
+    internal bool HasColumn(IQuerySource source, string columnName, bool isAliasIncluded)
     {
         if (isAliasIncluded && source.Query.GetColumnNames().Where(x => x.IsEqualNoCase(columnName)).Any())
         {
@@ -1141,7 +1129,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     public SelectQuery AddWhere(string tableName, string columnName, Func<IQuerySource, string> adder, bool isAliasIncluded = false)
     {
         GetQuerySources()
-            .Where(x => HasTable(x, tableName, true))
+            .Where(x => x.HasTable(tableName, true))
             .EnsureAny($"table:{tableName}")
             .Where(x => HasColumn(x, columnName, isAliasIncluded))
             .EnsureAny($"The table exists, but there is no corresponding column in the table. table:{tableName}, column:{columnName}")
@@ -1164,7 +1152,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     public SelectQuery AddWhere(string tableName, string columnName, Func<IQuerySource, string, string> adder, bool isAliasIncluded = false)
     {
         GetQuerySources()
-            .Where(x => HasTable(x, tableName, true))
+            .Where(x => x.HasTable(tableName, true))
             .EnsureAny($"table:{tableName}")
             .Where(x => HasColumn(x, columnName, isAliasIncluded))
             .EnsureAny($"The table exists, but there is no corresponding column in the table. table:{tableName}, column:{columnName}")
@@ -1215,7 +1203,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     public SelectQuery AddExists(string sourceTableName, IEnumerable<string> keyColumnNames, string validationTableName, Action<IQuerySource>? action = null)
     {
         GetQuerySources()
-            .Where(x => HasTable(x, sourceTableName, true))
+            .Where(x => x.HasTable(sourceTableName, true))
             .EnsureAny($"table:{sourceTableName}")
             .Where(x => keyColumnNames.All(keyColumn => x.ColumnNames.Contains(keyColumn)))
             .EnsureAny($"The table exists, but there is no corresponding column in the table. table:{sourceTableName}, columns:{string.Join(",", keyColumnNames)}")
@@ -1273,7 +1261,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     public SelectQuery AddNotExists(string sourceTableName, IEnumerable<string> keyColumnNames, string validationTableName, Action<IQuerySource>? action = null)
     {
         GetQuerySources()
-            .Where(x => HasTable(x, sourceTableName, true))
+            .Where(x => x.HasTable(sourceTableName, true))
             .EnsureAny($"table:{sourceTableName}")
             .Where(x => keyColumnNames.All(keyColumn => x.ColumnNames.Contains(keyColumn)))
             .EnsureAny($"The table exists, but there is no corresponding column in the table. table:{sourceTableName}, columns:{string.Join(",", keyColumnNames)}")
