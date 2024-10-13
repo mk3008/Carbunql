@@ -1065,18 +1065,6 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         return this;
     }
 
-    private bool HasTable(IQuerySource source, string tableName, bool isAliasIncluded)
-    {
-        if (isAliasIncluded && source.Alias.IsEqualNoCase(tableName))
-        {
-            return true;
-        }
-        else
-        {
-            return source.GetTableFullName().IsEqualNoCase(tableName);
-        }
-    }
-
     internal bool HasColumn(IQuerySource source, string columnName, bool isAliasIncluded)
     {
         if (isAliasIncluded && source.Query.GetColumnNames().Where(x => x.IsEqualNoCase(columnName)).Any())
