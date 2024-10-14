@@ -47,9 +47,18 @@ public static class SelectQuerySelectExtensions
         return query;
     }
 
+    /// <summary>
+    /// Adds a column selection to the query with an optional alias.
+    /// If the provided alias is null or empty, the column name will be used as the alias.
+    /// </summary>
+    /// <param name="query">The current SelectQuery object.</param>
+    /// <param name="tableAlias">The alias of the table that contains the column.</param>
+    /// <param name="column">The name of the column to select.</param>
+    /// <param name="columnAlias">Optional alias for the column. If not provided or empty, the column name will be used.</param>
+    /// <returns>The updated SelectQuery object.</returns>
     public static SelectQuery Select(this SelectQuery query, string tableAlias, string column, string columnAlias = "")
     {
-        query.AddSelect($"{tableAlias}.{column}", columnAlias);
+        query.AddSelect($"{tableAlias}.{column}", string.IsNullOrEmpty(columnAlias) ? column : columnAlias);
         return query;
     }
 
