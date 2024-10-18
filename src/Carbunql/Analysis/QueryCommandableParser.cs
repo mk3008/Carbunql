@@ -64,6 +64,12 @@ public static class QueryCommandableParser
                 }
                 return iq;
             }
+            else if (token.IsEqualNoCase("update"))
+            {
+                var uq = UpdateQueryParser.Parse(r);
+                uq.WithClause = clause;
+                return uq;
+            }
 
             throw new NotSupportedException($"Unsupported query command: '{token}'");
         }
@@ -73,6 +79,7 @@ public static class QueryCommandableParser
             if (token.IsEqualNoCase("values")) return ValuesQueryParser.Parse(r);
 
             if (token.IsEqualNoCase("insert into")) return InsertQueryParser.Parse(r);
+            if (token.IsEqualNoCase("update")) return UpdateQueryParser.Parse(r);
 
             if (token.IsEqualNoCase("create table")) return CreateTableQueryParser.Parse(r);
             if (token.IsEqualNoCase("create index")) return CreateIndexQueryParser.Parse(r);

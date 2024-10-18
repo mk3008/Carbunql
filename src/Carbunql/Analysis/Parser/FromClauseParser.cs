@@ -26,6 +26,8 @@ public static class FromClauseParser
     /// <returns>The parsed FROM clause.</returns>
     public static FromClause Parse(ITokenReader r)
     {
+        r.ReadOrDefault("from");
+
         var relationtokens = ReservedText.GetRelationTexts();
 
         var root = SelectableTableParser.Parse(r);

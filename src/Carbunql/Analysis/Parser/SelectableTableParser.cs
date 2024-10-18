@@ -45,6 +45,13 @@ public static class SelectableTableParser
         else
         {
             r.ReadOrDefault("as");
+
+            var next = r.Peek();
+            if (next.IsEqualNoCase(["from", "set"]))
+            {
+                return new SelectableTable(v, v.GetDefaultName());
+            }
+
             var alias = r.Read();
 
             if (TryParseColumnAliases(r, out var columnAliases))
