@@ -20,6 +20,11 @@ public class DeleteQuery : IQueryCommandable, IReturning, ICommentable
     public WithClause? WithClause { get; set; }
 
     /// <summary>
+    /// Gets or sets the using clause.
+    /// </summary>
+    public DeleteUsingClause? UsingClause { get; set; }
+
+    /// <summary>
     /// Gets or sets the where clause.
     /// </summary>
     public WhereClause? WhereClause { get; set; }
@@ -59,6 +64,13 @@ public class DeleteQuery : IQueryCommandable, IReturning, ICommentable
                 yield return item;
             }
         }
+        if (UsingClause != null)
+        {
+            foreach (var item in UsingClause.GetInternalQueries())
+            {
+                yield return item;
+            }
+        }
         if (WhereClause != null)
         {
             foreach (var item in WhereClause.GetInternalQueries())
@@ -91,6 +103,13 @@ public class DeleteQuery : IQueryCommandable, IReturning, ICommentable
         if (WithClause != null)
         {
             foreach (var item in WithClause.GetPhysicalTables())
+            {
+                yield return item;
+            }
+        }
+        if (UsingClause != null)
+        {
+            foreach (var item in UsingClause.GetPhysicalTables())
             {
                 yield return item;
             }
@@ -139,6 +158,7 @@ public class DeleteQuery : IQueryCommandable, IReturning, ICommentable
 
         if (WithClause != null) foreach (var item in WithClause.GetTokens(parent)) yield return item;
         foreach (var item in DeleteClause.GetTokens(parent)) yield return item;
+        if (UsingClause != null) foreach (var item in UsingClause.GetTokens(parent)) yield return item;
         if (WhereClause != null) foreach (var item in WhereClause.GetTokens(parent)) yield return item;
 
         if (ReturningClause == null) yield break;

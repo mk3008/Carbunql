@@ -102,6 +102,62 @@ public class DeleteQueryParserTest
     }
 
     [Fact]
+    public void DeleteWithUsingTest()
+    {
+        var text = @"
+        DELETE FROM table_a as a
+        USING table_b as b
+        WHERE a.id = b.id
+        AND b.status = 'inactive'";
+
+        var q = DeleteQueryParser.Parse(text);
+
+        Monitor.Log(q);
+
+        var actual = q.ToText();
+        var expect = """
+        DELETE FROM
+            table_a AS a
+        USING
+            table_b AS b
+        WHERE
+            a.id = b.id
+            AND b.status = 'inactive'
+        """;
+
+        Assert.Equal(expect, actual);
+    }
+
+    [Fact]
+    public void DeleteWithMultipleTablesTest()
+    {
+        var text = @"
+            DELETE FROM orders AS o
+            USING customers AS c, payments AS p
+            WHERE o.customer_id = c.id
+              AND c.payment_id = p.id
+              AND p.status = 'completed';
+        ";
+        var q = DeleteQueryParser.Parse(text);
+
+        Monitor.Log(q);
+
+        var actual = q.ToText();
+        var expect = """
+            DELETE FROM
+                orders AS o
+            USING
+                customers AS c, payments AS p
+            WHERE
+                o.customer_id = c.id
+                AND c.payment_id = p.id
+                AND p.status = 'completed'
+            """;
+
+        Assert.Equal(expect, actual);
+    }
+
+    [Fact]
     public void DeleteWithReturningColumnsTest()
     {
         var text = @"DELETE FROM table_a WHERE id = 1 RETURNING id, value";

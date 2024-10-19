@@ -26,14 +26,17 @@ public static class DeleteQueryParser
     {
         var dq = new DeleteQuery();
 
-        // with
         if (r.Peek().IsEqualNoCase("with"))
         {
             dq.WithClause = WithClauseParser.Parse(r);
         }
 
-        // update
         dq.DeleteClause = DeleteClauseParser.Parse(r);
+
+        if (r.Peek().IsEqualNoCase("using"))
+        {
+            dq.UsingClause = DeleteUsingClauseParser.Parse(r);
+        }
 
         if (r.Peek().IsEqualNoCase("where"))
         {

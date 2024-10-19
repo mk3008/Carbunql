@@ -47,7 +47,7 @@ public static class SelectableTableParser
             r.ReadOrDefault("as");
 
             var next = r.Peek();
-            if (next.IsEqualNoCase(["from", "set"]))
+            if (next.IsEqualNoCase(["from", "set", "using"]))
             {
                 return new SelectableTable(v, v.GetDefaultName());
             }
