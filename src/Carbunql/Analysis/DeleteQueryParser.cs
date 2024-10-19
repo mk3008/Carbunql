@@ -1,11 +1,14 @@
 ﻿using Carbunql.Analysis.Parser;
+using Carbunql.Clauses;
 using Carbunql.Extensions;
 
 namespace Carbunql.Analysis;
 
-public static class UpdateQueryParser
+
+public static class DeleteQueryParser
 {
-    public static UpdateQuery Parse(string text)
+
+    public static DeleteQuery Parse(string text)
     {
         var r = new SqlTokenReader(text);
         var query = Parse(r);
@@ -19,37 +22,29 @@ public static class UpdateQueryParser
         return query;
     }
 
-    public static UpdateQuery Parse(ITokenReader r)
+    public static DeleteQuery Parse(ITokenReader r)
     {
-        var uq = new UpdateQuery();
+        var dq = new DeleteQuery();
 
         // with
         if (r.Peek().IsEqualNoCase("with"))
         {
-            uq.WithClause = WithClauseParser.Parse(r);
+            dq.WithClause = WithClauseParser.Parse(r);
         }
 
         // update
-        uq.UpdateClause = UpdateClauseParser.Parse(r);
-
-        // set
-        uq.SetClause = SetClauseParser.Parse(r);
-
-        if (r.Peek().IsEqualNoCase("from"))
-        {
-            uq.FromClause = FromClauseParser.Parse(r);
-        }
+        dq.DeleteClause = DeleteClauseParser.Parse(r);
 
         if (r.Peek().IsEqualNoCase("where"))
         {
-            uq.WhereClause = WhereClauseParser.Parse(r);
+            dq.WhereClause = WhereClauseParser.Parse(r);
         }
 
         if (r.Peek().IsEqualNoCase("returning"))
         {
-            uq.ReturningClause = ReturningClauseParser.Parse(r);
+            dq.ReturningClause = ReturningClauseParser.Parse(r);
         }
 
-        return uq;
+        return dq;
     }
 }
