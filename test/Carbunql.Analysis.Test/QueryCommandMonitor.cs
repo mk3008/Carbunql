@@ -13,8 +13,7 @@ public class QueryCommandMonitor
 
     public void Log(IQueryCommandable arg)
     {
-        var frm = new TokenFormatLogic();
-        var bld = new CommandTextBuilder(frm);
+        var bld = new CommandTextBuilder();
         bld.Logger = (x) => Output.WriteLine(x);
 
         var sql = bld.Execute(arg.GetTokens(null));

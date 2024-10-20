@@ -27,7 +27,21 @@
 					</RadzenCard>
 				</div>
 			</div>
-
+        </RadzenTabsItem>
+        <RadzenTabsItem Text="Config">
+            <div class="row">
+                <div class="col-md-6 p-3">
+                    <RadzenCard>
+                        <RadzenText TextStyle="TextStyle.Subtitle2">Comma formatting</RadzenText>
+                        <RadzenRadioButtonList @bind-Value=@formatting TValue="commaFormatting" class="mb-5" Change=@OnFormattingChange>
+                            <Items>
+                                <RadzenRadioButtonListItem Text="Leading" Value=commaFormatting.Leading />
+                                <RadzenRadioButtonListItem Text="Trailing" Value=commaFormatting.Traiging />
+                            </Items>
+                        </RadzenRadioButtonList>
+                    </RadzenCard>
+                </div>
+            </div>
         </RadzenTabsItem>
         <RadzenTabsItem Text="Source">
 	        <RadzenText Style="font-family: 'Ricty Diminished', SFMono-Regular, Consolas, 'Courier New', 'BIZ UDGothic', Meiryo, monospace; font-size: 18px; white-space: pre;" ReadOnly="true" >using Carbunql;
@@ -40,17 +54,39 @@ var sql = QueryCommandableParser.Parse("select id, val from table_a as a")
 
 @code {
 
+    enum commaFormatting{
+        Leading,
+        Traiging,
+    }
+
+    commaFormatting formatting ;
+
     string fsql = string.Empty;
 
     protected override void OnInitialized()
-	{
-		OnChange(sql);
-	}
+    {
+        formatting = CommandTextBuilder.FORMATTER switch
+        {
+            LeadingCommaTokenFormattingLogic => commaFormatting.Leading,
+            _ => commaFormatting.Traiging
+        };
+        OnChange(sql);
+    }
 
-	void OnClear()
-	{
-		sql = string.Empty;
-		OnChange(sql);
+    void OnClear()
+    {
+        sql = string.Empty;
+        OnChange(sql);
+    }
+
+    void OnFormattingChange()
+    {
+        CommandTextBuilder.FORMATTER = formatting switch
+        {
+            commaFormatting.Leading => new LeadingCommaTokenFormattingLogic(),
+            _ => new TrailingCommaTokenFormattingLogic()
+        };
+        OnChange(sql);
 	}
 
 	void OnChange(string value)
