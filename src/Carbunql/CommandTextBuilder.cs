@@ -8,21 +8,8 @@ namespace Carbunql;
 /// </summary>
 public class CommandTextBuilder
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CommandTextBuilder"/> class with the specified formatter.
-    /// </summary>
-    /// <param name="formatter">The token format logic to use.</param>
-    public CommandTextBuilder(TokenFormatLogic formatter)
-    {
-        Formatter = formatter;
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CommandTextBuilder"/> class with a default formatter.
-    /// </summary>
     public CommandTextBuilder()
     {
-        Formatter = new TokenFormatLogic();
     }
 
     /// <summary>
@@ -33,7 +20,7 @@ public class CommandTextBuilder
     /// <summary>
     /// Gets the token format logic used by the builder.
     /// </summary>
-    public TokenFormatLogic Formatter { get; init; }
+    public static ITokenFormattingLogic FORMATTER { get; set; } = new TrailingCommaTokenFormattingLogic();
 
     private Token? PrevToken { get; set; }
 
@@ -84,7 +71,7 @@ public class CommandTextBuilder
 
             if (t.Parents().Count() > PrevToken.Parents().Count())
             {
-                if (t.Parent != null && Formatter.IsIncrementIndentOnBeforeWriteToken(t.Parent))
+                if (t.Parent != null && FORMATTER.IsIncrementIndentOnBeforeWriteToken(t.Parent))
                 {
                     Logger?.Invoke($"increment indent and line break on before : {t.Text}");
                     Level++;
@@ -95,7 +82,7 @@ public class CommandTextBuilder
                 continue;
             }
 
-            if (Formatter.IsDecrementIndentOnBeforeWriteToken(t))
+            if (FORMATTER.IsDecrementIndentOnBeforeWriteToken(t))
             {
                 var q = IndentLevels.Where(x => x.Token != null && x.Token.Equals(t.Parent)).Select(x => x.Level);
                 var lv = 0;
@@ -122,12 +109,12 @@ public class CommandTextBuilder
         if (token == null) yield break;
         if (string.IsNullOrEmpty(token.Text)) yield break;
 
-        if (PrevToken != null && Formatter.IsLineBreakOnBeforeWriteToken(token))
+        if (PrevToken != null && FORMATTER.IsLineBreakOnBeforeWriteToken(token))
         {
             yield return GetLineBreakText();
         }
         yield return GetTokenTextCore(token);
-        if (Formatter.IsLineBreakOnAfterWriteToken(token))
+        if (FORMATTER.IsLineBreakOnAfterWriteToken(token))
         {
             yield return GetLineBreakText();
         }
@@ -178,4 +165,15 @@ public class CommandTextBuilder
         }
         return "\r\n" + SpacerCache[Level];
     }
+}
+
+public interface ITokenFormattingLogic
+{
+    bool IsIncrementIndentOnBeforeWriteToken(Token token);
+
+    bool IsDecrementIndentOnBeforeWriteToken(Token token);
+
+    bool IsLineBreakOnBeforeWriteToken(Token token);
+
+    bool IsLineBreakOnAfterWriteToken(Token token);
 }

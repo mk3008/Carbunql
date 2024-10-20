@@ -8,7 +8,7 @@ namespace Carbunql;
 /// <summary>
 /// Provides logic for formatting tokens in query writing.
 /// </summary>
-public class TokenFormatLogic
+public class LeadingCommaTokenFormattingLogic : ITokenFormattingLogic
 {
     /// <summary>
     /// Gets or sets the logger action for logging.
@@ -29,6 +29,22 @@ public class TokenFormatLogic
         if (token.Text.Equals("/*")) return true;
 
         if (token.Text.Equals(",") && token.Sender is Relation) return false;
+
+        if (token.Text.Equals(","))
+        {
+            if (token.Sender is WithClause) return true;
+            if (token.Sender is WindowClause) return true;
+            if (token.Sender is SelectClause) return true;
+            if (token.Sender is Relation) return true;
+            if (token.Sender is GroupClause) return true;
+            if (token.Sender is OrderClause) return true;
+            if (token.Sender is ValuesQuery) return true;
+            if (token.Sender is SetClause) return true;
+            if (token.Sender is PartitionClause) return true;
+            if (token.Sender is TableDefinitionClause) return true;
+            if (token.Sender is IndexOnClause) return true;
+            if (token.Sender is AlterTableClause) return true;
+        }
 
         if (token.Text.IsEqualNoCase("as") && token.Sender is CreateTableQuery) return true;
 
@@ -57,24 +73,6 @@ public class TokenFormatLogic
         if (token.Sender is OperatableQuery) return true;
 
         if (token.Text.Equals("*/")) return true;
-
-        if (token.Text.Equals(","))
-        {
-            if (token.Sender is WithClause) return true;
-            if (token.Sender is WindowClause) return true;
-            if (token.Sender is SelectClause) return true;
-            if (token.Sender is Relation) return true;
-            if (token.Sender is GroupClause) return true;
-            if (token.Sender is OrderClause) return true;
-            if (token.Sender is ValuesQuery) return true;
-            if (token.Sender is SetClause) return true;
-            if (token.Sender is PartitionClause) return true;
-            if (token.Sender is TableDefinitionClause) return true;
-            if (token.Sender is IndexOnClause) return true;
-            if (token.Sender is AlterTableClause) return true;
-        }
-
-
 
         return false;
     }
