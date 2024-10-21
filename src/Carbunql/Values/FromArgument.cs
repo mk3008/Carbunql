@@ -22,7 +22,7 @@ public class FromArgument : ValueBase
     /// </summary>
     /// <param name="unit">The unit value.</param>
     /// <param name="value">The value.</param>
-    public FromArgument(ValueBase unit, ValueBase value)
+    public FromArgument(string unit, ValueBase value)
     {
         Unit = unit;
         Value = value;
@@ -31,7 +31,7 @@ public class FromArgument : ValueBase
     /// <summary>
     /// Gets or sets the unit value.
     /// </summary>
-    public ValueBase Unit { get; init; }
+    public string Unit { get; init; }
 
     /// <summary>
     /// Gets or sets the value.
@@ -41,10 +41,6 @@ public class FromArgument : ValueBase
     /// <inheritdoc/>
     protected override IEnumerable<SelectQuery> GetInternalQueriesCore()
     {
-        foreach (var item in Unit.GetInternalQueries())
-        {
-            yield return item;
-        }
         foreach (var item in Value.GetInternalQueries())
         {
             yield return item;
@@ -54,7 +50,9 @@ public class FromArgument : ValueBase
     /// <inheritdoc/>
     public override IEnumerable<Token> GetCurrentTokens(Token? parent)
     {
-        foreach (var item in Unit.GetTokens(parent)) yield return item;
+        if (string.IsNullOrEmpty(Unit)) throw new InvalidProgramException();
+
+        yield return Token.Reserved(this, parent, Unit);
         yield return Token.Reserved(this, parent, "from");
         foreach (var item in Value.GetTokens(parent)) yield return item;
     }
@@ -62,10 +60,6 @@ public class FromArgument : ValueBase
     /// <inheritdoc/>
     protected override IEnumerable<QueryParameter> GetParametersCore()
     {
-        foreach (var item in Unit.GetParameters())
-        {
-            yield return item;
-        }
         foreach (var item in Value.GetParameters())
         {
             yield return item;
@@ -75,10 +69,6 @@ public class FromArgument : ValueBase
     /// <inheritdoc/>
     protected override IEnumerable<PhysicalTable> GetPhysicalTablesCore()
     {
-        foreach (var item in Unit.GetPhysicalTables())
-        {
-            yield return item;
-        }
         foreach (var item in Value.GetPhysicalTables())
         {
             yield return item;
@@ -88,10 +78,6 @@ public class FromArgument : ValueBase
     /// <inheritdoc/>
     protected override IEnumerable<CommonTable> GetCommonTablesCore()
     {
-        foreach (var item in Unit.GetCommonTables())
-        {
-            yield return item;
-        }
         foreach (var item in Value.GetCommonTables())
         {
             yield return item;
@@ -100,10 +86,6 @@ public class FromArgument : ValueBase
 
     internal override IEnumerable<ColumnValue> GetColumnsCore()
     {
-        foreach (var item in Unit.GetColumns())
-        {
-            yield return item;
-        }
         foreach (var item in Value.GetColumns())
         {
             yield return item;
@@ -113,11 +95,6 @@ public class FromArgument : ValueBase
     public override IEnumerable<ValueBase> GetValues()
     {
         yield return this;
-
-        foreach (var item in Unit.GetValues())
-        {
-            yield return item;
-        }
 
         foreach (var item in Value.GetValues())
         {

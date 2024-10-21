@@ -58,7 +58,7 @@ public static class ValueCollectionParser
 
             if (r.ReadOrDefault("from") != null)
             {
-                yield return FromArgumentParser.Parse(v, r);
+                yield return FromArgumentParser.Parse(v.ToText(), r);
             }
             else if (r.ReadOrDefault("as") != null)
             {
