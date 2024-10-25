@@ -53,6 +53,8 @@ public class SelectableTable : IQueryCommandable, ISelectable, ICommentable
     /// </summary>
     public ValueCollection? ColumnAliases { get; init; }
 
+    public bool HideColumnAliases { get; internal set; } = false;
+
     public CommentClause? CommentClause { get; set; }
 
     public IEnumerable<Token> GetAliasTokens(Token? parent)
@@ -90,7 +92,7 @@ public class SelectableTable : IQueryCommandable, ISelectable, ICommentable
             yield return new Token(this, parent, Alias);
         }
 
-        if (ColumnAliases != null)
+        if (ColumnAliases != null && HideColumnAliases == false)
         {
             var bracket = Token.ReservedBracketStart(this, parent);
             yield return bracket;

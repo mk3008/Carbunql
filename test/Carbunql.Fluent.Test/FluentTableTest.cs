@@ -164,4 +164,108 @@ public class FluentTableTest
 
         Assert.Equal(expect, sq.ToText());
     }
+
+    [Fact]
+    public void SingleTableTest()
+    {
+        var a = FluentTable.Create("table_a", ["id", "value"], "a");
+
+        var sq = new SelectQuery()
+            .From(a)
+            .SelectAll(a);
+
+        Monitor.Log(sq);
+
+        var expect = """
+            SELECT
+                a.id,
+                a.value
+            FROM
+                table_a AS a
+            """;
+
+        Assert.Equal(expect, sq.ToText());
+    }
+
+    [Fact]
+    public void SingleTableCteTest_SelectAll()
+    {
+        var a = FluentTable.Create("table_a", ["id", "value"], "cte_a", "a");
+
+        var sq = new SelectQuery()
+            .From(a)
+            .SelectAll(a);
+
+        Monitor.Log(sq);
+
+        var expect = """
+            WITH
+                cte_a AS (
+                    SELECT
+                        *
+                    FROM
+                        table_a
+                )
+            SELECT
+                a.id,
+                a.value
+            FROM
+                cte_a AS a
+            """;
+
+        Assert.Equal(expect, sq.ToText());
+    }
+
+    [Fact]
+    public void SingleTableCteFilterTest()
+    {
+        var a = FluentTable.Create("table_a", ["id", "value"], "cte_a", "a");
+
+        var sq = new SelectQuery()
+            .From(a)
+            .Equal("id", 1);
+
+        Monitor.Log(sq);
+
+        var expect = """
+            WITH
+                cte_a AS (
+                    SELECT
+                        *
+                    FROM
+                        table_a
+                    WHERE
+                        table_a.id = 1
+                )
+            SELECT
+                *
+            FROM
+                cte_a AS a
+            """;
+
+        Assert.Equal(expect, sq.ToText());
+    }
+
+    [Fact]
+    public void SingleTableFilterTest()
+    {
+        var a = FluentTable.Create("table_a", ["id", "value"], "a");
+
+        var sq = new SelectQuery()
+            .From(a)
+            .Equal("id", 1);
+
+        Monitor.Log(sq);
+
+        var expect = """
+            SELECT
+                *
+            FROM
+                table_a AS a
+            WHERE
+                a.id = 1
+            """;
+
+        Assert.Equal(expect, sq.ToText());
+    }
 }

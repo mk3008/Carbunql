@@ -138,7 +138,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     {
         var commonTables = GetCommonTables().ToList();
         var sources = new List<IQuerySource>();
-        var lst = CreateQuerySources(ref sources, commonTables, new Numbering(0));
+        CreateQuerySources(ref sources, commonTables, new Numbering(0));
 
         return sources;
     }
@@ -169,6 +169,13 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             {
                 var qs = DisassembleQuerySources(ref sources, source, query, commonTables, numbering, SourceType.SubQuery);
                 currentSources.Add(qs);
+            }
+            else if (source.ColumnAliases != null && source.ColumnAliases.Any())
+            {
+                // If a column alias is present, no further parsing is done
+                var names = source.ColumnAliases.SelectMany(x => x.GetColumns()).Select(x => x.Column).ToHashSet();
+                var qs = new QuerySource(numbering.GetNext(), names, this, source, SourceType.PhysicalTable);
+                sources.Add(qs);
             }
             else if (source.Table is PhysicalTable table && commonTables.Any(x => x.Alias == table.GetTableFullName()))
             {

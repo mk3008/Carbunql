@@ -79,7 +79,29 @@ public class FluentTable(TableBase table, IEnumerable<string> columnAliases, str
         else
         {
             var t = TableParser.Parse(query);
-            return new FluentTable(t, columnAliases, cteName, alias);
+            if (t is PhysicalTable pt)
+            {
+                if (!string.IsNullOrEmpty(cteName))
+                {
+                    var ft = Create(pt.GetTableFullName(), columnAliases, pt.GetDefaultName());
+                    ft.HideColumnAliases = true;
+
+                    var sq = new SelectQuery()
+                        .From(ft);
+
+                    return Create(sq, Enumerable.Empty<string>(), cteName, alias);
+
+                    //return Create($"select {string.Join(",", columnAliases)} from {pt.GetTableFullName()}", Enumerable.Empty<string>(), cteName, alias);
+                }
+
+                //return new FluentTable(pt, columnAliases, cteName, alias);
+                return new FluentTable(pt, columnAliases, cteName, alias)
+                {
+                    HideColumnAliases = true
+                };
+            }
+
+            throw new NotSupportedException();
         }
     }
 
@@ -129,6 +151,15 @@ public class FluentTable(TableBase table, IEnumerable<string> columnAliases, str
     public IEnumerable<string> ColumnAliases { get; } = columnAliases;
 
     /// <summary>
+    /// Determines whether column aliases should be hidden in the SQL output.
+    /// </summary>
+    /// <remarks>
+    /// When set to <c>true</c>, column aliases will be omitted from the generated SQL statements.
+    /// The default value is <c>false</c>, which includes column aliases in the SQL output.
+    /// </remarks>
+    public bool HideColumnAliases { get; private set; } = false;
+
+    /// <summary>
     /// Gets the name of the Common Table Expression (CTE), if any.
     /// </summary>
     public string CteName { get; } = cteName;
@@ -156,7 +187,7 @@ public class FluentTable(TableBase table, IEnumerable<string> columnAliases, str
 
         var columnAliases = ColumnAliases.ToValueCollection();
 
-        if (ColumnAliases.Any())
+        if (ColumnAliases.Any() && HideColumnAliases == false)
         {
             return new CommonTable(Table, CteName, columnAliases)
             {
@@ -184,7 +215,10 @@ public class FluentTable(TableBase table, IEnumerable<string> columnAliases, str
         {
             if (columnAliases.Any())
             {
-                return new SelectableTable(Table, Alias, columnAliases);
+                return new SelectableTable(Table, Alias, columnAliases)
+                {
+                    HideColumnAliases = HideColumnAliases
+                };
             }
             else
             {
