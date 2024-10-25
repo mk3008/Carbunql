@@ -61,7 +61,17 @@ public class VirtualTable : TableBase
     /// <inheritdoc/>
     public override IList<string> GetColumnNames()
     {
-        if (Query is IReadQuery q)
+        if (Query is SelectQuery sq)
+        {
+            var s = sq.GetOrNewSelectQuery().SelectClause;
+            if (s == null)
+            {
+                var source = sq.GetQuerySources().Where(x => x.Query.Equals(sq)).First();
+                return source.ColumnNames.ToList();
+            }
+            return s.Select(x => x.Alias).ToList();
+        }
+        else if (Query is IReadQuery q)
         {
             var s = q.GetOrNewSelectQuery().SelectClause;
             if (s == null) return base.GetColumnNames();

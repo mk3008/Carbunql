@@ -28,6 +28,29 @@ public class ToCTETest
 
         Monitor.Log(sq);
 
+        var expect = """
+            WITH
+                x AS (
+                    SELECT
+                        id,
+                        val
+                    FROM
+                        table_a AS a
+                ),
+                alias AS (
+                    SELECT
+                        x.id
+                    FROM
+                        x
+                )
+            SELECT
+                alias.id
+            FROM
+                alias
+            """;
+
+        Assert.Equal(expect, sq.ToText());
+
         Assert.Equal(30, sq.GetTokens().ToList().Count);
     }
 
@@ -41,6 +64,29 @@ public class ToCTETest
         sq.Select(f);
 
         Monitor.Log(sq);
+
+        var expect = """
+            WITH
+                x AS (
+                    SELECT
+                        id,
+                        val
+                    FROM
+                        table_a AS a
+                ),
+                alias AS (
+                    SELECT
+                        x.id
+                    FROM
+                        x
+                )
+            SELECT
+                alias.id
+            FROM
+                alias
+            """;
+
+        Assert.Equal(expect, sq.ToText());
 
         Assert.Equal(30, sq.GetTokens().ToList().Count);
     }
