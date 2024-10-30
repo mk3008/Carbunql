@@ -522,7 +522,46 @@ public static class SelectQueryWhereExtensions
     /// <param name="keyColumnNames">A list of key column names used in the query.</param>
     /// <param name="validationTable">The FluentTable object used for validation.</param>
     /// <returns>Returns the updated SelectQuery object.</returns>
+    [Obsolete("use ExistsIn")]
     public static SelectQuery Exists(this SelectQuery query, IEnumerable<string> keyColumnNames, FluentTable validationTable)
+    {
+        return query.ExistsIn(validationTable, keyColumnNames);
+    }
+
+    /// <summary>
+    /// Applies an Exists query to the specified validation table based on the given table and key column names.
+    /// </summary>
+    /// <param name="query">The SelectQuery object to operate on.</param>
+    /// <param name="table">The FluentTable object to operate on.</param>
+    /// <param name="keyColumnNames">A list of key column names used in the query.</param>
+    /// <param name="validationTable">The FluentTable object used for validation.</param>
+    /// <returns>Returns the updated SelectQuery object.</returns>
+    [Obsolete("use ExistsIn")]
+    public static SelectQuery Exists(this SelectQuery query, FluentTable table, IEnumerable<string> keyColumnNames, FluentTable validationTable)
+    {
+        return query.ExistsIn(validationTable, keyColumnNames, table);
+    }
+
+    [Obsolete("use ExistsIn")]
+    public static SelectQuery Exists(this SelectQuery query, IEnumerable<string> keyColumnNames, string validationTableName)
+    {
+        return query.ExistsIn(validationTableName, keyColumnNames);
+    }
+
+    [Obsolete("use ExistsIn")]
+    public static SelectQuery Exists(this SelectQuery query, string tableName, IEnumerable<string> keyColumnNames, string validationTableName)
+    {
+        return query.ExistsIn(validationTableName, keyColumnNames, tableName);
+    }
+
+    /// <summary>
+    /// Applies an Exists query to the specified validation table based on the key column names.
+    /// </summary>
+    /// <param name="query">The SelectQuery object to operate on.</param>
+    /// <param name="validationTable">The FluentTable object used for validation.</param>
+    /// <param name="keyColumnNames">A list of key column names used in the query.</param>
+    /// <returns>Returns the updated SelectQuery object.</returns>
+    public static SelectQuery ExistsIn(this SelectQuery query, FluentTable validationTable, IEnumerable<string> keyColumnNames)
     {
         if (validationTable.IsCommonTable)
         {
@@ -546,15 +585,58 @@ public static class SelectQueryWhereExtensions
         return query;
     }
 
+    public static SelectQuery ExistsIn(this SelectQuery query, FluentTable validationTable, string condition)
+    {
+        if (validationTable.IsCommonTable)
+        {
+            query.With(validationTable);
+        }
+
+        query.Where(() =>
+        {
+            var sq = new SelectQuery().From(validationTable);
+            sq.Where(condition);
+            return sq.ToExists();
+        });
+
+        return query;
+    }
+
+    public static SelectQuery ExistsIn(this SelectQuery query, FluentTable validationTable, IEnumerable<string> validationcolumns, FluentTable table, IEnumerable<string> columns)
+    {
+        if (columns.Count() != validationcolumns.Count())
+        {
+            throw new ArgumentException("The number of elements in columns and validationcolumns must be the same.");
+        }
+
+        var columnMaps = columns.Zip(validationcolumns, (left, right) => (left, right));
+
+        var lquery = new SelectQuery().From(table).GetCurrentQuerySource();
+        var rquery = new SelectQuery().From(validationTable).GetCurrentQuerySource();
+
+        var condition = string.Join(" and ", columnMaps.Select(item => $"{rquery.GetColumn(item.right, isAliasIncluded: true)} = {lquery.GetColumn(item.left, isAliasIncluded: true)}"));
+
+        var targetQuery = query.GetQuerySources()
+                    .Where(x => x.HasTable(table.Alias, true))
+                    .EnsureAny($"table:{table.Alias}")
+                    .GetRootsByQuery()
+                    .First()
+                    .Query;
+
+        targetQuery.ExistsIn(validationTable, condition);
+
+        return query;
+    }
+
     /// <summary>
     /// Applies an Exists query to the specified validation table based on the given table and key column names.
     /// </summary>
     /// <param name="query">The SelectQuery object to operate on.</param>
-    /// <param name="table">The FluentTable object to operate on.</param>
-    /// <param name="keyColumnNames">A list of key column names used in the query.</param>
     /// <param name="validationTable">The FluentTable object used for validation.</param>
+    /// <param name="keyColumnNames">A list of key column names used in the query.</param>
+    /// <param name="table">The FluentTable object to operate on.</param>
     /// <returns>Returns the updated SelectQuery object.</returns>
-    public static SelectQuery Exists(this SelectQuery query, FluentTable table, IEnumerable<string> keyColumnNames, FluentTable validationTable)
+    public static SelectQuery ExistsIn(this SelectQuery query, FluentTable validationTable, IEnumerable<string> keyColumnNames, FluentTable table)
     {
         if (validationTable.IsCommonTable)
         {
@@ -580,13 +662,13 @@ public static class SelectQueryWhereExtensions
         return query;
     }
 
-    public static SelectQuery Exists(this SelectQuery query, IEnumerable<string> keyColumnNames, string validationTableName)
+    public static SelectQuery ExistsIn(this SelectQuery query, string validationTableName, IEnumerable<string> keyColumnNames)
     {
         query.AddExists(keyColumnNames, validationTableName);
         return query;
     }
 
-    public static SelectQuery Exists(this SelectQuery query, string tableName, IEnumerable<string> keyColumnNames, string validationTableName)
+    public static SelectQuery ExistsIn(this SelectQuery query, string validationTableName, IEnumerable<string> keyColumnNames, string tableName)
     {
         query.AddExists(tableName, keyColumnNames, validationTableName);
         return query;
@@ -605,7 +687,89 @@ public static class SelectQueryWhereExtensions
     /// <param name="keyColumnNames">A list of key column names used in the query.</param>
     /// <param name="validationTable">The FluentTable object used for validation.</param>
     /// <returns>Returns the updated SelectQuery object.</returns>
+    [Obsolete("use NotExistsIn")]
     public static SelectQuery NotExists(this SelectQuery query, IEnumerable<string> keyColumnNames, FluentTable validationTable)
+    {
+        return query.NotExistsIn(validationTable, keyColumnNames);
+    }
+
+    /// <summary>
+    /// Applies a NotExists query to the specified validation table based on the given table and key column names.
+    /// </summary>
+    /// <param name="query">The SelectQuery object to operate on.</param>
+    /// <param name="table">The FluentTable object to operate on.</param>
+    /// <param name="keyColumnNames">A list of key column names used in the query.</param>
+    /// <param name="validationTable">The FluentTable object used for validation.</param>
+    /// <returns>Returns the updated SelectQuery object.</returns>
+    [Obsolete("use NotExistsIn")]
+    public static SelectQuery NotExists(this SelectQuery query, FluentTable table, IEnumerable<string> keyColumnNames, FluentTable validationTable)
+    {
+        return query.NotExistsIn(validationTable, keyColumnNames, table);
+    }
+
+    [Obsolete("use NotExistsIn")]
+    public static SelectQuery NotExists(this SelectQuery query, IEnumerable<string> keyColumnNames, string validationTableName)
+    {
+        return query.NotExistsIn(validationTableName, keyColumnNames);
+    }
+
+    [Obsolete("use NotExistsIn")]
+    public static SelectQuery NotExists(this SelectQuery query, string tableName, IEnumerable<string> keyColumnNames, string validationTableName)
+    {
+        return query.NotExistsIn(validationTableName, keyColumnNames, tableName);
+    }
+
+    public static SelectQuery NotExistsIn(this SelectQuery query, FluentTable validationTable, string condition)
+    {
+        if (validationTable.IsCommonTable)
+        {
+            query.With(validationTable);
+        }
+
+        query.Where(() =>
+        {
+            var sq = new SelectQuery().From(validationTable);
+            sq.Where(condition);
+            return sq.ToNotExists();
+        });
+
+        return query;
+    }
+
+    public static SelectQuery NotExistsIn(this SelectQuery query, FluentTable validationTable, IEnumerable<string> validationcolumns, FluentTable table, IEnumerable<string> columns)
+    {
+        if (columns.Count() != validationcolumns.Count())
+        {
+            throw new ArgumentException("The number of elements in columns and validationcolumns must be the same.");
+        }
+
+        var columnMaps = columns.Zip(validationcolumns, (left, right) => (left, right));
+
+        var lquery = new SelectQuery().From(table).GetCurrentQuerySource();
+        var rquery = new SelectQuery().From(validationTable).GetCurrentQuerySource();
+
+        var condition = string.Join(" and ", columnMaps.Select(item => $"{rquery.GetColumn(item.right, isAliasIncluded: true)} = {lquery.GetColumn(item.left, isAliasIncluded: true)}"));
+
+        var targetQuery = query.GetQuerySources()
+                    .Where(x => x.HasTable(table.Alias, true))
+                    .EnsureAny($"table:{table.Alias}")
+                    .GetRootsByQuery()
+                    .First()
+                    .Query;
+
+        targetQuery.NotExistsIn(validationTable, condition);
+
+        return query;
+    }
+
+    /// <summary>
+    /// Applies a NotExists query to the specified validation table based on the key column names.
+    /// </summary>
+    /// <param name="query">The SelectQuery object to operate on.</param>
+    /// <param name="validationTable">The FluentTable object used for validation.</param>
+    /// <param name="keyColumnNames">A list of key column names used in the query.</param>
+    /// <returns>Returns the updated SelectQuery object.</returns>
+    public static SelectQuery NotExistsIn(this SelectQuery query, FluentTable validationTable, IEnumerable<string> keyColumnNames)
     {
         if (validationTable.IsCommonTable)
         {
@@ -633,11 +797,11 @@ public static class SelectQueryWhereExtensions
     /// Applies a NotExists query to the specified validation table based on the given table and key column names.
     /// </summary>
     /// <param name="query">The SelectQuery object to operate on.</param>
-    /// <param name="table">The FluentTable object to operate on.</param>
-    /// <param name="keyColumnNames">A list of key column names used in the query.</param>
     /// <param name="validationTable">The FluentTable object used for validation.</param>
+    /// <param name="keyColumnNames">A list of key column names used in the query.</param>
+    /// <param name="table">The FluentTable object to operate on.</param>
     /// <returns>Returns the updated SelectQuery object.</returns>
-    public static SelectQuery NotExists(this SelectQuery query, FluentTable table, IEnumerable<string> keyColumnNames, FluentTable validationTable)
+    public static SelectQuery NotExistsIn(this SelectQuery query, FluentTable validationTable, IEnumerable<string> keyColumnNames, FluentTable table)
     {
         if (validationTable.IsCommonTable)
         {
@@ -663,13 +827,13 @@ public static class SelectQueryWhereExtensions
         return query;
     }
 
-    public static SelectQuery NotExists(this SelectQuery query, IEnumerable<string> keyColumnNames, string validationTableName)
+    public static SelectQuery NotExistsIn(this SelectQuery query, string validationTableName, IEnumerable<string> keyColumnNames)
     {
         query.AddNotExists(keyColumnNames, validationTableName);
         return query;
     }
 
-    public static SelectQuery NotExists(this SelectQuery query, string tableName, IEnumerable<string> keyColumnNames, string validationTableName)
+    public static SelectQuery NotExistsIn(this SelectQuery query, string validationTableName, IEnumerable<string> keyColumnNames, string tableName)
     {
         query.AddNotExists(tableName, keyColumnNames, validationTableName);
         return query;
