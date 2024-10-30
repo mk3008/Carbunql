@@ -1,4 +1,5 @@
-﻿using Carbunql.Building;
+﻿using Carbunql.Extensions;
+using Carbunql.Building;
 using Carbunql.Fluent;
 using Cysharp.Text;
 
@@ -89,7 +90,39 @@ public static class SelectQueryWhereExtensions
     public static bool HasColumn(this SelectQuery query, string columnName, bool isAliasIncluded = true)
     {
         return query.GetQuerySources()
-                 .Where(x => query.HasColumn(x, columnName, isAliasIncluded)).Any();
+                 .Where(x => x.HasColumn(columnName, isAliasIncluded)).Any();
+    }
+
+    internal static bool HasColumn(this IQuerySource source, string columnName, bool isAliasIncluded)
+    {
+        if (isAliasIncluded && source.Query.GetColumnNames().Where(x => x.IsEqualNoCase(columnName)).Any())
+        {
+            return true;
+        }
+        else
+        {
+            return source.ColumnNames.Where(x => x.IsEqualNoCase(columnName)).Any();
+        }
+    }
+
+    internal static string GetColumn(this IQuerySource x, string columnName, bool isAliasIncluded)
+    {
+        if (x.Query.SelectClause != null && isAliasIncluded)
+        {
+            var selectableItem = x.Query.SelectClause!.Where(x => x.Alias.IsEqualNoCase(columnName)).FirstOrDefault();
+            if (selectableItem != null)
+            {
+                return selectableItem.Value.ToOneLineText();
+            }
+        }
+
+        var column = x.ColumnNames.Where(x => x.IsEqualNoCase(columnName)).FirstOrDefault();
+        if (column != null)
+        {
+            return $"{x.Alias}.{column}";
+        }
+
+        throw new InvalidProgramException();
     }
 
     private static (string, string) GenerateComparison(string operatorSymbol, object? value)
