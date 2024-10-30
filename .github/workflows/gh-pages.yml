@@ -1,10 +1,11 @@
-name: 'Publish application'
+name: 'Publish Github Pages'
 on: push
 
 jobs:
   build:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     
     env:
      PROJECT_FILE: CarbunqlWeb.csproj
