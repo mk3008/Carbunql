@@ -153,7 +153,7 @@ public class Sample
     }
 
     [Fact]
-    public void SingleTable_Join_Custome()
+    public void SingleTable_Join_Custom()
     {
         var tableA = FluentTable.Create("table_a", ["id", "value"], "a");
         var tableB = FluentTable.Create("table_b", ["id", "table_a_id", "value"], "b");
@@ -266,7 +266,7 @@ public class Sample
 
         var sq = new SelectQuery()
             .From(tableA)
-            .Exists(["table_a_id"], tableB);
+            .ExistsIn(tableB, ["table_a_id"]);
 
         Monitor.Log(sq);
 
@@ -297,7 +297,7 @@ public class Sample
 
         var sq = new SelectQuery()
             .From(tableA)
-            .Exists(tableA, ["table_a_id"], tableB);
+            .ExistsIn(tableB, ["table_a_id"], tableA);
 
         Monitor.Log(sq);
 
@@ -314,6 +314,68 @@ public class Sample
                         table_b AS b
                     WHERE
                         b.table_a_id = a.table_a_id
+                )
+            """;
+
+        Assert.Equal(expect, sq.ToText());
+    }
+
+    [Fact]
+    public void SingleTable_Exists_Custom()
+    {
+        var tableA = FluentTable.Create("table_a", ["id", "value"], "a");
+        var tableB = FluentTable.Create("table_b", ["table_a_id", "value"], "b");
+
+        var sq = new SelectQuery()
+            .From(tableA)
+            .ExistsIn(tableB, ["table_a_id"], tableA, ["id"]);
+
+        Monitor.Log(sq);
+
+        var expect = """
+            SELECT
+                *
+            FROM
+                table_a AS a
+            WHERE
+                EXISTS (
+                    SELECT
+                        *
+                    FROM
+                        table_b AS b
+                    WHERE
+                        b.table_a_id = a.id
+                )
+            """;
+
+        Assert.Equal(expect, sq.ToText());
+    }
+
+    [Fact]
+    public void SingleTable_NotExists_Custom()
+    {
+        var tableA = FluentTable.Create("table_a", ["id", "value"], "a");
+        var tableB = FluentTable.Create("table_b", ["table_a_id", "value"], "b");
+
+        var sq = new SelectQuery()
+            .From(tableA)
+            .NotExistsIn(tableB, ["table_a_id"], tableA, ["id"]);
+
+        Monitor.Log(sq);
+
+        var expect = """
+            SELECT
+                *
+            FROM
+                table_a AS a
+            WHERE
+                NOT EXISTS (
+                    SELECT
+                        *
+                    FROM
+                        table_b AS b
+                    WHERE
+                        b.table_a_id = a.id
                 )
             """;
 
