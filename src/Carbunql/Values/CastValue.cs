@@ -30,7 +30,7 @@ public class CastValue : ValueBase
     {
         Inner = inner;
         Symbol = symbol;
-        Type = type;
+        Type = type.ToText();
     }
 
     /// <summary>
@@ -43,7 +43,7 @@ public class CastValue : ValueBase
     {
         Inner = inner;
         Symbol = symbol;
-        Type = ValueParser.Parse(type);
+        Type = type;
     }
 
     /// <summary>
@@ -59,16 +59,12 @@ public class CastValue : ValueBase
     /// <summary>
     /// Gets or sets the type.
     /// </summary>
-    public ValueBase Type { get; init; }
+    public string Type { get; init; }
 
     /// <inheritdoc/>
     protected override IEnumerable<SelectQuery> GetInternalQueriesCore()
     {
         foreach (var item in Inner.GetInternalQueries())
-        {
-            yield return item;
-        }
-        foreach (var item in Type.GetInternalQueries())
         {
             yield return item;
         }
@@ -85,14 +81,14 @@ public class CastValue : ValueBase
             yield return bracket;
             foreach (var item in Inner.GetTokens(bracket)) yield return item;
             yield return Token.Reserved(this, bracket, Symbol);
-            foreach (var item in Type.GetTokens(bracket)) yield return item;
+            yield return Token.Reserved(this, bracket, Type);
             yield return Token.ExpressionBracketEnd(this, parent);
         }
         else
         {
             foreach (var item in Inner.GetTokens(parent)) yield return item;
             yield return Token.Reserved(this, parent, Symbol);
-            foreach (var item in Type.GetTokens(parent)) yield return item;
+            yield return Token.Reserved(this, parent, Type);
         }
     }
 
@@ -100,10 +96,6 @@ public class CastValue : ValueBase
     protected override IEnumerable<QueryParameter> GetParametersCore()
     {
         foreach (var item in Inner.GetParameters())
-        {
-            yield return item;
-        }
-        foreach (var item in Type.GetParameters())
         {
             yield return item;
         }
@@ -116,20 +108,12 @@ public class CastValue : ValueBase
         {
             yield return item;
         }
-        foreach (var item in Type.GetPhysicalTables())
-        {
-            yield return item;
-        }
     }
 
     /// <inheritdoc/>
     protected override IEnumerable<CommonTable> GetCommonTablesCore()
     {
         foreach (var item in Inner.GetCommonTables())
-        {
-            yield return item;
-        }
-        foreach (var item in Type.GetCommonTables())
         {
             yield return item;
         }
@@ -148,10 +132,6 @@ public class CastValue : ValueBase
         yield return this;
 
         foreach (var item in Inner.GetValues())
-        {
-            yield return item;
-        }
-        foreach (var item in Type.GetValues())
         {
             yield return item;
         }

@@ -40,7 +40,13 @@ public static class CastValueParser
     /// <returns>The parsed casted value.</returns>
     public static CastValue Parse(ValueBase value, string symbol, ITokenReader r)
     {
-        var type = ValueParser.Parse(r);
+        var type = ValueParser.ParseMain(r).ToText();
+
+        if (r.Peek() == "[]")
+        {
+            type += r.Read("[]");
+        }
+
         return new CastValue(value, symbol, type);
     }
 }

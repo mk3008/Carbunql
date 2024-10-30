@@ -815,7 +815,7 @@ SELECT
         Monitor.Log(item);
 
         var lst = item.GetTokens().ToList();
-        Assert.Equal(46, lst.Count);
+        Assert.Equal(45, lst.Count);
 
         var sql = @"SELECT
     NOW()::timestamp WITHOUT TIME ZONE AS t1,
@@ -1100,7 +1100,7 @@ ORDER BY
         Monitor.Log(sq);
 
         var lst = sq.GetTokens().ToList();
-        Assert.Equal(9, lst.Count);
+        Assert.Equal(6, lst.Count);
 
         Assert.Equal(expect, sq.ToText(), true, true, true);
     }

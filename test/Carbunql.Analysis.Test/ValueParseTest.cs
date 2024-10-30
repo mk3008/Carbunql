@@ -232,10 +232,12 @@ public class ValueParserTest
         var v = ValueParser.Parse(text);
         Monitor.Log(v);
 
-        var lst = v.GetTokens().ToList();
-        Assert.Equal(6, lst.Count);
+        var expect = "now()::timestamp without time zone";
+        var acutal = v.ToText();
+        Assert.Equal(expect, acutal);
 
-        Assert.Equal("now()::timestamp without time zone", v.ToText());
+        var lst = v.GetTokens().ToList();
+        Assert.Equal(5, lst.Count);
     }
 
     [Fact]
@@ -612,8 +614,12 @@ public class ValueParserTest
         var v = ValueParser.Parse(text);
         Monitor.Log(v);
 
+        var expect = "'3.14'::numeric(8, 2)";
+        var acutal = v.ToText();
+        Assert.Equal(expect, acutal);
+
         var lst = v.GetTokens().ToList();
-        Assert.Equal(8, lst.Count);
+        Assert.Equal(3, lst.Count);
     }
 
     [Fact]
@@ -655,6 +661,10 @@ public class ValueParserTest
         var text = "'[1,2,3]'::json->>2";
         var v = ValueParser.Parse(text);
         Monitor.Log(v);
+
+        var expect = "'[1,2,3]'::json ->> 2";
+        var acutal = v.ToText();
+        Assert.Equal(expect, acutal);
 
         var lst = v.GetTokens().ToList();
         Assert.Equal(5, lst.Count);
