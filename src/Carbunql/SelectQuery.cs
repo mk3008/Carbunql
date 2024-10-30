@@ -8,6 +8,7 @@ using Carbunql.Values;
 using Cysharp.Text;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
+using Carbunql.Fluent;
 
 namespace Carbunql;
 
@@ -132,6 +133,15 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     {
         HeaderCommentClause ??= new CommentClause();
         HeaderCommentClause.Add(comment);
+    }
+
+    public IQuerySource GetCurrentQuerySource()
+    {
+        var commonTables = GetCommonTables().ToList();
+        var sources = new List<IQuerySource>();
+        CreateQuerySources(ref sources, commonTables, new Numbering(0));
+
+        return sources.Where(x => x.Query.Equals(this)).First();
     }
 
     public IList<IQuerySource> GetQuerySources()
@@ -1041,7 +1051,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     public SelectQuery AddWhere(string columnName, Func<IQuerySource, string> adder, bool isAliasIncluded = false)
     {
         GetQuerySources()
-            .Where(x => HasColumn(x, columnName, isAliasIncluded))
+            .Where(x => x.HasColumn(columnName, isAliasIncluded))
             .EnsureAny($"column:{columnName}")
             .GetRootsByQuery()
             .ForEach(x =>
@@ -1061,48 +1071,18 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
     public SelectQuery AddWhere(string columnName, Func<IQuerySource, string, string> adder, bool isAliasIncluded = false)
     {
         GetQuerySources()
-            .Where(x => HasColumn(x, columnName, isAliasIncluded))
+            .Where(x => x.HasColumn(columnName, isAliasIncluded))
             .EnsureAny($"column:{columnName}")
             .GetRootsByQuery()
             .ForEach(x =>
             {
-                x.Query.Where(adder(x, GetColumn(x, columnName, isAliasIncluded)));
+                x.Query.Where(adder(x, x.GetColumn(columnName, isAliasIncluded)));
             });
 
         return this;
     }
 
-    internal bool HasColumn(IQuerySource source, string columnName, bool isAliasIncluded)
-    {
-        if (isAliasIncluded && source.Query.GetColumnNames().Where(x => x.IsEqualNoCase(columnName)).Any())
-        {
-            return true;
-        }
-        else
-        {
-            return source.ColumnNames.Where(x => x.IsEqualNoCase(columnName)).Any();
-        }
-    }
 
-    private string GetColumn(IQuerySource x, string columnName, bool isAliasIncluded)
-    {
-        if (x.Query.SelectClause != null && isAliasIncluded)
-        {
-            var selectableItem = x.Query.SelectClause!.Where(x => x.Alias.IsEqualNoCase(columnName)).FirstOrDefault();
-            if (selectableItem != null)
-            {
-                return selectableItem.Value.ToOneLineText();
-            }
-        }
-
-        var column = x.ColumnNames.Where(x => x.IsEqualNoCase(columnName)).FirstOrDefault();
-        if (column != null)
-        {
-            return $"{x.Alias}.{column}";
-        }
-
-        throw new InvalidProgramException();
-    }
 
     /// <summary>
     /// Adds a search condition.
@@ -1138,7 +1118,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         GetQuerySources()
             .Where(x => x.HasTable(tableName, true))
             .EnsureAny($"table:{tableName}")
-            .Where(x => HasColumn(x, columnName, isAliasIncluded))
+            .Where(x => x.HasColumn(columnName, isAliasIncluded))
             .EnsureAny($"The table exists, but there is no corresponding column in the table. table:{tableName}, column:{columnName}")
             .GetRootsByQuery()
             .ForEach(x =>
@@ -1161,12 +1141,12 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
         GetQuerySources()
             .Where(x => x.HasTable(tableName, true))
             .EnsureAny($"table:{tableName}")
-            .Where(x => HasColumn(x, columnName, isAliasIncluded))
+            .Where(x => x.HasColumn(columnName, isAliasIncluded))
             .EnsureAny($"The table exists, but there is no corresponding column in the table. table:{tableName}, column:{columnName}")
             .GetRootsByQuery()
             .ForEach(x =>
             {
-                x.Query.Where(adder(x, GetColumn(x, columnName, isAliasIncluded)));
+                x.Query.Where(adder(x, x.GetColumn(columnName, isAliasIncluded)));
             });
 
         return this;
@@ -1338,7 +1318,7 @@ public class SelectQuery : ReadQuery, IQueryCommandable, ICommentable
             .ForEach(x =>
             {
                 x.Query.OrderClause ??= new();
-                x.Query.OrderClause.Add(SortableItemParser.Parse(adder(x, GetColumn(x, columnName, isAliasIncluded))));
+                x.Query.OrderClause.Add(SortableItemParser.Parse(adder(x, x.GetColumn(columnName, isAliasIncluded))));
             });
 
         return this;
