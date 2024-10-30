@@ -155,6 +155,19 @@ public class SelectableItemParserTest
         Assert.Equal(14, lst.Count);
     }
 
+    [Fact]
+    public void Array()
+    {
+        var text = "'{1,2,3}'::int[] as val";
+        var v = SelectableItemParser.Parse(text);
+        Monitor.Log(v);
+
+        var expect = "'{1,2,3}'::INT[] AS val";
+
+        var actual = v.ToText();
+        Assert.Equal(expect, actual);
+    }
+
     //[Fact]
     //public void FunctionIssue198_Case()
     //{

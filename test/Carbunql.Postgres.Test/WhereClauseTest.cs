@@ -156,7 +156,7 @@ WHERE
     AND a.rate = 0.1
     AND a.is_enabled = True
     AND a.is_enabled <> False
-    AND a.timestamp >= CAST('2000/01/01 0:00:00' AS timestamp)";
+    AND a.timestamp >= CAST('2000/01/01 0:00:00' AS TIMESTAMP)";
 
         Assert.Equal(expect, sq.ToText());
     }

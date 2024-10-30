@@ -64,7 +64,7 @@ public static class ValueParser
         return value;
     }
 
-    private static ValueBase ParseMain(ITokenReader r)
+    internal static ValueBase ParseMain(ITokenReader r)
     {
         var v = ParseCore(r);
 
