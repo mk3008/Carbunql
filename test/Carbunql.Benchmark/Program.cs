@@ -117,6 +117,15 @@ order by
     }
 
     [Benchmark]
+    public string CarbunqlLexerRead()
+    {
+        var reader = new SqlLexReader(Sql);
+        while (!string.IsNullOrEmpty(reader.Read())) { }
+
+        return "success";// sq.ToQuery().CommandText;
+    }
+
+    [Benchmark]
     public string SqModelParse()
     {
         var sq = SqModel.Analysis.SqlParser.Parse(Sql);

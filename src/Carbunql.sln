@@ -49,7 +49,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demo.DatasourceCompare", ".
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carbunql.Fluent.Test", "..\test\Carbunql.Fluent.Test\Carbunql.Fluent.Test.csproj", "{596E923B-6E21-4A17-9E83-50B5DE44EBD6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carbunql.Formatting.Test.LeadingCommaFormatting", "..\test\Carbunql.Formatting.Test\Carbunql.Formatting.Test.LeadingCommaFormatting.csproj", "{AD43B45C-0FA1-46D5-862C-7EF1DDB1E5EF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Carbunql.Formatting.Test.LeadingCommaFormatting", "..\test\Carbunql.Formatting.Test\Carbunql.Formatting.Test.LeadingCommaFormatting.csproj", "{AD43B45C-0FA1-46D5-862C-7EF1DDB1E5EF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Carbunql.LexicalAnalyzer", "Carbunql.LexicalAnalyzer\Carbunql.LexicalAnalyzer.csproj", "{A1991036-A9EF-491F-8F82-B0A77DB650D5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -153,6 +155,10 @@ Global
 		{AD43B45C-0FA1-46D5-862C-7EF1DDB1E5EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD43B45C-0FA1-46D5-862C-7EF1DDB1E5EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD43B45C-0FA1-46D5-862C-7EF1DDB1E5EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1991036-A9EF-491F-8F82-B0A77DB650D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1991036-A9EF-491F-8F82-B0A77DB650D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1991036-A9EF-491F-8F82-B0A77DB650D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1991036-A9EF-491F-8F82-B0A77DB650D5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
