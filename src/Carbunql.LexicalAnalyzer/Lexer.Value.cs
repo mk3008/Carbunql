@@ -5,24 +5,24 @@ namespace Carbunql.LexicalAnalyzer;
 public static partial class Lexer
 {
     [MemberNotNullWhen(true)]
-    public static bool TryParseValueLex(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    internal static bool TryParseValueLex(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
     {
         lex = default;
-        if (TryParseWildCardLex(memory, ref position, out lex)) return true;
-        if (TryParseNumericValueLex(memory, ref position, out lex)) return true;
-        if (TryParseTextValueLex(memory, ref position, out lex)) return true;
+        if (TryParseWildCard(memory, ref position, out lex)) return true;
+        if (TryParseNumericValue(memory, ref position, out lex)) return true;
+        if (TryParseSingleQuotedText(memory, ref position, out lex)) return true;
         if (TryParseLetterValueLex(memory, ref position, out lex)) return true;
         return false;
     }
 
     [MemberNotNullWhen(true)]
-    private static bool TryParseWildCardLex(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    private static bool TryParseWildCard(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
     {
         return TryParseSingleCharLex(memory, ref position, '*', LexType.WildCard, out lex);
     }
 
     [MemberNotNullWhen(true)]
-    public static bool TryParseLetterValueLex(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    public static bool TryParseLetter(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
     {
         lex = default;
 
@@ -86,8 +86,73 @@ public static partial class Lexer
         return true;
     }
 
+    //[MemberNotNullWhen(true)]
+    //public static bool TryParseLetterValueLex(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    //{
+    //    lex = default;
+
+    //    if (memory.Length < position + 1)
+    //    {
+    //        return false;
+    //    }
+
+    //    int start = position;
+
+    //    while (position < memory.Length)
+    //    {
+    //        char current = memory.Span[position];
+
+    //        if (char.IsLetter(current) || current == '_')
+    //        {
+    //            position++;
+    //            continue;
+    //        }
+
+    //        break;
+    //    }
+
+    //    // If no letter were found
+    //    if (start == position)
+    //    {
+    //        return false;
+    //    }
+
+    //    //check next lex
+    //    int tempPos = position;
+    //    SkipWhiteSpaces(memory, ref tempPos);
+
+    //    LexType lexType;
+    //    if (tempPos < memory.Length)
+    //    {
+    //        char nextChar = memory.Span[tempPos];
+    //        if (nextChar == '.')
+    //        {
+    //            lexType = LexType.SchemaOrTableOrColumn;
+    //        }
+    //        else if (nextChar == ',' || char.IsWhiteSpace(nextChar))
+    //        {
+    //            lexType = LexType.Column;
+    //        }
+    //        else if (nextChar == '(')
+    //        {
+    //            lexType = LexType.Function;
+    //        }
+    //        else
+    //        {
+    //            lexType = LexType.Value;
+    //        }
+    //    }
+    //    else
+    //    {
+    //        lexType = LexType.Value;
+    //    }
+
+    //    lex = new Lex(memory, lexType, start, position - start);
+    //    return true;
+    //}
+
     [MemberNotNullWhen(true)]
-    public static bool TryParseNumericValueLex(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    public static bool TryParseNumericValue(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
     {
         lex = default;
 
@@ -144,7 +209,7 @@ public static partial class Lexer
     }
 
     [MemberNotNullWhen(true)]
-    private static bool TryParseTextValueLex(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    private static bool TryParseSingleQuotedText(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
     {
         lex = default;
 

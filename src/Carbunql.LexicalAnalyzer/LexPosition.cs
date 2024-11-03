@@ -1,269 +1,30 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿namespace Carbunql.LexicalAnalyzer;
 
-namespace Carbunql.LexicalAnalyzer;
-
-public static partial class Lexer
+public readonly struct LexPosition(ReadOnlyMemory<char> memory, int position, int length)
 {
-    [MemberNotNullWhen(true)]
-    public static IEnumerable<Lex> ReadSelectExpressionLexes(ReadOnlyMemory<char> memory, int position)
+    public ReadOnlyMemory<char> Memory { get; } = memory;
+
+    public int Position { get; } = position;
+
+    public int Length { get; } = length;
+
+    public int EndPosition => Position + Length;
+
+    public string Value => GetValue();
+
+    private readonly string? cachedValue;
+
+    private string GetValue()
     {
-        SkipWhiteSpaces(memory, ref position);
-
-        var length = memory.Length;
-        if (length < position + 1)
+        if (cachedValue == null)
         {
-            yield break;
+            if (Position + Length > Memory.Length)
+                throw new ArgumentOutOfRangeException(nameof(Length), "Position and Length exceed memory bounds.");
+
+            return Memory.Slice(Position, Length).ToString();
         }
-
-        Lex lex;
-        while (position < length)
-        {
-            // wild card
-            if (TryParseWildCard(memory, ref position, out lex))
-            {
-                yield return lex;
-                break;
-            }
-
-            // value
-            if (TryParseSingleQuotedText(memory, ref position, out lex)
-                || TryParseNumericValue(memory, ref position, out lex)
-                || TryParseSpecialValue(memory, ref position, out lex))
-            {
-                yield return lex;
-                SkipWhiteSpacesAndComment(memory, ref position);
-
-                // operator
-                if (TryParseOperator(memory, ref position, out lex))
-                {
-                    yield return lex;
-                    SkipWhiteSpacesAndComment(memory, ref position);
-                    continue;
-                }
-
-                // alias, expression separator, or 'from' keyword
-                break;
-            }
-
-            // column
-            if (TryParseSchemaOrTableOrColumn(memory, ref position, out lex))
-            {
-                while (lex.Type == LexType.SchemaOrTable)
-                {
-                    yield return lex;
-                    ParseIdentifierSeparator(memory, ref position);
-                    if (!TryParseSchemaOrTableOrColumn(memory, ref position, out lex))
-                    {
-                        throw new FormatException();
-                    }
-                }
-                if (lex.Type != LexType.Column)
-                {
-                    throw new FormatException();
-                }
-                yield return lex;
-                SkipWhiteSpacesAndComment(memory, ref position);
-
-                // operator
-                if (TryParseOperator(memory, ref position, out lex))
-                {
-                    yield return lex;
-                    SkipWhiteSpacesAndComment(memory, ref position);
-                    continue;
-                }
-
-                // alias, expression separator, or 'from' keyword
-                break;
-            }
-
-            if (TryParseLeftParen(memory, ref position, out lex))
-            {
-                // 左カッコが出現する可能性がある
-                // SELECT句が来る可能性がある
-                // あとは同じ
-            }
-        }
+        return cachedValue;
     }
-
-
-    public static Lex TokenizeAsQueryStart(ReadOnlyMemory<char> memory)
-    {
-        int position = 0;
-
-        SkipWhiteSpaces(memory, ref position);
-
-        // Discard all comments before the query starts
-        position = ParseUntilNonComment(memory, previous: null).LastOrDefault().EndPosition;
-        SkipWhiteSpaces(memory, ref position);
-
-        if (memory.Length < position + 1)
-        {
-            throw new FormatException("The SQL string is empty or in an invalid format.");
-        }
-
-        // The first character must be a comment start or a reserved word; otherwise, it's an error.
-        Lex lex;
-        if (TryParseWithOrRecursiveLex(memory, ref position, out lex)) return lex;
-        if (TryParseSelectLex(memory, ref position, out lex)) return lex;
-        if (TryParseInsertLex(memory, ref position, out lex)) return lex;
-        if (TryParseDeleteLex(memory, ref position, out lex)) return lex;
-        if (TryParseUpdateLex(memory, ref position, out lex)) return lex;
-        if (TryParseMergeLex(memory, ref position, out lex)) return lex;
-        if (TryParseCreateLex(memory, ref position, out lex)) return lex;
-        if (TryParseAlterLex(memory, ref position, out lex)) return lex;
-
-        throw new FormatException("An invalid token was encountered. Please check if the SQL statement is correct.");
-    }
-
-    public static Lex TokenizeIdentifier(ReadOnlyMemory<char> memory, int position)
-    {
-        SkipWhiteSpaces(memory, ref position);
-
-        if (memory.Length < position + 1)
-        {
-            throw new FormatException("The SQL string is empty or in an invalid format.");
-        }
-
-        // Assume some identifier can be retrieved
-        // Separators like commas or dots are not expected
-        Lex lex;
-        if (TryParseCommentStartLex(memory, ref position, out lex)) return lex;
-
-        if (TryParsePrefixNegationLex(memory, ref position, out lex)) return lex;
-        if (TryParseLeftParen(memory, ref position, out lex)) return lex;
-
-        if (TryParseValueLex(memory, ref position, out lex)) return lex;
-
-        throw new FormatException("An invalid token was encountered. Please check if the SQL statement is correct.");
-    }
-
-
-
-    private static bool MemoryEqualsIgnoreCase(ReadOnlyMemory<char> memory, int position, string keyword)
-    {
-        if (position + keyword.Length > memory.Length)
-        {
-            return false;
-        }
-
-        for (int i = 0; i < keyword.Length; i++)
-        {
-            if (char.ToLowerInvariant(memory.Span[position + i]) != char.ToLowerInvariant(keyword[i]))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    [MemberNotNullWhen(true)]
-    private static bool TryParseQueryTerminator(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
-    {
-        lex = default;
-
-        if ((memory.Span[position] == ';'))
-        {
-            lex = new Lex(memory, LexType.QueryTerminator, position, 1, memory.Length);
-            return true;
-        }
-
-        return false;
-    }
-
-    [MemberNotNullWhen(true)]
-    private static bool TryParseSingleCharLex(ReadOnlyMemory<char> memory, ref int position, char targetChar, LexType lexType, out Lex lex)
-    {
-        lex = default;
-
-        if (memory.Length < position + 1)
-        {
-            return false;
-        }
-
-        if (memory.Span[position] == targetChar)
-        {
-            lex = new Lex(memory, lexType, position, 1);
-            return true;
-        }
-
-        return false;
-    }
-
-    [MemberNotNullWhen(true)]
-    private static bool TryParseValueSeparator(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
-    {
-        return TryParseSingleCharLex(memory, ref position, ',', LexType.ValueSeparator, out lex);
-    }
-
-    private static Lex ParseIdentifierSeparator(ReadOnlyMemory<char> memory, ref int position)
-    {
-        if (memory.Length < position + 1 || memory.Span[position] != '.')
-        {
-            throw new Exception();
-        }
-        var start = position;
-        position++;
-        return new Lex(memory, LexType.IdentifierSeparator, start, 1);
-    }
-
-    [MemberNotNullWhen(true)]
-    private static bool TryParseIdentifierSeparator(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
-    {
-        return TryParseSingleCharLex(memory, ref position, '.', LexType.IdentifierSeparator, out lex);
-    }
-
-    [MemberNotNullWhen(true)]
-    private static bool TryParseLeftParen(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
-    {
-        return TryParseSingleCharLex(memory, ref position, '(', LexType.LeftParen, out lex);
-    }
-
-
-
-
-
-
-
-    [MemberNotNullWhen(true)]
-    private static bool TryParsePrefixNegationLex(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
-    {
-        lex = default;
-
-        if (memory.Span[position] == '~')
-        {
-            lex = new Lex(memory, LexType.PrefixNegation, position, 1);
-            return true;
-        }
-
-        if (memory.Length < position + 3)
-        {
-            return false;
-        }
-
-        if (memory.EqualsWordIgnoreCase(position, "not"))
-        {
-            lex = new Lex(memory, LexType.PrefixNegation, position, 3);
-            return true;
-        }
-
-        return false;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
 
 

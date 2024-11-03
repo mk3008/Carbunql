@@ -12,6 +12,16 @@ public readonly struct Lex
         cachedValue = null;
     }
 
+    public Lex(ReadOnlyMemory<char> memory, LexType type, int position, int length, string value)
+    {
+        Memory = memory;
+        Type = type;
+        Position = position;
+        Length = length;
+        EndPosition = Position + Length;
+        cachedValue = value;
+    }
+
     public Lex(ReadOnlyMemory<char> memory, LexType type, int position, int length, int endPosition)
     {
         Memory = memory;

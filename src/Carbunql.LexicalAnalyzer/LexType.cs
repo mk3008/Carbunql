@@ -11,6 +11,10 @@ public enum LexType : byte
 
     QueryTerminator = 1,
 
+    As,
+
+    Operator,
+
     //alter command
     AlterSchema,
     AlterTable,
@@ -51,6 +55,7 @@ public enum LexType : byte
 
     WildCard,
     Value,
+    SchemaOrTable,
     SchemaOrTableOrColumn,
     Column,
     Function,

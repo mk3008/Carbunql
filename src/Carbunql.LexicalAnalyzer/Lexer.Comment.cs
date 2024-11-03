@@ -4,6 +4,28 @@ namespace Carbunql.LexicalAnalyzer;
 
 public static partial class Lexer
 {
+    internal static void SkipWhiteSpacesAndComment(ReadOnlyMemory<char> memory, ref int position)
+    {
+        SkipWhiteSpaces(memory, ref position);
+        SkipComment(memory, ref position);
+        SkipWhiteSpaces(memory, ref position);
+    }
+
+    internal static void SkipWhiteSpaces(ReadOnlyMemory<char> memory, ref int position)
+    {
+        var span = memory.Span;
+
+        while (position < span.Length && char.IsWhiteSpace(span[position]))
+        {
+            position++;
+        }
+    }
+
+    internal static void SkipComment(ReadOnlyMemory<char> memory, ref int position)
+    {
+        position = Math.Max(ParseUntilNonComment(memory, position).Last().EndPosition, position);
+    }
+
     [MemberNotNullWhen(true)]
     private static bool TryParseCommentStartLex(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
     {
@@ -19,7 +41,7 @@ public static partial class Lexer
     /// <param name="memory">The string to be parsed.</param>
     /// <param name="previous">The previous Lex indicating a non-comment state, or null if no previous state exists.</param>
     /// <returns>An enumeration of Lexes after comments have been removed.</returns>
-    private static IEnumerable<Lex> ParseUntilNonComment(ReadOnlyMemory<char> memory, Lex? previous = null)
+    internal static IEnumerable<Lex> ParseUntilNonComment(ReadOnlyMemory<char> memory, Lex? previous = null)
     {
         // Invalid if the previous Lex is in a comment state
         if (previous?.Type == LexType.LineCommentStart
@@ -33,6 +55,11 @@ public static partial class Lexer
         // Start position is 0 if previous is null
         int position = previous?.EndPosition ?? 0;
 
+        return ParseUntilNonComment(memory, position);
+    }
+
+    internal static IEnumerable<Lex> ParseUntilNonComment(ReadOnlyMemory<char> memory, int position)
+    {
         while (true)
         {
             Lex lex;

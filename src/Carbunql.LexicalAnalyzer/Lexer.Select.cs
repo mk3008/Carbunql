@@ -5,7 +5,7 @@ namespace Carbunql.LexicalAnalyzer;
 public static partial class Lexer
 {
     [MemberNotNullWhen(true)]
-    private static bool TryParseSelectLex(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    internal static bool TryParseSelectLex(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
     {
         lex = default;
 
@@ -48,6 +48,20 @@ public static partial class Lexer
         }
 
         lex = new Lex(memory, LexType.SelectDistinct, start, distinctEndPosition - start);
+        return true;
+    }
+
+    [MemberNotNullWhen(true)]
+    internal static bool TryParseAliasKeyword(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    {
+        lex = default;
+
+        if (!memory.EqualsWordIgnoreCase(position, "as"))
+        {
+            return false;
+        }
+
+        lex = new Lex(memory, LexType.As, position, 2);
         return true;
     }
 }

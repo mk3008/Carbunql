@@ -1,8 +1,117 @@
-﻿namespace Carbunql.LexicalAnalyzer;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Carbunql.LexicalAnalyzer;
 
 public static partial class Lexer
 {
-    private static IEnumerable<Lex> TryParseSchemaOrTableOrColumns(ReadOnlyMemory<char> memory, int position)
+    [MemberNotNullWhen(true)]
+    internal static bool TryParseSchemaOrTableOrColumn(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    {
+        lex = default;
+        if (TryParseSchemaOrTableOrColumnAsDefault(memory, ref position, out lex)) return true;
+        if (TryParseSchemaOrTableOrColumnAsWithDelimiters(memory, ref position, '"', '"', out lex)) return true; // Postgres
+        if (TryParseSchemaOrTableOrColumnAsWithDelimiters(memory, ref position, '[', ']', out lex)) return true; // SQLServer
+        if (TryParseSchemaOrTableOrColumnAsWithDelimiters(memory, ref position, '`', '`', out lex)) return true; // MySQL
+
+        return false;
+    }
+
+    [MemberNotNullWhen(true)]
+    private static bool TryParseSchemaOrTableOrColumnAsDefault(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    {
+        lex = default;
+        var start = position;
+
+        // Ensure the first character is a letter
+        if (position >= memory.Length || !char.IsLetter(memory.Span[position]))
+        {
+            return false;
+        }
+
+        while (position < memory.Length)
+        {
+            char next = memory.Span[position];
+
+            // Allow letters, digits, underscores, or dashes
+            if (char.IsLetterOrDigit(next) || next == '_' || next == '-')
+            {
+                position++;
+                continue;
+            }
+
+            // Check for the dot separator
+            if (next == '.')
+            {
+                lex = new Lex(memory, LexType.SchemaOrTable, start, position - start);
+                return true; // Successfully parsed schema or table
+            }
+
+            // If it's any other character, we terminate the parsing here
+            break;
+        }
+
+        // Yield the final identifier if valid
+        if (position > start)
+        {
+            lex = new Lex(memory, LexType.Column, start, position - start);
+            return true;
+        }
+
+        return false; // No valid identifier found
+    }
+
+    [MemberNotNullWhen(true)]
+    private static bool TryParseSchemaOrTableOrColumnAsWithDelimiters(ReadOnlyMemory<char> memory, ref int position, char openingDelimiter, char closingDelimiter, out Lex lex)
+    {
+        lex = default;
+        var start = position;
+
+        // Ensure the first character is the opening delimiter
+        if (position >= memory.Length || memory.Span[position] != openingDelimiter)
+        {
+            return false; // Not a valid start for a quoted identifier
+        }
+
+        position++; // Move past the opening delimiter
+
+        while (position < memory.Length)
+        {
+            char next = memory.Span[position];
+
+            // Allow letters, digits, underscores, dashes, or whitespace
+            if (char.IsLetterOrDigit(next) || next == '_' || next == '-' || char.IsWhiteSpace(next))
+            {
+                position++;
+                continue; // Continue parsing valid characters
+            }
+
+            // Check for the closing delimiter
+            if (next == closingDelimiter)
+            {
+                position++; // Move past the closing delimiter
+
+                // Check if the next character is a dot
+                if (position < memory.Length && memory.Span[position] == '.')
+                {
+                    lex = new Lex(memory, LexType.SchemaOrTable, start, position - start);
+                    return true; // Successfully parsed schema or table
+                }
+                else
+                {
+                    lex = new Lex(memory, LexType.Column, start, position - start);
+                    return true; // Successfully parsed column
+                }
+            }
+
+            // If it's any other character, terminate the parsing here
+            break;
+        }
+
+        return false; // No valid identifier found
+    }
+
+
+    internal static IEnumerable<Lex> ParseSchemaOrTableOrColumns(ReadOnlyMemory<char> memory, int position)
     {
         var start = position;
 
