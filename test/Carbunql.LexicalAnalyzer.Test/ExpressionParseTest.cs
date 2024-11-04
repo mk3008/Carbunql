@@ -51,34 +51,21 @@ public class ExpressionParseTest(ITestOutputHelper output)
         Assert.Equal("1", lexes[0].Value);
     }
 
-    [Fact]
-    public void BlockCommentSkip()
+    [Theory]
+    [InlineData("/*comment*/\n1", "1")]
+    [InlineData("/*+comment*/\n1", "1")]
+    public void CommentSkip(string text, string expectedValue)
     {
-        var text = " /*comment*/\n1";
         var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
 
         output.WriteLine($"Count : {lexes.Count()}");
         foreach (var (lex, index) in lexes.Select((lex, index) => (lex, index)))
         {
-            output.WriteLine($"Index: {index}, Position: {lex.Position}, Length: {lex.Length},  Value: {lex.Value}");
+            output.WriteLine($"Index: {index}, Position: {lex.Position}, Length: {lex.Length}, Value: {lex.Value}");
         }
 
-        Assert.Equal("1", lexes[0].Value);
-    }
-
-    [Fact]
-    public void HintCommentSkip()
-    {
-        var text = " /*+comment*/\n1";
-        var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
-
-        output.WriteLine($"Count : {lexes.Count()}");
-        foreach (var (lex, index) in lexes.Select((lex, index) => (lex, index)))
-        {
-            output.WriteLine($"Index: {index}, Position: {lex.Position}, Length: {lex.Length},  Value: {lex.Value}");
-        }
-
-        Assert.Equal("1", lexes[0].Value);
+        Assert.Single(lexes);
+        Assert.Equal(expectedValue, lexes[0].Value);
     }
 
     [Fact]
@@ -96,145 +83,79 @@ public class ExpressionParseTest(ITestOutputHelper output)
         Assert.Equal("1", lexes[0].Value);
     }
 
-    [Fact]
-    public void EndOfNewLine()
+    [Theory]
+    [InlineData("1\n", "1")]
+    [InlineData("1\r", "1")]
+    public void EndOfLineVariations(string text, string expectedValue)
     {
-        var text = " 1\n";
         var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
 
-        output.WriteLine($"Count : {lexes.Count()}");
+        output.WriteLine($"Count : {lexes.Count}");
+        foreach (var (lex, index) in lexes.Select((lex, index) => (lex, index)))
+        {
+            output.WriteLine($"Index: {index}, Position: {lex.Position}, Length: {lex.Length}, Value: {lex.Value}");
+        }
+
+        Assert.Single(lexes);
+        Assert.Equal(expectedValue, lexes[0].Value);
+    }
+
+
+    [Theory]
+    [InlineData("42", "42")]
+    [InlineData("3.14", "3.14")]
+    [InlineData("- 3.14", "- 3.14")]
+    public void NumericValues(string text, string expectedValue)
+    {
+        var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
+
+        output.WriteLine($"Count : {lexes.Count}");
+        foreach (var (lex, index) in lexes.Select((lex, index) => (lex, index)))
+        {
+            output.WriteLine($"Index: {index}, Position: {lex.Position}, Length: {lex.Length}, Value: {lex.Value}");
+        }
+
+        Assert.Single(lexes);
+        Assert.Equal(expectedValue, lexes[0].Value);
+    }
+
+    [Theory]
+    [InlineData("'abc'", "'abc'")]
+    [InlineData("'abc''s'", "'abc''s'")]
+    public void SingleQuotedText(string text, string expectedValue)
+    {
+        var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
+
+        output.WriteLine($"Count : {lexes.Count}");
         foreach (var (lex, index) in lexes.Select((lex, index) => (lex, index)))
         {
             output.WriteLine($"Index: {index}, Position: {lex.Position}, Length: {lex.Length},  Value: {lex.Value}");
         }
 
-        Assert.Equal("1", lexes[0].Value);
+        Assert.Single(lexes);
+        Assert.Equal(expectedValue, lexes[0].Value);
     }
 
-    [Fact]
-    public void EndOfReturn()
+    [Theory]
+    [InlineData("value", new[] { "value" })]
+    [InlineData("table.value", new[] { "table", ".", "value" })]
+    [InlineData("schema.table.value", new[] { "schema", ".", "table", ".", "value" })]
+    public void ColumnNames(string text, string[] expectedValues)
     {
-        var text = " 1\r";
         var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
 
-        output.WriteLine($"Count : {lexes.Count()}");
+        output.WriteLine($"Count : {lexes.Count}");
         foreach (var (lex, index) in lexes.Select((lex, index) => (lex, index)))
         {
             output.WriteLine($"Index: {index}, Position: {lex.Position}, Length: {lex.Length},  Value: {lex.Value}");
         }
 
-        Assert.Equal("1", lexes[0].Value);
-    }
+        Assert.Equal(expectedValues.Length, lexes.Count);
 
-    [Fact]
-    public void UnsignedNumeric()
-    {
-        var text = " 3.14 ";
-        var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
-
-        output.WriteLine($"Count : {lexes.Count()}");
-        foreach (var (lex, index) in lexes.Select((lex, index) => (lex, index)))
+        for (int i = 0; i < expectedValues.Length; i++)
         {
-            output.WriteLine($"Index: {index}, Position: {lex.Position}, Length: {lex.Length},  Value: {lex.Value}");
+            Assert.Equal(expectedValues[i], lexes[i].Value);
         }
-
-        Assert.Equal("3.14", lexes[0].Value);
-    }
-
-    [Fact]
-    public void SignedNumeric()
-    {
-        var text = " +   3.14 ";
-        var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
-
-        output.WriteLine($"Count : {lexes.Count()}");
-        foreach (var (lex, index) in lexes.Select((lex, index) => (lex, index)))
-        {
-            output.WriteLine($"Index: {index}, Position: {lex.Position}, Length: {lex.Length},  Value: {lex.Value}");
-        }
-
-        Assert.Equal("+ 3.14", lexes[0].Value);
-    }
-
-    [Fact]
-    public void SingleQuotedText()
-    {
-        var text = " 'abc' ";
-        var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
-
-        output.WriteLine($"Count : {lexes.Count()}");
-        foreach (var (lex, index) in lexes.Select((lex, index) => (lex, index)))
-        {
-            output.WriteLine($"Index: {index}, Position: {lex.Position}, Length: {lex.Length},  Value: {lex.Value}");
-        }
-
-        Assert.Equal("'abc'", lexes[0].Value);
-    }
-
-    [Fact]
-    public void SingleQuotedTextWithEscape()
-    {
-        var text = " 'abc''s' ";
-        var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
-
-        output.WriteLine($"Count : {lexes.Count()}");
-        foreach (var (lex, index) in lexes.Select((lex, index) => (lex, index)))
-        {
-            output.WriteLine($"Index: {index}, Position: {lex.Position}, Length: {lex.Length},  Value: {lex.Value}");
-        }
-
-        Assert.Equal("'abc''s'", lexes[0].Value);
-    }
-
-    [Fact]
-    public void Column()
-    {
-        var text = " value ";
-        var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
-
-        output.WriteLine($"Count : {lexes.Count()}");
-        foreach (var (lex, index) in lexes.Select((lex, index) => (lex, index)))
-        {
-            output.WriteLine($"Index: {index}, Position: {lex.Position}, Length: {lex.Length},  Value: {lex.Value}");
-        }
-
-        Assert.Equal("value", lexes[0].Value);
-    }
-
-    [Fact]
-    public void TableColumn()
-    {
-        var text = " table.value ";
-        var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
-
-        output.WriteLine($"Count : {lexes.Count()}");
-        foreach (var (lex, index) in lexes.Select((lex, index) => (lex, index)))
-        {
-            output.WriteLine($"Index: {index}, Type: {lex.Type}, Position: {lex.Position}, Length: {lex.Length},  Value: {lex.Value}");
-        }
-
-        Assert.Equal("table", lexes[0].Value);
-        Assert.Equal(".", lexes[1].Value);
-        Assert.Equal("value", lexes[2].Value);
-    }
-
-    [Fact]
-    public void SchemaTableColumn()
-    {
-        var text = " schema.table.value ";
-        var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
-
-        output.WriteLine($"Count : {lexes.Count()}");
-        foreach (var (lex, index) in lexes.Select((lex, index) => (lex, index)))
-        {
-            output.WriteLine($"Index: {index}, Type: {lex.Type}, Position: {lex.Position}, Length: {lex.Length},  Value: {lex.Value}");
-        }
-
-        Assert.Equal("schema", lexes[0].Value);
-        Assert.Equal(".", lexes[1].Value);
-        Assert.Equal("table", lexes[2].Value);
-        Assert.Equal(".", lexes[3].Value);
-        Assert.Equal("value", lexes[4].Value);
     }
 
     [Fact]
@@ -258,5 +179,42 @@ public class ExpressionParseTest(ITestOutputHelper output)
         Assert.Equal("4", lexes[6].Value);
         Assert.Equal("/", lexes[7].Value);
         Assert.Equal("5", lexes[8].Value);
+    }
+
+    [Theory]
+    [InlineData("a = 0", new[] { "a", "=", "0" })]
+    [InlineData("b != 0", new[] { "b", "!=", "0" })]
+    [InlineData("c <> 0", new[] { "c", "<>", "0" })]
+    [InlineData("0 < d", new[] { "0", "<", "d" })]
+    [InlineData("0 <= f", new[] { "0", "<=", "f" })]
+    [InlineData("g < 0", new[] { "g", "<", "0" })]
+    [InlineData("h <= 0", new[] { "h", "<=", "0" })]
+    [InlineData("i is null", new[] { "i", "is", "null" })]
+    [InlineData("j is not null", new[] { "j", "is not", "null" })]
+    public void Operators(string text, string[] expectedValues)
+    {
+        var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
+
+        Assert.Equal(expectedValues.Length, lexes.Count);
+
+        for (int i = 0; i < expectedValues.Length; i++)
+        {
+            Assert.Equal(expectedValues[i], lexes[i].Value);
+        }
+    }
+
+    [Theory]
+    [InlineData("a=1 and b=2", new[] { "a", "=", "1", "and", "b", "=", "2" })]
+    [InlineData("a=1 or b=2", new[] { "a", "=", "1", "or", "b", "=", "2" })]
+    public void LogicalOperators(string text, string[] expectedValues)
+    {
+        var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
+
+        Assert.Equal(expectedValues.Length, lexes.Count);
+
+        for (int i = 0; i < expectedValues.Length; i++)
+        {
+            Assert.Equal(expectedValues[i], lexes[i].Value);
+        }
     }
 }
