@@ -18,7 +18,7 @@ public static partial class Lexer
         // Starting position for the lex and move position past "delete"
         var start = position;
         position += 6; // Move past "delete"
-        SkipWhiteSpaces(memory, ref position); // Skip any whitespace after "delete"
+        memory.SkipWhiteSpaces(ref position); // Skip any whitespace after "delete"
 
         // Check for "from"
         if (!memory.EqualsWordIgnoreCase(position, "from"))

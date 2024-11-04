@@ -82,7 +82,7 @@ public static partial class Lexer
             position += 2;
 
             // Skip whitespace and comments for compound Lex
-            SkipWhiteSpacesAndComment(memory, ref position);
+            memory.SkipWhiteSpacesAndComment(ref position);
 
             // Check for "not" after "is"
             if (memory.EqualsWordIgnoreCase(position, "not"))

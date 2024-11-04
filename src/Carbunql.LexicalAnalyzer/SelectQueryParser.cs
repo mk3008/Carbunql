@@ -4,25 +4,25 @@ public static class SelectQueryParser
 {
     public static object Parse(string sql)
     {
-        var memory = sql.AsMemory();
-        var position = 0;
+        //var memory = sql.AsMemory();
+        //var position = 0;
 
-        Lexer.SkipWhiteSpaces(memory, ref position);
+        //memory.SkipWhiteSpaces(ref position);
 
-        Lexer.SkipComment(memory, ref position);
+        //Lexer.SkipComment(memory, ref position);
 
-        Lexer.SkipWhiteSpaces(memory, ref position);
+        //Lexer.SkipWhiteSpaces(memory, ref position);
 
-        Lex lex;
-        if (Lexer.TryParseWithOrRecursiveLex(memory, ref position, out lex))
-        {
-            throw new NotImplementedException();
-        }
-        else if (Lexer.TryParseSelectLex(memory, ref position, out lex))
-        {
-            // value
+        //Lex lex;
+        //if (Lexer.TryParseWithOrRecursiveLex(memory, ref position, out lex))
+        //{
+        //    throw new NotImplementedException();
+        //}
+        //else if (Lexer.TryParseSelectLex(memory, ref position, out lex))
+        //{
+        //    // value
 
-        }
+        //}
 
         throw new FormatException();
     }

@@ -48,6 +48,8 @@ public enum LexType : byte
     SelectDistinct,
     SelectDistinctOn,
 
+    From,
+
     With,
     WithRecursive,
 
@@ -82,7 +84,7 @@ public enum LexType : byte
     /// <summary>
     /// Separator for values, represented by a comma (,).
     /// </summary>
-    ValueSeparator,
+    ExpressionSeparator,
 
     /// <summary>
     /// Separator for identifiers, represented by a period (.).

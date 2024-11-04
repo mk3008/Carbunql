@@ -4,22 +4,16 @@ namespace Carbunql.LexicalAnalyzer;
 
 public static partial class Lexer
 {
-    [MemberNotNullWhen(true)]
-    internal static bool TryParseValueLex(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
-    {
-        lex = default;
-        if (TryParseWildCard(memory, ref position, out lex)) return true;
-        if (TryParseNumericValue(memory, ref position, out lex)) return true;
-        if (TryParseSingleQuotedText(memory, ref position, out lex)) return true;
-        //if (TryParseLetterValueLex(memory, ref position, out lex)) return true;
-        return false;
-    }
-
-    [MemberNotNullWhen(true)]
-    private static bool TryParseWildCard(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
-    {
-        return TryParseSingleCharLex(memory, ref position, '*', LexType.WildCard, out lex);
-    }
+    //[MemberNotNullWhen(true)]
+    //internal static bool TryParseValueLex(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    //{
+    //    lex = default;
+    //    if (memory.TryParseWildCard(ref position, out lex)) return true;
+    //    if (TryParseNumericValue(memory, ref position, out lex)) return true;
+    //    if (TryParseSingleQuotedText(memory, ref position, out lex)) return true;
+    //    //if (TryParseLetterValueLex(memory, ref position, out lex)) return true;
+    //    return false;
+    //}
 
     //[MemberNotNullWhen(true)]
     //public static bool TryParseLetter(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
@@ -181,7 +175,7 @@ public static partial class Lexer
         bool hasDecimalPoint = false;
         digitStart++;
 
-        SkipWhiteSpacesAndComment(memory, ref digitStart);
+        memory.SkipWhiteSpacesAndComment(ref digitStart);
 
         if (memory.IsAtEnd(digitStart) || !char.IsDigit(memory.Span[digitStart]))
         {

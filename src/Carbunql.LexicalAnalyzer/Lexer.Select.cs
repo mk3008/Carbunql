@@ -38,7 +38,7 @@ public static partial class Lexer
         position += 8; // Move past "distinct"
         var distinctEndPosition = position; // End position for distinct lex
 
-        SkipWhiteSpaces(memory, ref position); // Skip any whitespace after "distinct"
+        memory.SkipWhiteSpaces(ref position); // Skip any whitespace after "distinct"
 
         // Check Postgres syntax "select distinct on"
         if (memory.EqualsWordIgnoreCase(position, "on"))

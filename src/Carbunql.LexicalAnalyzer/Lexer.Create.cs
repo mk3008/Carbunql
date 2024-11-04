@@ -23,7 +23,7 @@ public static partial class Lexer
         if (memory.EqualsWordIgnoreCase(position, "temporary"))
         {
             position += 9; // Move past "temporary"
-            SkipWhiteSpaces(memory, ref position);
+            memory.SkipWhiteSpaces(ref position);
 
             if (memory.EqualsWordIgnoreCase(position, "table"))
             {
@@ -45,7 +45,7 @@ public static partial class Lexer
         else if (memory.EqualsWordIgnoreCase(position, "materialized"))
         {
             position += 12; // Move past "materialized"
-            SkipWhiteSpaces(memory, ref position);
+            memory.SkipWhiteSpaces(ref position);
 
             if (memory.EqualsWordIgnoreCase(position, "view"))
             {

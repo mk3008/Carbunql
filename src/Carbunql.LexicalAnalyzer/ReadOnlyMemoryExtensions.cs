@@ -1,7 +1,239 @@
-﻿namespace Carbunql.LexicalAnalyzer;
+﻿using System.Diagnostics.CodeAnalysis;
 
-internal static class ReadOnlyMemoryExtensions
+namespace Carbunql.LexicalAnalyzer;
+
+public static class ReadOnlyMemoryExtensions
 {
+    /// <summary>
+    /// Skip whitespace and comments.
+    /// </summary>
+    /// <param name="memory">The memory to skip.</param>
+    /// <param name="position">The current position.</param>
+    public static void SkipWhiteSpacesAndComment(this ReadOnlyMemory<char> memory, ref int position)
+    {
+        memory.SkipWhiteSpaces(ref position);
+        memory.SkipComment(ref position);
+        memory.SkipWhiteSpaces(ref position);
+    }
+
+    /// <summary>
+    /// Skip comments.
+    /// </summary>
+    /// <param name="memory">The memory to skip comments from.</param>
+    /// <param name="position">The current position.</param>
+    public static void SkipComment(this ReadOnlyMemory<char> memory, ref int position)
+    {
+        var comments = memory.ParseUntilNonComment(position);
+        if (comments.Any())
+        {
+            position = comments.Last().EndPosition;
+        }
+    }
+
+    /// <summary>
+    /// Parse until a non-comment is reached and yield comments.
+    /// </summary>
+    /// <param name="memory">The memory to parse.</param>
+    /// <param name="position">The starting position.</param>
+    /// <returns>Enumerable of parsed comments.</returns>
+    public static IEnumerable<Lex> ParseUntilNonComment(this ReadOnlyMemory<char> memory, int position)
+    {
+        while (true)
+        {
+            Lex lex;
+            if (memory.TryParseLineCommentStart(ref position, out lex))
+            {
+                yield return lex;
+                yield return memory.ParseLineComment(ref position);
+                memory.SkipWhiteSpaces(ref position);
+                continue;
+            }
+            else if (memory.TryParseBlockCommentStart(ref position, out lex))
+            {
+                yield return lex;
+                yield return memory.ParseBlockComment(ref position);
+                yield return memory.ParseBlockCommentEnd(ref position);
+                memory.SkipWhiteSpaces(ref position);
+                continue;
+            }
+            break;
+        }
+    }
+
+    /// <summary>
+    /// Parses the end of a block comment from the specified memory, returning the resulting Lex object.
+    /// </summary>
+    /// <param name="memory">The memory to process.</param>
+    /// <param name="position">The current position in the memory.</param>
+    /// <returns>The Lex object representing the block comment end.</returns>
+    /// <exception cref="FormatException">Thrown when the block comment end symbols '*/' are not found.</exception>
+    public static Lex ParseBlockCommentEnd(this ReadOnlyMemory<char> memory, ref int position)
+    {
+        var start = position;
+        if (memory.StartsWithExact(ref position, "*/"))
+        {
+            return new Lex(memory, LexType.BlockCommentEnd, start, position - start);
+        }
+        throw new FormatException("Block comment end symbols '*/' not found.");
+    }
+
+    /// <summary>
+    /// Parses a block comment from the specified memory, returning the resulting Lex object.
+    /// </summary>
+    /// <param name="memory">The memory to process.</param>
+    /// <param name="position">The current position in the memory.</param>
+    /// <returns>The Lex object representing the block comment.</returns>
+    /// <exception cref="FormatException">Thrown when the SQL string is empty or in an invalid format.</exception>
+    public static Lex ParseBlockComment(this ReadOnlyMemory<char> memory, ref int position)
+    {
+        // Must be at least 2 characters for block comment start
+        if (memory.HasFewerThanChars(position, 2))
+        {
+            throw new FormatException("The SQL string is empty or in an invalid format.");
+        }
+
+        var start = position;
+
+        // Search for the block comment end
+        while (position < memory.Length)
+        {
+            if (memory.Span[position] == '*' && memory.HasChar(position + 1) && memory.Span[position + 1] == '/')
+            {
+                // Exclude end symbol
+                return new Lex(memory, LexType.Comment, start, position - start);
+            }
+            position++;
+        }
+
+        throw new FormatException("Block comment not closed properly.");
+    }
+
+    /// <summary>
+    /// Parses a line comment from the specified memory, returning the resulting Lex object.
+    /// </summary>
+    /// <param name="memory">The memory to process.</param>
+    /// <param name="position">The current position in the memory.</param>
+    /// <returns>The Lex object representing the line comment.</returns>
+    /// <exception cref="FormatException">Thrown when the SQL string is empty or in an invalid format.</exception>
+    public static Lex ParseLineComment(this ReadOnlyMemory<char> memory, ref int position)
+    {
+        if (memory.IsAtEnd(position))
+        {
+            throw new FormatException("The SQL string is empty or in an invalid format.");
+        }
+
+        var start = position;
+
+        // Exclude line comment end symbol
+        while (!memory.IsAtEnd(position))
+        {
+            char current = memory.Span[position];
+
+            if (current == '\r' || current == '\n')
+            {
+                return new Lex(memory, LexType.Comment, start, position - start);
+            }
+            position++;
+        }
+
+        return new Lex(memory, LexType.Comment, start, memory.Length - start);
+    }
+
+    /// <summary>
+    /// Tries to parse a wildcard character ('*') from the specified memory.
+    /// </summary>
+    /// <param name="memory">The memory to process.</param>
+    /// <param name="position">The current position in the memory.</param>
+    /// <param name="lex">The resulting Lex object if parsing is successful.</param>
+    /// <returns>True if the wildcard character was successfully parsed; otherwise, false.</returns>
+    [MemberNotNullWhen(true)]
+    public static bool TryParseWildCard(this ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    {
+        return memory.TryParseSingleCharLex(ref position, '*', LexType.WildCard, out lex);
+    }
+
+    /// <summary>
+    /// Skips over white space characters in the given memory starting from the current position.
+    /// </summary>
+    /// <param name="memory">The memory to process.</param>
+    /// <param name="position">The current position to start skipping from. This will be updated.</param>
+    public static void SkipWhiteSpaces(this ReadOnlyMemory<char> memory, ref int position)
+    {
+        var span = memory.Span;
+
+        while (position < span.Length && char.IsWhiteSpace(span[position]))
+        {
+            position++;
+        }
+    }
+
+    [MemberNotNullWhen(true)]
+    public static bool TryParseBlockCommentStart(this ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    {
+        lex = default;
+
+        if (memory.HasFewerThanChars(position, 2))
+        {
+            return false;
+        }
+
+        var start = position;
+        // Check for /* or /*+
+        if (memory.Span[position] == '/' && memory.Span[position + 1] == '*')
+        {
+            // Check for /*+
+            if (memory.HasChar(position + 2) && memory.Span[position + 2] == '+')
+            {
+                position += 3;
+                lex = new Lex(memory, LexType.HitCommentStart, start, position - start);
+            }
+            else
+            {
+                position += 2;
+                lex = new Lex(memory, LexType.BlockCommentStart, start, position - start);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    [MemberNotNullWhen(true)]
+    public static bool TryParseLineCommentStart(this ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    {
+        lex = default;
+        var start = position;
+
+        if (memory.StartsWithExact(ref position, "--"))
+        {
+            lex = new Lex(memory, LexType.LineCommentStart, start, position - start);
+            return true;
+        }
+
+        return false;
+    }
+
+    [MemberNotNullWhen(true)]
+    public static bool TryParseSingleCharLex(this ReadOnlyMemory<char> memory, ref int position, char targetChar, LexType lexType, out Lex lex)
+    {
+        lex = default;
+
+        // Ensure there are enough characters remaining
+        if (memory.HasFewerThanChars(position, 1))
+        {
+            return false;
+        }
+
+        var start = position;
+        if (memory.Span[position] == targetChar)
+        {
+            position++;
+            lex = new Lex(memory, lexType, start, position - start);
+            return true;
+        }
+
+        return false;
+    }
+
     /// <summary>
     /// Determines if the specified position is at the end of the memory.
     /// </summary>
@@ -35,6 +267,20 @@ internal static class ReadOnlyMemoryExtensions
     {
         // Check if position is within bounds and at least one character can be accessed
         return position >= 0 && position < memory.Length;
+    }
+
+    public static bool TryParseKeywordIgnoreCase(this ReadOnlyMemory<char> memory, ref int position, string keyword, LexType lexType, out Lex lex)
+    {
+        lex = default;
+
+        if (memory.EqualsWordIgnoreCase(position, keyword))
+        {
+            var start = position;
+            position += keyword.Length;
+            lex = new Lex(memory, lexType, start, keyword.Length);
+            return true;
+        }
+        return false;
     }
 
     /// <summary>

@@ -19,7 +19,7 @@ public static partial class Lexer
         position += 4;
         var withEndPosition = position;
 
-        SkipWhiteSpaces(memory, ref position);
+        memory.SkipWhiteSpaces(ref position);
 
         // Check for "recursive"
         if (memory.EqualsWordIgnoreCase(position, "recursive"))

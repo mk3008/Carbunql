@@ -10,7 +10,7 @@ public class CommentTest(ITestOutputHelper output)
     public void LineComment()
     {
         var text = "--comment\n1";
-        var lexes = Lexer.ParseUntilNonComment(text.AsMemory(), 0).ToList();
+        var lexes = text.AsMemory().ParseUntilNonComment(0).ToList();
 
         output.WriteLine($"Text : {text}");
         output.WriteLine($"Count : {lexes.Count()}");
@@ -27,7 +27,7 @@ public class CommentTest(ITestOutputHelper output)
     public void BlockComment()
     {
         var text = "/*comment*/1";
-        var lexes = Lexer.ParseUntilNonComment(text.AsMemory(), 0);
+        var lexes = text.AsMemory().ParseUntilNonComment(0).ToList();
 
         output.WriteLine($"Text : {text}");
         foreach (var (lex, index) in lexes.Select((lex, index) => (lex, index)))

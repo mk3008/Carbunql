@@ -18,7 +18,7 @@ public static partial class Lexer
         // Starting position for the lex and move position past "merge"
         var start = position;
         position += 5; // Move past "merge"
-        SkipWhiteSpaces(memory, ref position); // Skip any whitespace after "merge"
+        memory.SkipWhiteSpaces(ref position); // Skip any whitespace after "merge"
 
         // Check for "into"
         if (!memory.EqualsWordIgnoreCase(position, "into"))

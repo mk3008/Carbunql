@@ -18,7 +18,7 @@ public static partial class Lexer
         // Starting position for the lex and move position past "insert"
         var start = position;
         position += 6;
-        SkipWhiteSpaces(memory, ref start);
+        memory.SkipWhiteSpaces(ref start);
 
         // Check for "into"
         if (!memory.EqualsWordIgnoreCase(position, "into"))
