@@ -50,7 +50,10 @@ public static partial class Lexer
                 while (lex.Type == LexType.SchemaOrTable)
                 {
                     yield return lex;
-                    ParseIdentifierSeparator(memory, ref position);
+
+                    lex = ParseIdentifierSeparator(memory, ref position);
+                    yield return lex;
+
                     if (!TryParseSchemaOrTableOrColumn(memory, ref position, out lex))
                     {
                         throw new FormatException();
