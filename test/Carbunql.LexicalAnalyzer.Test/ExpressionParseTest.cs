@@ -127,7 +127,7 @@ public class ExpressionParseTest(ITestOutputHelper output)
     }
 
     [Fact]
-    public void Numeric()
+    public void UnsignedNumeric()
     {
         var text = "3.14 ";
         var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
@@ -139,6 +139,21 @@ public class ExpressionParseTest(ITestOutputHelper output)
         }
 
         Assert.Equal("3.14", lexes[0].Value);
+    }
+
+    [Fact]
+    public void SignedNumeric()
+    {
+        var text = "+   3.14 ";
+        var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
+
+        output.WriteLine($"Count : {lexes.Count()}");
+        foreach (var (lex, index) in lexes.Select((lex, index) => (lex, index)))
+        {
+            output.WriteLine($"Index: {index}, Position: {lex.Position}, Length: {lex.Length},  Value: {lex.Value}");
+        }
+
+        Assert.Equal("+ 3.14", lexes[0].Value);
     }
 
     [Fact]
@@ -154,5 +169,20 @@ public class ExpressionParseTest(ITestOutputHelper output)
         }
 
         Assert.Equal("'abc'", lexes[0].Value);
+    }
+
+    [Fact]
+    public void SingleQuotedTextWithEscape()
+    {
+        var text = "'abc''s' ";
+        var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
+
+        output.WriteLine($"Count : {lexes.Count()}");
+        foreach (var (lex, index) in lexes.Select((lex, index) => (lex, index)))
+        {
+            output.WriteLine($"Index: {index}, Position: {lex.Position}, Length: {lex.Length},  Value: {lex.Value}");
+        }
+
+        Assert.Equal("'abc''s'", lexes[0].Value);
     }
 }

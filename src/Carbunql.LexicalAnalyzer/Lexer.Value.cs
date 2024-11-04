@@ -155,25 +155,85 @@ public static partial class Lexer
     public static bool TryParseNumericValue(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
     {
         lex = default;
+        if (TryParseUnsignedNumericValue(memory, ref position, out lex)) return true;
+        if (TryParseSignedNumericValue(memory, ref position, out lex)) return true;
+        return false;
+    }
 
-        // Complete starting position including the optional sign
+    [MemberNotNullWhen(true)]
+    private static bool TryParseSignedNumericValue(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    {
+        lex = default;
+
+        if (memory.IsAtEnd(position))
+        {
+            return false;
+        }
+
+        char signChar = memory.Span[position];
+        if (!(signChar == '+' || signChar == '-'))
+        {
+            return false;
+        }
+
+        var start = position;
+        var digitStart = position;
+        bool hasDecimalPoint = false;
+        digitStart++;
+
+        SkipWhiteSpacesAndComment(memory, ref digitStart);
+
+        if (memory.IsAtEnd(digitStart) || !char.IsDigit(memory.Span[digitStart]))
+        {
+            return false;
+        }
+
+        position = digitStart;
+
+        // Parse digits and optional decimal point
+        while (!memory.IsAtEnd(position))
+        {
+            char current = memory.Span[position];
+
+            if (char.IsDigit(current))
+            {
+                position++;
+                continue;
+            }
+
+            if (current == '.')
+            {
+                if (!hasDecimalPoint)
+                {
+                    hasDecimalPoint = true;
+                    position++;
+                    continue;
+                }
+                throw new FormatException("Multiple decimal points found in numeric value.");
+            }
+
+            break; // Exit loop on encountering a non-digit and non-decimal point
+        }
+
+        lex = new Lex(memory, LexType.Value, start, position - start, signChar + " " + memory.Slice(digitStart, position - digitStart));
+        return true;
+    }
+
+    [MemberNotNullWhen(true)]
+    public static bool TryParseUnsignedNumericValue(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    {
+        lex = default;
+
+        if (memory.IsAtEnd(position))
+        {
+            return false;
+        }
+
         var start = position;
         bool hasDecimalPoint = false;
 
-        // Check for optional sign at the beginning
-        char firstChar = memory.Span[position];
-        if (firstChar == '+' || firstChar == '-')
-        {
-            position++; // Skip the sign
-        }
-
-        // Skip whitespace after the sign
-        SkipWhiteSpaces(memory, ref position);
-
-        // Start position for digits (after sign and whitespace)
-        var digitStart = position;
-
-        while (position < memory.Length)
+        // Parse digits and optional decimal point
+        while (!memory.IsAtEnd(position))
         {
             char current = memory.Span[position];
 
@@ -198,30 +258,34 @@ public static partial class Lexer
         }
 
         // If no digits were found
-        if (digitStart == position)
+        if (start == position)
         {
             return false;
         }
 
-        // Include the optional sign in the Lex object
         lex = new Lex(memory, LexType.Value, start, position - start);
         return true;
     }
+
 
     [MemberNotNullWhen(true)]
     private static bool TryParseSingleQuotedText(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
     {
         lex = default;
 
-        if (memory.Span[position] != '\'')
+        if (memory.IsAtEnd(position))
         {
             return false;
         }
 
-        int start = position; // Remember the starting position, including the starting single quote
-        position++; // Skip the starting single quote
+        int start = position;
+        if (memory.Span[position] != '\'')
+        {
+            return false;
+        }
+        position++;
 
-        while (position < memory.Length)
+        while (!memory.IsAtEnd(position))
         {
             char current = memory.Span[position];
 

@@ -9,14 +9,13 @@ public static partial class Lexer
     {
         SkipWhiteSpacesAndComment(memory, ref position);
 
-        var length = memory.Length;
-        if (length < position)
+        if (memory.IsAtEnd(position))
         {
             yield break;
         }
 
         Lex lex;
-        while (position < length)
+        while (!memory.IsAtEnd(position))
         {
             // wild card
             if (TryParseWildCard(memory, ref position, out lex))
@@ -176,14 +175,16 @@ public static partial class Lexer
     {
         lex = default;
 
-        if (memory.Length < position + 1)
+        if (memory.HasFewerThanChars(position, 1))
         {
             return false;
         }
 
+        var start = position;
         if (memory.Span[position] == targetChar)
         {
-            lex = new Lex(memory, lexType, position, 1);
+            position++;
+            lex = new Lex(memory, lexType, start, position - start);
             return true;
         }
 
