@@ -38,28 +38,28 @@ public static partial class Lexer
         return false;
     }
 
-    /// <summary>
-    /// Parses and removes comments until a non-comment Lex is reached, starting from the specified non-comment state.
-    /// </summary>
-    /// <param name="memory">The string to be parsed.</param>
-    /// <param name="previous">The previous Lex indicating a non-comment state, or null if no previous state exists.</param>
-    /// <returns>An enumeration of Lexes after comments have been removed.</returns>
-    public static IEnumerable<Lex> ParseUntilNonComment(ReadOnlyMemory<char> memory, Lex? previous = null)
-    {
-        // Invalid if the previous Lex is in a comment state
-        if (previous?.Type == LexType.LineCommentStart
-            || previous?.Type == LexType.BlockCommentStart
-            || previous?.Type == LexType.HitCommentStart
-            || previous?.Type == LexType.Comment)
-        {
-            throw new InvalidOperationException("Previous Lex must be in a non-comment state.");
-        }
+    ///// <summary>
+    ///// Parses and removes comments until a non-comment Lex is reached, starting from the specified non-comment state.
+    ///// </summary>
+    ///// <param name="memory">The string to be parsed.</param>
+    ///// <param name="previous">The previous Lex indicating a non-comment state, or null if no previous state exists.</param>
+    ///// <returns>An enumeration of Lexes after comments have been removed.</returns>
+    //public static IEnumerable<Lex> ParseUntilNonComment(ReadOnlyMemory<char> memory, Lex? previous = null)
+    //{
+    //    // Invalid if the previous Lex is in a comment state
+    //    if (previous?.Type == LexType.LineCommentStart
+    //        || previous?.Type == LexType.BlockCommentStart
+    //        || previous?.Type == LexType.HitCommentStart
+    //        || previous?.Type == LexType.Comment)
+    //    {
+    //        throw new InvalidOperationException("Previous Lex must be in a non-comment state.");
+    //    }
 
-        // Start position is 0 if previous is null
-        int position = previous?.EndPosition ?? 0;
+    //    // Start position is 0 if previous is null
+    //    int position = previous?.EndPosition ?? 0;
 
-        return ParseUntilNonComment(memory, position);
-    }
+    //    return ParseUntilNonComment(memory, position);
+    //}
 
     public static IEnumerable<Lex> ParseUntilNonComment(ReadOnlyMemory<char> memory, int position)
     {
@@ -105,8 +105,7 @@ public static partial class Lexer
     {
         lex = default;
 
-        // Must be at least 4 characters (minimum comment /**/)
-        if (memory.HasFewerThanChars(position, 4))
+        if (memory.HasFewerThanChars(position, 2))
         {
             return false;
         }
@@ -116,7 +115,7 @@ public static partial class Lexer
         if (memory.Span[position] == '/' && memory.Span[position + 1] == '*')
         {
             // Check for /*+
-            if (memory.Span[position + 2] == '+')
+            if (memory.HasChar(position + 2) && memory.Span[position + 2] == '+')
             {
                 position += 3;
                 lex = new Lex(memory, LexType.HitCommentStart, start, position - start);
@@ -152,7 +151,7 @@ public static partial class Lexer
         var start = position;
 
         // exclude line comment end symbol
-        while (position < memory.Length)
+        while (!memory.IsAtEnd(position))
         {
             char current = memory.Span[position];
 

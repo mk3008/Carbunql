@@ -21,70 +21,70 @@ public static partial class Lexer
         return TryParseSingleCharLex(memory, ref position, '*', LexType.WildCard, out lex);
     }
 
-    [MemberNotNullWhen(true)]
-    public static bool TryParseLetter(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
-    {
-        lex = default;
+    //[MemberNotNullWhen(true)]
+    //public static bool TryParseLetter(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    //{
+    //    lex = default;
 
-        if (memory.Length < position + 1)
-        {
-            return false;
-        }
+    //    if (memory.Length < position + 1)
+    //    {
+    //        return false;
+    //    }
 
-        int start = position;
+    //    int start = position;
 
-        while (position < memory.Length)
-        {
-            char current = memory.Span[position];
+    //    while (position < memory.Length)
+    //    {
+    //        char current = memory.Span[position];
 
-            if (char.IsLetter(current) || current == '_')
-            {
-                position++;
-                continue;
-            }
+    //        if (char.IsLetter(current) || current == '_')
+    //        {
+    //            position++;
+    //            continue;
+    //        }
 
-            break;
-        }
+    //        break;
+    //    }
 
-        // If no letter were found
-        if (start == position)
-        {
-            return false;
-        }
+    //    // If no letter were found
+    //    if (start == position)
+    //    {
+    //        return false;
+    //    }
 
-        //check next lex
-        int tempPos = position;
-        SkipWhiteSpaces(memory, ref tempPos);
+    //    //check next lex
+    //    int tempPos = position;
+    //    SkipWhiteSpaces(memory, ref tempPos);
 
-        LexType lexType;
-        if (tempPos < memory.Length)
-        {
-            char nextChar = memory.Span[tempPos];
-            if (nextChar == '.')
-            {
-                lexType = LexType.SchemaOrTableOrColumn;
-            }
-            else if (nextChar == ',' || char.IsWhiteSpace(nextChar))
-            {
-                lexType = LexType.Column;
-            }
-            else if (nextChar == '(')
-            {
-                lexType = LexType.Function;
-            }
-            else
-            {
-                lexType = LexType.Value;
-            }
-        }
-        else
-        {
-            lexType = LexType.Value;
-        }
+    //    LexType lexType;
+    //    if (tempPos < memory.Length)
+    //    {
+    //        char nextChar = memory.Span[tempPos];
+    //        if (nextChar == '.')
+    //        {
+    //            lexType = LexType.SchemaOrTableOrColumn;
+    //        }
+    //        else if (nextChar == ',' || char.IsWhiteSpace(nextChar))
+    //        {
+    //            lexType = LexType.Column;
+    //        }
+    //        else if (nextChar == '(')
+    //        {
+    //            lexType = LexType.Function;
+    //        }
+    //        else
+    //        {
+    //            lexType = LexType.Value;
+    //        }
+    //    }
+    //    else
+    //    {
+    //        lexType = LexType.Value;
+    //    }
 
-        lex = new Lex(memory, lexType, start, position - start);
-        return true;
-    }
+    //    lex = new Lex(memory, lexType, start, position - start);
+    //    return true;
+    //}
 
     //[MemberNotNullWhen(true)]
     //public static bool TryParseLetterValueLex(ReadOnlyMemory<char> memory, ref int position, out Lex lex)

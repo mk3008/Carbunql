@@ -14,25 +14,25 @@ public static partial class Lexer
             yield break;
         }
 
-        //first charator "*" is all column wild card.
         Lex lex;
-        if (TryParseWildCard(memory, ref position, out lex))
-        {
-            yield return lex;
-            yield break;
-        }
-
         while (!memory.IsAtEnd(position))
         {
+            // wildcard
+            if (TryParseWildCard(memory, ref position, out lex))
+            {
+                yield return lex;
+                break;
+            }
+
             // value
             if (TryParseSingleQuotedText(memory, ref position, out lex)
                 || TryParseNumericValue(memory, ref position, out lex)
                 || TryParseSpecialValue(memory, ref position, out lex))
             {
                 yield return lex;
-                SkipWhiteSpacesAndComment(memory, ref position);
 
-                // operator
+                // operator check
+                SkipWhiteSpacesAndComment(memory, ref position);
                 if (TryParseOperator(memory, ref position, out lex))
                 {
                     yield return lex;
@@ -64,9 +64,9 @@ public static partial class Lexer
                     throw new FormatException();
                 }
                 yield return lex;
-                SkipWhiteSpacesAndComment(memory, ref position);
 
-                // operator
+                // operator check
+                SkipWhiteSpacesAndComment(memory, ref position);
                 if (TryParseOperator(memory, ref position, out lex))
                 {
                     yield return lex;
@@ -80,64 +80,86 @@ public static partial class Lexer
 
             if (TryParseLeftParen(memory, ref position, out lex))
             {
-                // 左カッコが出現する可能性がある
-                // SELECT句が来る可能性がある
-                // あとは同じ
+                yield return lex;
+                SkipWhiteSpacesAndComment(memory, ref position);
+
+                // 次のトークンがselectの場合、インラインクエリのため特殊
+
+                // それ以外は再帰処理
+                foreach (var innerLex in ReadExpressionLexes(memory, position))
+                {
+                    yield return innerLex;
+                    position = innerLex.EndPosition;
+                }
+
+                lex = ParseRightParen(memory, ref position);
+                yield return lex;
+
+                // operator check
+                SkipWhiteSpacesAndComment(memory, ref position);
+                if (TryParseOperator(memory, ref position, out lex))
+                {
+                    yield return lex;
+                    SkipWhiteSpacesAndComment(memory, ref position);
+                    continue;
+                }
+
+                // alias, expression separator, or 'from' keyword
+                break;
             }
         }
     }
 
+    //public static Lex TokenizeAsQueryStart(ReadOnlyMemory<char> memory)
+    //{
+    //    int position = 0;
 
-    public static Lex TokenizeAsQueryStart(ReadOnlyMemory<char> memory)
-    {
-        int position = 0;
+    //    SkipWhiteSpaces(memory, ref position);
 
-        SkipWhiteSpaces(memory, ref position);
+    //    // Discard all comments before the query starts
+    //    position = ParseUntilNonComment(memory, previous: null).LastOrDefault().EndPosition;
+    //    SkipWhiteSpaces(memory, ref position);
 
-        // Discard all comments before the query starts
-        position = ParseUntilNonComment(memory, previous: null).LastOrDefault().EndPosition;
-        SkipWhiteSpaces(memory, ref position);
+    //    if (memory.Length < position + 1)
+    //    {
+    //        throw new FormatException("The SQL string is empty or in an invalid format.");
+    //    }
 
-        if (memory.Length < position + 1)
-        {
-            throw new FormatException("The SQL string is empty or in an invalid format.");
-        }
+    //    // The first character must be a comment start or a reserved word; otherwise, it's an error.
+    //    Lex lex;
+    //    if (TryParseWithOrRecursiveLex(memory, ref position, out lex)) return lex;
+    //    if (TryParseSelectLex(memory, ref position, out lex)) return lex;
+    //    if (TryParseInsertLex(memory, ref position, out lex)) return lex;
+    //    if (TryParseDeleteLex(memory, ref position, out lex)) return lex;
+    //    if (TryParseUpdateLex(memory, ref position, out lex)) return lex;
+    //    if (TryParseMergeLex(memory, ref position, out lex)) return lex;
+    //    if (TryParseCreateLex(memory, ref position, out lex)) return lex;
+    //    if (TryParseAlterLex(memory, ref position, out lex)) return lex;
 
-        // The first character must be a comment start or a reserved word; otherwise, it's an error.
-        Lex lex;
-        if (TryParseWithOrRecursiveLex(memory, ref position, out lex)) return lex;
-        if (TryParseSelectLex(memory, ref position, out lex)) return lex;
-        if (TryParseInsertLex(memory, ref position, out lex)) return lex;
-        if (TryParseDeleteLex(memory, ref position, out lex)) return lex;
-        if (TryParseUpdateLex(memory, ref position, out lex)) return lex;
-        if (TryParseMergeLex(memory, ref position, out lex)) return lex;
-        if (TryParseCreateLex(memory, ref position, out lex)) return lex;
-        if (TryParseAlterLex(memory, ref position, out lex)) return lex;
+    //    throw new FormatException("An invalid token was encountered. Please check if the SQL statement is correct.");
+    //}
 
-        throw new FormatException("An invalid token was encountered. Please check if the SQL statement is correct.");
-    }
+    //public static Lex TokenizeIdentifier(ReadOnlyMemory<char> memory, int position)
+    //{
+    //    SkipWhiteSpaces(memory, ref position);
 
-    public static Lex TokenizeIdentifier(ReadOnlyMemory<char> memory, int position)
-    {
-        SkipWhiteSpaces(memory, ref position);
+    //    if (memory.Length < position + 1)
+    //    {
+    //        throw new FormatException("The SQL string is empty or in an invalid format.");
+    //    }
 
-        if (memory.Length < position + 1)
-        {
-            throw new FormatException("The SQL string is empty or in an invalid format.");
-        }
+    //    // Assume some identifier can be retrieved
+    //    // Separators like commas or dots are not expected
+    //    Lex lex;
+    //    if (TryParseCommentStartLex(memory, ref position, out lex)) return lex;
 
-        // Assume some identifier can be retrieved
-        // Separators like commas or dots are not expected
-        Lex lex;
-        if (TryParseCommentStartLex(memory, ref position, out lex)) return lex;
+    //    if (TryParsePrefixNegationLex(memory, ref position, out lex)) return lex;
+    //    if (TryParseLeftParen(memory, ref position, out lex)) return lex;
 
-        if (TryParsePrefixNegationLex(memory, ref position, out lex)) return lex;
-        if (TryParseLeftParen(memory, ref position, out lex)) return lex;
+    //    if (TryParseValueLex(memory, ref position, out lex)) return lex;
 
-        if (TryParseValueLex(memory, ref position, out lex)) return lex;
-
-        throw new FormatException("An invalid token was encountered. Please check if the SQL statement is correct.");
-    }
+    //    throw new FormatException("An invalid token was encountered. Please check if the SQL statement is correct.");
+    //}
 
 
 
@@ -217,11 +239,6 @@ public static partial class Lexer
         return TryParseSingleCharLex(memory, ref position, '.', LexType.IdentifierSeparator, out lex);
     }
 
-    [MemberNotNullWhen(true)]
-    private static bool TryParseLeftParen(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
-    {
-        return TryParseSingleCharLex(memory, ref position, '(', LexType.LeftParen, out lex);
-    }
 
 
 

@@ -217,4 +217,50 @@ public class ExpressionParseTest(ITestOutputHelper output)
             Assert.Equal(expectedValues[i], lexes[i].Value);
         }
     }
+
+    [Theory]
+    [InlineData("a + b", new[] { "a", "+", "b" })]
+    [InlineData("a - b", new[] { "a", "-", "b" })]
+    [InlineData("a * b", new[] { "a", "*", "b" })]
+    [InlineData("a / b", new[] { "a", "/", "b" })]
+    [InlineData("(a + b) * c", new[] { "(", "a", "+", "b", ")", "*", "c" })]
+    [InlineData("x * (y - z)", new[] { "x", "*", "(", "y", "-", "z", ")" })]
+    [InlineData("((a + b) * c) / d", new[] { "(", "(", "a", "+", "b", ")", "*", "c", ")", "/", "d" })]
+    public void ArithmeticOperators(string text, string[] expectedValues)
+    {
+        output.WriteLine($"Text: {text}");
+
+        var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
+
+        foreach (var (lex, index) in lexes.Select((lex, index) => (lex, index)))
+        {
+            output.WriteLine($"[{index}] {lex.Value}");
+        }
+
+        Assert.Equal(expectedValues.Length, lexes.Count);
+
+        for (int i = 0; i < expectedValues.Length; i++)
+        {
+            Assert.Equal(expectedValues[i], lexes[i].Value);
+        }
+    }
+
+    [Theory]
+    [InlineData("a.value", new[] { "a", ".", "value" })]
+    [InlineData("table.column", new[] { "table", ".", "column" })]
+    [InlineData("schema.table.column", new[] { "schema", ".", "table", ".", "column" })]
+    [InlineData("(a.value + b.value) * c.value", new[] { "(", "a", ".", "value", "+", "b", ".", "value", ")", "*", "c", ".", "value" })]
+    [InlineData("x.value * (y.value - z.value)", new[] { "x", ".", "value", "*", "(", "y", ".", "value", "-", "z", ".", "value", ")" })]
+    [InlineData("((a.value + b.value) * c.value) / d.value", new[] { "(", "(", "a", ".", "value", "+", "b", ".", "value", ")", "*", "c", ".", "value", ")", "/", "d", ".", "value" })]
+    public void ColumnAccess(string text, string[] expectedValues)
+    {
+        var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
+
+        Assert.Equal(expectedValues.Length, lexes.Count);
+
+        for (int i = 0; i < expectedValues.Length; i++)
+        {
+            Assert.Equal(expectedValues[i], lexes[i].Value);
+        }
+    }
 }
