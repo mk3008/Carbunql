@@ -27,17 +27,17 @@ public static class SelectQueryParser
         throw new FormatException();
     }
 
-    private static object ParseSelectClause(ReadOnlyMemory<char> memory, ref int position)
-    {
-        Lex lex;
+    //private static object ParseSelectClause(ReadOnlyMemory<char> memory, ref int position)
+    //{
+    //    Lex lex;
 
-        var lexes =
-
-
-        if (Lexer.TryParseValueLex(memory, ref position, out lex))
-        {
+    //    var lexes =
 
 
-        }
-    }
+    //    if (Lexer.TryParseValueLex(memory, ref position, out lex))
+    //    {
+
+
+    //    }
+    //}
 }

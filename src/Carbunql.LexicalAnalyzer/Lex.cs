@@ -40,7 +40,9 @@ public readonly struct Lex
 
     private readonly string? cachedValue;
 
-    public string GetValue()
+    public string Value => GetValue();
+
+    private string GetValue()
     {
         if (cachedValue == null)
         {

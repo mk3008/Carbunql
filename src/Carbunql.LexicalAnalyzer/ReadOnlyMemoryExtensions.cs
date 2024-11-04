@@ -36,7 +36,7 @@ internal static class ReadOnlyMemoryExtensions
         int nextPosition = position + keyword.Length;
 
         // If nextPosition is at the end of the memory, it's a valid match
-        if (nextPosition == memory.Length)
+        if (nextPosition == memory.Length - 1)
         {
             return true; // End of memory, valid match
         }

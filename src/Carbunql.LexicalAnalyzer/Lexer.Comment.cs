@@ -23,7 +23,10 @@ public static partial class Lexer
 
     internal static void SkipComment(ReadOnlyMemory<char> memory, ref int position)
     {
-        position = Math.Max(ParseUntilNonComment(memory, position).Last().EndPosition, position);
+        if (ParseUntilNonComment(memory, position).Any())
+        {
+            position = ParseUntilNonComment(memory, position).Last().EndPosition;
+        }
     }
 
     [MemberNotNullWhen(true)]
@@ -41,7 +44,7 @@ public static partial class Lexer
     /// <param name="memory">The string to be parsed.</param>
     /// <param name="previous">The previous Lex indicating a non-comment state, or null if no previous state exists.</param>
     /// <returns>An enumeration of Lexes after comments have been removed.</returns>
-    internal static IEnumerable<Lex> ParseUntilNonComment(ReadOnlyMemory<char> memory, Lex? previous = null)
+    public static IEnumerable<Lex> ParseUntilNonComment(ReadOnlyMemory<char> memory, Lex? previous = null)
     {
         // Invalid if the previous Lex is in a comment state
         if (previous?.Type == LexType.LineCommentStart
@@ -58,7 +61,7 @@ public static partial class Lexer
         return ParseUntilNonComment(memory, position);
     }
 
-    internal static IEnumerable<Lex> ParseUntilNonComment(ReadOnlyMemory<char> memory, int position)
+    public static IEnumerable<Lex> ParseUntilNonComment(ReadOnlyMemory<char> memory, int position)
     {
         while (true)
         {
@@ -87,14 +90,17 @@ public static partial class Lexer
     {
         lex = default;
 
-        if (memory.Length < position + 2)
+        // must over 2charactor
+        if (memory.Length < position + 1)
         {
             return false;
         }
 
+        var start = position;
         if (memory.Span[position] == '-' && memory.Span[position + 1] == '-')
         {
-            lex = new Lex(memory, LexType.LineCommentStart, position, 2);
+            position += 2;
+            lex = new Lex(memory, LexType.LineCommentStart, start, position - start);
             return true;
         }
 
@@ -106,22 +112,26 @@ public static partial class Lexer
     {
         lex = default;
 
+        // must over 2charactor
         if (memory.Length < position + 1)
         {
             return false;
         }
 
+        var start = position;
         // Check for /* or /*+
         if (memory.Span[position] == '/' && memory.Span[position + 1] == '*')
         {
             // Check for /*+
             if (memory.Length < position + 2 && memory.Span[position + 2] == '+')
             {
-                lex = new Lex(memory, LexType.HitCommentStart, position, 3);
+                position += 3;
+                lex = new Lex(memory, LexType.HitCommentStart, start, position - start);
             }
             else
             {
-                lex = new Lex(memory, LexType.BlockCommentStart, position, 2);
+                position += 2;
+                lex = new Lex(memory, LexType.BlockCommentStart, start, position - start);
             }
             return true;
         }
@@ -132,7 +142,7 @@ public static partial class Lexer
 
     private static Lex ParseLineComment(ReadOnlyMemory<char> memory, ref int position)
     {
-        if (memory.Length < position + 1)
+        if (memory.Length < position)
         {
             throw new FormatException("The SQL string is empty or in an invalid format.");
         }
@@ -140,11 +150,11 @@ public static partial class Lexer
         var start = position;
 
         // exclude line comment end symbol
-        while (position < memory.Length + 1)
+        while (position < memory.Length)
         {
-            char next = memory.Span[position + 1];
+            char current = memory.Span[position];
 
-            if (next == '\r' || next == '\n')
+            if (current == '\r' || current == '\n')
             {
                 return new Lex(memory, LexType.Comment, start, position - start);
             }
@@ -155,7 +165,8 @@ public static partial class Lexer
 
     private static Lex ParseBlockComment(ReadOnlyMemory<char> memory, ref int position)
     {
-        if (memory.Length < position + 2)
+        // must over 2charactor
+        if (memory.Length < position + 1)
         {
             throw new FormatException("The SQL string is empty or in an invalid format.");
         }
@@ -163,13 +174,14 @@ public static partial class Lexer
         var start = position;
 
         // Search for the block comment end
-        while (position < memory.Length - 1)
+        while (position < memory.Length)
         {
-            if (memory.Span[position] == '*' && memory.Span[position + 1] == '/')
+            if (memory.Span[position] == '*' && position + 1 < memory.Length && memory.Span[position + 1] == '/')
             {
-                // Found the end of the block comment
-                position += 2;
-                return new Lex(memory, LexType.Comment, start, position - start);
+                {
+                    // exclude end symbol
+                    return new Lex(memory, LexType.Comment, start, position - start);
+                }
             }
             position++;
         }
@@ -184,7 +196,8 @@ public static partial class Lexer
         {
             throw new FormatException("Block comment end symbols '*/' not found.");
         }
-
-        return new Lex(memory, LexType.BlockCommentEnd, position, 2);
+        var start = position;
+        position += 2;
+        return new Lex(memory, LexType.BlockCommentEnd, start, position - start);
     }
 }

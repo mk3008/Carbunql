@@ -5,12 +5,12 @@ namespace Carbunql.LexicalAnalyzer;
 public static partial class Lexer
 {
     [MemberNotNullWhen(true)]
-    public static IEnumerable<Lex> ReadSelectExpressionLexes(ReadOnlyMemory<char> memory, int position)
+    public static IEnumerable<Lex> ReadExpressionLexes(ReadOnlyMemory<char> memory, int position)
     {
-        SkipWhiteSpaces(memory, ref position);
+        SkipWhiteSpacesAndComment(memory, ref position);
 
         var length = memory.Length;
-        if (length < position + 1)
+        if (length < position)
         {
             yield break;
         }

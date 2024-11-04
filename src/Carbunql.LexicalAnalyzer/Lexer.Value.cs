@@ -11,7 +11,7 @@ public static partial class Lexer
         if (TryParseWildCard(memory, ref position, out lex)) return true;
         if (TryParseNumericValue(memory, ref position, out lex)) return true;
         if (TryParseSingleQuotedText(memory, ref position, out lex)) return true;
-        if (TryParseLetterValueLex(memory, ref position, out lex)) return true;
+        //if (TryParseLetterValueLex(memory, ref position, out lex)) return true;
         return false;
     }
 
