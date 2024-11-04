@@ -5,25 +5,27 @@ public static partial class Lexer
     internal static bool TryParseOperator(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
     {
         lex = default;
-        if (TryParseSymbolOperator(memory, ref position, out lex)) return true;
+        if (TryParseCharOperator(memory, ref position, out lex)) return true;
         if (TryParseStringOperator(memory, ref position, out lex)) return true;
         return false;
     }
 
-    private static bool TryParseSymbolOperator(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    private static readonly HashSet<char> Operators = new HashSet<char> { '*', '+', '-', '/', '=', '<', '>', '!', '^' };
+
+    private static bool TryParseCharOperator(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
     {
         lex = default;
-        var start = position;
 
         // Ensure we are within bounds
-        if (position >= memory.Length)
+        if (memory.IsAtEnd(position))
         {
             return false;
         }
 
         // Logic assumes comment-starting Lex is removed
         // Check for consecutive symbol characters to identify an operator
-        while (position < memory.Length && char.IsSymbol(memory.Span[position]))
+        var start = position;
+        while (!memory.IsAtEnd(position) && Operators.Contains(memory.Span[position]))
         {
             position++;
         }

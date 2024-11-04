@@ -14,16 +14,16 @@ public static partial class Lexer
             yield break;
         }
 
+        //first charator "*" is all column wild card.
         Lex lex;
+        if (TryParseWildCard(memory, ref position, out lex))
+        {
+            yield return lex;
+            yield break;
+        }
+
         while (!memory.IsAtEnd(position))
         {
-            // wild card
-            if (TryParseWildCard(memory, ref position, out lex))
-            {
-                yield return lex;
-                break;
-            }
-
             // value
             if (TryParseSingleQuotedText(memory, ref position, out lex)
                 || TryParseNumericValue(memory, ref position, out lex)

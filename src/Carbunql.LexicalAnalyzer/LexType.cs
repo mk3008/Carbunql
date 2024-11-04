@@ -9,7 +9,7 @@ public enum LexType : byte
 
     CommentAfterWhiteSpaces,
 
-    QueryTerminator = 1,
+    QueryTerminator,
 
     As,
 
@@ -61,11 +61,11 @@ public enum LexType : byte
     Function,
     Letter,
 
-    LineCommentStart = 1,
-    BlockCommentStart = 2,
-    HitCommentStart = 4,
-    BlockCommentEnd = 3,
-    Comment = 6,
+    LineCommentStart,
+    BlockCommentStart,
+    HitCommentStart,
+    BlockCommentEnd,
+    Comment,
 
 
 
@@ -82,33 +82,33 @@ public enum LexType : byte
     /// <summary>
     /// Separator for values, represented by a comma (,).
     /// </summary>
-    ValueSeparator = 2,
+    ValueSeparator,
 
     /// <summary>
     /// Separator for identifiers, represented by a period (.).
     /// Used to separate schema, table, and column names (e.g., table.column).
     /// </summary>
-    IdentifierSeparator = 3,
+    IdentifierSeparator,
 
     /// <summary>
     /// Left parenthesis, represented by an opening parenthesis (() used in expressions.
     /// </summary>
-    LeftParen = 4,
+    LeftParen,
 
     /// <summary>
     /// Right parenthesis, represented by a closing parenthesis ()) used in expressions.
     /// </summary>
-    RightParen = 5,
+    RightParen,
 
     /// <summary>
     /// Left square bracket, represented by an opening bracket ([), often used for identifiers.
     /// </summary>
-    LeftSquareBracket = 6,
+    LeftSquareBracket,
 
     /// <summary>
     /// Right square bracket, represented by a closing bracket (]), often used for identifiers.
     /// </summary>
-    RightSquareBracket = 7
+    RightSquareBracket
 }
 
 

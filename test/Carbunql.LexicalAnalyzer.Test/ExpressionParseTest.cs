@@ -236,4 +236,27 @@ public class ExpressionParseTest(ITestOutputHelper output)
         Assert.Equal(".", lexes[3].Value);
         Assert.Equal("value", lexes[4].Value);
     }
+
+    [Fact]
+    public void ArithmeticOperations()
+    {
+        var text = " 1+2-3*4/5 ";
+        var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
+
+        output.WriteLine($"Count : {lexes.Count()}");
+        foreach (var (lex, index) in lexes.Select((lex, index) => (lex, index)))
+        {
+            output.WriteLine($"Index: {index}, Type: {lex.Type}, Position: {lex.Position}, Length: {lex.Length},  Value: {lex.Value}");
+        }
+
+        Assert.Equal("1", lexes[0].Value);
+        Assert.Equal("+", lexes[1].Value);
+        Assert.Equal("2", lexes[2].Value);
+        Assert.Equal("-", lexes[3].Value);
+        Assert.Equal("3", lexes[4].Value);
+        Assert.Equal("*", lexes[5].Value);
+        Assert.Equal("4", lexes[6].Value);
+        Assert.Equal("/", lexes[7].Value);
+        Assert.Equal("5", lexes[8].Value);
+    }
 }
