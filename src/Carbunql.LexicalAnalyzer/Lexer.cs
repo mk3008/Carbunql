@@ -4,7 +4,6 @@ namespace Carbunql.LexicalAnalyzer;
 
 public static partial class Lexer
 {
-    [MemberNotNullWhen(true)]
     public static IEnumerable<Lex> ReadExpressionLexes(ReadOnlyMemory<char> memory, int position)
     {
         SkipWhiteSpacesAndComment(memory, ref position);
@@ -110,6 +109,32 @@ public static partial class Lexer
         }
     }
 
+    [MemberNotNullWhen(true)]
+    public static bool TryParseExpressionName(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    {
+        lex = default;
+
+        if (memory.IsAtEnd(position))
+        {
+            return false;
+        }
+
+        SkipWhiteSpacesAndComment(memory, ref position);
+        SkipAliasCommand(memory, ref position);
+        SkipWhiteSpacesAndComment(memory, ref position);
+
+        if (TryParseSchemaOrTableOrColumn(memory, ref position, out lex))
+        {
+            if (lex.Type == LexType.Column)
+            {
+                return true;
+            }
+            throw new FormatException();
+        }
+
+        return false;
+    }
+
     //public static Lex TokenizeAsQueryStart(ReadOnlyMemory<char> memory)
     //{
     //    int position = 0;
@@ -181,6 +206,14 @@ public static partial class Lexer
         return true;
     }
 
+    private static void SkipAliasCommand(ReadOnlyMemory<char> memory, ref int position)
+    {
+        if (memory.EqualsWordIgnoreCase(position, "as"))
+        {
+            position += 2;
+        }
+    }
+
     [MemberNotNullWhen(true)]
     private static bool TryParseQueryTerminator(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
     {
@@ -224,13 +257,18 @@ public static partial class Lexer
 
     private static Lex ParseIdentifierSeparator(ReadOnlyMemory<char> memory, ref int position)
     {
-        if (memory.Length < position + 1 || memory.Span[position] != '.')
+        if (memory.IsAtEnd(position))
         {
             throw new Exception();
         }
+        if (memory.Span[position] != '.')
+        {
+            var name = memory.Span[position].ToString();
+            throw new Exception(name);
+        }
         var start = position;
         position++;
-        return new Lex(memory, LexType.IdentifierSeparator, start, 1);
+        return new Lex(memory, LexType.IdentifierSeparator, start, position - start);
     }
 
     [MemberNotNullWhen(true)]

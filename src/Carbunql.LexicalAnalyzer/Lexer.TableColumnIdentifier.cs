@@ -22,18 +22,25 @@ public static partial class Lexer
         lex = default;
         var start = position;
 
-        // Ensure the first character is a letter
-        if (position >= memory.Length || !char.IsLetter(memory.Span[position]))
+        if (memory.IsAtEnd(position))
         {
             return false;
         }
 
-        while (position < memory.Length)
+        // Ensure the first character is a letter or "_"
+        if (!(char.IsLetter(memory.Span[position]) || memory.Span[position] == '_'))
+        {
+            return false;
+        }
+
+        var backup = position;
+
+        while (!memory.IsAtEnd(position))
         {
             char next = memory.Span[position];
 
-            // Allow letters, digits, underscores, or dashes
-            if (char.IsLetterOrDigit(next) || next == '_' || next == '-')
+            // Allow letters, digits, underscores
+            if (char.IsLetterOrDigit(next) || next == '_')
             {
                 position++;
                 continue;
@@ -53,11 +60,19 @@ public static partial class Lexer
         // Yield the final identifier if valid
         if (position > start)
         {
-            lex = new Lex(memory, LexType.Column, start, position - start);
+            var name = memory.Slice(start, position - start).ToString();
+            if (name.ToLowerInvariant() == "from")
+            {
+                //rollback and exit;
+                position = backup;
+                return false;
+            }
+
+            lex = new Lex(memory, LexType.Column, start, position - start, name);
             return true;
         }
 
-        return false; // No valid identifier found
+        return false;
     }
 
     [MemberNotNullWhen(true)]
