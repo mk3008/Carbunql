@@ -263,4 +263,25 @@ public class ExpressionParseTest(ITestOutputHelper output)
             Assert.Equal(expectedValues[i], lexes[i].Value);
         }
     }
+
+    [Theory]
+    [InlineData("count(*)", new[] { "count", "(", "*", ")" })]
+    [InlineData("sum(a.alue)", new[] { "sum", "(", "a", ".", "value", ")" })]
+    public void TestFunction(string text, string[] expectedValues)
+    {
+        var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
+
+        output.WriteLine($"Count : {lexes.Count}");
+        foreach (var (lex, index) in lexes.Select((lex, index) => (lex, index)))
+        {
+            output.WriteLine($"Index: {index}, Position: {lex.Position}, Length: {lex.Length},  Value: {lex.Value}");
+        }
+
+        Assert.Equal(expectedValues.Length, lexes.Count);
+
+        for (int i = 0; i < expectedValues.Length; i++)
+        {
+            Assert.Equal(expectedValues[i], lexes[i].Value);
+        }
+    }
 }

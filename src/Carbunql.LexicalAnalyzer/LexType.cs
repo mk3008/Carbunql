@@ -57,7 +57,7 @@ public enum LexType : byte
 
     WildCard,
     Value,
-    SchemaOrTable,
+    Namespace,
     SchemaOrTableOrColumn,
     Column,
     Function,

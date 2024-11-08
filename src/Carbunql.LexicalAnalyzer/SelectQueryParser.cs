@@ -2,42 +2,65 @@
 
 public static class SelectQueryParser
 {
-    public static object Parse(string sql)
+    // debug
+    public static IEnumerable<Lex> Parse(string sql)
     {
-        //var memory = sql.AsMemory();
-        //var position = 0;
+        var memory = sql.AsMemory();
+        var position = 0;
 
-        //memory.SkipWhiteSpaces(ref position);
+        Lex lex;
 
-        //Lexer.SkipComment(memory, ref position);
+        // "with"
+        if (Lexer.TryParseWithOrRecursive(memory, ref position, out lex))
+        {
+            throw new FormatException();
+        }
 
-        //Lexer.SkipWhiteSpaces(memory, ref position);
+        if (!Lexer.TryParseSelect(memory, ref position, out lex))
+        {
+            throw new FormatException();
+        }
 
-        //Lex lex;
-        //if (Lexer.TryParseWithOrRecursiveLex(memory, ref position, out lex))
-        //{
-        //    throw new NotImplementedException();
-        //}
-        //else if (Lexer.TryParseSelectLex(memory, ref position, out lex))
-        //{
-        //    // value
+        // "select"
+        yield return lex;
 
-        //}
+        if (lex.Type == LexType.SelectDistinctOn)
+        {
+            // paren argument
+            throw new FormatException();
+        }
 
-        throw new FormatException();
+        bool hasExpression = false;
+        while (true)
+        {
+            // expression
+            foreach (var item in Lexer.ReadExpressionLexes(memory, position))
+            {
+                hasExpression = true;
+                position = item.EndPosition;
+                yield return item;
+            }
+            // alias name
+            if (Lexer.TryParseExpressionName(memory, ref position, out lex))
+            {
+                yield return lex;
+            }
+
+            //expression Separator
+            if (!Lexer.TryParseExpressionSeparator(memory, ref position, out lex))
+            {
+                break;
+            }
+        }
+
+        if (hasExpression == false)
+        {
+            throw new FormatException();
+        }
+
+        // "from"
+        lex = Lexer.ParseFrom(memory, ref position);
+
+        // table
     }
-
-    //private static object ParseSelectClause(ReadOnlyMemory<char> memory, ref int position)
-    //{
-    //    Lex lex;
-
-    //    var lexes =
-
-
-    //    if (Lexer.TryParseValueLex(memory, ref position, out lex))
-    //    {
-
-
-    //    }
-    //}
 }

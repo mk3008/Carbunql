@@ -4,23 +4,42 @@ namespace Carbunql.LexicalAnalyzer;
 
 public static partial class Lexer
 {
-    public static Lex ParseSelectExpressionDelimiter(ReadOnlyMemory<char> memory, ref int position)
+    public static Lex ParseFrom(ReadOnlyMemory<char> memory, ref int position)
     {
         memory.SkipWhiteSpacesAndComment(ref position);
 
-        Lex lex;
-        if (memory.TryParseSingleCharLex(ref position, ',', LexType.ExpressionSeparator, out lex))
+        if (memory.TryParseKeywordIgnoreCase(ref position, "from", LexType.From, out var lex))
         {
             return lex;
         }
-
-        if (memory.TryParseKeywordIgnoreCase(ref position, "from", LexType.From, out lex))
-        {
-            return lex;
-        }
-
-        throw new FormatException("Expected a comma or the keyword 'FROM' to end the SELECT clause.");
+        throw new FormatException();
     }
+
+    public static bool TryParseExpressionSeparator(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    {
+        memory.SkipWhiteSpacesAndComment(ref position);
+
+        if (memory.TryParseSingleCharLex(ref position, ',', LexType.ExpressionSeparator, out lex)) return true;
+        return false;
+    }
+
+    //public static Lex ParseSelectExpressionDelimiter(ReadOnlyMemory<char> memory, ref int position)
+    //{
+    //    memory.SkipWhiteSpacesAndComment(ref position);
+
+    //    Lex lex;
+    //    if (memory.TryParseSingleCharLex(ref position, ',', LexType.ExpressionSeparator, out lex))
+    //    {
+    //        return lex;
+    //    }
+
+    //    if (memory.TryParseKeywordIgnoreCase(ref position, "from", LexType.From, out lex))
+    //    {
+    //        return lex;
+    //    }
+
+    //    throw new FormatException("Expected a comma or the keyword 'FROM' to end the SELECT clause.");
+    //}
 
 
     //public static Lex TokenizeAsQueryStart(ReadOnlyMemory<char> memory)

@@ -5,7 +5,7 @@ namespace Carbunql.LexicalAnalyzer;
 public static partial class Lexer
 {
     [MemberNotNullWhen(true)]
-    internal static bool TryParseSchemaOrTableOrColumn(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    internal static bool TryParseNamespaceOrColumn(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
     {
         lex = default;
         if (TryParseSchemaOrTableOrColumnAsDefault(memory, ref position, out lex)) return true;
@@ -49,7 +49,7 @@ public static partial class Lexer
             // Check for the dot separator
             if (next == '.')
             {
-                lex = new Lex(memory, LexType.SchemaOrTable, start, position - start);
+                lex = new Lex(memory, LexType.Namespace, start, position - start);
                 return true; // Successfully parsed schema or table
             }
 
@@ -108,7 +108,7 @@ public static partial class Lexer
                 // Check if the next character is a dot
                 if (position < memory.Length && memory.Span[position] == '.')
                 {
-                    lex = new Lex(memory, LexType.SchemaOrTable, start, position - start);
+                    lex = new Lex(memory, LexType.Namespace, start, position - start);
                     return true; // Successfully parsed schema or table
                 }
                 else

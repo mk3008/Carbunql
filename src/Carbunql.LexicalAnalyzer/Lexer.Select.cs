@@ -5,7 +5,7 @@ namespace Carbunql.LexicalAnalyzer;
 public static partial class Lexer
 {
     [MemberNotNullWhen(true)]
-    internal static bool TryParseSelectLex(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    internal static bool TryParseSelect(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
     {
         lex = default;
 
