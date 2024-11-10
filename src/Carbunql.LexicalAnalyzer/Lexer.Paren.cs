@@ -10,6 +10,12 @@ public static partial class Lexer
         return memory.TryParseSingleCharLex(ref position, '(', LexType.LeftParen, out lex);
     }
 
+    private static Lex ParseLeftParen(ReadOnlyMemory<char> memory, ref int position)
+    {
+        if (memory.TryParseSingleCharLex(ref position, '(', LexType.LeftParen, out var lex)) return lex;
+        throw new InvalidProgramException();
+    }
+
     private static Lex ParseRightParen(ReadOnlyMemory<char> memory, ref int position)
     {
         if (memory.TryParseSingleCharLex(ref position, ')', LexType.RightParen, out var lex)) return lex;

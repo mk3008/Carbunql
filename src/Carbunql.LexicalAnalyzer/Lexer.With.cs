@@ -9,7 +9,7 @@ public static partial class Lexer
     {
         lex = default;
 
-        if (!memory.EqualsWordIgnoreCase(position, "with"))
+        if (!memory.EqualsWordIgnoreCase(position, "with", out _))
         {
             return false;
         }
@@ -22,9 +22,9 @@ public static partial class Lexer
         memory.SkipWhiteSpaces(ref position);
 
         // Check for "recursive"
-        if (memory.EqualsWordIgnoreCase(position, "recursive"))
+        if (memory.EqualsWordIgnoreCase(position, "recursive", out position))
         {
-            lex = new Lex(memory, LexType.WithRecursive, start, position + 9 - start);
+            lex = new Lex(memory, LexType.WithRecursive, start, position - start, "with recursive");
             return true;
         }
 
@@ -32,17 +32,17 @@ public static partial class Lexer
         return true;
     }
 
-    [MemberNotNullWhen(true)]
-    private static bool TryParseWithLex(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
-    {
-        lex = default;
-        var start = position;
-        if (!memory.EqualsWordIgnoreCase(position, "with"))
-        {
-            return false;
-        }
+    //[MemberNotNullWhen(true)]
+    //private static bool TryParseWithLex(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    //{
+    //    lex = default;
+    //    var start = position;
+    //    if (!memory.EqualsWordIgnoreCase(position, "with"))
+    //    {
+    //        return false;
+    //    }
 
-        lex = new Lex(memory, LexType.With, position, position + 4 - start);
-        return true;
-    }
+    //    lex = new Lex(memory, LexType.With, position, position + 4 - start);
+    //    return true;
+    //}
 }

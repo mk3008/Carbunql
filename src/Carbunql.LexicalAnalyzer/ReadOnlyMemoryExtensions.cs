@@ -272,11 +272,10 @@ public static class ReadOnlyMemoryExtensions
     public static bool TryParseKeywordIgnoreCase(this ReadOnlyMemory<char> memory, ref int position, string keyword, LexType lexType, out Lex lex)
     {
         lex = default;
+        var start = position;
 
-        if (memory.EqualsWordIgnoreCase(position, keyword))
+        if (memory.EqualsWordIgnoreCase(position, keyword, out position))
         {
-            var start = position;
-            position += keyword.Length;
             lex = new Lex(memory, lexType, start, keyword.Length);
             return true;
         }
@@ -295,9 +294,11 @@ public static class ReadOnlyMemoryExtensions
     /// <c>true</c> if the substring matches the keyword as a complete word; 
     /// otherwise, <c>false</c>.
     /// </returns>
-    public static bool EqualsWordIgnoreCase(this ReadOnlyMemory<char> memory, int position, string keyword)
+    public static bool EqualsWordIgnoreCase(this ReadOnlyMemory<char> memory, int position, string keyword, out int endPosition)
     {
+        endPosition = position;
         var keyLength = keyword.Length;
+
         // Not enough characters remaining for a match
         if (memory.HasFewerThanChars(position, keyLength))
         {
@@ -317,7 +318,8 @@ public static class ReadOnlyMemoryExtensions
         int nextPosition = position + keyLength;
         if (memory.IsAtEnd(nextPosition))
         {
-            return true; // End of memory, valid match
+            endPosition = nextPosition;
+            return true;
         }
 
         // Get the next character
@@ -326,11 +328,55 @@ public static class ReadOnlyMemoryExtensions
         // Check if the next character is a space, or a symbol (comma, dot, left parenthesis, arithmetic operators, etc.)
         if (char.IsWhiteSpace(nextChar) || char.IsSymbol(nextChar))
         {
-            return true; // Valid word match
+            endPosition = nextPosition;
+            return true;
         }
 
         // Invalid match (not a complete word)
         return false;
+    }
+
+    public static bool IsAtEndOrWhiteSpace(this ReadOnlyMemory<char> memory, int position)
+    {
+        if (HasFewerThanChars(memory, position, 1)) return false;
+        return char.IsWhiteSpace(memory.Span[position]);
+    }
+
+    public static bool Equals(this ReadOnlyMemory<char> memory, int startPosition, char keyword, out int position)
+    {
+        position = startPosition;
+
+        // Not enough characters remaining for a match
+        if (memory.HasFewerThanChars(startPosition, 1))
+        {
+            return false;
+        }
+
+        return memory.Span[startPosition] == keyword;
+    }
+
+    public static bool Equals(this ReadOnlyMemory<char> memory, int startPosition, string keyword, out int position)
+    {
+        position = startPosition;
+        var keyLength = keyword.Length;
+
+        // Not enough characters remaining for a match
+        if (memory.HasFewerThanChars(startPosition, keyLength))
+        {
+            return false;
+        }
+
+        // Check for keyword match
+        for (int i = 0; i < keyLength; i++)
+        {
+            if (memory.Span[startPosition + i] != keyword[i])
+            {
+                return false;
+            }
+            position++;
+        }
+
+        return true;
     }
 
     /// <summary>

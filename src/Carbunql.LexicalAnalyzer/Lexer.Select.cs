@@ -8,60 +8,52 @@ public static partial class Lexer
     internal static bool TryParseSelect(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
     {
         lex = default;
+        var start = position;
 
         // Check for "select" keyword
-        if (!memory.EqualsWordIgnoreCase(position, "select"))
+        if (!memory.EqualsWordIgnoreCase(position, "select", out position))
         {
             return false;
         }
 
-        // Starting position for the lex and move position past "select"
-        var start = position;
-        position += 6;
+        memory.SkipWhiteSpacesAndComment(ref position);
 
         // Check for "all"
-        if (memory.EqualsWordIgnoreCase(position, "all"))
+        if (memory.EqualsWordIgnoreCase(position, "all", out position))
         {
-            lex = new Lex(memory, LexType.Select, start, position + 3 - start);
+            lex = new Lex(memory, LexType.Select, position, position - start, "select all");
             return true;
         }
 
         // Check for "distinct"
-        if (!memory.EqualsWordIgnoreCase(position, "distinct"))
+        if (memory.EqualsWordIgnoreCase(position, "distinct", out position))
         {
-            // If neither "all" nor "distinct", return simple "select" lex
-            lex = new Lex(memory, LexType.Select, start, position - start);
+            memory.SkipWhiteSpacesAndComment(ref position);
+            if (memory.EqualsWordIgnoreCase(position, "on", out position))
+            {
+                lex = new Lex(memory, LexType.Select, position, position - start, "select distinct on");
+                return true;
+            }
+            lex = new Lex(memory, LexType.Select, position, position - start, "select distinct");
             return true;
         }
 
-        // Move position past "distinct"
-        position += 8; // Move past "distinct"
-        var distinctEndPosition = position; // End position for distinct lex
-
-        memory.SkipWhiteSpaces(ref position); // Skip any whitespace after "distinct"
-
-        // Check Postgres syntax "select distinct on"
-        if (memory.EqualsWordIgnoreCase(position, "on"))
-        {
-            lex = new Lex(memory, LexType.SelectDistinctOn, start, position + 2 - start);
-            return true;
-        }
-
-        lex = new Lex(memory, LexType.SelectDistinct, start, distinctEndPosition - start);
+        // If neither "all" nor "distinct", return simple "select" lex
+        lex = new Lex(memory, LexType.Select, start, position - start);
         return true;
     }
 
-    [MemberNotNullWhen(true)]
-    internal static bool TryParseAliasKeyword(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
-    {
-        lex = default;
+    //[MemberNotNullWhen(true)]
+    //internal static bool TryParseAliasKeyword(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    //{
+    //    lex = default;
 
-        if (!memory.EqualsWordIgnoreCase(position, "as"))
-        {
-            return false;
-        }
+    //    if (!memory.EqualsWordIgnoreCase(position, "as"))
+    //    {
+    //        return false;
+    //    }
 
-        lex = new Lex(memory, LexType.As, position, 2);
-        return true;
-    }
+    //    lex = new Lex(memory, LexType.As, position, 2);
+    //    return true;
+    //}
 }

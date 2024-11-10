@@ -113,14 +113,6 @@ public static partial class Lexer
         return true;
     }
 
-    private static void SkipAliasCommand(ReadOnlyMemory<char> memory, ref int position)
-    {
-        if (memory.EqualsWordIgnoreCase(position, "as"))
-        {
-            position += 2;
-        }
-    }
-
     [MemberNotNullWhen(true)]
     private static bool TryParseQueryTerminator(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
     {
@@ -170,30 +162,30 @@ public static partial class Lexer
 
 
 
-    [MemberNotNullWhen(true)]
-    private static bool TryParsePrefixNegationLex(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
-    {
-        lex = default;
+    //[MemberNotNullWhen(true)]
+    //private static bool TryParsePrefixNegationLex(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    //{
+    //    lex = default;
 
-        if (memory.Span[position] == '~')
-        {
-            lex = new Lex(memory, LexType.PrefixNegation, position, 1);
-            return true;
-        }
+    //    if (memory.Span[position] == '~')
+    //    {
+    //        lex = new Lex(memory, LexType.PrefixNegation, position, 1);
+    //        return true;
+    //    }
 
-        if (memory.Length < position + 3)
-        {
-            return false;
-        }
+    //    if (memory.Length < position + 3)
+    //    {
+    //        return false;
+    //    }
 
-        if (memory.EqualsWordIgnoreCase(position, "not"))
-        {
-            lex = new Lex(memory, LexType.PrefixNegation, position, 3);
-            return true;
-        }
+    //    if (memory.EqualsWordIgnoreCase(position, "not"))
+    //    {
+    //        lex = new Lex(memory, LexType.PrefixNegation, position, 3);
+    //        return true;
+    //    }
 
-        return false;
-    }
+    //    return false;
+    //}
 
 
 
