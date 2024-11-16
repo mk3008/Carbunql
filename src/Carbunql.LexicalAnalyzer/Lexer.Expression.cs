@@ -74,7 +74,6 @@ public static partial class Lexer
                     continue;
                 }
 
-
                 // alias, expression separator, or 'from' keyword
                 break;
             }

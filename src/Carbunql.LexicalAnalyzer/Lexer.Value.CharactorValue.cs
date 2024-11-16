@@ -1,22 +1,30 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.LexicalAnalyzer;
 
 public static partial class Lexer
 {
-    /// <summary>
-    /// Defines a set of characters considered as symbols that terminate an identifier.
-    /// </summary>
-    //internal static readonly HashSet<char> Symbols = new HashSet<char>
-    //{
-    //    '+', '-', '*', '/', '%', // Arithmetic operators
-    //    '(', ')', '[', ']', '{', '}', // Brackets and braces
-    //    '~', '@', '#', '$', '^', '&', // Special symbols
-    //    '!', '?', ':', ';', ',', '.', '<', '>', '=', '|', '\\', // Other symbols
-    //    '`', '"', '\'' // Quotation marks
-    //};
+    private static HashSet<string> SpecialValueWords = new HashSet<string>
+    {
+        "true",
+        "false",
+        "null",
 
+        "current_timestamp",
+        "current_date",
+        "current_time",
+        "timestamp",
+        "now",
+
+        "yesterday",
+        "today",
+        "tomorrow",
+
+        "-infinity",
+        "infinity",
+        "allballs",
+        "epoch",
+    };
 
     [MemberNotNullWhen(true)]
     public static bool TryParseCharactorValue(ReadOnlyMemory<char> memory, int start, out Lex lex, out int endPosition)
@@ -41,9 +49,9 @@ public static partial class Lexer
         // Special word (e.g. true, false, null, timestamp)
         foreach (var keyword in SpecialValueWords.Where(x => x.Length == length))
         {
-            if (memory.EqualsWordIgnoreCase(position, keyword, out position))
+            if (memory.EqualsWordIgnoreCase(start, keyword, out _))
             {
-                lex = new Lex(memory, LexType.Type, start, position - start);
+                lex = new Lex(memory, LexType.Value, start, position - start);
                 endPosition = position;
                 return true;
             }
@@ -81,89 +89,6 @@ public static partial class Lexer
         lex = new Lex(memory, LexType.Column, start, position - start);
         endPosition = position;
         return true;
-    }
-
-
-    [MemberNotNullWhen(true)]
-    private static bool TryParseCharactorValues(ReadOnlyMemory<char> memory, int position, out IEnumerable<Lex> lexes)
-    {
-        lexes = Enumerable.Empty<Lex>();
-        var start = position;
-
-        if (TryGetCharacterEndPosition(memory, position, out _))
-        {
-            lexes = ParseCharactorValues(memory, position);
-            return true;
-        }
-        return false;
-    }
-
-    [MemberNotNullWhen(true)]
-    private static IEnumerable<Lex> ParseCharactorValues(ReadOnlyMemory<char> memory, int position)
-    {
-        var start = position;
-
-        if (!TryGetCharacterEndPosition(memory, position, out position))
-        {
-            throw new FormatException();
-        }
-
-        // check next charactor
-        if (memory.IsAtEndOrWhiteSpace(position))
-        {
-            if (IsSpacialValueWord(memory, start, position - start))
-            {
-                yield return new Lex(memory, LexType.Value, start, position - start);
-            }
-
-            yield return new Lex(memory, LexType.Column, start, position - start);
-            yield break;
-        }
-
-        // Identifier separator
-        if (memory.EqualsChar(position, '.', out _))
-        {
-            yield return new Lex(memory, LexType.Namespace, start, position - start);
-
-            position++;//skip comma
-            start = position;
-            while (TryGetCharacterEndPosition(memory, position, out position))
-            {
-                if (memory.EqualsChar(position, '.', out _))
-                {
-                    yield return new Lex(memory, LexType.Namespace, start, position - start);
-                    position++;//skip comma
-                    start = position;
-                    continue;
-                }
-                else
-                {
-                    yield return new Lex(memory, LexType.Column, start, position - start);
-                    yield break;
-                }
-            }
-            throw new FormatException();
-        }
-
-        // left paren
-        if (memory.EqualsChar(position, '(', out _))
-        {
-            yield return new Lex(memory, LexType.Function, start, position - start);
-            yield break;
-        }
-
-        // mulitiword
-
-
-        // other
-        if (IsSpacialValueWord(memory, start, position - start))
-        {
-            yield return new Lex(memory, LexType.Value, start, position - start);
-            yield break;
-        }
-
-        yield return new Lex(memory, LexType.Column, start, position - start);
-        yield break;
     }
 
     /// <summary>
