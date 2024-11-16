@@ -11,9 +11,10 @@ public class SelectQueryParseTest(ITestOutputHelper output)
     {
         var text = """
             select
-                a.id,
-                a.value,
-                a.quantity * a.price as total_price
+                a.id
+                , a.value v1
+                , a.value as v2
+                , a.quantity * a.price as total_price
             from
                 table as a
             """;

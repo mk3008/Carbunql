@@ -8,7 +8,7 @@ public static partial class Lexer
         "not",
         "and",
         "or",
-        "as", //type cast "as"
+        //"as", //type cast "as"
     };
 
     private static bool TryParseStringOperator(ReadOnlyMemory<char> memory, ref int position, out Lex lex)

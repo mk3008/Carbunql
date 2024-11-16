@@ -39,7 +39,7 @@ public static partial class Lexer
         }
 
         // If neither "all" nor "distinct", return simple "select" lex
-        lex = new Lex(memory, LexType.Select, start, position - start);
+        lex = new Lex(memory, LexType.Select, start, position - start, "select");
         return true;
     }
 

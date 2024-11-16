@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.LexicalAnalyzer;
 
@@ -9,7 +8,7 @@ public static partial class Lexer
 
 
 
-    public static IEnumerable<Lex> ReadExpressionLexes(ReadOnlyMemory<char> memory, int position)
+    public static IEnumerable<Lex> ReadExpressionLexes(ReadOnlyMemory<char> memory, int position, Lex? owner = null)
     {
         memory.SkipWhiteSpacesAndComment(ref position);
 
@@ -67,12 +66,14 @@ public static partial class Lexer
 
                 // operator check
                 memory.SkipWhiteSpacesAndComment(ref position);
+
                 if (TryParseOperator(memory, ref position, out lex))
                 {
                     yield return lex;
                     memory.SkipWhiteSpacesAndComment(ref position);
                     continue;
                 }
+
 
                 // alias, expression separator, or 'from' keyword
                 break;
@@ -97,10 +98,35 @@ public static partial class Lexer
                     yield return ParseLeftParen(memory, ref position);
 
                     // read arguments
-                    foreach (var argument in ReadExpressionLexes(memory, position))
+                    foreach (var argument in ReadExpressionLexes(memory, position, owner = lex))
                     {
                         yield return argument;
                         position = argument.EndPosition;
+                    }
+
+                    memory.SkipWhiteSpacesAndComment(ref position);
+
+                    if (lex.Value.ToLowerInvariant() == "cast")
+                    {
+                        if (memory.TryParseKeywordIgnoreCase(ref position, "as", LexType.Operator, out lex))
+                        {
+                            yield return lex;
+                        }
+                        else
+                        {
+                            throw new FormatException();
+                        }
+
+                        memory.SkipWhiteSpacesAndComment(ref position);
+
+                        if (TryParseDbType(memory, position, out lex, out position))
+                        {
+                            yield return lex;
+                        }
+                        else
+                        {
+                            throw new FormatException();
+                        }
                     }
 
                     // close paren
@@ -178,7 +204,7 @@ public static partial class Lexer
             {
                 throw new FormatException();
             }
-            lex = new Lex(memory, LexType.Column, start, position - start);
+            lex = new Lex(memory, LexType.Alias, start, position - start);
             return true;
         }
         else
@@ -194,7 +220,7 @@ public static partial class Lexer
                 return false;
             }
             position = p;
-            lex = new Lex(memory, LexType.Column, start, position - start, name);
+            lex = new Lex(memory, LexType.Alias, start, position - start, name);
             return true;
         }
     }
