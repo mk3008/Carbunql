@@ -21,7 +21,7 @@ public static partial class Lexer
 
             // Postgres typeconverter
             start = position;
-            if (memory.Equals(position, "::", out position))
+            if (memory.EqualsWord(position, "::", out position))
             {
                 //read expression
             }

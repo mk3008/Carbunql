@@ -10,7 +10,7 @@ public static partial class Lexer
         return false;
     }
 
-    private static readonly HashSet<char> Operators = new HashSet<char> { '*', '+', '-', '/', '=', '<', '>', '!', '^' };
+    private static readonly HashSet<char> Operators = new HashSet<char> { '*', '+', '-', '/', '=', '<', '>', '!', '^', ':' };
 
     private static bool TryParseCharOperator(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
     {

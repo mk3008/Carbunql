@@ -13,11 +13,8 @@ public class CommentTest(ITestOutputHelper output)
         var lexes = text.AsMemory().ParseUntilNonComment(0).ToList();
 
         output.WriteLine($"Text : {text}");
-        output.WriteLine($"Count : {lexes.Count()}");
-        foreach (var (lex, index) in lexes.Select((lex, index) => (lex, index)))
-        {
-            output.WriteLine($"Index: {index}, Position: {lex.Position}, Length: {lex.Length},  Value: {lex.Value}");
-        }
+
+        Debugger.Print(output, lexes);
 
         Assert.Equal("--", lexes[0].Value);
         Assert.Equal("comment", lexes[1].Value);
@@ -30,10 +27,8 @@ public class CommentTest(ITestOutputHelper output)
         var lexes = text.AsMemory().ParseUntilNonComment(0).ToList();
 
         output.WriteLine($"Text : {text}");
-        foreach (var (lex, index) in lexes.Select((lex, index) => (lex, index)))
-        {
-            output.WriteLine($"Index: {index}, Position: {lex.Position}, Length: {lex.Length},  Value: {lex.Value}");
-        }
+
+        Debugger.Print(output, lexes);
 
         var lst = lexes.ToList();
         Assert.Equal("/*", lst[0].Value);

@@ -21,9 +21,7 @@ public class SelectQueryParseTest(ITestOutputHelper output)
         var lexes = SelectQueryParser.Parse(text);
 
         output.WriteLine($"Text : {text}");
-        foreach (var (lex, index) in lexes.Select((lex, index) => (lex, index)))
-        {
-            output.WriteLine($"Lex[{index,3}] {lex.Value,-20}, Type: {lex.Type,-20}");
-        }
+
+        Debugger.Print(output, lexes);
     }
 }

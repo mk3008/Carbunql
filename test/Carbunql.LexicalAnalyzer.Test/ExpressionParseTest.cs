@@ -6,25 +6,11 @@ public class ExpressionParseTest(ITestOutputHelper output)
 {
     private readonly ITestOutputHelper output = output;
 
-    private void DebugPrint(IEnumerable<Lex> lexes)
-    {
-        var count = 0;
-        foreach (var (lex, index) in lexes.Select((lex, index) => (lex, index)))
-        {
-            output.WriteLine($"[{index,3}][{lex.Type,-10}] {lex.Value}");
-            count++;
-        }
-
-        output.WriteLine($"Count : {count}");
-    }
-
     [Fact]
     public void Default()
     {
         var text = "1";
         var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
-
-        DebugPrint(lexes);
 
         Assert.Equal("1", lexes[0].Value);
     }
@@ -35,7 +21,7 @@ public class ExpressionParseTest(ITestOutputHelper output)
         var text = " \t\r\n1";
         var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
 
-        DebugPrint(lexes);
+        Debugger.Print(output, lexes);
 
         Assert.Equal("1", lexes[0].Value);
     }
@@ -46,7 +32,7 @@ public class ExpressionParseTest(ITestOutputHelper output)
         var text = " --comment\n1";
         var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
 
-        DebugPrint(lexes);
+        Debugger.Print(output, lexes);
 
         Assert.Equal("1", lexes[0].Value);
     }
@@ -58,7 +44,7 @@ public class ExpressionParseTest(ITestOutputHelper output)
     {
         var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
 
-        DebugPrint(lexes);
+        Debugger.Print(output, lexes);
 
         Assert.Single(lexes);
         Assert.Equal(expectedValue, lexes[0].Value);
@@ -70,7 +56,7 @@ public class ExpressionParseTest(ITestOutputHelper output)
         var text = " 1 ";
         var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
 
-        DebugPrint(lexes);
+        Debugger.Print(output, lexes);
 
         Assert.Equal("1", lexes[0].Value);
     }
@@ -82,7 +68,7 @@ public class ExpressionParseTest(ITestOutputHelper output)
     {
         var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
 
-        DebugPrint(lexes);
+        Debugger.Print(output, lexes);
 
         Assert.Single(lexes);
         Assert.Equal(expectedValue, lexes[0].Value);
@@ -97,7 +83,7 @@ public class ExpressionParseTest(ITestOutputHelper output)
     {
         var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
 
-        DebugPrint(lexes);
+        Debugger.Print(output, lexes);
 
         Assert.Single(lexes);
         Assert.Equal(expectedValue, lexes[0].Value);
@@ -110,7 +96,7 @@ public class ExpressionParseTest(ITestOutputHelper output)
     {
         var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
 
-        DebugPrint(lexes);
+        Debugger.Print(output, lexes);
 
         Assert.Single(lexes);
         Assert.Equal(expectedValue, lexes[0].Value);
@@ -124,7 +110,7 @@ public class ExpressionParseTest(ITestOutputHelper output)
     {
         var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
 
-        DebugPrint(lexes);
+        Debugger.Print(output, lexes);
 
         Assert.Equal(expectedValues.Length, lexes.Count);
 
@@ -140,7 +126,7 @@ public class ExpressionParseTest(ITestOutputHelper output)
         var text = " 1+2-3*4/5 ";
         var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
 
-        DebugPrint(lexes);
+        Debugger.Print(output, lexes);
 
         Assert.Equal("1", lexes[0].Value);
         Assert.Equal("+", lexes[1].Value);
@@ -167,7 +153,7 @@ public class ExpressionParseTest(ITestOutputHelper output)
     {
         var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
 
-        DebugPrint(lexes);
+        Debugger.Print(output, lexes);
 
         Assert.Equal(expectedValues.Length, lexes.Count);
 
@@ -184,7 +170,7 @@ public class ExpressionParseTest(ITestOutputHelper output)
     {
         var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
 
-        DebugPrint(lexes);
+        Debugger.Print(output, lexes);
 
         Assert.Equal(expectedValues.Length, lexes.Count);
 
@@ -208,7 +194,7 @@ public class ExpressionParseTest(ITestOutputHelper output)
 
         var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
 
-        DebugPrint(lexes);
+        Debugger.Print(output, lexes);
 
         Assert.Equal(expectedValues.Length, lexes.Count);
 
@@ -225,11 +211,17 @@ public class ExpressionParseTest(ITestOutputHelper output)
     [InlineData("(a.value + b.value) * c.value", new[] { "(", "a", "value", "+", "b", "value", ")", "*", "c", "value" })]
     [InlineData("x.value * (y.value - z.value)", new[] { "x", "value", "*", "(", "y", "value", "-", "z", "value", ")" })]
     [InlineData("((a.value + b.value) * c.value) / d.value", new[] { "(", "(", "a", "value", "+", "b", "value", ")", "*", "c", "value", ")", "/", "d", "value" })]
+    [InlineData("a.*", new[] { "a", "*" })]
+    [InlineData("a.value1", new[] { "a", "value1" })]
+    [InlineData("a.total_value", new[] { "a", "total_value" })]
+    [InlineData("a.\"total value\"", new[] { "a", "\"total value\"" })]
+    [InlineData("\"table a\".\"total value\"", new[] { "\"table a\"", "\"total value\"" })]
+    [InlineData("\"table\"\"a\".\"total\"\"value\"", new[] { "\"table\"\"a\"", "\"total\"\"value\"" })]
     public void ColumnAccess(string text, string[] expectedValues)
     {
         var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
 
-        DebugPrint(lexes);
+        Debugger.Print(output, lexes);
 
         Assert.Equal(expectedValues.Length, lexes.Count);
 
@@ -242,11 +234,15 @@ public class ExpressionParseTest(ITestOutputHelper output)
     [Theory]
     [InlineData("count(*)", new[] { "count", "(", "*", ")" })]
     [InlineData("sum(a.value)", new[] { "sum", "(", "a", "value", ")" })]
+    [InlineData("cast(a.value as text)", new[] { "cast", "(", "a", "value", "as", "text", ")" })]
+    [InlineData("a.value::text", new[] { "a", "value", "::", "text" })]
     public void TestFunction(string text, string[] expectedValues)
     {
+        // type‚ª—ˆ‚é‚±‚Æ‚ª‚ ‚é
+
         var lexes = Lexer.ReadExpressionLexes(text.AsMemory(), 0).ToList();
 
-        DebugPrint(lexes);
+        Debugger.Print(output, lexes);
 
         Assert.Equal(expectedValues.Length, lexes.Count);
 

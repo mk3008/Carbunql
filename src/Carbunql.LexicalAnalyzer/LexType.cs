@@ -11,7 +11,7 @@ public enum LexType : byte
 
     QueryTerminator,
 
-    As,
+    Alias,
 
     Operator,
 
@@ -24,6 +24,8 @@ public enum LexType : byte
     AlterProcedure,
     AlterTrigger,
     AlterSequence,
+
+    Type,
 
     //create command
     CreateSchema,
@@ -61,7 +63,7 @@ public enum LexType : byte
     SchemaOrTableOrColumn,
     Column,
     Function,
-    Letter,
+    //Letter,
 
     LineCommentStart,
     BlockCommentStart,

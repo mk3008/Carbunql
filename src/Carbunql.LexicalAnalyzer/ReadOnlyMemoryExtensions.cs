@@ -161,7 +161,7 @@ public static class ReadOnlyMemoryExtensions
     {
         var span = memory.Span;
 
-        while (position < span.Length && char.IsWhiteSpace(span[position]))
+        while (position < span.Length && span[position].IsWhiteSpace())
         {
             position++;
         }
@@ -300,7 +300,7 @@ public static class ReadOnlyMemoryExtensions
         var keyLength = keyword.Length;
 
         // Not enough characters remaining for a match
-        if (memory.HasFewerThanChars(position, keyLength))
+        if (memory.IsAtEnd(position + keyLength - 1))
         {
             return false;
         }
@@ -326,7 +326,7 @@ public static class ReadOnlyMemoryExtensions
         char nextChar = memory.Span[nextPosition];
 
         // Check if the next character is a space, or a symbol (comma, dot, left parenthesis, arithmetic operators, etc.)
-        if (char.IsWhiteSpace(nextChar) || char.IsSymbol(nextChar))
+        if (nextChar.IsWhiteSpace() || nextChar.IsSymbols())
         {
             endPosition = nextPosition;
             return true;
@@ -339,29 +339,29 @@ public static class ReadOnlyMemoryExtensions
     public static bool IsAtEndOrWhiteSpace(this ReadOnlyMemory<char> memory, int position)
     {
         if (HasFewerThanChars(memory, position, 1)) return false;
-        return char.IsWhiteSpace(memory.Span[position]);
+        return memory.Span[position].IsWhiteSpace();
     }
 
-    public static bool Equals(this ReadOnlyMemory<char> memory, int startPosition, char keyword, out int position)
+    public static bool EqualsChar(this ReadOnlyMemory<char> memory, int start, char keyword, out int position)
     {
-        position = startPosition;
+        position = start;
 
         // Not enough characters remaining for a match
-        if (memory.HasFewerThanChars(startPosition, 1))
+        if (memory.HasFewerThanChars(start, 1))
         {
             return false;
         }
 
-        return memory.Span[startPosition] == keyword;
+        return memory.Span[start] == keyword;
     }
 
-    public static bool Equals(this ReadOnlyMemory<char> memory, int startPosition, string keyword, out int position)
+    public static bool EqualsWord(this ReadOnlyMemory<char> memory, int start, string keyword, out int position)
     {
-        position = startPosition;
+        position = start;
         var keyLength = keyword.Length;
 
         // Not enough characters remaining for a match
-        if (memory.HasFewerThanChars(startPosition, keyLength))
+        if (memory.HasFewerThanChars(start, keyLength))
         {
             return false;
         }
@@ -369,7 +369,7 @@ public static class ReadOnlyMemoryExtensions
         // Check for keyword match
         for (int i = 0; i < keyLength; i++)
         {
-            if (memory.Span[startPosition + i] != keyword[i])
+            if (memory.Span[start + i] != keyword[i])
             {
                 return false;
             }
@@ -409,6 +409,4 @@ public static class ReadOnlyMemoryExtensions
         position += keyLength;
         return true;
     }
-
-
 }

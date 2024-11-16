@@ -2,7 +2,14 @@
 
 public static partial class Lexer
 {
-
+    private static HashSet<string> StringOperators = new HashSet<string>()
+    {
+        "like",
+        "not",
+        "and",
+        "or",
+        "as", //type cast "as"
+    };
 
     private static bool TryParseStringOperator(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
     {
@@ -15,28 +22,12 @@ public static partial class Lexer
             return false;
         }
 
-        // Check for "like" operator
-        if (memory.TryParseKeywordIgnoreCase(ref position, "like", LexType.Operator, out lex))
+        foreach (var item in StringOperators)
         {
-            return true;
-        }
-
-        // Check for "not" operator
-        if (memory.TryParseKeywordIgnoreCase(ref position, "not", LexType.Operator, out lex))
-        {
-            return true;
-        }
-
-        // Check for "and" operator
-        if (memory.TryParseKeywordIgnoreCase(ref position, "and", LexType.Operator, out lex))
-        {
-            return true;
-        }
-
-        // Check for "or" operator
-        if (memory.TryParseKeywordIgnoreCase(ref position, "or", LexType.Operator, out lex))
-        {
-            return true;
+            if (memory.TryParseKeywordIgnoreCase(ref position, item, LexType.Operator, out lex))
+            {
+                return true;
+            }
         }
 
         // Check for "is" operator

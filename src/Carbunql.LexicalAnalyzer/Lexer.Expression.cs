@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Carbunql.LexicalAnalyzer;
 
@@ -77,32 +78,63 @@ public static partial class Lexer
                 break;
             }
 
-            if (TryParseCharactorValues(memory, position, out var lexes))
+            // type
+            if (TryParseDbType(memory, position, out lex, out position))
             {
-                foreach (var item in lexes)
+                yield return lex;
+                break;
+            }
+
+            // charactor value 
+            if (TryParseCharactorValue(memory, position, out lex, out position))
+            {
+                yield return lex;
+
+                if (lex.Type == LexType.Function)
                 {
-                    position = item.EndPosition;
-                    yield return item;
+                    // open paren
+                    memory.SkipWhiteSpacesAndComment(ref position);
+                    yield return ParseLeftParen(memory, ref position);
 
-                    if (item.Type == LexType.Function)
+                    // read arguments
+                    foreach (var argument in ReadExpressionLexes(memory, position))
                     {
-                        // open paren
-                        yield return ParseLeftParen(memory, ref position);
-
-                        // read arguments
-                        foreach (var argument in ReadExpressionLexes(memory, position))
-                        {
-                            yield return argument;
-                            position = argument.EndPosition;
-                        }
-
-                        // close paren
-                        yield return ParseRightParen(memory, ref position);
+                        yield return argument;
+                        position = argument.EndPosition;
                     }
+
+                    // close paren
+                    memory.SkipWhiteSpacesAndComment(ref position);
+                    yield return ParseRightParen(memory, ref position);
                 }
+                else if (lex.Type == LexType.Namespace)
+                {
+                    do
+                    {
+                        memory.SkipWhiteSpacesAndComment(ref position);
+                        if (memory.Span[position] != '.')
+                        {
+                            throw new FormatException();
+                        }
+                        position++;
+                        memory.SkipWhiteSpacesAndComment(ref position);
 
-
-
+                        if (memory.TryParseWildCard(ref position, out lex))
+                        {
+                            yield return lex;
+                            break;
+                        }
+                        if (!TryParseCharactorValue(memory, position, out lex, out position))
+                        {
+                            throw new FormatException();
+                        }
+                        if (!(lex.Type == LexType.Namespace || lex.Type == LexType.Column))
+                        {
+                            throw new FormatException();
+                        }
+                        yield return lex;
+                    } while (lex.Type != LexType.Column);
+                }
 
                 // operator check
                 memory.SkipWhiteSpacesAndComment(ref position);
@@ -118,6 +150,7 @@ public static partial class Lexer
             }
 
 
+            throw new FormatException();
         }
     }
 
@@ -132,18 +165,37 @@ public static partial class Lexer
         }
 
         memory.SkipWhiteSpacesAndComment(ref position);
+
+        var start = position;
         memory.EqualsWordIgnoreCase(position, "as", out position);
-        memory.SkipWhiteSpacesAndComment(ref position);
-
-        if (TryParseNamespaceOrColumn(memory, ref position, out lex))
+        if (start != position)
         {
-            if (lex.Type == LexType.Column)
-            {
-                return true;
-            }
-            throw new FormatException();
-        }
+            // "as" がある場合、必ずエイリアス名が取得できる
 
-        return false;
+            memory.SkipWhiteSpacesAndComment(ref position);
+            start = position;
+            if (!TryGetCharacterEndPosition(memory, position, out position))
+            {
+                throw new FormatException();
+            }
+            lex = new Lex(memory, LexType.Column, start, position - start);
+            return true;
+        }
+        else
+        {
+            // "as" が省略されている場合、エイリアス名は無い可能性がある
+            if (!TryGetCharacterEndPosition(memory, position, out var p))
+            {
+                return false;
+            }
+            var name = memory.Slice(start, p - start).ToString();
+            if (name.ToLowerInvariant() == "from")
+            {
+                return false;
+            }
+            position = p;
+            lex = new Lex(memory, LexType.Column, start, position - start, name);
+            return true;
+        }
     }
 }
