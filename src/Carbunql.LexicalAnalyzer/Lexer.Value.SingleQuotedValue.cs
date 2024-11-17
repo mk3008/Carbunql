@@ -5,14 +5,16 @@ namespace Carbunql.LexicalAnalyzer;
 public static partial class Lexer
 {
     [MemberNotNullWhen(true)]
-    private static bool TryParseSingleQuotedValue(ReadOnlyMemory<char> memory, ref int start, out Lex lex)
+    private static bool TryParseSingleQuotedValue(ReadOnlyMemory<char> memory, int start, out Lex lex, out int endPosition)
     {
         lex = default;
+        endPosition = start;
         var pos = start;
 
         if (TryGetSingleQuoteEndPosition(memory, pos, out pos))
         {
             lex = new Lex(memory, LexType.Value, start, pos - start);
+            endPosition = lex.EndPosition;
             return true;
         }
         return false;

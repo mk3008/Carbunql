@@ -72,17 +72,17 @@ public static partial class Lexer
         // timestamp
         if (length == 9 && memory.EqualsWordIgnoreCase(position, "timestamp", out position))
         {
-            memory.SkipWhiteSpacesAndComment(ref position);
+            memory.SkipWhiteSpacesAndComment(position, out position);
 
             if (memory.EqualsWordIgnoreCase(position, "with", out position))
             {
-                memory.SkipWhiteSpacesAndComment(ref position);
+                memory.SkipWhiteSpacesAndComment(position, out position);
                 if (!memory.EqualsWordIgnoreCase(position, "time", out position))
                 {
                     throw new FormatException();
                 }
 
-                memory.SkipWhiteSpacesAndComment(ref position);
+                memory.SkipWhiteSpacesAndComment(position, out position);
                 if (!memory.EqualsWordIgnoreCase(position, "zone", out position))
                 {
                     throw new FormatException();
@@ -92,13 +92,13 @@ public static partial class Lexer
             }
             else if (memory.EqualsWordIgnoreCase(position, "without", out position))
             {
-                memory.SkipWhiteSpacesAndComment(ref position);
+                memory.SkipWhiteSpacesAndComment(position, out position);
                 if (!memory.EqualsWordIgnoreCase(position, "time", out position))
                 {
                     throw new FormatException();
                 }
 
-                memory.SkipWhiteSpacesAndComment(ref position);
+                memory.SkipWhiteSpacesAndComment(position, out position);
                 if (!memory.EqualsWordIgnoreCase(position, "zone", out position))
                 {
                     throw new FormatException();
@@ -117,7 +117,7 @@ public static partial class Lexer
         // character
         if (length == 9 && memory.EqualsWordIgnoreCase(position, "character", out position))
         {
-            memory.SkipWhiteSpacesAndComment(ref position);
+            memory.SkipWhiteSpacesAndComment(position, out position);
 
             if (memory.EqualsWordIgnoreCase(position, "varying", out position))
             {
@@ -134,7 +134,7 @@ public static partial class Lexer
         // double
         if (length == 6 && memory.EqualsWordIgnoreCase(position, "double", out position))
         {
-            memory.SkipWhiteSpacesAndComment(ref position);
+            memory.SkipWhiteSpacesAndComment(position, out position);
 
             if (memory.EqualsWordIgnoreCase(position, "precision", out position))
             {

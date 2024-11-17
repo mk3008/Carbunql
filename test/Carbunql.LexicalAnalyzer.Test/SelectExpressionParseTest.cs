@@ -20,7 +20,7 @@ public class SelectExpressionParseTest(ITestOutputHelper output)
         output.WriteLine($"Text: {text}");
 
         int position = 0;
-        bool result = Lexer.TryParseExpressionName(text.AsMemory(), ref position, out var lex);
+        bool result = Lexer.TryParseExpressionName(text.AsMemory(), position, out var lex, out position);
 
         if (hasAlias)
         {

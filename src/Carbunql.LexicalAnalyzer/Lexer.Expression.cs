@@ -10,7 +10,7 @@ public static partial class Lexer
 
     public static IEnumerable<Lex> ReadExpressionLexes(ReadOnlyMemory<char> memory, int position, Lex? owner = null)
     {
-        memory.SkipWhiteSpacesAndComment(ref position);
+        memory.SkipWhiteSpacesAndComment(position, out position);
 
         if (memory.IsAtEnd(position))
         {
@@ -21,7 +21,7 @@ public static partial class Lexer
         while (!memory.IsAtEnd(position))
         {
             // wildcard
-            if (memory.TryParseWildCard(ref position, out lex))
+            if (memory.TryParseWildCard(position, out lex, out position))
             {
                 yield return lex;
                 break;
@@ -31,7 +31,7 @@ public static partial class Lexer
             if (TryParseLeftParen(memory, ref position, out lex))
             {
                 yield return lex;
-                memory.SkipWhiteSpacesAndComment(ref position);
+                memory.SkipWhiteSpacesAndComment(position, out position);
 
                 // 次のトークンがselectの場合、インラインクエリのため特殊
 
@@ -47,11 +47,11 @@ public static partial class Lexer
                 yield return lex;
 
                 // operator check
-                memory.SkipWhiteSpacesAndComment(ref position);
+                memory.SkipWhiteSpacesAndComment(position, out position);
                 if (TryParseOperator(memory, ref position, out lex))
                 {
                     yield return lex;
-                    memory.SkipWhiteSpacesAndComment(ref position);
+                    memory.SkipWhiteSpacesAndComment(position, out position);
                     continue;
                 }
 
@@ -59,18 +59,18 @@ public static partial class Lexer
                 break;
             }
 
-            if (TryParseNumericValue(memory, ref position, out lex)
-                || TryParseSingleQuotedValue(memory, ref position, out lex))
+            if (TryParseNumericValue(memory, position, out lex, out position)
+                || TryParseSingleQuotedValue(memory, position, out lex, out position))
             {
                 yield return lex;
 
                 // operator check
-                memory.SkipWhiteSpacesAndComment(ref position);
+                memory.SkipWhiteSpacesAndComment(position, out position);
 
                 if (TryParseOperator(memory, ref position, out lex))
                 {
                     yield return lex;
-                    memory.SkipWhiteSpacesAndComment(ref position);
+                    memory.SkipWhiteSpacesAndComment(position, out position);
                     continue;
                 }
 
@@ -93,7 +93,7 @@ public static partial class Lexer
                 if (lex.Type == LexType.Function)
                 {
                     // open paren
-                    memory.SkipWhiteSpacesAndComment(ref position);
+                    memory.SkipWhiteSpacesAndComment(position, out position);
                     yield return ParseLeftParen(memory, ref position);
 
                     // read arguments
@@ -103,11 +103,11 @@ public static partial class Lexer
                         position = argument.EndPosition;
                     }
 
-                    memory.SkipWhiteSpacesAndComment(ref position);
+                    memory.SkipWhiteSpacesAndComment(position, out position);
 
                     if (lex.Value.ToLowerInvariant() == "cast")
                     {
-                        if (memory.TryParseKeywordIgnoreCase(ref position, "as", LexType.Operator, out lex))
+                        if (memory.TryParseKeywordIgnoreCase(position, "as", LexType.Operator, out lex, out position))
                         {
                             yield return lex;
                         }
@@ -116,7 +116,7 @@ public static partial class Lexer
                             throw new FormatException();
                         }
 
-                        memory.SkipWhiteSpacesAndComment(ref position);
+                        memory.SkipWhiteSpacesAndComment(position, out position);
 
                         if (TryParseDbType(memory, position, out lex, out position))
                         {
@@ -129,22 +129,22 @@ public static partial class Lexer
                     }
 
                     // close paren
-                    memory.SkipWhiteSpacesAndComment(ref position);
+                    memory.SkipWhiteSpacesAndComment(position, out position);
                     yield return ParseRightParen(memory, ref position);
                 }
                 else if (lex.Type == LexType.Namespace)
                 {
                     do
                     {
-                        memory.SkipWhiteSpacesAndComment(ref position);
+                        memory.SkipWhiteSpacesAndComment(position, out position);
                         if (memory.Span[position] != '.')
                         {
                             throw new FormatException();
                         }
                         position++;
-                        memory.SkipWhiteSpacesAndComment(ref position);
+                        memory.SkipWhiteSpacesAndComment(position, out position);
 
-                        if (memory.TryParseWildCard(ref position, out lex))
+                        if (memory.TryParseWildCard(position, out lex, out position))
                         {
                             yield return lex;
                             break;
@@ -162,11 +162,11 @@ public static partial class Lexer
                 }
 
                 // operator check
-                memory.SkipWhiteSpacesAndComment(ref position);
+                memory.SkipWhiteSpacesAndComment(position, out position);
                 if (TryParseOperator(memory, ref position, out lex))
                 {
                     yield return lex;
-                    memory.SkipWhiteSpacesAndComment(ref position);
+                    memory.SkipWhiteSpacesAndComment(position, out position);
                     continue;
                 }
 
@@ -180,30 +180,31 @@ public static partial class Lexer
     }
 
     [MemberNotNullWhen(true)]
-    public static bool TryParseExpressionName(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    public static bool TryParseExpressionName(ReadOnlyMemory<char> memory, int start, out Lex lex, out int endPosition)
     {
+        endPosition = start;
         lex = default;
+
+        var position = start;
 
         if (memory.IsAtEnd(position))
         {
             return false;
         }
 
-        memory.SkipWhiteSpacesAndComment(ref position);
-
-        var start = position;
         memory.EqualsWordIgnoreCase(position, "as", out position);
         if (start != position)
         {
             // "as" がある場合、必ずエイリアス名が取得できる
+            memory.SkipWhiteSpacesAndComment(position, out position);
 
-            memory.SkipWhiteSpacesAndComment(ref position);
             start = position;
             if (!TryGetCharacterEndPosition(memory, position, out position))
             {
                 throw new FormatException();
             }
             lex = new Lex(memory, LexType.Alias, start, position - start);
+            endPosition = lex.EndPosition;
             return true;
         }
         else
@@ -213,13 +214,16 @@ public static partial class Lexer
             {
                 return false;
             }
+
             var name = memory.Slice(start, p - start).ToString();
             if (name.ToLowerInvariant() == "from")
             {
                 return false;
             }
+
             position = p;
             lex = new Lex(memory, LexType.Alias, start, position - start, name);
+            endPosition = lex.EndPosition;
             return true;
         }
     }

@@ -10,22 +10,16 @@ public static partial class Lexer
     };
 
     [MemberNotNullWhen(true)]
-    public static bool TryParseNumericValue(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    public static bool TryParseNumericValue(ReadOnlyMemory<char> memory, int start, out Lex lex, out int endPosition)
     {
         lex = default;
-        var start = position;
+        endPosition = start;
+        var pos = start;
 
-        if (TryGetNumericEndPosition(memory, position, out position))
+        if (TryGetNumericEndPosition(memory, pos, out pos))
         {
-            lex = new Lex(memory, LexType.Value, start, position - start);
-
-            // Postgres typeconverter
-            start = position;
-            if (memory.EqualsWord(position, "::", out position))
-            {
-                //read expression
-            }
-
+            lex = new Lex(memory, LexType.Value, start, pos - start);
+            endPosition = lex.EndPosition;
             return true;
         }
         return false;
@@ -44,7 +38,7 @@ public static partial class Lexer
         if (NumericSigns.Contains(memory.Span[position]))
         {
             position++;
-            memory.SkipWhiteSpacesAndComment(ref position);
+            memory.SkipWhiteSpacesAndComment(position, out position);
         }
 
         // 1文字目が数値でなければ、対象外

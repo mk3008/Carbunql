@@ -12,7 +12,7 @@ public class ValueTest(ITestOutputHelper output)
         var text = "1234";
         var position = 0;
         Lex lex;
-        var result = Lexer.TryParseNumericValue(text.AsMemory(), ref position, out lex);
+        var result = Lexer.TryParseNumericValue(text.AsMemory(), position, out lex, out position);
 
         Assert.True(result);
         if (result)

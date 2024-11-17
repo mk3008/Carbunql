@@ -9,25 +9,29 @@ public static class ReadOnlyMemoryExtensions
     /// </summary>
     /// <param name="memory">The memory to skip.</param>
     /// <param name="position">The current position.</param>
-    public static void SkipWhiteSpacesAndComment(this ReadOnlyMemory<char> memory, ref int position)
+    public static void SkipWhiteSpacesAndComment(this ReadOnlyMemory<char> memory, int position, out int endPosition)
     {
-        memory.SkipWhiteSpaces(ref position);
-        memory.SkipComment(ref position);
-        memory.SkipWhiteSpaces(ref position);
+        endPosition = position;
+        memory.SkipWhiteSpaces(endPosition, out endPosition);
+        memory.SkipComment(endPosition, out endPosition);
+        memory.SkipWhiteSpaces(endPosition, out endPosition);
     }
 
     /// <summary>
     /// Skip comments.
     /// </summary>
     /// <param name="memory">The memory to skip comments from.</param>
-    /// <param name="position">The current position.</param>
-    public static void SkipComment(this ReadOnlyMemory<char> memory, ref int position)
+    /// <param name="start">The current position.</param>
+    public static void SkipComment(this ReadOnlyMemory<char> memory, int start, out int endPosition)
     {
-        var comments = memory.ParseUntilNonComment(position);
+        endPosition = start;
+
+        var comments = memory.ParseUntilNonComment(start);
         if (comments.Any())
         {
-            position = comments.Last().EndPosition;
+            start = comments.Last().EndPosition;
         }
+        endPosition = start;
     }
 
     /// <summary>
@@ -41,19 +45,19 @@ public static class ReadOnlyMemoryExtensions
         while (true)
         {
             Lex lex;
-            if (memory.TryParseLineCommentStart(ref position, out lex))
+            if (memory.TryParseLineCommentStart(position, out lex, out position))
             {
                 yield return lex;
-                yield return memory.ParseLineComment(ref position);
-                memory.SkipWhiteSpaces(ref position);
+                yield return memory.ParseLineComment(position, out position);
+                memory.SkipWhiteSpacesAndComment(position, out position);
                 continue;
             }
-            else if (memory.TryParseBlockCommentStart(ref position, out lex))
+            else if (memory.TryParseBlockCommentStart(position, out lex, out position))
             {
                 yield return lex;
-                yield return memory.ParseBlockComment(ref position);
-                yield return memory.ParseBlockCommentEnd(ref position);
-                memory.SkipWhiteSpaces(ref position);
+                yield return memory.ParseBlockComment(position, out position);
+                yield return memory.ParseBlockCommentEnd(position, out position);
+                memory.SkipWhiteSpacesAndComment(position, out position);
                 continue;
             }
             break;
@@ -64,15 +68,19 @@ public static class ReadOnlyMemoryExtensions
     /// Parses the end of a block comment from the specified memory, returning the resulting Lex object.
     /// </summary>
     /// <param name="memory">The memory to process.</param>
-    /// <param name="position">The current position in the memory.</param>
+    /// <param name="start">The current position in the memory.</param>
     /// <returns>The Lex object representing the block comment end.</returns>
     /// <exception cref="FormatException">Thrown when the block comment end symbols '*/' are not found.</exception>
-    public static Lex ParseBlockCommentEnd(this ReadOnlyMemory<char> memory, ref int position)
+    public static Lex ParseBlockCommentEnd(this ReadOnlyMemory<char> memory, int start, out int endPosition)
     {
-        var start = position;
-        if (memory.StartsWithExact(ref position, "*/"))
+        endPosition = start;
+        var pos = start;
+
+        if (memory.StartsWithExact(pos, "*/", out pos))
         {
-            return new Lex(memory, LexType.BlockCommentEnd, start, position - start);
+            var lex = new Lex(memory, LexType.BlockCommentEnd, start, pos - start);
+            endPosition = lex.EndPosition;
+            return lex;
         }
         throw new FormatException("Block comment end symbols '*/' not found.");
     }
@@ -81,28 +89,31 @@ public static class ReadOnlyMemoryExtensions
     /// Parses a block comment from the specified memory, returning the resulting Lex object.
     /// </summary>
     /// <param name="memory">The memory to process.</param>
-    /// <param name="position">The current position in the memory.</param>
+    /// <param name="start">The current position in the memory.</param>
     /// <returns>The Lex object representing the block comment.</returns>
     /// <exception cref="FormatException">Thrown when the SQL string is empty or in an invalid format.</exception>
-    public static Lex ParseBlockComment(this ReadOnlyMemory<char> memory, ref int position)
+    public static Lex ParseBlockComment(this ReadOnlyMemory<char> memory, int start, out int endPosition)
     {
+        endPosition = start;
+        var pos = start;
+
         // Must be at least 2 characters for block comment start
-        if (memory.HasFewerThanChars(position, 2))
+        if (memory.HasFewerThanChars(pos, 2))
         {
             throw new FormatException("The SQL string is empty or in an invalid format.");
         }
 
-        var start = position;
-
         // Search for the block comment end
-        while (position < memory.Length)
+        while (!memory.IsAtEnd(pos))
         {
-            if (memory.Span[position] == '*' && memory.HasChar(position + 1) && memory.Span[position + 1] == '/')
+            if (memory.Span[pos] == '*' && memory.HasChar(pos + 1) && memory.Span[pos + 1] == '/')
             {
                 // Exclude end symbol
-                return new Lex(memory, LexType.Comment, start, position - start);
+                var lex = new Lex(memory, LexType.Comment, start, pos - start);
+                endPosition = lex.EndPosition;
+                return lex;
             }
-            position++;
+            pos++;
         }
 
         throw new FormatException("Block comment not closed properly.");
@@ -112,72 +123,81 @@ public static class ReadOnlyMemoryExtensions
     /// Parses a line comment from the specified memory, returning the resulting Lex object.
     /// </summary>
     /// <param name="memory">The memory to process.</param>
-    /// <param name="position">The current position in the memory.</param>
+    /// <param name="start">The current position in the memory.</param>
     /// <returns>The Lex object representing the line comment.</returns>
     /// <exception cref="FormatException">Thrown when the SQL string is empty or in an invalid format.</exception>
-    public static Lex ParseLineComment(this ReadOnlyMemory<char> memory, ref int position)
+    public static Lex ParseLineComment(this ReadOnlyMemory<char> memory, int start, out int endPosition)
     {
-        if (memory.IsAtEnd(position))
+        endPosition = start;
+        var pos = start;
+
+        if (memory.IsAtEnd(pos))
         {
             throw new FormatException("The SQL string is empty or in an invalid format.");
         }
 
-        var start = position;
-
         // Exclude line comment end symbol
-        while (!memory.IsAtEnd(position))
+        while (!memory.IsAtEnd(pos))
         {
-            char current = memory.Span[position];
+            char current = memory.Span[pos];
 
             if (current == '\r' || current == '\n')
             {
-                return new Lex(memory, LexType.Comment, start, position - start);
+                var lex = new Lex(memory, LexType.Comment, start, pos - start);
+                endPosition = lex.EndPosition;
+                return lex;
             }
-            position++;
+            pos++;
         }
 
-        return new Lex(memory, LexType.Comment, start, memory.Length - start);
+        var lastlex = new Lex(memory, LexType.Comment, start, memory.Length - start);
+        endPosition = lastlex.EndPosition;
+        return lastlex;
     }
 
     /// <summary>
     /// Tries to parse a wildcard character ('*') from the specified memory.
     /// </summary>
     /// <param name="memory">The memory to process.</param>
-    /// <param name="position">The current position in the memory.</param>
+    /// <param name="start">The current position in the memory.</param>
     /// <param name="lex">The resulting Lex object if parsing is successful.</param>
     /// <returns>True if the wildcard character was successfully parsed; otherwise, false.</returns>
     [MemberNotNullWhen(true)]
-    public static bool TryParseWildCard(this ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    public static bool TryParseWildCard(this ReadOnlyMemory<char> memory, int start, out Lex lex, out int endPosition)
     {
-        return memory.TryParseSingleCharLex(ref position, '*', LexType.WildCard, out lex);
+        endPosition = start;
+        return memory.TryParseSingleCharLex(endPosition, '*', LexType.WildCard, out lex, out endPosition);
     }
 
     /// <summary>
     /// Skips over white space characters in the given memory starting from the current position.
     /// </summary>
     /// <param name="memory">The memory to process.</param>
-    /// <param name="position">The current position to start skipping from. This will be updated.</param>
-    public static void SkipWhiteSpaces(this ReadOnlyMemory<char> memory, ref int position)
+    /// <param name="start">The current position to start skipping from. This will be updated.</param>
+    public static void SkipWhiteSpaces(this ReadOnlyMemory<char> memory, int start, out int endPosition)
     {
-        var span = memory.Span;
+        endPosition = start;
+        var position = start;
 
-        while (position < span.Length && span[position].IsWhiteSpace())
+        while (position < memory.Span.Length && memory.Span[position].IsWhiteSpace())
         {
             position++;
         }
+        endPosition = position;
     }
 
     [MemberNotNullWhen(true)]
-    public static bool TryParseBlockCommentStart(this ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    public static bool TryParseBlockCommentStart(this ReadOnlyMemory<char> memory, int start, out Lex lex, out int endPosition)
     {
         lex = default;
+        endPosition = start;
+        var position = start;
 
         if (memory.HasFewerThanChars(position, 2))
         {
             return false;
         }
 
-        var start = position;
         // Check for /* or /*+
         if (memory.Span[position] == '/' && memory.Span[position + 1] == '*')
         {
@@ -192,20 +212,23 @@ public static class ReadOnlyMemoryExtensions
                 position += 2;
                 lex = new Lex(memory, LexType.BlockCommentStart, start, position - start);
             }
+            endPosition = lex.EndPosition;
             return true;
         }
         return false;
     }
 
     [MemberNotNullWhen(true)]
-    public static bool TryParseLineCommentStart(this ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    public static bool TryParseLineCommentStart(this ReadOnlyMemory<char> memory, int start, out Lex lex, out int endPosition)
     {
         lex = default;
-        var start = position;
+        endPosition = start;
+        var pos = start;
 
-        if (memory.StartsWithExact(ref position, "--"))
+        if (memory.StartsWithExact(pos, "--", out pos))
         {
-            lex = new Lex(memory, LexType.LineCommentStart, start, position - start);
+            lex = new Lex(memory, LexType.LineCommentStart, start, pos - start);
+            endPosition = lex.EndPosition;
             return true;
         }
 
@@ -213,21 +236,23 @@ public static class ReadOnlyMemoryExtensions
     }
 
     [MemberNotNullWhen(true)]
-    public static bool TryParseSingleCharLex(this ReadOnlyMemory<char> memory, ref int position, char targetChar, LexType lexType, out Lex lex)
+    public static bool TryParseSingleCharLex(this ReadOnlyMemory<char> memory, int start, char targetChar, LexType lexType, out Lex lex, out int endPosition)
     {
+        endPosition = start;
+        var pos = start;
         lex = default;
 
         // Ensure there are enough characters remaining
-        if (memory.HasFewerThanChars(position, 1))
+        if (memory.HasFewerThanChars(pos, 1))
         {
             return false;
         }
 
-        var start = position;
-        if (memory.Span[position] == targetChar)
+        if (memory.Span[pos] == targetChar)
         {
-            position++;
-            lex = new Lex(memory, lexType, start, position - start);
+            pos++;
+            lex = new Lex(memory, lexType, start, pos - start);
+            endPosition = lex.EndPosition;
             return true;
         }
 
@@ -269,14 +294,16 @@ public static class ReadOnlyMemoryExtensions
         return position >= 0 && position < memory.Length;
     }
 
-    public static bool TryParseKeywordIgnoreCase(this ReadOnlyMemory<char> memory, ref int position, string keyword, LexType lexType, out Lex lex)
+    public static bool TryParseKeywordIgnoreCase(this ReadOnlyMemory<char> memory, int start, string keyword, LexType lexType, out Lex lex, out int endPosition)
     {
+        endPosition = start;
         lex = default;
-        var start = position;
+        var pos = start;
 
-        if (memory.EqualsWordIgnoreCase(position, keyword, out position))
+        if (memory.EqualsWordIgnoreCase(pos, keyword, out pos))
         {
             lex = new Lex(memory, lexType, start, keyword.Length);
+            endPosition = lex.EndPosition;
             return true;
         }
         return false;
@@ -386,12 +413,14 @@ public static class ReadOnlyMemoryExtensions
     /// <param name="position">The position to start comparing from.</param>
     /// <param name="keyword">The string to compare against.</param>
     /// <returns>Returns true if the characters from the specified position match the keyword; otherwise, false.</returns>
-    public static bool StartsWithExact(this ReadOnlyMemory<char> memory, ref int position, string keyword)
+    public static bool StartsWithExact(this ReadOnlyMemory<char> memory, int start, string keyword, out int endPosition)
     {
+        endPosition = start;
+        var pos = start;
         var keyLength = keyword.Length;
 
         // Not enough characters remaining for a match
-        if (memory.HasFewerThanChars(position, keyLength))
+        if (memory.HasFewerThanChars(pos, keyLength))
         {
             return false;
         }
@@ -399,14 +428,15 @@ public static class ReadOnlyMemoryExtensions
         // Check for prefix match with the keyword
         for (int i = 0; i < keyLength; i++)
         {
-            var current = memory.Span[position + i];
+            var current = memory.Span[pos + i];
             if (current != keyword[i])
             {
                 return false;
             }
         }
 
-        position += keyLength;
+        pos += keyLength;
+        endPosition = pos;
         return true;
     }
 }

@@ -5,9 +5,11 @@ namespace Carbunql.LexicalAnalyzer;
 public static partial class Lexer
 {
     [MemberNotNullWhen(true)]
-    internal static bool TryParseWithOrRecursive(ReadOnlyMemory<char> memory, ref int position, out Lex lex)
+    internal static bool TryParseWithOrRecursive(ReadOnlyMemory<char> memory, int start, out Lex lex, out int endPosition)
     {
+        endPosition = start;
         lex = default;
+        var position = start;
 
         if (!memory.EqualsWordIgnoreCase(position, "with", out _))
         {
@@ -15,20 +17,22 @@ public static partial class Lexer
         }
 
         // Starting position for the lex and move position past "with"
-        var start = position;
+
         position += 4;
         var withEndPosition = position;
 
-        memory.SkipWhiteSpaces(ref position);
+        memory.SkipWhiteSpacesAndComment(position, out position);
 
         // Check for "recursive"
         if (memory.EqualsWordIgnoreCase(position, "recursive", out position))
         {
             lex = new Lex(memory, LexType.WithRecursive, start, position - start, "with recursive");
+            endPosition = lex.EndPosition;
             return true;
         }
 
         lex = new Lex(memory, LexType.With, start, withEndPosition - start);
+        endPosition = lex.EndPosition;
         return true;
     }
 

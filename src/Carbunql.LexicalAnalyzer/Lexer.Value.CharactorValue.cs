@@ -59,7 +59,7 @@ public static partial class Lexer
 
         // next charactor check
         var nextPost = position;
-        memory.SkipWhiteSpacesAndComment(ref nextPost);
+        memory.SkipWhiteSpacesAndComment(nextPost, out nextPost);
 
         // end of text check
         if (memory.IsAtEnd(nextPost))
