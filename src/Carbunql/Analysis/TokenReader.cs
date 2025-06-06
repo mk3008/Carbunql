@@ -21,7 +21,7 @@ public abstract class TokenReader
 
     private static IEnumerable<string> ByLexs { get; set; } = new string[] { "group", "partition", "order" };
 
-    private static IEnumerable<string> OuterJoinLexs { get; set; } = new string[] { "left", "right" };
+    private static IEnumerable<string> OuterJoinLexs { get; set; } = new string[] { "left", "right", "full" };
 
     private static IEnumerable<string> NullsSortTokens { get; set; } = new string[] { "first", "last" };
 

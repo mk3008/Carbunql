@@ -43,6 +43,7 @@ public static class RelationParser
             if (x.IsEqualNoCase(ReservedText.Inner)) return true;
             if (x.IsEqualNoCase(ReservedText.Left)) return true;
             if (x.IsEqualNoCase(ReservedText.Right)) return true;
+            if (x.IsEqualNoCase(ReservedText.Full)) return true;
             return false;
         }))
         {

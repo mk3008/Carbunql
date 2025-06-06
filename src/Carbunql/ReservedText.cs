@@ -156,6 +156,11 @@ public static class ReservedText
     public static string Cross => "cross join";
 
     /// <summary>
+    /// Represents the SQL keyword `FULL JOIN`.
+    /// </summary>
+    public static string Full => "full join";
+
+    /// <summary>
     /// Returns an enumerable containing all reserved text items.
     /// </summary>
     /// <returns>An enumerable containing all reserved text items.</returns>
@@ -191,6 +196,7 @@ public static class ReservedText
         yield return Left;
         yield return Right;
         yield return Cross;
+        yield return Full;
     }
 
     /// <summary>
@@ -217,6 +223,7 @@ public static class ReservedText
         yield return Left;
         yield return Right;
         yield return Cross;
+        yield return Full;
         yield return Comma;
     }
 }
