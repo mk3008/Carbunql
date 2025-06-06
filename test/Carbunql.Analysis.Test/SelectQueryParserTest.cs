@@ -1185,4 +1185,33 @@ ORDER BY
 
         Assert.Equal(expect, sq.ToText(), true, true, true);
     }
+    [Fact]
+    public void Parse_FullOuterJoin_ShouldSucceed()
+    {
+        var sql = @"
+SELECT *
+FROM table1
+FULL OUTER JOIN table2
+ON table1.id = table2.id";
+
+        var result = QueryParser.Parse(sql) as SelectQuery;
+        Assert.NotNull(result);
+
+        // Test passes if parsing succeeds without throwing an exception
+    }
+
+    [Fact]
+    public void Parse_FullJoin_ShouldSucceed()
+    {
+        var sql = @"
+SELECT *
+FROM table1
+FULL JOIN table2
+ON table1.id = table2.id";
+
+        var result = QueryParser.Parse(sql) as SelectQuery;
+        Assert.NotNull(result);
+
+        // Test passes if parsing succeeds without throwing an exception
+    }
 }

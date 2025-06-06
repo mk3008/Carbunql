@@ -102,4 +102,25 @@ public class RelationParserTest
 
         Assert.Equal("table_b", item.Table.Alias);
     }
+
+    [Fact]
+    public void FullJoin()
+    {
+        var text = "full join public.table as b on a.id = b.id";
+        var item = RelationParser.Parse(text);
+        Monitor.Log(item);
+
+        Assert.Equal("b", item.Table.Alias);
+    }
+    [Fact]
+    public void FullOuterJoin()
+    {
+        var text = "full outer join public.table as b on a.id = b.id";
+
+        // FULL OUTER JOIN should be parsed successfully
+        var item = RelationParser.Parse(text);
+        Monitor.Log(item);
+
+        Assert.Equal("b", item.Table.Alias);
+    }
 }
